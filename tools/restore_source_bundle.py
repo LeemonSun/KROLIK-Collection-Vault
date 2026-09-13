@@ -8,35 +8,68 @@ import zipfile
 from pathlib import Path
 
 
-def _bundle_payload(bundle: Path) -> bytes:
-    """Return ZIP bytes from either a binary ZIP or a text/base64 recovery blob.
+LEGACY_CHUNKS = (
+    ".source_sync/part_000.txt",
+    ".source_sync/part_001.txt",
+    ".source_sync/part_002.txt",
+    ".source_sync_missing/missing_003a.txt",
+    ".source_sync/part_003.txt",
+)
 
-    GitHub connector transports may preserve uploaded base64 as text rather than
-    decoding it to binary. Supporting both representations keeps the recovery
-    path deterministic and makes the bundle portable through text-only tools.
-    """
-    raw = bundle.read_bytes()
+
+def _decode_zip_payload(raw: bytes, source: str) -> bytes:
     if raw.startswith(b"PK"):
-        return raw
+        payload = raw
+    else:
+        compact = b"".join(raw.split())
+        try:
+            payload = base64.b64decode(compact, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise zipfile.BadZipFile(
+                f"{source} is neither a ZIP file nor valid base64 ZIP data"
+            ) from exc
+    if not payload.startswith(b"PK"):
+        raise zipfile.BadZipFile(f"decoded {source} has no ZIP signature")
+    # A truncated ZIP can still start with PK. Opening here validates the central
+    # directory before we accept a transport payload.
+    with zipfile.ZipFile(io.BytesIO(payload), "r") as archive:
+        archive.infolist()
+    return payload
 
-    compact = b"".join(raw.split())
-    try:
-        decoded = base64.b64decode(compact, validate=True)
-    except (binascii.Error, ValueError) as exc:
-        raise zipfile.BadZipFile(
-            f"{bundle} is neither a ZIP file nor valid base64 ZIP data"
-        ) from exc
-    if not decoded.startswith(b"PK"):
-        raise zipfile.BadZipFile(
-            f"decoded {bundle} does not contain a ZIP signature"
-        )
-    return decoded
+
+def _bundle_payload(bundle: Path, root: Path) -> tuple[bytes, str]:
+    """Load the recovery ZIP, with a legacy chunked fallback.
+
+    Binary uploads can be truncated by text-only connector transports. The
+    repository already contains the previous text-safe source-sync chunks, so a
+    bad primary bundle must never block recovery.
+    """
+    if bundle.exists():
+        try:
+            return _decode_zip_payload(bundle.read_bytes(), str(bundle)), str(bundle)
+        except zipfile.BadZipFile as primary_error:
+            print(f"primary recovery bundle rejected: {primary_error}")
+
+    chunks: list[bytes] = []
+    used: list[str] = []
+    for relative in LEGACY_CHUNKS:
+        path = root / relative
+        if not path.exists() or path.stat().st_size == 0:
+            continue
+        chunks.append(path.read_bytes().strip())
+        used.append(relative)
+    if not chunks:
+        raise zipfile.BadZipFile("no usable recovery bundle or legacy chunks found")
+    combined = b"".join(chunks)
+    label = "+".join(used)
+    return _decode_zip_payload(combined, label), label
 
 
 def restore(bundle: Path, root: Path) -> list[str]:
     root = root.resolve()
     restored: list[str] = []
-    payload = _bundle_payload(bundle)
+    payload, source = _bundle_payload(bundle, root)
+    print(f"using recovery source: {source}")
     with zipfile.ZipFile(io.BytesIO(payload), "r") as archive:
         for info in archive.infolist():
             if info.is_dir():
@@ -52,12 +85,13 @@ def restore(bundle: Path, root: Path) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Restore tracked KROLIK source files from the recovery bundle"
+        description="Restore tracked KROLIK source files from recovery data"
     )
     parser.add_argument("--bundle", default="tools/source_restore.zip")
     parser.add_argument("--root", default=".")
     args = parser.parse_args()
-    restored = restore(Path(args.bundle), Path(args.root))
+    root = Path(args.root)
+    restored = restore(Path(args.bundle), root)
     print(f"restored {len(restored)} files")
     for path in restored:
         print(path)
