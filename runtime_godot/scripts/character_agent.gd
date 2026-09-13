@@ -21,6 +21,7 @@ var _visual_offset := Vector2.ZERO
 var _visual_rotation := 0.0
 var _visual_scale := Vector2.ONE
 var rig_joints: Dictionary = {}
+var animated_joints: Dictionary = {}
 var solved_joints: Dictionary = {}
 var rig_bones: Array = []
 var skin_recipe: Dictionary = {}
@@ -45,7 +46,6 @@ func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     collision_mask = 1
     queue_redraw()
 
-
 func load_runtime_manifest(manifest_path: String) -> bool:
     var file := FileAccess.open(manifest_path, FileAccess.READ)
     if file == null:
@@ -58,6 +58,8 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     character_id = str(c.get("id", character_id))
     var mind: Dictionary = manifest.get("mind", {})
     brain.apply_snapshot(mind)
+    var animation_doc: Dictionary = manifest.get("animation", {})
+    animation_driver.configure(animation_doc)
     var visual: Dictionary = manifest.get("visual", {})
     var image_name := str(visual.get("file", "character.png"))
     var image_path := manifest_path.get_base_dir().path_join(image_name)
@@ -75,14 +77,13 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     rig_bones = rig.get("bones", []).duplicate(true)
     var mesh_doc: Dictionary = rig.get("mesh", {})
     skin_recipe = mesh_doc.get("skinning", rig.get("skinning", {})).duplicate(true)
-    # Runtime packages produced by current exporters store the recipe directly
-    # under rig.skinning; keep the mesh lookup above for forward compatibility.
     if skin_recipe.is_empty():
         skin_recipe = rig.get("skinning", {}).duplicate(true)
     var physics_doc: Dictionary = manifest.get("physics", {})
     physics_proxies = physics_doc.get("collision", []).duplicate(true)
-    solved_joints = rig_joints.duplicate(true)
-    _solve_runtime_constraints()
+    animated_joints = rig_joints.duplicate(true)
+    solved_joints = animated_joints.duplicate(true)
+    _solve_runtime_constraints(animated_joints)
     _rebuild_character_visual()
     _rebuild_collision_rig()
     queue_redraw()
@@ -98,12 +99,12 @@ func apply_runtime_interaction(data: Dictionary) -> void:
         item["target_v"] = Vector2(float(t.get("x", 0.5)), float(t.get("y", 0.5)))
         runtime_constraints.append(item)
     contained = bool(data.get("contained", contained)) or not runtime_constraints.is_empty()
-    _solve_runtime_constraints()
+    _solve_runtime_constraints(animated_joints if not animated_joints.is_empty() else rig_joints)
     _apply_visual_transform()
     queue_redraw()
 
-func _solve_runtime_constraints() -> void:
-    solved_joints = rig_joints.duplicate(true)
+func _solve_runtime_constraints(base_pose: Dictionary = {}) -> void:
+    solved_joints = (base_pose if not base_pose.is_empty() else rig_joints).duplicate(true)
     if solved_joints.is_empty():
         return
     var chains := {
@@ -124,6 +125,25 @@ func _solve_runtime_constraints() -> void:
             solved_joints, str(chain[0]), str(chain[1]), str(chain[2]), target,
             float(raw.get("strength", 1.0))
         )
+
+func _apply_animation_pose(sample: Dictionary) -> void:
+    animated_joints = rig_joints.duplicate(true)
+    var offsets = sample.get("joint_offsets", {})
+    if typeof(offsets) == TYPE_DICTIONARY:
+        for joint_name in offsets.keys():
+            var name := str(joint_name)
+            if not animated_joints.has(name):
+                continue
+            var raw = offsets[joint_name]
+            var delta := Vector2.ZERO
+            if typeof(raw) == TYPE_VECTOR2:
+                delta = raw
+            elif typeof(raw) == TYPE_ARRAY and raw.size() >= 2:
+                delta = Vector2(float(raw[0]), float(raw[1]))
+            elif typeof(raw) == TYPE_DICTIONARY:
+                delta = Vector2(float(raw.get("x", 0.0)), float(raw.get("y", 0.0)))
+            animated_joints[name] = animated_joints[name] + delta
+    _solve_runtime_constraints(animated_joints)
 
 func _rig_to_local(p: Vector2, size: Vector2) -> Vector2:
     return Vector2((p.x - 0.5) * size.x, (p.y - 1.0) * size.y)
@@ -151,8 +171,6 @@ func _ensure_navigation_agent() -> void:
     navigation_agent.target_desired_distance = 12.0
     navigation_agent.radius = 12.0
     navigation_agent.neighbor_distance = 90.0
-    # Physical collision is already provided by CharacterBody2D capsule proxies.
-    # RVO can be enabled later per LOD tier without changing movement semantics.
     navigation_agent.avoidance_enabled = false
     add_child(navigation_agent)
 
@@ -194,8 +212,6 @@ func _rebuild_character_visual() -> void:
             return
         skinned_visual.queue_free()
         skinned_visual = null
-    # Compatibility path for old packages or failed rigs.  New runtime exports
-    # should normally use the Polygon2D/Skeleton2D path above.
     flat_sprite = Sprite2D.new()
     flat_sprite.name = "FlatFallback"
     flat_sprite.texture = character_texture
@@ -247,11 +263,12 @@ func _physics_process(delta: float) -> void:
             velocity = velocity.move_toward(Vector2.ZERO, acceleration * delta)
             if velocity.length_squared() > .01:
                 move_and_slide()
-    animation_driver.set_animation(_animation_for_state(brain.state))
+    animation_driver.set_state(brain.state)
     var sample := animation_driver.step(delta)
-    _visual_offset = sample.offset
-    _visual_rotation = sample.rotation
-    _visual_scale = sample.scale
+    _visual_offset = sample.get("offset", Vector2.ZERO)
+    _visual_rotation = float(sample.get("rotation", 0.0))
+    _visual_scale = sample.get("scale", Vector2.ONE)
+    _apply_animation_pose(sample)
     _apply_visual_transform()
     queue_redraw()
 
@@ -272,8 +289,6 @@ func _choose_target() -> void:
             navigation_agent.target_position = target_position
         return
     if not world_targets.is_empty():
-        # Deterministic-but-changing selection keeps playback repeatable while
-        # still letting autonomous agents move through the exported Vault.
         var index := int(absf(sin(phase * 0.73)) * float(world_targets.size())) % world_targets.size()
         target_position = world_targets[index]
     else:
@@ -284,11 +299,7 @@ func _choose_target() -> void:
 
 func _draw() -> void:
     if character_texture:
-        # Pixels are rendered by CharacterVisual.  `_draw()` is now debug-only;
-        # this prevents the old rigid draw_texture_rect path from covering the
-        # GPU skinned Polygon2D.
         if debug_rig and not solved_joints.is_empty():
-            var size := character_texture.get_size() * texture_scale
             var bones := [
                 ["head","neck"], ["neck","left_shoulder"], ["left_shoulder","left_elbow"], ["left_elbow","left_wrist"],
                 ["neck","right_shoulder"], ["right_shoulder","right_elbow"], ["right_elbow","right_wrist"], ["neck","pelvis"],
@@ -301,7 +312,6 @@ func _draw() -> void:
                     var p1 := _rig_to_local(solved_joints[bone[1]], character_texture.get_size()) * texture_scale
                     draw_line(p0, p1, Color(0.2,0.9,0.8,0.85), 1.5)
         return
-    # Fallback diagnostic body when no cutout has been exported yet.
     var tint := Color(0.8, 0.55, 0.65, 0.95)
     if brain.state == "contained": tint = Color(0.55, 0.55, 0.65, 0.95)
     draw_circle(_visual_offset, 18.0, tint)
