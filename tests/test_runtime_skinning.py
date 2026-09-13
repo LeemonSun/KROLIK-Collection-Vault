@@ -58,6 +58,9 @@ def test_godot_runtime_uses_polygon2d_skeleton_skinning():
     assert "extends CharacterBody2D" in agent_script
     assert "NavigationAgent2D.new()" in agent_script
     assert "CollisionRig" in agent_script
+    collision_script = (root / "runtime_godot/scripts/collision_rig.gd").read_text(encoding="utf-8")
+    assert "extends RefCounted" in collision_script
+    assert "owner_body.add_child(shape_node)" in collision_script
     assert "draw_texture_rect(character_texture" not in agent_script
 
 
