@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.pytest_cache/
+KROLIK_COLLECTION/
+build/
+dist/
+*.spec
+
+tests/ui_*_screenshot.png
