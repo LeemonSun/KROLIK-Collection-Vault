@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
 DEFAULT_NEEDS = {
@@ -24,9 +23,44 @@ DEFAULT_PROFILE = {
 MOBILE_STATES = {"idle", "wander", "inspect", "social", "return_home"}
 IMMOBILE_STATES = {"contained", "rest", "disabled"}
 
+ANIMATION_BY_STATE = {
+    "idle": "idle_breathe",
+    "wander": "walk",
+    "inspect": "inspect",
+    "social": "social_idle",
+    "return_home": "walk",
+    "contained": "contained_idle",
+    "rest": "rest",
+    "disabled": "idle_static",
+}
+
 
 def clamp01(v: float) -> float:
     return max(0.0, min(1.0, float(v)))
+
+
+def derive_affect(needs: dict[str, float], state: str) -> dict[str, Any]:
+    energy = clamp01(needs.get("energy", 0.5))
+    comfort = clamp01(needs.get("comfort", 0.5))
+    curiosity = clamp01(needs.get("curiosity", 0.5))
+    social = clamp01(needs.get("social", 0.5))
+    if state == "rest" or energy < 0.22:
+        mood = "tired"
+    elif comfort < 0.28:
+        mood = "uneasy"
+    elif curiosity > 0.78:
+        mood = "alert"
+    elif social > 0.78:
+        mood = "seeking_company"
+    else:
+        mood = "calm"
+    return {
+        "mood": mood,
+        "energy": energy,
+        "comfort": comfort,
+        "focus": max(curiosity, social),
+        "animation": ANIMATION_BY_STATE.get(state, "idle_breathe"),
+    }
 
 
 def merged_profile(value: dict[str, Any] | None) -> dict[str, Any]:
@@ -48,9 +82,9 @@ def merged_profile(value: dict[str, Any] | None) -> dict[str, Any]:
 def merged_needs(value: dict[str, Any] | None) -> dict[str, float]:
     out = dict(DEFAULT_NEEDS)
     if value:
-        for k in out:
-            if k in value:
-                out[k] = clamp01(value[k])
+        for key in out:
+            if key in value:
+                out[key] = clamp01(value[key])
     return out
 
 
@@ -122,4 +156,6 @@ def step_mind(
         "profile": profile,
         "mobile": next_state in MOBILE_STATES,
         "contained": next_state == "contained",
+        "animation": ANIMATION_BY_STATE.get(next_state, "idle_breathe"),
+        "affect": derive_affect(needs, next_state),
     }
