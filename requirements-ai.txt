@@ -1,0 +1,6 @@
+# Optional maximum-quality local cutout pack.
+# rembg itself is MIT-licensed. On Windows we use the DirectML ONNX Runtime
+# so AMD/NVIDIA/Intel DirectX 12 GPUs can accelerate compatible models.
+rembg>=2.0.69
+onnxruntime-directml>=1.23.0; platform_system == "Windows"
+onnxruntime>=1.23.0; platform_system != "Windows"
