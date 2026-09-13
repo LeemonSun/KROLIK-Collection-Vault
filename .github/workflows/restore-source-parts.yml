@@ -1,0 +1,124 @@
+name: Restore source from text-safe parts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/source_restore_parts/**'
+      - '.github/workflows/restore-source-parts.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: restore-source-parts-main
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Reconstruct and validate recovery archive
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+          import base64
+          import io
+          from pathlib import Path, PurePosixPath
+          import zipfile
+
+          root = Path('.')
+          part_dir = root / 'tools' / 'source_restore_parts'
+          ordered = [
+              *[part_dir / f'part_{i:02d}.b64' for i in range(7)],
+              part_dir / 'part_07.correct.b64',
+              part_dir / 'part_08.b64',
+              part_dir / 'part_09.b64',
+          ]
+          missing_parts = [str(p) for p in ordered if not p.is_file()]
+          if missing_parts:
+              raise SystemExit(f'missing recovery parts: {missing_parts}')
+
+          encoded = ''.join(p.read_text(encoding='ascii').strip() for p in ordered)
+          payload = base64.b64decode(encoded, validate=True)
+          print(f'reconstructed archive bytes: {len(payload)}')
+
+          expected = {
+              'app.py',
+              'smart_cutout.py',
+              'runtime_package.py',
+              'web/app.css', 'web/app.js', 'web/index.html',
+              'tests/test_cutout_cache.py', 'tests/test_alpha_mesh.py',
+              'tests/http_smoke.py', 'tests/live_barrel_demo.py',
+              'tests/ui_mock_smoke.py', 'tests/real_barrel_render.py',
+              'tests/test_backend.py', 'tests/test_checkpoint.py',
+              'tools/prepare_ai_models.py', 'tools/qa_all_characters.py',
+              'runtime_godot/scripts/runtime_prop.gd',
+          }
+
+          with zipfile.ZipFile(io.BytesIO(payload), 'r') as archive:
+              bad = archive.testzip()
+              if bad is not None:
+                  raise SystemExit(f'corrupt archive member: {bad}')
+              names = {info.filename for info in archive.infolist() if not info.is_dir()}
+              if names != expected:
+                  raise SystemExit(
+                      'recovery archive contents mismatch\n'
+                      f'missing={sorted(expected - names)}\n'
+                      f'unexpected={sorted(names - expected)}'
+                  )
+              for info in archive.infolist():
+                  if info.is_dir():
+                      continue
+                  rel = PurePosixPath(info.filename)
+                  if rel.is_absolute() or '..' in rel.parts:
+                      raise SystemExit(f'unsafe archive path: {info.filename}')
+                  target = root.joinpath(*rel.parts)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(archive.read(info))
+                  print(f'restored {info.filename}')
+          PY
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Compile restored backend
+        run: python -m py_compile app.py
+
+      - name: Run full test suite
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q
+
+      - name: Commit verified restored source
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            app.py smart_cutout.py runtime_package.py \
+            web tests \
+            runtime_godot/scripts/runtime_prop.gd \
+            tools/prepare_ai_models.py tools/qa_all_characters.py
+          if git diff --cached --quiet; then
+            echo 'Source tree already synchronized.'
+            exit 0
+          fi
+          git commit -m 'Restore complete stable source tree from text-safe parts'
+          git pull --rebase origin main
+          git push origin HEAD:main
