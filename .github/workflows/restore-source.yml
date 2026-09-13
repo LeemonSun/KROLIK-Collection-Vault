@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tools/source_restore.zip'
+      - 'tools/source_restore_parts/**'
       - 'tools/restore_source_bundle.py'
       - '.github/workflows/restore-source.yml'
   workflow_dispatch:
