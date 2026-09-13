@@ -1,72 +1,45 @@
 # KROLIK autonomous development state
 
-Updated: 2026-09-13, autonomous pass 1.
+Updated: 2026-09-14, autonomous pass 2.
 
-## Validated baseline / rollback
+## Current main / rollback
 
-- Pre-recovery main commit: `5df5ad6008df59435cba8b18fe90fca3b7d1cfce`.
-- Rollback checkpoint branch created before recovery work: `checkpoint/pre-source-restore-20260913-2356`.
-- Current recovery-infrastructure main commit before this state file: `fb396d49024058a94a8735aacf9b450a24047b29`.
+- Current coherent recovery-infrastructure commit: `626e24f45c9a3fcfdb6039ef7547da7df0b8017f`.
+- Existing rollback checkpoints remain available, including `checkpoint/pre-source-restore-20260913-2356`, `checkpoint/pre-complete-source-restore-20260914-0024`, and `checkpoint/pre-source-recovery-fix-20260914-0054`.
+- No application/schema contract was changed in this pass.
 
-## What was found
+## Repository integrity status
 
-The repository was not actually in a complete buildable state: the `Vault CI` workflow stopped at `python -m py_compile app.py` because `app.py` was absent from `main`. The same source-tree desynchronization also omitted other stable source/UI/test files that do exist in the latest local stable artifact.
+The repository is still missing the stable application source (`app.py` and related source/UI/tests), so Phase A feature development must not proceed on this incomplete tree. The last `Vault CI` failure is therefore still an infrastructure/source-sync failure rather than evidence of a regression in the locally validated stable artifact.
 
-This is a repository synchronization failure, not a failing application unit test. It must be repaired before continuing roadmap Phase A work, otherwise later autonomous passes would build on a misleading red baseline.
+The previous recovery attempt failed at `Restore source files`: the single binary recovery ZIP is truncated, and the legacy fallback is also not a complete ZIP. The exact stable local artifact had previously passed `python -m py_compile app.py` and `PYTHONPATH=. python -m pytest -q` with **67 passed**, but those source bytes are not currently reconstructible from the repository alone.
 
-## Stable source evidence available to recovery
+## Work completed in pass 2
 
-The latest stable local artifact used as the recovery source is `KROLIK_Collection_Vault_STABLE_2026-09-13_2241.zip`. Before attempting repository recovery it was validated locally with:
+1. Inspected latest main and the actual failed GitHub Actions job/log instead of assuming the failure reason.
+2. Confirmed `tools/source_restore_parts/` exists but is not a trustworthy canonical transport set: `part_10.b64` is absent, and some staged files have anomalous sizes/alternate `.correct` fragments. Concatenating the currently canonical names cannot produce the validated stable ZIP.
+3. Hardened `tools/restore_source_bundle.py` so recovery now prefers an exact canonical 11-part set (`part_00.b64` through `part_10.b64`), refuses incomplete sets, validates base64/ZIP structure and CRC before writing any tracked source, and only then considers older fallbacks.
+4. Updated `Restore source bundle` workflow triggers to include `tools/source_restore_parts/**`, so a future corrected canonical part immediately invokes guarded restore + compile + tests.
+5. The workflow/CI triggered after these changes; at the time this state was written those new runs were still in progress. Do not report them as passing unless a later pass confirms their conclusions.
 
-- `python -m py_compile app.py` — PASS.
-- `PYTHONPATH=. python -m pytest -q` — PASS, **67 passed** (Pillow deprecation warnings only).
+## Tests / verification actually performed
 
-A plain system-Python `pytest -q` invocation also exposed a local import-path difference; the verified command above is the one that actually ran the complete suite. CI uses Python 3.12, so CI remains the authoritative cross-environment gate after the files are restored.
+- Inspected GitHub Actions run `34785300428` and its job log: confirmed failure occurs in `python tools/restore_source_bundle.py` with `zipfile.BadZipFile`, before source verification/commit.
+- Inspected current recovery-part directory via GitHub API and confirmed the canonical set is incomplete (`part_10.b64` missing).
+- New GitHub Actions runs triggered by the recovery hardening were observed **in progress**; no passing result is claimed here.
+- No local Python application tests were runnable from this incomplete repository because `app.py` is absent.
 
-## Recovery work completed in this pass
+## Exact blocker / safe continuation
 
-1. Added a source-recovery path and GitHub Actions workflow rather than manually reconstructing large files from snippets.
-2. Added `tools/restore_source_bundle.py` with path-traversal protection and ZIP validation.
-3. Added `.github/workflows/restore-source.yml`; it restores source, runs `py_compile` + `python -m pytest -q`, and only then commits recovered source to `main`.
-4. Tested the recovery path in Actions. This uncovered a connector transport limitation: a single large binary/base64 blob is truncated before reaching GitHub, leaving a ZIP with no central directory.
-5. Modified the recovery helper to reject truncated archives and fall back safely instead of silently restoring corrupt data.
-6. Began the robust fix: split the exact stable ZIP base64 into small text chunks so the connector cannot truncate the payload. Safe chunk blobs 00–05 have been staged/created during this pass; they are not yet attached to the repository tree because the full set must be committed atomically.
+A byte-exact copy of the validated stable source artifact (or its exact base64) is required to finish repository restoration. The current repository fragments must not be guessed/recombined because several are demonstrably incomplete or malformed. The safest continuation is:
 
-Recovery-related commits currently on main:
+1. If a future automation environment has the original stable ZIP mounted/available, regenerate **all 11 canonical chunks from that exact file**, replacing `part_00.b64` … `part_10.b64` as one coherent set. Do not reuse suspect staged chunks merely because their names match.
+2. Let `Restore source bundle` validate ZIP CRC, restore, run `python -m py_compile app.py` and `python -m pytest -q`, and only then allow its bot commit.
+3. Inspect `Vault CI` and `Godot Runtime CI` after the restore commit. Fix genuine failures before feature work.
+4. Create `checkpoint/stable-source-restored-<timestamp>` once both source integrity and CI are verified; then remove/deprecate the truncated recovery artifacts.
 
-- `1a35609072a80178cf776180a3ec84eee37d8bbf` — add recovery bundle/workflow.
-- `fe28e11d96c053c146dc4c49f7ef0b6da2892733` — handle text-safe base64 recovery data.
-- `fb396d49024058a94a8735aacf9b450a24047b29` — add safe fallback behavior.
+If the original stable artifact is not available to the automation environment, do **not** stall the project by inventing replacement source. Record this same blocker and use repository-safe work only; the first run that can access the stable artifact should prioritize restoration above all roadmap work.
 
-## Current verification status
+## Next roadmap task after integrity restoration
 
-- Latest stable local source: **67/67 tests pass** using the verified command above.
-- Repository `Vault CI`: still red because the complete source restoration has not yet landed; do not interpret this as an application regression.
-- Recovery workflow: deliberately failed on the truncated single-blob archive, which confirms the guard works and corrupt data was **not** committed.
-- No source-format/schema contract was changed in this pass.
-- No existing stable application file was overwritten by an unverified recovery attempt.
-
-## Exact blocker / continuation point
-
-Finish the text-safe atomic source upload first. Local files `/mnt/data/chunk_00.txt` … `/mnt/data/chunk_10.txt` were produced from the exact stable recovery ZIP; 11 chunks total (10 × 15000 chars + final 13912 chars). Blobs already created during pass 1 include:
-
-- part 00: `b900ca0d1998e71a95cff24afd1f3acca7bd07e4`
-- part 01: `5a8d09266582b5954221918a91322cc43053f49d`
-- part 02: `34b1d56e2b9e06c6a2ad11c29877b816736fae44`
-- part 03: `daaa039c297654e23221e46e57a603a36bd06bbb`
-- part 04: `a4bb5b921e01f5ab8bb518995039679d0bb10049`
-- part 05: `fcd2bc45f2fef788e078af0b82937b45dcda61f8`
-
-The next pass should create blobs for parts 06–10, then in **one tree/commit** add all parts under `tools/source_restore_parts/part_00.b64` … `part_10.b64`. Update `tools/restore_source_bundle.py` to concatenate those current chunks first, decode/validate the ZIP, and update the workflow path trigger to include `tools/source_restore_parts/**`.
-
-Then run/inspect `Restore source bundle`. It must only push recovered source after `python -m py_compile app.py` and `python -m pytest -q` pass. After its bot commit, inspect `Vault CI` and `Godot Runtime CI`; fix genuine failures before roadmap work.
-
-Once CI is green, create a stable checkpoint branch such as `checkpoint/stable-source-restored-<timestamp>` and remove or clearly deprecate the known-truncated `tools/source_restore.zip` so future passes cannot mistake it for a valid artifact.
-
-## Next roadmap task after repository integrity is restored
-
-Return to the earliest unblocked Phase A item in `KROLIK_MASTER_PLAN.md`:
-
-1. Prefer **A1 real Godot runtime validation** on real reference art if the runner/assets permit it; capture an actual visual/runtime artifact, not textual asserts.
-2. If A1 is blocked by unavailable real reference assets or an unavailable Godot runtime, record the exact blocker and take the next unblocked Phase A task, especially A5 validation-edge coverage or A4 live-agent stress harness/profiling.
-3. Do not start B–H content expansion until the Phase A foundation and real runtime gates are trustworthy.
+Return to earliest unfinished Phase A work from `docs/AUTONOMOUS_RUNBOOK.md` / `KROLIK_MASTER_PLAN.md`: prefer A1 real Godot runtime validation with actual runtime artifact if reference assets/runner permit it; otherwise take the next genuinely unblocked Phase A item (A5 clip-validation edge coverage or A4 200+ live-agent stress harness). Do not expand B–H while the foundation/CI gate is untrustworthy.
