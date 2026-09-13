@@ -45,6 +45,61 @@ DEFAULT_ANIMATION_GRAPH = {
     "disabled": {"clip": "idle_static", "loop": True, "blend": 0.0},
 }
 
+DEFAULT_POSE_CLIPS = {
+    "idle_breathe": {
+        "duration": 2.4, "loop": True,
+        "keyframes": [
+            {"t": 0.0, "joints": {}, "root": {}},
+            {"t": 1.2, "joints": {"neck": [0.0, -0.004], "left_shoulder": [0.0, -0.003], "right_shoulder": [0.0, -0.003], "pelvis": [0.0, 0.002]}, "root": {"y": -0.6, "scale_y": 1.003}},
+            {"t": 2.4, "joints": {}, "root": {}},
+        ],
+    },
+    "walk": {
+        "duration": 0.72, "loop": True,
+        "keyframes": [
+            {"t": 0.0, "joints": {"left_wrist": [0.020, 0.010], "right_wrist": [-0.020, -0.008], "left_knee": [0.018, -0.010], "right_knee": [-0.015, 0.014], "left_ankle": [0.025, -0.020], "right_ankle": [-0.020, 0.018]}, "root": {"y": 0.0, "rotation": -0.004}},
+            {"t": 0.18, "joints": {"left_wrist": [0.008, -0.006], "right_wrist": [-0.008, 0.006], "left_knee": [0.008, 0.006], "right_knee": [-0.006, -0.004]}, "root": {"y": -1.8}},
+            {"t": 0.36, "joints": {"left_wrist": [-0.020, -0.008], "right_wrist": [0.020, 0.010], "left_knee": [-0.015, 0.014], "right_knee": [0.018, -0.010], "left_ankle": [-0.020, 0.018], "right_ankle": [0.025, -0.020]}, "root": {"y": 0.0, "rotation": 0.004}},
+            {"t": 0.54, "joints": {"left_wrist": [-0.008, 0.006], "right_wrist": [0.008, -0.006], "left_knee": [-0.006, -0.004], "right_knee": [0.008, 0.006]}, "root": {"y": -1.8}},
+            {"t": 0.72, "joints": {"left_wrist": [0.020, 0.010], "right_wrist": [-0.020, -0.008], "left_knee": [0.018, -0.010], "right_knee": [-0.015, 0.014], "left_ankle": [0.025, -0.020], "right_ankle": [-0.020, 0.018]}, "root": {"y": 0.0, "rotation": -0.004}},
+        ],
+    },
+    "inspect": {
+        "duration": 3.2, "loop": True,
+        "keyframes": [
+            {"t": 0.0, "joints": {}, "root": {}},
+            {"t": 0.9, "joints": {"head": [-0.018, 0.004], "neck": [-0.006, 0.0], "left_elbow": [0.010, -0.008]}, "root": {"rotation": -0.006}},
+            {"t": 2.0, "joints": {"head": [0.020, -0.002], "neck": [0.006, 0.0], "right_elbow": [-0.010, -0.006]}, "root": {"rotation": 0.006}},
+            {"t": 3.2, "joints": {}, "root": {}},
+        ],
+    },
+    "social_idle": {
+        "duration": 2.8, "loop": True,
+        "keyframes": [
+            {"t": 0.0, "joints": {"head": [-0.008, 0.0]}, "root": {}},
+            {"t": 1.4, "joints": {"head": [0.010, -0.003], "left_wrist": [0.012, -0.008], "right_wrist": [-0.008, -0.004]}, "root": {"y": -0.7}},
+            {"t": 2.8, "joints": {"head": [-0.008, 0.0]}, "root": {}},
+        ],
+    },
+    "contained_idle": {
+        "duration": 3.0, "loop": True,
+        "keyframes": [
+            {"t": 0.0, "joints": {}, "root": {}},
+            {"t": 1.5, "joints": {"head": [0.010, 0.002], "neck": [0.003, -0.003], "pelvis": [-0.002, 0.003]}, "root": {"rotation": 0.003}},
+            {"t": 3.0, "joints": {}, "root": {}},
+        ],
+    },
+    "rest": {
+        "duration": 3.6, "loop": True,
+        "keyframes": [
+            {"t": 0.0, "joints": {"head": [0.0, 0.010], "neck": [0.0, 0.006]}, "root": {"scale_y": 0.997}},
+            {"t": 1.8, "joints": {"head": [0.0, 0.014], "neck": [0.0, 0.009], "left_shoulder": [0.0, 0.004], "right_shoulder": [0.0, 0.004]}, "root": {"y": 0.5, "scale_y": 1.002}},
+            {"t": 3.6, "joints": {"head": [0.0, 0.010], "neck": [0.0, 0.006]}, "root": {"scale_y": 0.997}},
+        ],
+    },
+    "idle_static": {"duration": 1.0, "loop": True, "keyframes": [{"t": 0.0, "joints": {}, "root": {}}]},
+}
+
 SECONDARY_CHANNELS = {
     "hair": {"stiffness": 0.34, "damping": 0.74, "gravity": 0.18, "max_angle": 18.0},
     "chest": {"stiffness": 0.56, "damping": 0.84, "gravity": 0.04, "max_offset": 0.012},
@@ -91,7 +146,6 @@ def collision_proxies(joints: dict[str, Any], bones: list[list[str]]) -> list[di
     return out
 
 
-
 SKIN_FORMAT_VERSION = 1
 
 
@@ -115,13 +169,7 @@ def build_skinning_mesh(
     rows: int = 26,
     influence_radius: float = 0.17,
 ) -> dict[str, Any]:
-    """Build a portable regular-grid GPU skin recipe for Godot Polygon2D.
-
-    Vertices/UVs are normalized so the same recipe is resolution independent.
-    Bone weights are generated once during export rather than every frame in
-    Godot.  Runtime only updates Bone2D transforms; deformation stays on the
-    renderer side.
-    """
+    """Build a portable regular-grid GPU skin recipe for Godot Polygon2D."""
     cols = max(3, min(48, int(cols)))
     rows = max(3, min(72, int(rows)))
     radius = max(0.025, min(0.5, float(influence_radius)))
@@ -139,7 +187,6 @@ def build_skinning_mesh(
             i1 = i0 + 1
             i2 = i0 + cols
             i3 = i2 + 1
-            # Stable winding: two CCW triangles per cell in image coordinates.
             triangles.extend([i0, i2, i1, i1, i2, i3])
 
     valid_bones: list[tuple[str, str, dict[str, float], dict[str, float]]] = []
@@ -163,14 +210,11 @@ def build_skinning_mesh(
             "influence_radius": radius,
         }
 
-    # Raw locality scores per vertex, later normalized so every vertex sums to 1.
     raw_by_bone: list[list[float]] = [[] for _ in valid_bones]
     for vx, vy in vertices:
         scores: list[float] = []
         for _, _, pa, pb in valid_bones:
             d = _segment_distance(vx, vy, pa["x"], pa["y"], pb["x"], pb["y"])
-            # Gaussian-like compact locality.  A tiny floor prevents unbound
-            # vertices at image corners while keeping far-away influence tiny.
             score = math.exp(-((d / radius) ** 2) * 2.15) + 1e-8
             scores.append(score)
         total = sum(scores)
@@ -198,6 +242,7 @@ def build_skinning_mesh(
         "bone_weights": weight_docs,
         "influence_radius": radius,
     }
+
 
 def rig_health(joints: dict[str, Any], bones: list[list[str]]) -> dict[str, Any]:
     expected = {name for bone in bones for name in bone}
@@ -280,10 +325,12 @@ def build_manifest(
             "floor_contact_joints": ["left_ankle", "right_ankle"],
         },
         "animation": {
+            "format_version": 1,
+            "default_clip": "idle_breathe",
             "state_graph": DEFAULT_ANIMATION_GRAPH,
+            "clips": DEFAULT_POSE_CLIPS,
             "procedural_blink": {"enabled": True, "min_interval": 2.1, "max_interval": 6.4, "duration": 0.12},
             "look_at": {"enabled": True, "max_head_deg": 16.0, "max_eye": 0.06},
-            "breathing": {"enabled": True, "rate": 1.0, "amplitude": 0.006},
         },
         "mind": {
             "enabled": bool((mind or {}).get("enabled", 0)),
@@ -319,7 +366,6 @@ def write_package(project_root: str | Path, character_id: str, source_image: str
     out.mkdir(parents=True, exist_ok=True)
     image_out = out / "character.png"
     source = Path(source_image)
-    # Runtime expects a predictable PNG. Pillow preserves source alpha.
     try:
         from PIL import Image
         with Image.open(source) as im:
