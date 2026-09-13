@@ -8,6 +8,8 @@ import zipfile
 from pathlib import Path
 
 
+RECOVERY_PART_DIR = "tools/source_restore_parts"
+EXPECTED_RECOVERY_PARTS = 11
 LEGACY_CHUNKS = (
     ".source_sync/part_000.txt",
     ".source_sync/part_001.txt",
@@ -30,21 +32,47 @@ def _decode_zip_payload(raw: bytes, source: str) -> bytes:
             ) from exc
     if not payload.startswith(b"PK"):
         raise zipfile.BadZipFile(f"decoded {source} has no ZIP signature")
-    # A truncated ZIP can still start with PK. Opening here validates the central
-    # directory before we accept a transport payload.
     with zipfile.ZipFile(io.BytesIO(payload), "r") as archive:
         archive.infolist()
+        bad = archive.testzip()
+        if bad is not None:
+            raise zipfile.BadZipFile(f"CRC failure in {source}: {bad}")
     return payload
 
 
-def _bundle_payload(bundle: Path, root: Path) -> tuple[bytes, str]:
-    """Load the recovery ZIP, with a legacy chunked fallback.
+def _numbered_parts_payload(root: Path) -> tuple[bytes, str] | None:
+    """Load only a complete, canonical numbered recovery set.
 
-    Binary uploads can be truncated by text-only connector transports. The
-    repository already contains the previous text-safe source-sync chunks, so a
-    bad primary bundle must never block recovery. The fallback is intentionally
-    revalidated on every recovery run before any tracked source is overwritten.
+    Recovery data crosses text-oriented connector transports. Partial/duplicated
+    chunks must never be guessed into a ZIP: accepting them risks overwriting a
+    stable tree with corrupted source. A canonical bundle is exactly part_00
+    through part_10; helper/corrected fragments are ignored until promoted to
+    their canonical filename.
     """
+    directory = root / RECOVERY_PART_DIR
+    if not directory.is_dir():
+        return None
+    expected = [directory / f"part_{index:02d}.b64" for index in range(EXPECTED_RECOVERY_PARTS)]
+    missing = [path.name for path in expected if not path.is_file() or path.stat().st_size == 0]
+    if missing:
+        raise zipfile.BadZipFile(
+            "incomplete canonical recovery part set; missing: " + ", ".join(missing)
+        )
+    raw = b"".join(path.read_bytes().strip() for path in expected)
+    label = f"{RECOVERY_PART_DIR}/part_00..part_{EXPECTED_RECOVERY_PARTS - 1:02d}.b64"
+    return _decode_zip_payload(raw, label), label
+
+
+def _bundle_payload(bundle: Path, root: Path) -> tuple[bytes, str]:
+    # Prefer the canonical text-safe transport once it is complete. This avoids
+    # ever selecting the known-truncated binary artifact by accident.
+    try:
+        numbered = _numbered_parts_payload(root)
+        if numbered is not None:
+            return numbered
+    except zipfile.BadZipFile as parts_error:
+        print(f"numbered recovery parts rejected: {parts_error}")
+
     if bundle.exists():
         try:
             return _decode_zip_payload(bundle.read_bytes(), str(bundle)), str(bundle)
@@ -85,9 +113,7 @@ def restore(bundle: Path, root: Path) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Restore tracked KROLIK source files from recovery data"
-    )
+    parser = argparse.ArgumentParser(description="Restore tracked KROLIK source files from recovery data")
     parser.add_argument("--bundle", default="tools/source_restore.zip")
     parser.add_argument("--root", default=".")
     args = parser.parse_args()
