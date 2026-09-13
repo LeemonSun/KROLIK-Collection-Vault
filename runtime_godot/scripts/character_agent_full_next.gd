@@ -1,1 +1,0 @@
-# temporary staging artifact, will be replaced by atomic sync
