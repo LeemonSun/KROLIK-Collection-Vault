@@ -1,20 +1,29 @@
 class_name VaultCollisionRig
-extends Node2D
+extends RefCounted
 
-## Runtime collision proxy builder.  Proxies are exported from the same rig that
+## Runtime collision proxy builder. Proxies are exported from the same rig that
 ## drives GPU skinning, so physics and visual joints share one coordinate space.
+##
+## IMPORTANT: Godot only uses CollisionShape2D nodes that are DIRECT children
+## of the CollisionObject2D/PhysicsBody2D. This helper is therefore RefCounted
+## and installs its shapes directly on the owning CharacterBody2D instead of
+## hiding them under an intermediate Node2D.
 
+var owner_body: CollisionObject2D
 var texture_size := Vector2.ONE
 var proxies: Array = []
 var shapes: Array = []
 var runtime_scale := 1.0
 var facing := 1.0
 
-func setup(size: Vector2, proxy_docs: Array, display_scale: float = 1.0) -> void:
+func setup(body: CollisionObject2D, size: Vector2, proxy_docs: Array, display_scale: float = 1.0) -> void:
+    clear()
+    owner_body = body
     texture_size = size
     runtime_scale = maxf(.001, display_scale)
     proxies = proxy_docs.duplicate(true)
-    _clear_shapes()
+    if owner_body == null:
+        return
     for raw in proxies:
         if typeof(raw) != TYPE_DICTIONARY:
             continue
@@ -33,13 +42,13 @@ func setup(size: Vector2, proxy_docs: Array, display_scale: float = 1.0) -> void
         capsule.radius = maxf(1.5, radius_px)
         capsule.height = maxf(capsule.radius * 2.0, delta.length() + capsule.radius * 2.0)
         var shape_node := CollisionShape2D.new()
-        shape_node.name = "Collision_%s_%s" % [str(raw.get("a", "a")), str(raw.get("b", "b"))]
+        shape_node.name = "KROLIKCollision_%s_%s" % [str(raw.get("a", "a")), str(raw.get("b", "b"))]
         shape_node.shape = capsule
         shape_node.position = (p0 + p1) * .5
         # CapsuleShape2D's long axis is local Y.
         shape_node.rotation = delta.angle() - PI * .5
         shape_node.disabled = bool(raw.get("sensor", false))
-        add_child(shape_node)
+        owner_body.add_child(shape_node)
         shapes.append({
             "a": str(raw.get("a", "")),
             "b": str(raw.get("b", "")),
@@ -47,11 +56,14 @@ func setup(size: Vector2, proxy_docs: Array, display_scale: float = 1.0) -> void
             "radius_norm": radius_norm,
         })
 
-func _clear_shapes() -> void:
-    for child in get_children():
-        remove_child(child)
-        child.queue_free()
+func clear() -> void:
+    for entry in shapes:
+        var node = entry.get("node")
+        if node != null and is_instance_valid(node):
+            node.queue_free()
     shapes.clear()
+    proxies.clear()
+    owner_body = null
 
 func _rig_to_local(p: Vector2) -> Vector2:
     return Vector2((p.x - .5) * texture_size.x * runtime_scale * facing, (p.y - 1.0) * texture_size.y * runtime_scale)
@@ -72,6 +84,8 @@ func apply_joint_pose(joints: Dictionary, display_scale: float = -1.0, facing_va
         if delta.length_squared() < 1.0:
             continue
         var node: CollisionShape2D = entry["node"]
+        if not is_instance_valid(node):
+            continue
         var capsule := node.shape as CapsuleShape2D
         if capsule == null:
             continue
@@ -82,4 +96,4 @@ func apply_joint_pose(joints: Dictionary, display_scale: float = -1.0, facing_va
         node.rotation = delta.angle() - PI * .5
 
 func stats() -> Dictionary:
-    return {"capsules": shapes.size(), "backend": "godot_physics2d_capsules_v1"}
+    return {"capsules": shapes.size(), "backend": "godot_physics2d_capsules_v2_direct"}
