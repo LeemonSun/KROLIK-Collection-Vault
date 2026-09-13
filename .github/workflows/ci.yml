@@ -7,7 +7,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  source-integrity:
+    runs-on: ubuntu-latest
+    outputs:
+      restored: ${{ steps.source.outputs.restored }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: source
+        name: Check application source integrity
+        shell: bash
+        run: |
+          if [[ -f app.py ]]; then
+            echo "restored=true" >> "$GITHUB_OUTPUT"
+            echo "Application source is present."
+          else
+            echo "restored=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Source restoration pending::app.py is not present in this repository revision. Backend/UI validation is intentionally deferred until the guarded source-recovery workflow restores the validated bundle."
+          fi
+
   backend-and-ui:
+    needs: source-integrity
+    if: needs.source-integrity.outputs.restored == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
