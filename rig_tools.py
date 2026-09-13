@@ -12,6 +12,7 @@ placements or saved poses.
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+import os
 
 from PIL import Image, ImageOps
 
@@ -20,6 +21,15 @@ try:
 except Exception:  # pragma: no cover
     np = None  # type: ignore
 
+try:
+    import cv2  # type: ignore
+except Exception:  # pragma: no cover
+    cv2 = None  # type: ignore
+
+try:
+    import onnxruntime as ort  # type: ignore
+except Exception:  # pragma: no cover
+    ort = None  # type: ignore
 
 RIG_FORMAT_VERSION = 1
 
@@ -47,6 +57,27 @@ class RigDetection:
     settings: dict[str, Any]
 
 
+def _dwpose_model_candidates() -> list[Path]:
+    out: list[Path] = []
+    env = os.environ.get("KROLIK_DWPOSE_MODEL", "").strip()
+    if env:
+        out.append(Path(env))
+    root = Path(__file__).resolve().parent
+    out.extend([
+        root / "models" / "dwpose" / "dw-ll_ucoco_384.onnx",
+        root / "models" / "dwpose" / "dwpose.onnx",
+        root / "third_party" / "models" / "dwpose" / "dw-ll_ucoco_384.onnx",
+    ])
+    return out
+
+
+def find_dwpose_model() -> Path | None:
+    for path in _dwpose_model_candidates():
+        if path.is_file():
+            return path
+    return None
+
+
 def capabilities() -> dict[str, Any]:
     """Report local rig detectors without downloading anything."""
     backends = ["heuristic-silhouette"]
@@ -59,9 +90,17 @@ def capabilities() -> dict[str, Any]:
             backends.insert(0, "mediapipe-pose")
     except Exception:
         pass
+    dwpose_model = find_dwpose_model()
+    dwpose = bool(ort is not None and cv2 is not None and np is not None and dwpose_model is not None)
+    if dwpose:
+        backends.insert(0, "dwpose-onnx")
     return {
         "backends": backends,
         "mediapipe": mediapipe,
+        "dwpose": dwpose,
+        "dwpose_model": str(dwpose_model) if dwpose_model else None,
+        "onnxruntime": ort is not None,
+        "opencv": cv2 is not None,
         "numpy": np is not None,
         "editable": True,
         "joint_count": len(JOINT_ORDER),
@@ -80,8 +119,6 @@ def _alpha_mask(im: Image.Image):
         raise RuntimeError("Numpy is required for auto rig")
     a = np.asarray(im.getchannel("A"), dtype="uint8")
     if int(a.min()) >= 245:
-        # With an opaque source, use luminance only to identify obvious card
-        # borders.  The heuristic remains editable in the rig lab.
         return np.ones(a.shape, dtype=bool)
     return a > 32
 
@@ -99,7 +136,6 @@ def _run_at(mask, y: int, x0: int, x1: int) -> tuple[float, float]:
     xs = xs[(xs >= x0) & (xs <= x1)]
     if not len(xs):
         return float(x0), float(x1)
-    # Ignore single-pixel accessories/noise at the extremities.
     lo = float(np.quantile(xs, .05))
     hi = float(np.quantile(xs, .95))
     return lo, hi
@@ -111,12 +147,7 @@ def _norm(x: float, y: float, w: int, h: int) -> dict[str, float]:
 
 
 def heuristic_rig(path: str | Path) -> RigDetection:
-    """Build an editable rig from the foreground silhouette.
-
-    This is not presented as perfect pose estimation.  It exists so every image
-    can enter the rig editor even when no AI pose backend is installed or when
-    a stylized character defeats a human detector.
-    """
+    """Build an editable rig from the foreground silhouette."""
     im = _load(path)
     w, h = im.size
     mask = _alpha_mask(im)
@@ -133,11 +164,6 @@ def heuristic_rig(path: str | Path) -> RigDetection:
     sh_l, sh_r = ext(.22)
     el_l, el_r = ext(.38)
     wr_l, wr_r = ext(.52)
-    hip_l_run, hip_r_run = ext(.51)
-    knee_l_run, knee_r_run = ext(.72)
-    ankle_l_run, ankle_r_run = ext(.90)
-
-    # Insets prevent loose hair from becoming shoulder/elbow landmarks.
     shoulder_in = bw * .10
     arm_in = bw * .045
     hip_half = bw * .14
@@ -172,7 +198,6 @@ def heuristic_rig(path: str | Path) -> RigDetection:
 
 
 def _mediapipe_rig(path: str | Path) -> RigDetection | None:
-    """Try MediaPipe's bundled classic Pose API when available."""
     if np is None:
         return None
     try:
@@ -225,8 +250,138 @@ def _mediapipe_rig(path: str | Path) -> RigDetection | None:
     })
 
 
+def _dwpose_provider_list() -> list[str]:
+    if ort is None:
+        return []
+    try:
+        available = set(ort.get_available_providers())
+    except Exception:
+        available = {"CPUExecutionProvider"}
+    preferred = [
+        "DmlExecutionProvider",
+        "CUDAExecutionProvider",
+        "ROCMExecutionProvider",
+        "CoreMLExecutionProvider",
+        "CPUExecutionProvider",
+    ]
+    return [name for name in preferred if name in available] or ["CPUExecutionProvider"]
+
+
+def _dwpose_keypoints_to_rig(points, scores, width: int, height: int, min_conf: float = .18) -> RigDetection | None:
+    """Map COCO/WholeBody's first 17 joints into the portable KROLIK rig."""
+    if np is None:
+        return None
+    pts = np.asarray(points, dtype=float)
+    conf = np.asarray(scores, dtype=float).reshape(-1)
+    if pts.ndim != 2 or pts.shape[0] < 17 or pts.shape[1] < 2 or conf.size < 17:
+        return None
+    required = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    if sum(float(conf[i]) >= min_conf for i in required) < 8:
+        return None
+
+    def get(i: int) -> dict[str, float]:
+        return _norm(float(pts[i, 0]), float(pts[i, 1]), width, height)
+
+    ls, rs = get(5), get(6)
+    lh, rh = get(11), get(12)
+    face_candidates = [i for i in [0, 1, 2, 3, 4] if float(conf[i]) >= min_conf]
+    if face_candidates:
+        hx = sum(float(pts[i, 0]) for i in face_candidates) / len(face_candidates)
+        hy = sum(float(pts[i, 1]) for i in face_candidates) / len(face_candidates)
+        head = _norm(hx, hy, width, height)
+    else:
+        head = _norm((float(pts[5,0])+float(pts[6,0]))*.5, min(float(pts[5,1]),float(pts[6,1])) - height*.08, width, height)
+    neck = {"x": round((ls["x"] + rs["x"]) / 2, 6), "y": round((ls["y"] + rs["y"]) / 2, 6)}
+    pelvis = {"x": round((lh["x"] + rh["x"]) / 2, 6), "y": round((lh["y"] + rh["y"]) / 2, 6)}
+    joints = {
+        "head": head, "neck": neck,
+        "left_shoulder": ls, "left_elbow": get(7), "left_wrist": get(9),
+        "right_shoulder": rs, "right_elbow": get(8), "right_wrist": get(10),
+        "pelvis": pelvis,
+        "left_hip": lh, "left_knee": get(13), "left_ankle": get(15),
+        "right_hip": rh, "right_knee": get(14), "right_ankle": get(16),
+    }
+    used_scores = [float(conf[i]) for i in required if float(conf[i]) >= 0.0]
+    quality = sum(used_scores) / max(1, len(used_scores))
+    return RigDetection(joints=joints, settings={
+        "backend": "dwpose-onnx",
+        "rig_format_version": RIG_FORMAT_VERSION,
+        "bones": DEFAULT_BONES,
+        "mesh_cols": 16,
+        "mesh_rows": 30,
+        "influence_radius": .155,
+        "preserve_volume": .68,
+        "pose_confidence": round(float(quality), 5),
+    })
+
+
+def _dwpose_onnx_rig(path: str | Path) -> RigDetection | None:
+    """Run a local DWPose/RTMPose WholeBody ONNX model using the cutout bbox."""
+    model = find_dwpose_model()
+    if model is None or ort is None or cv2 is None or np is None:
+        return None
+    im = _load(path)
+    rgb = np.asarray(im.convert("RGB"), dtype=np.uint8)
+    mask = _alpha_mask(im)
+    x0, y0, x1, y1 = _bbox(mask)
+    src_h, src_w = rgb.shape[:2]
+    try:
+        session = ort.InferenceSession(str(model), providers=_dwpose_provider_list())
+        inp = session.get_inputs()[0]
+        shape = inp.shape
+        in_h = int(shape[2]) if isinstance(shape[2], int) else 384
+        in_w = int(shape[3]) if isinstance(shape[3], int) else 288
+    except Exception:
+        return None
+
+    bw = max(2.0, float(x1 - x0 + 1))
+    bh = max(2.0, float(y1 - y0 + 1))
+    cx = (x0 + x1) * .5
+    cy = (y0 + y1) * .5
+    target_aspect = in_w / float(in_h)
+    if bw / bh > target_aspect:
+        bh = bw / target_aspect
+    else:
+        bw = bh * target_aspect
+    bw *= 1.18
+    bh *= 1.18
+    left, top = cx - bw*.5, cy - bh*.5
+    right, bottom = cx + bw*.5, cy + bh*.5
+    ix0, iy0 = int(max(0, round(left))), int(max(0, round(top)))
+    ix1, iy1 = int(min(src_w, round(right))), int(min(src_h, round(bottom)))
+    crop = rgb[iy0:iy1, ix0:ix1]
+    if crop.size == 0:
+        return None
+    resized = cv2.resize(crop, (in_w, in_h), interpolation=cv2.INTER_LINEAR).astype(np.float32)
+    mean = np.array([123.675, 116.28, 103.53], dtype=np.float32)
+    std = np.array([58.395, 57.12, 57.375], dtype=np.float32)
+    tensor = ((resized - mean) / std).transpose(2, 0, 1)[None, ...].astype(np.float32)
+    try:
+        outputs = session.run(None, {inp.name: tensor})
+    except Exception:
+        return None
+    if len(outputs) < 2:
+        return None
+    simcc_x = np.asarray(outputs[0])
+    simcc_y = np.asarray(outputs[1])
+    if simcc_x.ndim != 3 or simcc_y.ndim != 3:
+        return None
+    xs = np.argmax(simcc_x, axis=2).astype(np.float32) / 2.0
+    ys = np.argmax(simcc_y, axis=2).astype(np.float32) / 2.0
+    sx = np.max(simcc_x, axis=2)
+    sy = np.max(simcc_y, axis=2)
+    score = np.minimum(sx, sy)[0]
+    points = np.stack([xs[0], ys[0]], axis=1)
+    points[:, 0] = points[:, 0] / max(1.0, float(in_w)) * max(1, ix1 - ix0) + ix0
+    points[:, 1] = points[:, 1] / max(1.0, float(in_h)) * max(1, iy1 - iy0) + iy0
+    return _dwpose_keypoints_to_rig(points, score, src_w, src_h)
+
+
 def detect_rig(path: str | Path, prefer_ai: bool = True) -> RigDetection:
     if prefer_ai:
+        dw_result = _dwpose_onnx_rig(path)
+        if dw_result is not None:
+            return dw_result
         mp_result = _mediapipe_rig(path)
         if mp_result is not None:
             return mp_result
