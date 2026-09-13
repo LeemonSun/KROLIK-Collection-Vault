@@ -42,7 +42,8 @@ def _bundle_payload(bundle: Path, root: Path) -> tuple[bytes, str]:
 
     Binary uploads can be truncated by text-only connector transports. The
     repository already contains the previous text-safe source-sync chunks, so a
-    bad primary bundle must never block recovery.
+    bad primary bundle must never block recovery. The fallback is intentionally
+    revalidated on every recovery run before any tracked source is overwritten.
     """
     if bundle.exists():
         try:
