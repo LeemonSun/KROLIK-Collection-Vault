@@ -157,16 +157,13 @@ func _ensure_navigation_agent() -> void:
     add_child(navigation_agent)
 
 func _rebuild_collision_rig() -> void:
-    if collision_rig != null and is_instance_valid(collision_rig):
-        remove_child(collision_rig)
-        collision_rig.queue_free()
+    if collision_rig != null:
+        collision_rig.clear()
         collision_rig = null
     if character_texture == null or physics_proxies.is_empty():
         return
     collision_rig = CollisionRigScript.new()
-    collision_rig.name = "CollisionRig"
-    add_child(collision_rig)
-    collision_rig.setup(character_texture.get_size(), physics_proxies, texture_scale)
+    collision_rig.setup(self, character_texture.get_size(), physics_proxies, texture_scale)
     collision_rig.apply_joint_pose(solved_joints if not solved_joints.is_empty() else rig_joints, texture_scale, facing)
 
 func _ensure_visual_root() -> void:
