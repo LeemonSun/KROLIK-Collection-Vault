@@ -54,6 +54,22 @@
       "rest": {"rest": 0.25}
     }
   },
+  "long_term_affinity": {
+    "character_capacity": 16,
+    "place_capacity": 8,
+    "max_subject_length": 64,
+    "learning_rate": 0.2,
+    "familiarity_gain": 0.08,
+    "decay_per_hour": 0.001,
+    "familiarity_decay_per_hour": 0.0002,
+    "drop_epsilon": 0.01,
+    "max_abs_state_bias": 0.3,
+    "character_social_weight": 0.3,
+    "place_wander_weight": 0.12,
+    "place_inspect_weight": 0.08,
+    "home_return_weight": 0.2,
+    "favorite_min_affinity": 0.2
+  },
   "need_rates_per_minute": {
     "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
     "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.02, "social": 0.01},
