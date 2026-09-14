@@ -30,8 +30,6 @@ func _spawn_agents() -> void:
     for i in range(AGENT_COUNT):
         var agent := AgentScript.new() as VaultCharacterAgent
         _root.add_child(agent)
-        # The harness owns physics ticks explicitly; do not also let SceneTree
-        # schedule a second tick for the same agent.
         agent.process_mode = Node.PROCESS_MODE_DISABLED
         var row := i / columns
         var col := i % columns
@@ -84,6 +82,9 @@ func _run() -> void:
     var avg_travel := total_travel / float(maxi(active, 1))
     print("KROLIK_STRESS agents=%d active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f" % [
         AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel
+    ])
+    print("KROLIK_STRESS_METRIC agents=%d active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f" % [
+        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel
     ])
 
     if active != AGENT_COUNT:
