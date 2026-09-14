@@ -6,7 +6,7 @@ from pathlib import Path
 from tools.build_import_qa_matrix import build_import_qa_matrix
 
 
-def test_import_qa_matrix_covers_formats_alpha_and_proportions(tmp_path: Path) -> None:
+def test_import_qa_matrix_covers_formats_alpha_proportions_and_rig_edit(tmp_path: Path) -> None:
     result = build_import_qa_matrix(tmp_path / "matrix")
     assert result["count"] == 4
     entries = result["entries"]
@@ -25,6 +25,11 @@ def test_import_qa_matrix_covers_formats_alpha_and_proportions(tmp_path: Path) -
     assert all(int(entry["vertices"]) > 0 for entry in entries)
     assert all(int(entry["triangles"]) > 0 for entry in entries)
 
+    corrected = next(entry for entry in entries if entry["character_id"] == "qa-compact-png")
+    assert corrected["joint_override_count"] == 1
+    assert corrected["expected_joint"] == {"name": "left_wrist", "x": 0.16, "y": 0.49}
+    assert sum(int(entry.get("joint_override_count", 0)) for entry in entries) == 1
+
     matrix_path = Path(str(result["matrix"]))
     document = json.loads(matrix_path.read_text(encoding="utf-8"))
     assert document["schema"] == "krolik.import-qa-matrix/1"
@@ -36,3 +41,6 @@ def test_import_qa_matrix_covers_formats_alpha_and_proportions(tmp_path: Path) -
         assert runtime["schema"] == "krolik.runtime-character/1"
         assert runtime["quality"]["runtime_ready"] is True
         assert runtime["character"]["id"] == entry["character_id"]
+        if "expected_joint" in entry:
+            expected = entry["expected_joint"]
+            assert runtime["rig"]["joints"][expected["name"]] == {"x": expected["x"], "y": expected["y"]}
