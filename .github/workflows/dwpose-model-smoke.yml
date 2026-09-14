@@ -8,6 +8,7 @@ on:
       - 'rig_tools.py'
       - 'tools/fetch_dwpose_model.py'
       - 'tools/inspect_dwpose_model.py'
+      - 'tools/smoke_dwpose_backend.py'
       - 'tests/test_dwpose_backend.py'
       - 'tests/test_dwpose_model_bootstrap.py'
       - 'tests/test_dwpose_model_contract.py'
@@ -29,12 +30,12 @@ jobs:
       - name: Install real DWPose smoke dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install numpy onnxruntime
+          pip install numpy onnxruntime Pillow opencv-python-headless
       - name: Syntax and lightweight contract regressions
         run: |
-          python -m py_compile tools/fetch_dwpose_model.py tools/inspect_dwpose_model.py
+          python -m py_compile tools/fetch_dwpose_model.py tools/inspect_dwpose_model.py tools/smoke_dwpose_backend.py rig_tools.py
           pip install pytest
-          pytest -q tests/test_dwpose_model_bootstrap.py tests/test_dwpose_model_contract.py
+          pytest -q tests/test_dwpose_backend.py tests/test_dwpose_model_bootstrap.py tests/test_dwpose_model_contract.py
       - name: Cache pinned DWPose model
         uses: actions/cache@v4
         with:
@@ -46,3 +47,13 @@ jobs:
         run: python tools/fetch_dwpose_model.py --check
       - name: Real ONNXRuntime inference and SimCC contract smoke
         run: python tools/inspect_dwpose_model.py
+      - name: Fetch official DWPose single-character smoke asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 \
+            --output "${RUNNER_TEMP}/dwpose-iron.gif" \
+            "https://raw.githubusercontent.com/IDEA-Research/DWPose/onnx/resources/iron.gif"
+          test -s "${RUNNER_TEMP}/dwpose-iron.gif"
+      - name: Production rig_tools DWPose backend smoke
+        run: python tools/smoke_dwpose_backend.py "${RUNNER_TEMP}/dwpose-iron.gif" --min-confidence 0.18
