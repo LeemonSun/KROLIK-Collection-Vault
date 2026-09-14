@@ -40,10 +40,15 @@ func _spawn_agents() -> void:
             "profile": {"mobility": "free", "routine": "explorer", "autonomy": 1.0, "wander": 1.0, "walk_speed": 1.0},
             "needs": {"energy": 1.0, "comfort": 0.7, "curiosity": 1.0, "social": 0.35}
         })
+        # target_position must be assigned after setup(), which intentionally
+        # resets it to spawn.  Keep it close enough that the agent does not hit
+        # the CharacterBody2D collision pile formed by the stress grid before
+        # the movement assertion is sampled.
         var direction := -1.0 if (i % 2) == 0 else 1.0
+        var target := spawn + Vector2(direction * 24.0, 12.0 + float(i % 3) * 4.0)
         agent.home_position = spawn
-        agent.target_position = spawn + Vector2(direction * 420.0, 90.0 + float(i % 5) * 18.0)
-        agent.world_targets = [agent.target_position]
+        agent.target_position = target
+        agent.world_targets = [target]
         _agents.append(agent)
         _start_positions[agent.get_instance_id()] = spawn
 
