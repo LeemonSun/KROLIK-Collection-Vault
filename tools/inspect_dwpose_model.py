@@ -7,6 +7,10 @@ This is intentionally stronger than checking that an ONNX file can be opened.
 X then Y, with a split ratio of 2.0. This smoke performs one CPU inference on a
 zero tensor and rejects a model whose shape/output contract would make KROLIK's
 current decoder silently wrong.
+
+ONNXRuntime is imported only for the real-model smoke. The ordinary core test
+suite can validate the decoder contract with fake sessions without paying the
+heavy runtime dependency cost on every push.
 """
 
 import argparse
@@ -14,7 +18,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import onnxruntime as ort
 
 from tools.fetch_dwpose_model import DEFAULT_OUTPUT, MODEL_SHA256, verify_file
 
@@ -99,6 +102,10 @@ def inspect_model(path: str | Path) -> dict[str, Any]:
     valid, reason = verify_file(model)
     if not valid:
         raise DWPoseContractError(f"pinned model integrity failed: {reason}")
+    try:
+        import onnxruntime as ort  # type: ignore
+    except Exception as exc:
+        raise DWPoseContractError(f"ONNXRuntime is required for real model smoke: {exc}") from exc
     try:
         session = ort.InferenceSession(str(model), providers=["CPUExecutionProvider"])
     except Exception as exc:
