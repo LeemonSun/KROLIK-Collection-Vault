@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from affinity import (
     DEFAULT_LONG_TERM_AFFINITY_POLICY,
     affinity_lookup,
@@ -92,10 +94,10 @@ def test_matching_character_and_place_ids_apply_only_relevant_capped_biases():
         "home_place_subject": "home",
         "away_from_home": True,
     }, config)
-    assert bias["social"] == .30
-    assert bias["wander"] == .12
-    assert bias["inspect"] == .08
-    assert bias["return_home"] == .16
+    assert bias["social"] == pytest.approx(.30)
+    assert bias["wander"] == pytest.approx(.12)
+    assert bias["inspect"] == pytest.approx(.08)
+    assert bias["return_home"] == pytest.approx(.16)
     assert affinity_utility_bias(records, {"social_subject": "unknown"}, config)["social"] == 0.0
 
 
