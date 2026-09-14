@@ -15,9 +15,12 @@ on:
       - 'rig_tools.py'
       - 'character_import.py'
       - 'tools/build_core_vertical_slice.py'
+      - 'tools/build_import_qa_matrix.py'
       - 'tools/import_character_package.py'
       - 'tests/test_runtime_skinning.py'
       - 'tests/test_character_import.py'
+      - 'tests/test_character_import_modes.py'
+      - 'tests/test_import_qa_matrix.py'
       - 'tests/test_core_vertical_slice.py'
       - '.github/workflows/godot-runtime.yml'
   pull_request:
@@ -33,9 +36,12 @@ on:
       - 'rig_tools.py'
       - 'character_import.py'
       - 'tools/build_core_vertical_slice.py'
+      - 'tools/build_import_qa_matrix.py'
       - 'tools/import_character_package.py'
       - 'tests/test_runtime_skinning.py'
       - 'tests/test_character_import.py'
+      - 'tests/test_character_import_modes.py'
+      - 'tests/test_import_qa_matrix.py'
       - 'tests/test_core_vertical_slice.py'
       - '.github/workflows/godot-runtime.yml'
   workflow_dispatch:
@@ -58,7 +64,7 @@ jobs:
       - name: Install vertical-slice builder dependencies
         run: python -m pip install Pillow numpy
       - name: Import-pipeline syntax
-        run: python -m py_compile character_import.py tools/build_core_vertical_slice.py tools/import_character_package.py
+        run: python -m py_compile character_import.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py
       - name: Download verified Godot
         shell: bash
         run: |
@@ -109,6 +115,30 @@ jobs:
         if: always()
         shell: bash
         run: rm -rf runtime_godot/.ci_vertical_slice
+      - name: Build multi-format import QA matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf runtime_godot/.ci_import_matrix
+          python tools/build_import_qa_matrix.py --output-root runtime_godot/.ci_import_matrix
+      - name: Production Godot multi-format import matrix regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 60s "$GODOT" --headless --path runtime_godot --script res://scripts/import_matrix_harness.gd
+      - name: Upload import QA matrix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-qa-matrix-evidence
+          path: runtime_godot/.ci_import_matrix/**
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Cleanup import QA matrix
+        if: always()
+        shell: bash
+        run: rm -rf runtime_godot/.ci_import_matrix
       - name: Generated AI policy runtime regression
         shell: bash
         run: |
