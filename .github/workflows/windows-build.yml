@@ -61,7 +61,7 @@ jobs:
       - name: Build one-file headless import CLI
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --console --name KROLIK_Character_Import --paths . --collect-all PIL --collect-all numpy tools/import_character_package.py
+          pyinstaller --noconfirm --clean --onefile --console --name KROLIK_Character_Import --paths . --add-data "content/animations;content/animations" --collect-all PIL --collect-all numpy tools/import_character_package.py
       - name: Execute packaged import CLI with manual joint correction on Windows
         shell: pwsh
         run: |
@@ -111,7 +111,7 @@ jobs:
       - name: Build one-file graphical EXE
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name KROLIK_Collection_Vault --add-data "web;web" --collect-all PIL --collect-all webview app.py
+          pyinstaller --noconfirm --clean --onefile --windowed --name KROLIK_Collection_Vault --add-data "web;web" --add-data "content;content" --collect-all PIL --collect-all webview app.py
       - name: Upload full product EXE
         uses: actions/upload-artifact@v4
         with:
