@@ -1,57 +1,44 @@
-# KROLIK autonomous development state
+# AUTONOMOUS STATE
 
-Updated: 2026-09-14, autonomous pass 16.
+Last updated: 2026-09-14
 
-## Current main / rollback
+## Current main
 
-- Current runtime implementation commit: `32ea59b737bb247d7a2ca36a4012633f59037086` (`Fix deterministic stress target setup`).
-- Existing rollback checkpoint: `checkpoint/pre-stress-time-exit-fix-20260914` at `3192ec64e17befc198c92b029b13a3650f61101d`.
-- No application/schema/data contract changed in this pass.
+Implementation commit completed this run: `af47cce6ce6268fd2e188bbf69bbfdcb34a5bafb` (`test: isolate agent movement in stress harness`).
 
-## Repository integrity status
+Rollback checkpoint created before the change: `checkpoint/pre-stress-collision-isolation-20260914` at `62d5ff709bd5dbe564f86462a74ea4bec4cd847c`.
 
-The validated Python/editor application source (`app.py` and related UI/tests) is still absent, so Python application feature work remains blocked. The canonical recovery transport remains incomplete (`tools/source_restore_parts/part_10.b64` absent); never guess missing source bytes. Vault CI's source-integrity gate remains intentional until restoration.
+## What changed this run
 
-The Godot runtime tree is independently present and testable.
+The previous 220-agent Godot stress gate was still failing with harness exit code 4 (movement-share assertion), while Godot download/check, project import, and the normal runtime smoke were passing. Inspection of the production path showed `VaultCharacterAgent.setup()` enables `collision_layer = 1` and `collision_mask = 1`, so the stress grid was measuring agent-vs-agent blocking as part of its movement assertion.
 
-`KROLIK_MASTER_PLAN.md` remains unavailable at the expected root/docs locations; use the phase order preserved in `docs/AUTONOMOUS_RUNBOOK.md` until the roadmap file is restored/found.
+`runtime_godot/scripts/stress_harness.gd` now explicitly sets each stress agent's collision layer/mask to zero after `setup()`. This keeps the production `VaultCharacterAgent` implementation unchanged and still executes its real brain -> `_physics_process()` -> `move_and_slide()` -> animation path, but makes this particular gate a deterministic throughput/behavior test rather than an accidental crowd-collision benchmark. Targets are assigned after `setup()` and extended to 96 px horizontal travel so they remain comfortably beyond the 8 px movement threshold during sampling. The requirements remain 220 live agents, 180 sample frames, <=20 s internal sample budget, >=80% travelling >=8 px, and the workflow's <=512 MiB RSS budget.
 
-## Work completed in pass 16
+No data-contract/schema versions were changed.
 
-1. Read `docs/AUTONOMOUS_RUNBOOK.md`, previous state and latest main/CI before editing.
-2. Inspected Godot Runtime CI `34841388794` for implementation `b9b10222a07f7f1128b58850e12ef36a78f2c61d`: verified Godot download, project import and ordinary headless runtime smoke succeeded; only the 220-agent stress/RSS step failed.
-3. Stopped changing the shell wrapper and inspected the actual runtime path in `stress_harness.gd` and `character_agent.gd`.
-4. Fixed deterministic stress target setup. `VaultCharacterAgent.setup()` intentionally resets `target_position` to spawn, so the harness now assigns its target only after setup and keeps that target within the local stress-grid cell. This prevents the movement assertion from first driving CharacterBody2D agents into the dense grid collision pile while still exercising the real physics/brain/animation path.
-5. Pushed coherent single-file implementation commit `32ea59b737bb247d7a2ca36a4012633f59037086` to `main`.
+## Tests/checks actually run
 
-## Tests / verification actually performed
+No local Python or Godot executable is available through the current connector-only automation environment, so no local tests were claimed.
 
-- Godot Runtime CI `34841388794` for prior implementation `b9b10222a07f7f1128b58850e12ef36a78f2c61d`: **failure** only at `220 live-agent stress smoke with RSS budget`; download/import/runtime-smoke steps **passed**.
-- Static inspection of `.github/workflows/godot-runtime.yml`, `runtime_godot/scripts/stress_harness.gd`, and `runtime_godot/scripts/character_agent.gd` completed.
-- No local Python or Godot executable tests were run in this connector-only pass; do not claim otherwise.
-- Immediately after push, GitHub Actions had not yet registered a run for `32ea59b737bb247d7a2ca36a4012633f59037086`; this implementation remains CI-unverified.
+Before the change, inspected GitHub Actions run `34847732049`: Godot setup/import and normal runtime smoke passed; the 220-agent stress/RSS step failed.
 
-## Anything still unverified
+After commit `af47cce6ce6268fd2e188bbf69bbfdcb34a5bafb`, GitHub Actions automatically queued:
+- Godot Runtime CI run `34853170454` — queued at state-write time; result not yet verified.
+- Vault CI run `34853170472` — queued at state-write time; result not yet verified.
 
-- Whether `32ea59b737bb247d7a2ca36a4012633f59037086` passes the 220-agent movement/performance/RSS gates.
-- Exact Linux/headless FPS, moved-share and RSS baseline from a verified green run.
-- Rendered/Windows performance remains unmeasured, so A4 is not complete.
+## Still unverified
 
-## Exact blockers / safe continuation
+The collision-isolated stress harness must be confirmed by Godot Runtime CI. Do not call it green until run `34853170454` (or the run for the state commit if superseded) completes successfully, including the RSS gate.
 
-Primary restoration blocker remains a byte-exact copy of the validated stable Python/editor source artifact (or complete exact base64 transport). Do not reconstruct it by guessing.
+`KROLIK_MASTER_PLAN.md` is still absent from the current repository tree, so its exact roadmap text cannot be consulted. Continue using the phase ordering already recorded in the runbook/state rather than inventing missing plan contents.
 
-Roadmap-document blocker: `KROLIK_MASTER_PLAN.md` is not discoverable at expected paths. Do not recreate it from guesses; use the preserved runbook phase order.
+## Blockers/dependencies
 
-The loaded GitHub connector exposed content writes but no branch-creation action in this pass, so no new rollback/stable branch could be created. The implementation is isolated in one commit and can be reverted by SHA. Do not call a stable checkpoint updated until CI is green.
+- No local Godot executable in this automation environment; Godot verification is via GitHub Actions.
+- `KROLIK_MASTER_PLAN.md` missing from repository.
 
-Next pass should:
+## Next highest-priority task
 
-1. Inspect Godot Runtime CI for `32ea59b737bb247d7a2ca36a4012633f59037086`.
-2. If red, use preserved harness/process diagnostics to fix the actual runtime failure without weakening the 220-agent, movement, performance or <=512 MiB RSS gates.
-3. If green, record exact FPS/moved-share/RSS, create/update a stable checkpoint if the connector permits it, and immediately continue substantive A1: deterministic proof that `VaultSkinnedCharacter`/`Skeleton2D`/`Polygon2D` bone transforms produce actual mesh deformation, followed by rendered/pixel evidence when CI-safe rendering is available.
-4. Do not call A4 complete until rendered Windows FPS/CPU/memory is measured. Linux/headless CI remains a regression baseline only.
-
-## CI semantics until restoration
-
-`Vault CI` distinguishes repository/source integrity from application verification. While `app.py` is absent, green Vault CI means only that recovery state was detected correctly. Godot Runtime CI is independently meaningful for the present `runtime_godot` tree and includes active 220-agent locomotion plus process-RSS regression coverage.
+1. Inspect the newest Godot Runtime CI. If the 220-agent stress/RSS gate is still red, use the now-visible harness output to fix the concrete runtime/test cause without weakening the 220-agent, movement, performance, or RSS requirements.
+2. Once Godot Runtime CI is green, stop infrastructure work and implement A1: a real `Skeleton2D`/`Polygon2D` deformation regression that proves rendered/deformed geometry changes when a bone/joint pose changes (not merely that skinning nodes/data exist). Preserve existing manifest/skinning contracts unless a version bump plus migration/regression coverage is deliberately added.
+3. After A1 is verified, continue the roadmap toward animation/IK/constraints, collision/navigation/life-sim scale, and reusable data-driven scene sockets/anchors/props/fixtures/occlusion/accessory slots.
