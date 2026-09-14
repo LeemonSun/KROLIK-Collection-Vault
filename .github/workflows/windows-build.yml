@@ -1,32 +1,98 @@
-name: Windows EXE
+name: Windows Build
 
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags: ['vault-*']
+    paths:
+      - 'character_import.py'
+      - 'runtime_package.py'
+      - 'rig_tools.py'
+      - 'animation_content.py'
+      - 'content/animations/**'
+      - 'tools/build_core_vertical_slice.py'
+      - 'tools/import_character_package.py'
+      - 'tests/test_character_import.py'
+      - 'tests/test_core_vertical_slice.py'
+      - 'tests/test_runtime_skinning.py'
+      - '.github/workflows/windows-build.yml'
 
 jobs:
-  build:
+  core-import-windows:
     runs-on: windows-latest
     timeout-minutes: 20
+    env:
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: pip
-      - name: Install build dependencies
+      - name: Install core Windows dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest Pillow numpy pyinstaller
+      - name: Core import syntax and regressions
+        shell: pwsh
+        run: |
+          python -m py_compile character_import.py runtime_package.py rig_tools.py tools/build_core_vertical_slice.py tools/import_character_package.py
+          pytest -q tests/test_character_import.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
+      - name: Build ordinary-image runtime package on Windows
+        shell: pwsh
+        run: |
+          $slice = Join-Path $env:RUNNER_TEMP 'krolik-core-slice'
+          python tools/build_core_vertical_slice.py --output-root $slice
+          if (-not (Test-Path (Join-Path $slice 'exports/runtime/ci_core_slice/manifest.json'))) { throw 'Windows vertical-slice manifest missing' }
+      - name: Build one-file headless import CLI
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --console --name KROLIK_Character_Import --paths . --collect-all PIL --collect-all numpy tools/import_character_package.py
+      - name: Execute packaged import CLI on Windows
+        shell: pwsh
+        run: |
+          $source = Join-Path $env:RUNNER_TEMP 'krolik-core-slice/fixture_input.png'
+          $workspace = Join-Path $env:RUNNER_TEMP 'krolik-exe-import'
+          & .\dist\KROLIK_Character_Import.exe $source --project-root $workspace --character-id windows-exe-ci --name 'Windows EXE CI' --heuristic-rig
+          if ($LASTEXITCODE -ne 0) { throw "Packaged import CLI exited $LASTEXITCODE" }
+          if (-not (Test-Path (Join-Path $workspace 'exports/runtime/windows-exe-ci/manifest.json'))) { throw 'Packaged CLI did not emit runtime manifest' }
+      - name: Upload verified Windows import CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: KROLIK-Character-Import-Windows
+          path: dist/KROLIK_Character_Import.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  full-product-exe:
+    if: startsWith(github.ref, 'refs/tags/vault-')
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Require canonical graphical application source
+        shell: pwsh
+        run: |
+          if (-not (Test-Path app.py)) { throw 'Canonical app.py is missing; refusing to publish a fake full-product EXE.' }
+      - name: Install full-product build dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-      - name: Build one-file EXE
+      - name: Build one-file graphical EXE
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --onefile --windowed --name KROLIK_Collection_Vault --add-data "web;web" --collect-all PIL --collect-all webview app.py
-      - name: Upload EXE
+      - name: Upload full product EXE
         uses: actions/upload-artifact@v4
         with:
           name: KROLIK-Collection-Vault-Windows
           path: dist/KROLIK_Collection_Vault.exe
+          if-no-files-found: error
