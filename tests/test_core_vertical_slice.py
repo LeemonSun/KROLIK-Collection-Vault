@@ -10,6 +10,10 @@ from tools.build_core_vertical_slice import CHARACTER_ID, build_core_vertical_sl
 def test_core_vertical_slice_builds_runtime_ready_package(tmp_path: Path) -> None:
     metrics = build_core_vertical_slice(tmp_path)
     assert metrics["character_id"] == CHARACTER_ID
+    assert metrics["cutout_method"] == "uniform-border-v1"
+    assert metrics["review_required"] is False
+    assert float(metrics["cutout_confidence"]) >= 0.95
+    assert 0.05 < float(metrics["alpha_coverage"]) < 0.75
     assert metrics["backend"] == "heuristic-silhouette"
     assert metrics["runtime_ready"] is True
     assert float(metrics["rig_score"]) == 100.0
@@ -20,10 +24,22 @@ def test_core_vertical_slice_builds_runtime_ready_package(tmp_path: Path) -> Non
     assert metrics["bone_weights"] == 14
     assert metrics["collision_proxies"] == 14
 
+    original_path = Path(str(metrics["original"]))
+    cutout_path = Path(str(metrics["cutout"]))
+    receipt_path = Path(str(metrics["receipt"]))
     manifest_path = Path(str(metrics["manifest"]))
     image_path = Path(str(metrics["image"]))
+    assert original_path.is_file()
+    assert cutout_path.is_file()
+    assert receipt_path.is_file()
     assert manifest_path.is_file()
     assert image_path.is_file()
+
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["schema"] == "krolik.asset-import/1"
+    assert receipt["source"]["sha256"] == metrics["source_sha256"]
+    assert receipt["derived"]["method"] == "uniform-border-v1"
+    assert receipt["derived"]["cutout_sha256"] == hashlib.sha256(cutout_path.read_bytes()).hexdigest()
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["schema"] == "krolik.runtime-character/1"
