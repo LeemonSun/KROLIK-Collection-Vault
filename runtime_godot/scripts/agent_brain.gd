@@ -38,6 +38,7 @@ var social := 0.45
 var mood := "calm"
 var last_utility: Dictionary = {}
 var memory: Array = []
+var affinity_state := VaultAffinityState.new()
 
 var policy_loaded := false
 var policy_source := "fallback"
@@ -85,7 +86,7 @@ static func _default_policy_document() -> Dictionary:
     var doc: Dictionary = parsed
     if str(doc.get("schema", "")) != POLICY_SCHEMA or int(doc.get("format_version", 0)) != POLICY_FORMAT_VERSION:
         return {}
-    for key in ["defaults", "valid", "hard_gates", "utility", "trait_effects", "short_term_memory", "need_rates_per_minute", "affect_thresholds"]:
+    for key in ["defaults", "valid", "hard_gates", "utility", "trait_effects", "short_term_memory", "long_term_affinity", "need_rates_per_minute", "affect_thresholds"]:
         if typeof(doc.get(key, null)) != TYPE_DICTIONARY:
             return {}
     if typeof(doc.get("state_order", null)) != TYPE_ARRAY:
@@ -96,13 +97,15 @@ static func _default_policy_document() -> Dictionary:
 func configure_policy(doc: Dictionary, source: String = "runtime") -> bool:
     if str(doc.get("schema", "")) != POLICY_SCHEMA or int(doc.get("format_version", 0)) != POLICY_FORMAT_VERSION:
         return false
-    for key in ["defaults", "valid", "hard_gates", "utility", "trait_effects", "short_term_memory", "need_rates_per_minute", "affect_thresholds"]:
+    for key in ["defaults", "valid", "hard_gates", "utility", "trait_effects", "short_term_memory", "long_term_affinity", "need_rates_per_minute", "affect_thresholds"]:
         if typeof(doc.get(key, null)) != TYPE_DICTIONARY:
             return false
     if typeof(doc.get("state_order", null)) != TYPE_ARRAY:
         return false
     _materialize_memory()
     _policy = doc.duplicate(true)
+    if not affinity_state.configure(doc.get("long_term_affinity", {})):
+        return false
     policy_loaded = true
     policy_source = source
     _rebuild_trait_bias()
@@ -455,6 +458,18 @@ func memory_snapshot() -> Array:
             out.append(entry)
     return out
 
+func learn_affinity(kind: String, subject: String, signal: float) -> bool:
+    return affinity_state.learn(kind, subject, signal)
+
+func decay_affinities(elapsed_hours: float) -> void:
+    affinity_state.decay(elapsed_hours)
+
+func favorite_place() -> String:
+    return affinity_state.favorite_place()
+
+func affinity_snapshot() -> Array:
+    return affinity_state.snapshot()
+
 func _apply_policy_defaults() -> void:
     var defaults: Dictionary = _policy.get("defaults", {})
     var p: Dictionary = defaults.get("profile", {})
@@ -502,6 +517,7 @@ func apply_snapshot(data: Dictionary) -> void:
     memory = _normalize_memory(data.get("memory", []))
     _memory_elapsed = 0.0
     _rebuild_memory_cache()
+    affinity_state.apply_snapshot(data.get("affinity", []))
     _update_mood()
 
 func activity_scores(context: Dictionary = {}) -> Dictionary:
@@ -520,13 +536,14 @@ func activity_scores(context: Dictionary = {}) -> Dictionary:
     var social_bonus := float(bonus.get("social", 0.18)) if routine == "social" else 0.0
     var home_bonus := float(bonus.get("homebody", 0.20)) if routine == "homebody" else 0.0
     var focused_bias := _focused_memory_bias(context)
+    var affinity_bias := affinity_state.utility_bias(context)
     return {
-        "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)) + _trait_bias_idle + _combined_memory_bias("idle", focused_bias),
-        "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus + _trait_bias_wander + _combined_memory_bias("wander", focused_bias),
-        "inspect": float(inspect.get("base", 0.12)) + curiosity * float(inspect.get("curiosity", 0.58)) + minf(float(target.get("cap", 0.18)), interesting * float(target.get("step", 0.06))) + explorer_bonus + _trait_bias_inspect + _combined_memory_bias("inspect", focused_bias),
-        "social": float(social_u.get("base", 0.10)) + social * float(social_u.get("social_need", 0.48)) + social_drive * float(social_u.get("social_drive", 0.28)) + minf(float(target.get("cap", 0.18)), social_targets * float(target.get("step", 0.06))) + social_bonus + _trait_bias_social + _combined_memory_bias("social", focused_bias),
-        "return_home": ((float(return_home.get("base", 0.08)) + home_bias * float(return_home.get("home_bias", 0.35)) + home_bonus + (1.0 - comfort) * float(return_home.get("inverse_comfort", 0.32)) + (1.0 - energy) * float(return_home.get("inverse_energy", 0.26))) if away else 0.0) + _trait_bias_return_home + _combined_memory_bias("return_home", focused_bias),
-        "rest": float(rest.get("base", 0.12)) + (1.0 - energy) * float(rest.get("inverse_energy", 0.88)) + (float(rest.get("home_bonus", 0.18)) if not away else float(rest.get("away_bonus", -0.25))) + _trait_bias_rest + _combined_memory_bias("rest", focused_bias),
+        "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)) + _trait_bias_idle + _combined_memory_bias("idle", focused_bias) + float(affinity_bias.get("idle", 0.0)),
+        "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus + _trait_bias_wander + _combined_memory_bias("wander", focused_bias) + float(affinity_bias.get("wander", 0.0)),
+        "inspect": float(inspect.get("base", 0.12)) + curiosity * float(inspect.get("curiosity", 0.58)) + minf(float(target.get("cap", 0.18)), interesting * float(target.get("step", 0.06))) + explorer_bonus + _trait_bias_inspect + _combined_memory_bias("inspect", focused_bias) + float(affinity_bias.get("inspect", 0.0)),
+        "social": float(social_u.get("base", 0.10)) + social * float(social_u.get("social_need", 0.48)) + social_drive * float(social_u.get("social_drive", 0.28)) + minf(float(target.get("cap", 0.18)), social_targets * float(target.get("step", 0.06))) + social_bonus + _trait_bias_social + _combined_memory_bias("social", focused_bias) + float(affinity_bias.get("social", 0.0)),
+        "return_home": ((float(return_home.get("base", 0.08)) + home_bias * float(return_home.get("home_bias", 0.35)) + home_bonus + (1.0 - comfort) * float(return_home.get("inverse_comfort", 0.32)) + (1.0 - energy) * float(return_home.get("inverse_energy", 0.26))) if away else 0.0) + _trait_bias_return_home + _combined_memory_bias("return_home", focused_bias) + float(affinity_bias.get("return_home", 0.0)),
+        "rest": float(rest.get("base", 0.12)) + (1.0 - energy) * float(rest.get("inverse_energy", 0.88)) + (float(rest.get("home_bonus", 0.18)) if not away else float(rest.get("away_bonus", -0.25))) + _trait_bias_rest + _combined_memory_bias("rest", focused_bias) + float(affinity_bias.get("rest", 0.0)),
     }
 
 func _is_bound(context: Dictionary) -> bool:
@@ -621,6 +638,8 @@ func snapshot() -> Dictionary:
         },
         "needs": {"energy": energy, "comfort": comfort, "curiosity": curiosity, "social": social},
         "memory": memory_snapshot(),
+        "affinity": affinity_state.snapshot(),
+        "favorite_place": affinity_state.favorite_place(),
         "affect": {"mood": mood},
         "utility": last_utility.duplicate(true),
     }
