@@ -74,9 +74,13 @@ jobs:
             exit 1
           fi
 
-          stress_metric="$(grep '^KROLIK_STRESS_METRIC ' "$output" | tail -n 1 || true)"
+          # Godot may prefix stdout with engine/log metadata, so match the stable
+          # marker anywhere on the line and strip only the prefix before it.
+          stress_metric="$(grep -F 'KROLIK_STRESS_METRIC ' "$output" | tail -n 1 | sed 's/^.*KROLIK_STRESS_METRIC /KROLIK_STRESS_METRIC /' || true)"
           if [[ -z "$stress_metric" ]]; then
             echo "Unable to parse KROLIK_STRESS_METRIC from harness output" >&2
+            echo "Available KROLIK stress lines:" >&2
+            grep -F 'KROLIK_STRESS' "$output" >&2 || true
             exit 1
           fi
 
