@@ -14,6 +14,7 @@ const SAMPLE_FRAMES := 180
 const MAX_SAMPLE_SECONDS := 20.0
 const MIN_MOVED_SHARE := 0.80
 const MIN_TRAVEL_PX := 8.0
+const MIN_PHASE_SECONDS := 2.0
 
 var _root: Node2D
 var _agents: Array[VaultCharacterAgent] = []
@@ -32,11 +33,12 @@ func _spawn_agents() -> void:
     for i in range(AGENT_COUNT):
         var agent := AgentScript.new() as VaultCharacterAgent
         _root.add_child(agent)
-        # Keep normal SceneTree physics processing enabled. Previous harness
-        # versions disabled processing and called _physics_process() from a tight
-        # deferred loop; that does not exercise CharacterBody2D/move_and_slide in
-        # its intended physics-frame context and produced a false movement gate.
+        # A custom SceneTree launched through --script does not have a project
+        # main scene to establish processing state for us. Make both inheritance
+        # and the physics callback explicit so this harness measures the same
+        # callback Godot invokes for a live VaultCharacterAgent.
         agent.process_mode = Node.PROCESS_MODE_INHERIT
+        agent.set_physics_process(true)
         var row := i / columns
         var col := i % columns
         var spawn := Vector2(40.0 + col * 34.0, 60.0 + row * 42.0)
@@ -75,10 +77,15 @@ func _run() -> void:
     var moved := 0
     var active := 0
     var total_travel := 0.0
+    var total_phase := 0.0
+    var state_counts: Dictionary = {}
     for agent in _agents:
         if not is_instance_valid(agent):
             continue
         active += 1
+        total_phase += agent.phase
+        var state_name := agent.brain.state
+        state_counts[state_name] = int(state_counts.get(state_name, 0)) + 1
         if agent.velocity.length_squared() > 0.01:
             moving += 1
         var start: Vector2 = _start_positions.get(agent.get_instance_id(), agent.global_position)
@@ -89,11 +96,12 @@ func _run() -> void:
 
     var moved_share := float(moved) / float(AGENT_COUNT)
     var avg_travel := total_travel / float(maxi(active, 1))
-    print("KROLIK_STRESS agents=%d active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f" % [
-        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel
+    var avg_phase := total_phase / float(maxi(active, 1))
+    print("KROLIK_STRESS agents=%d active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s" % [
+        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts)
     ])
-    print("KROLIK_STRESS_METRIC agents=%d active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f" % [
-        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel
+    print("KROLIK_STRESS_METRIC agents=%d active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
+        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
     ])
 
     if active != AGENT_COUNT:
@@ -103,6 +111,13 @@ func _run() -> void:
     if elapsed > MAX_SAMPLE_SECONDS:
         push_error("KROLIK stress: %d physics frames took %.2fs (> %.2fs budget)" % [SAMPLE_FRAMES, elapsed, MAX_SAMPLE_SECONDS])
         quit(3)
+        return
+    # Fail separately when SceneTree physics callbacks did not advance. This
+    # prevents a future harness regression from being misdiagnosed as bad crowd
+    # movement and leaves the state distribution in CI output for diagnosis.
+    if avg_phase < MIN_PHASE_SECONDS:
+        push_error("KROLIK stress: physics callbacks advanced only %.2fs average phase (need >= %.2fs)" % [avg_phase, MIN_PHASE_SECONDS])
+        quit(5)
         return
     if moved_share < MIN_MOVED_SHARE:
         push_error("KROLIK stress: only %.1f%% agents travelled >= %.1fpx (need %.1f%%)" % [moved_share * 100.0, MIN_TRAVEL_PX, MIN_MOVED_SHARE * 100.0])
