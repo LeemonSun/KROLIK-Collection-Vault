@@ -40,7 +40,6 @@ jobs:
       STRESS_MAX_RSS_KB: '524288'
     steps:
       - uses: actions/checkout@v4
-
       - name: Download verified Godot
         shell: bash
         run: |
@@ -52,35 +51,36 @@ jobs:
           unzip -q "$archive" -d godot-bin
           chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --version
-
       - name: Parse and import Godot project
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
-
       - name: Headless runtime smoke
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
-
       - name: Generated AI policy runtime regression
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/ai_policy_harness.gd
-
+      - name: Personality trait runtime regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/personality_harness.gd
       - name: Animation clip validation regression
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/animation_validation_harness.gd
-
       - name: Authored motion library runtime regression
         shell: bash
         run: |
@@ -89,35 +89,30 @@ jobs:
           cp content/animations/default_v1.json runtime_godot/.ci_motion_library.json
           trap 'rm -f runtime_godot/.ci_motion_library.json' EXIT
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/motion_library_harness.gd
-
       - name: Layered animation regression
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/layered_animation_harness.gd
-
       - name: Facial mood state regression
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/facial_state_harness.gd
-
       - name: Secondary motion production regression
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/secondary_motion_harness.gd
-
       - name: IK joint angle limit regression
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/ik_limit_harness.gd
-
       - name: Rendered Skeleton2D Polygon2D deformation regression
         shell: bash
         env:
@@ -134,7 +129,6 @@ jobs:
           test -s runtime_godot/deformation_artifacts/tall_posed.png
           test -s runtime_godot/deformation_artifacts/compact_baseline.png
           test -s runtime_godot/deformation_artifacts/compact_posed.png
-
       - name: Upload deformation evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -143,7 +137,6 @@ jobs:
           path: runtime_godot/deformation_artifacts/*.png
           if-no-files-found: warn
           retention-days: 14
-
       - name: 220 live-agent stress smoke with RSS budget
         shell: bash
         run: |
@@ -151,47 +144,18 @@ jobs:
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           metrics="${RUNNER_TEMP}/godot-stress-time.txt"
           output="${RUNNER_TEMP}/godot-stress-output.txt"
-
           stress_status=0
-          if /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1; then
-            stress_status=0
-          else
-            stress_status=$?
-          fi
-
+          if /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1; then stress_status=0; else stress_status=$?; fi
           cat "$output"
           cat "$metrics"
           echo "KROLIK_STRESS_PROCESS_STATUS=${stress_status}"
-
           max_rss_kb="$(awk -F: '/Maximum resident set size \(kbytes\)/ {gsub(/^[[:space:]]+/, "", $2); print $2}' "$metrics")"
-          if [[ ! "$max_rss_kb" =~ ^[0-9]+$ ]]; then
-            echo "Unable to parse maximum RSS from /usr/bin/time output" >&2
-            tail -n 100 "$output" >&2 || true
-            exit 1
-          fi
-
+          if [[ ! "$max_rss_kb" =~ ^[0-9]+$ ]]; then echo "Unable to parse maximum RSS" >&2; exit 1; fi
           stress_metric="$(awk 'index($0, "KROLIK_STRESS_METRIC ") {line=$0; sub(/^.*KROLIK_STRESS_METRIC /, "KROLIK_STRESS_METRIC ", line); metric=line} END {print metric}' "$output")"
-          if [[ -z "$stress_metric" ]]; then
-            stress_metric="KROLIK_STRESS_METRIC unavailable_in_captured_stdout"
-            echo "Warning: metric summary marker was not captured; preserving runtime/RSS gates." >&2
-            grep -F 'KROLIK_STRESS' "$output" >&2 || true
-          fi
-
+          if [[ -z "$stress_metric" ]]; then stress_metric="KROLIK_STRESS_METRIC unavailable_in_captured_stdout"; fi
           echo "KROLIK_STRESS_PROCESS status=${stress_status} max_rss_kb=${max_rss_kb} max_rss_mib=$(( (max_rss_kb + 1023) / 1024 )) budget_kb=${STRESS_MAX_RSS_KB}"
           {
-            echo '### KROLIK 220-agent runtime stress'
-            echo
-            echo "- ${stress_metric}"
-            echo "- process_status=${stress_status}"
-            echo "- max_rss_kb=${max_rss_kb} (~$(( (max_rss_kb + 1023) / 1024 )) MiB), budget=${STRESS_MAX_RSS_KB} KiB"
+            echo '### KROLIK 220-agent runtime stress'; echo; echo "- ${stress_metric}"; echo "- process_status=${stress_status}"; echo "- max_rss_kb=${max_rss_kb} (~$(( (max_rss_kb + 1023) / 1024 )) MiB), budget=${STRESS_MAX_RSS_KB} KiB";
           } >> "$GITHUB_STEP_SUMMARY"
-
-          if (( max_rss_kb > STRESS_MAX_RSS_KB )); then
-            echo "Stress process exceeded conservative RSS budget: ${max_rss_kb} KiB > ${STRESS_MAX_RSS_KB} KiB" >&2
-            exit 1
-          fi
-          if (( stress_status != 0 )); then
-            echo "Godot stress harness exited with status ${stress_status}; tail follows:" >&2
-            tail -n 100 "$output" >&2 || true
-            exit "$stress_status"
-          fi
+          if (( max_rss_kb > STRESS_MAX_RSS_KB )); then echo "Stress process exceeded RSS budget" >&2; exit 1; fi
+          if (( stress_status != 0 )); then tail -n 100 "$output" >&2 || true; exit "$stress_status"; fi
