@@ -3,7 +3,7 @@ from __future__ import annotations
 """Filesystem-first character image import for the source-independent KROLIK core.
 
 The legacy graphical/backend source is currently unavailable, so this module is
-intentionally independent of app.py/database code.  It establishes the product
+intentionally independent of app.py/database code. It establishes the product
 invariants that recovered UI code must call into later:
 
 - source bytes are immutable and content-addressed;
@@ -32,11 +32,19 @@ ASSET_IMPORT_FORMAT_VERSION = 1
 CUTOUT_ALGORITHM_VERSION = 1
 MAX_IMAGE_PIXELS = 40_000_000
 SUPPORTED_FORMATS = {"PNG", "JPEG", "WEBP", "BMP"}
+CUTOUT_MODES = {"auto", "alpha-only", "opaque"}
 
 
 def _safe_id(value: str) -> str:
     safe = "".join(ch if (ch.isalnum() or ch in "-_.") else "_" for ch in str(value)).strip("._")
     return safe or "character"
+
+
+def _normalize_cutout_mode(mode: str) -> str:
+    normalized = str(mode or "auto").strip().lower()
+    if normalized not in CUTOUT_MODES:
+        raise ValueError("cutout_mode must be one of: auto, alpha-only, opaque")
+    return normalized
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -95,7 +103,7 @@ def _uniform_border_cutout(image: Image.Image) -> tuple[Image.Image, dict[str, A
 
     This deliberately handles the reliable subset (plain/studio-like borders).
     Busy photographic backgrounds are retained and marked for review rather than
-    being destructively over-segmented.  The algorithm is offline/import-time.
+    being destructively over-segmented. The algorithm is offline/import-time.
     """
     rgb = np.asarray(image.convert("RGB"), dtype=np.int16)
     height, width = rgb.shape[:2]
@@ -104,12 +112,13 @@ def _uniform_border_cutout(image: Image.Image) -> tuple[Image.Image, dict[str, A
     border_distance = np.sqrt(np.sum((border.astype(np.float32) - background) ** 2, axis=1))
     border_p90 = float(np.percentile(border_distance, 90.0))
 
-    # A stable border gets a tight threshold.  A noisy border gets a wider one
-    # and therefore naturally trends toward review/fallback rather than erasing
-    # large parts of the subject.
     threshold = float(np.clip(26.0 + border_p90 * 2.2, 26.0, 88.0))
     distance = np.sqrt(np.sum((rgb.astype(np.float32) - background) ** 2, axis=2))
-    alpha = np.clip((distance - threshold * 0.45) * (255.0 / max(1.0, threshold * 0.70)), 0.0, 255.0).astype(np.uint8)
+    alpha = np.clip(
+        (distance - threshold * 0.45) * (255.0 / max(1.0, threshold * 0.70)),
+        0.0,
+        255.0,
+    ).astype(np.uint8)
 
     foreground_share = float(np.mean(alpha > 24))
     border_stability = max(0.0, min(1.0, 1.0 - border_p90 / 64.0))
@@ -117,8 +126,6 @@ def _uniform_border_cutout(image: Image.Image) -> tuple[Image.Image, dict[str, A
     confidence = round(border_stability * coverage_quality, 4)
     warnings: list[str] = []
 
-    # Reject obviously implausible masks.  In that case the derived PNG remains
-    # visually lossless/opaque and is explicitly flagged for manual correction.
     fallback_opaque = foreground_share < 0.015 or foreground_share > 0.965
     if fallback_opaque:
         alpha = np.full((height, width), 255, dtype=np.uint8)
@@ -143,10 +150,7 @@ def _uniform_border_cutout(image: Image.Image) -> tuple[Image.Image, dict[str, A
 
 
 def _prepare_cutout(image: Image.Image, mode: str) -> tuple[Image.Image, dict[str, Any]]:
-    mode = str(mode or "auto").strip().lower()
-    if mode not in {"auto", "alpha-only", "opaque"}:
-        raise ValueError("cutout_mode must be one of: auto, alpha-only, opaque")
-
+    normalized_mode = _normalize_cutout_mode(mode)
     if _has_meaningful_alpha(image):
         return image.copy(), {
             "method": "embedded-alpha",
@@ -155,8 +159,7 @@ def _prepare_cutout(image: Image.Image, mode: str) -> tuple[Image.Image, dict[st
             "foreground_share": round(_alpha_coverage(image), 6),
             "warnings": [],
         }
-
-    if mode == "auto":
+    if normalized_mode == "auto":
         return _uniform_border_cutout(image)
 
     opaque = image.copy()
@@ -183,6 +186,7 @@ def prepare_character_asset(
     if not source.is_file():
         raise FileNotFoundError(source)
 
+    mode_key = _normalize_cutout_mode(cutout_mode)
     original_bytes = source.read_bytes()
     source_sha = _sha256_bytes(original_bytes)
     normalized, source_format = _normalized_image(source)
@@ -203,8 +207,15 @@ def prepare_character_asset(
         if original_path.read_bytes() != original_bytes:
             raise RuntimeError("immutable original copy differs from source bytes")
 
-    cutout, cutout_info = _prepare_cutout(normalized, cutout_mode)
-    cutout_path = import_root / "derived" / "cutout" / f"v{CUTOUT_ALGORITHM_VERSION}" / f"{source_sha}.png"
+    cutout, cutout_info = _prepare_cutout(normalized, mode_key)
+    cutout_path = (
+        import_root
+        / "derived"
+        / "cutout"
+        / f"v{CUTOUT_ALGORITHM_VERSION}"
+        / mode_key
+        / f"{source_sha}.png"
+    )
     cutout_path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_name = tempfile.mkstemp(prefix=cutout_path.stem + ".", suffix=".png", dir=str(cutout_path.parent))
     os.close(fd)
@@ -230,6 +241,7 @@ def prepare_character_asset(
             "original_bytes": len(original_bytes),
         },
         "derived": {
+            "requested_mode": mode_key,
             "cutout_path": str(cutout_path),
             "cutout_sha256": cutout_sha,
             "width": int(cutout.width),
@@ -238,7 +250,13 @@ def prepare_character_asset(
             **cutout_info,
         },
     }
-    receipt_path = import_root / "receipts" / f"v{ASSET_IMPORT_FORMAT_VERSION}" / f"{source_sha}.json"
+    receipt_path = (
+        import_root
+        / "receipts"
+        / f"v{ASSET_IMPORT_FORMAT_VERSION}"
+        / mode_key
+        / f"{source_sha}.json"
+    )
     _atomic_write_text(receipt_path, json.dumps(receipt, ensure_ascii=False, indent=2))
 
     return {
@@ -250,6 +268,7 @@ def prepare_character_asset(
         "receipt": str(receipt_path),
         "width": int(cutout.width),
         "height": int(cutout.height),
+        "cutout_mode": mode_key,
         "cutout_method": str(cutout_info["method"]),
         "cutout_confidence": float(cutout_info["confidence"]),
         "review_required": bool(cutout_info["review_required"]),
