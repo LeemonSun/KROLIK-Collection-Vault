@@ -7,6 +7,34 @@ on:
   workflow_dispatch:
 
 jobs:
+  core-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install core test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest Pillow opencv-python-headless numpy
+      - name: Core module syntax
+        run: |
+          python -m py_compile \
+            rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
+            constraint_solver.py interaction_runtime.py life_sim.py
+      - name: Core regression suite
+        run: |
+          pytest -q \
+            tests/test_animation_pose.py \
+            tests/test_dwpose_backend.py \
+            tests/test_mesh_deform.py \
+            tests/test_runtime_skinning.py \
+            tests/test_scale.py \
+            tests/test_rig_migrations.py
+
   source-integrity:
     runs-on: ubuntu-latest
     outputs:
