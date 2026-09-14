@@ -47,13 +47,13 @@ jobs:
         run: python tools/fetch_dwpose_model.py --check
       - name: Real ONNXRuntime inference and SimCC contract smoke
         run: python tools/inspect_dwpose_model.py
-      - name: Fetch official DWPose single-character smoke asset
+      - name: Fetch upstream DWPose inference-example image
         shell: bash
         run: |
           set -euo pipefail
           curl --fail --location --retry 4 \
-            --output "${RUNNER_TEMP}/dwpose-iron.gif" \
-            "https://raw.githubusercontent.com/IDEA-Research/DWPose/onnx/resources/iron.gif"
-          test -s "${RUNNER_TEMP}/dwpose-iron.gif"
+            --output "${RUNNER_TEMP}/dwpose-pose1.png" \
+            "https://raw.githubusercontent.com/IDEA-Research/DWPose/onnx/ControlNet-v1-1-nightly/test_imgs/pose1.png"
+          test -s "${RUNNER_TEMP}/dwpose-pose1.png"
       - name: Production rig_tools DWPose backend smoke
-        run: python tools/smoke_dwpose_backend.py "${RUNNER_TEMP}/dwpose-iron.gif" --min-confidence 0.18
+        run: python tools/smoke_dwpose_backend.py "${RUNNER_TEMP}/dwpose-pose1.png" --min-confidence 0.18
