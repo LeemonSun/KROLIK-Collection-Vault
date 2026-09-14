@@ -5,14 +5,18 @@ extends RefCounted
 ##
 ## Clips contain normalized joint offsets relative to the rig rest pose. The
 ## driver samples them, performs cross-fades between clips and returns a pose
-## that is applied *before* IK constraints. Invalid authoring data is rejected
-## clip-by-clip so one malformed content pack cannot poison the runtime pose.
+## that is applied *before* IK constraints. Runtime-only additive layers can be
+## masked to selected joints so gestures/reactions can ride on top of locomotion
+## without changing the versioned animation-v1 content contract. Invalid
+## authoring data is rejected clip-by-clip so one malformed content pack cannot
+## poison the runtime pose.
 
 var current := "idle_breathe"
 var phase := 0.0
 var speed := 1.0
 var clips: Dictionary = {}
 var state_graph: Dictionary = {}
+var layers: Dictionary = {}
 var validation_errors: Array[String] = []
 var validation_warnings: Array[String] = []
 var _default_clip := "idle_breathe"
@@ -26,6 +30,7 @@ func configure(animation_doc: Dictionary) -> void:
     validation_warnings.clear()
     clips.clear()
     state_graph.clear()
+    layers.clear()
 
     var raw_clips = animation_doc.get("clips", {})
     if typeof(raw_clips) != TYPE_DICTIONARY:
@@ -64,6 +69,7 @@ func validation_report() -> Dictionary:
     return {
         "valid_clip_count": clips.size(),
         "default_clip": _default_clip,
+        "active_layer_count": layers.size(),
         "errors": validation_errors.duplicate(),
         "warnings": validation_warnings.duplicate(),
     }
@@ -210,6 +216,69 @@ func set_animation(name: String, blend: float = 0.16) -> void:
     current = safe_name
     phase = 0.0
 
+func set_additive_layer(
+    layer_name: String,
+    clip_name: String,
+    weight: float = 1.0,
+    joint_mask: Array = [],
+    root_weight: float = 0.0,
+    playback_speed: float = 1.0,
+    restart: bool = true
+) -> bool:
+    if layer_name.is_empty() or clip_name.is_empty():
+        return false
+    if not clips.is_empty() and not clips.has(clip_name):
+        return false
+
+    var mask: Dictionary = {}
+    for raw_name in joint_mask:
+        var joint_name := str(raw_name)
+        if not joint_name.is_empty():
+            mask[joint_name] = true
+
+    var previous = layers.get(layer_name, {})
+    var layer_phase := 0.0
+    if not restart and typeof(previous) == TYPE_DICTIONARY and str(previous.get("clip", "")) == clip_name:
+        var previous_phase = previous.get("phase", 0.0)
+        if _finite_number(previous_phase):
+            layer_phase = maxf(0.0, float(previous_phase))
+
+    var safe_weight := clampf(weight if is_finite(weight) else 0.0, 0.0, 1.0)
+    var safe_root_weight := clampf(root_weight if is_finite(root_weight) else 0.0, 0.0, 1.0)
+    var safe_speed := maxf(0.0, playback_speed if is_finite(playback_speed) else 1.0)
+    layers[layer_name] = {
+        "clip": clip_name,
+        "phase": layer_phase,
+        "speed": safe_speed,
+        "weight": safe_weight,
+        "root_weight": safe_root_weight,
+        "joint_mask": mask,
+    }
+    return true
+
+func set_additive_layer_weight(layer_name: String, weight: float) -> bool:
+    var value = layers.get(layer_name, null)
+    if typeof(value) != TYPE_DICTIONARY:
+        return false
+    var layer: Dictionary = value
+    layer["weight"] = clampf(weight if is_finite(weight) else 0.0, 0.0, 1.0)
+    layers[layer_name] = layer
+    return true
+
+func clear_additive_layer(layer_name: String) -> bool:
+    return layers.erase(layer_name)
+
+func clear_additive_layers() -> void:
+    layers.clear()
+
+func active_layer_names() -> Array[String]:
+    var out: Array[String] = []
+    var names: Array = layers.keys()
+    names.sort()
+    for raw_name in names:
+        out.append(str(raw_name))
+    return out
+
 func _empty_sample() -> Dictionary:
     return {
         "offset": Vector2.ZERO,
@@ -260,6 +329,43 @@ func _lerp_samples(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
     var joints: Dictionary = {}
     for name in names.keys():
         joints[name] = _as_vec2(aj.get(name, Vector2.ZERO)).lerp(_as_vec2(bj.get(name, Vector2.ZERO)), t)
+    out["joint_offsets"] = joints
+    return out
+
+func _apply_additive_layer(base: Dictionary, overlay: Dictionary, layer: Dictionary) -> Dictionary:
+    var out: Dictionary = base.duplicate(true)
+    var weight_value = layer.get("weight", 0.0)
+    var weight := clampf(float(weight_value), 0.0, 1.0) if _finite_number(weight_value) else 0.0
+    if weight <= 0.0:
+        return out
+
+    var root_weight_value = layer.get("root_weight", 0.0)
+    var root_weight := clampf(float(root_weight_value), 0.0, 1.0) if _finite_number(root_weight_value) else 0.0
+    var root_mix := weight * root_weight
+    if root_mix > 0.0:
+        out["offset"] = _as_vec2(base.get("offset", Vector2.ZERO)) + _as_vec2(overlay.get("offset", Vector2.ZERO)) * root_mix
+        out["rotation"] = float(base.get("rotation", 0.0)) + float(overlay.get("rotation", 0.0)) * root_mix
+        var base_scale := _as_vec2(base.get("scale", Vector2.ONE))
+        var overlay_scale := _as_vec2(overlay.get("scale", Vector2.ONE))
+        var scale_delta := Vector2(
+            lerpf(1.0, overlay_scale.x, root_mix),
+            lerpf(1.0, overlay_scale.y, root_mix)
+        )
+        out["scale"] = base_scale * scale_delta
+
+    var base_joints = base.get("joint_offsets", {})
+    var overlay_joints = overlay.get("joint_offsets", {})
+    var joints: Dictionary = base_joints.duplicate(true) if typeof(base_joints) == TYPE_DICTIONARY else {}
+    if typeof(overlay_joints) != TYPE_DICTIONARY:
+        out["joint_offsets"] = joints
+        return out
+    var mask = layer.get("joint_mask", {})
+    var mask_enabled := typeof(mask) == TYPE_DICTIONARY and not mask.is_empty()
+    for raw_name in overlay_joints.keys():
+        var joint_name := str(raw_name)
+        if mask_enabled and not mask.has(joint_name):
+            continue
+        joints[joint_name] = _as_vec2(joints.get(joint_name, Vector2.ZERO)) + _as_vec2(overlay_joints[raw_name]) * weight
     out["joint_offsets"] = joints
     return out
 
@@ -333,5 +439,27 @@ func step(delta: float) -> Dictionary:
     if _blend_duration > 0.0 and _blend_elapsed < _blend_duration and not _blend_from.is_empty():
         _blend_elapsed += safe_delta
         sampled = _lerp_samples(_blend_from, sampled, clampf(_blend_elapsed / _blend_duration, 0.0, 1.0))
+
+    # Keep the pre-layer sample for base-clip cross-fades. Otherwise changing
+    # locomotion while a gesture layer is active would bake the layer into the
+    # blend source and apply it twice on the next frame.
     _last_sample = sampled.duplicate(true)
-    return sampled
+
+    var output: Dictionary = sampled
+    var layer_names: Array = layers.keys()
+    layer_names.sort()
+    for raw_layer_name in layer_names:
+        var value = layers.get(raw_layer_name, null)
+        if typeof(value) != TYPE_DICTIONARY:
+            continue
+        var layer: Dictionary = value
+        var layer_speed_value = layer.get("speed", 1.0)
+        var layer_speed := maxf(0.0, float(layer_speed_value)) if _finite_number(layer_speed_value) else 1.0
+        var layer_phase_value = layer.get("phase", 0.0)
+        var layer_phase := maxf(0.0, float(layer_phase_value)) if _finite_number(layer_phase_value) else 0.0
+        layer_phase += safe_delta * layer_speed
+        layer["phase"] = layer_phase
+        layers[raw_layer_name] = layer
+        var overlay := _sample_clip(str(layer.get("clip", "")), layer_phase)
+        output = _apply_additive_layer(output, overlay, layer)
+    return output
