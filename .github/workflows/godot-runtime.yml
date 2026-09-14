@@ -61,19 +61,39 @@ jobs:
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           metrics="${RUNNER_TEMP}/godot-stress-time.txt"
           output="${RUNNER_TEMP}/godot-stress-output.txt"
+          status_file="${RUNNER_TEMP}/godot-stress-status.txt"
 
-          # The harness has its own 12 s measured-runtime assertion. Keep a wider
-          # process watchdog so slow hosted-runner startup does not masquerade as
-          # a gameplay regression, while still failing deterministically on hangs.
+          # Run the timed command in a child shell so its exit status is persisted
+          # independently of tee/PIPESTATUS semantics in the outer Actions shell.
+          # The harness retains its own 20 s measured-runtime budget; 90 s only
+          # protects CI from a hung Godot process or unusually slow startup.
           set +e
-          /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd 2>&1 | tee "$output"
-          stress_status=${PIPESTATUS[0]}
+          (
+            set +e
+            /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd
+            rc=$?
+            printf '%s\n' "$rc" > "$status_file"
+            exit "$rc"
+          ) 2>&1 | tee "$output"
+          pipeline_status=$?
           set -e
+
+          if [[ ! -s "$status_file" ]]; then
+            echo "Stress harness did not persist an exit status (pipeline_status=${pipeline_status}); tail follows:" >&2
+            tail -n 100 "$output" >&2 || true
+            exit 1
+          fi
+          stress_status="$(tr -d '[:space:]' < "$status_file")"
+          if [[ ! "$stress_status" =~ ^[0-9]+$ ]]; then
+            echo "Invalid persisted stress status: '${stress_status}'" >&2
+            exit 1
+          fi
 
           cat "$metrics"
           max_rss_kb="$(awk -F: '/Maximum resident set size \(kbytes\)/ {gsub(/^[[:space:]]+/, "", $2); print $2}' "$metrics")"
           if [[ ! "$max_rss_kb" =~ ^[0-9]+$ ]]; then
             echo "Unable to parse maximum RSS from /usr/bin/time output" >&2
+            tail -n 100 "$output" >&2 || true
             exit 1
           fi
 
@@ -84,12 +104,12 @@ jobs:
             grep -F 'KROLIK_STRESS' "$output" >&2 || true
           fi
 
-          echo "KROLIK_STRESS_PROCESS status=${stress_status} max_rss_kb=${max_rss_kb} max_rss_mib=$(( (max_rss_kb + 1023) / 1024 )) budget_kb=${STRESS_MAX_RSS_KB}"
+          echo "KROLIK_STRESS_PROCESS status=${stress_status} pipeline_status=${pipeline_status} max_rss_kb=${max_rss_kb} max_rss_mib=$(( (max_rss_kb + 1023) / 1024 )) budget_kb=${STRESS_MAX_RSS_KB}"
           {
             echo '### KROLIK 220-agent runtime stress'
             echo
             echo "- ${stress_metric}"
-            echo "- process_status=${stress_status}"
+            echo "- process_status=${stress_status}; pipeline_status=${pipeline_status}"
             echo "- max_rss_kb=${max_rss_kb} (~$(( (max_rss_kb + 1023) / 1024 )) MiB), budget=${STRESS_MAX_RSS_KB} KiB"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -98,10 +118,7 @@ jobs:
             exit 1
           fi
           if (( stress_status != 0 )); then
-            if (( stress_status == 124 || stress_status == 137 )); then
-              echo "Godot stress harness hit the 90 s process watchdog; tail follows:" >&2
-              tail -n 80 "$output" >&2 || true
-            fi
-            echo "Godot stress harness exited with status ${stress_status}" >&2
+            echo "Godot stress harness exited with status ${stress_status}; tail follows:" >&2
+            tail -n 100 "$output" >&2 || true
             exit "$stress_status"
           fi
