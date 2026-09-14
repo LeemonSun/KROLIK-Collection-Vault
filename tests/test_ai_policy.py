@@ -25,9 +25,15 @@ def test_policy_validation_rejects_drift_prone_structural_damage():
     broken = deepcopy(generated_policy_document())
     broken["state_order"] = ["idle", "idle"]
     broken["utility"]["wander"]["wander"] = float("inf")
+    broken["short_term_memory"]["capacity"] = 0
+    broken["short_term_memory"]["max_ttl"] = 1
+    broken["short_term_memory"]["effects"]["social"] = {"bogus": .5}
     errors = validate_ai_policy_document(broken)
     assert any("state_order" in item for item in errors)
     assert any("utility.wander" in item for item in errors)
+    assert any("short_term_memory.capacity" in item for item in errors)
+    assert any("max_ttl" in item for item in errors)
+    assert any("short_term_memory.effects.social" in item for item in errors)
 
 
 def test_python_behavior_still_uses_policy_values():
