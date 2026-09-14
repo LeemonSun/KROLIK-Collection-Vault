@@ -54,6 +54,13 @@ jobs:
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
 
+      - name: Animation clip validation regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/animation_validation_harness.gd
+
       - name: Rendered Skeleton2D Polygon2D deformation regression
         shell: bash
         env:
