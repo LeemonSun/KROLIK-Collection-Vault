@@ -57,20 +57,17 @@ jobs:
       - name: 220 live-agent stress smoke with RSS budget
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           metrics="${RUNNER_TEMP}/godot-stress-time.txt"
           output="${RUNNER_TEMP}/godot-stress-output.txt"
 
-          # GNU time returns the wrapped command's exit status. Do not let the
-          # shell's errexit consume that status before we can report diagnostics.
-          set +e
           /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1
           stress_status=$?
-          set -e
 
           cat "$output"
           cat "$metrics"
+          echo "KROLIK_STRESS_PROCESS_STATUS=${stress_status}"
 
           max_rss_kb="$(awk -F: '/Maximum resident set size \(kbytes\)/ {gsub(/^[[:space:]]+/, "", $2); print $2}' "$metrics")"
           if [[ ! "$max_rss_kb" =~ ^[0-9]+$ ]]; then
