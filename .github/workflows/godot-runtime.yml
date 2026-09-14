@@ -51,6 +51,12 @@ jobs:
           unzip -q "$archive" -d godot-bin
           chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --version
+      - name: Canonical AI brain syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/agent_brain.gd
       - name: Parse and import Godot project
         shell: bash
         run: |
