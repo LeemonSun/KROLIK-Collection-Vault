@@ -13,7 +13,9 @@ on:
       - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
+      - 'tools/build_core_vertical_slice.py'
       - 'tests/test_runtime_skinning.py'
+      - 'tests/test_core_vertical_slice.py'
       - '.github/workflows/godot-runtime.yml'
   pull_request:
     paths:
@@ -26,7 +28,9 @@ on:
       - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
+      - 'tools/build_core_vertical_slice.py'
       - 'tests/test_runtime_skinning.py'
+      - 'tests/test_core_vertical_slice.py'
       - '.github/workflows/godot-runtime.yml'
   workflow_dispatch:
 
@@ -38,8 +42,15 @@ jobs:
       GODOT_VERSION: '4.7.2'
       GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
       STRESS_MAX_RSS_KB: '524288'
+      PYTHONPATH: '.'
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install vertical-slice builder dependencies
+        run: python -m pip install Pillow numpy
       - name: Download verified Godot
         shell: bash
         run: |
@@ -63,6 +74,19 @@ jobs:
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
+      - name: Build deterministic image-to-runtime vertical slice package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf runtime_godot/.ci_vertical_slice
+          python tools/build_core_vertical_slice.py --output-root runtime_godot/.ci_vertical_slice
+      - name: Production Python-to-Godot vertical slice regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          trap 'rm -rf runtime_godot/.ci_vertical_slice' EXIT
+          timeout 45s "$GODOT" --headless --path runtime_godot --script res://scripts/core_vertical_slice_harness.gd
       - name: Generated AI policy runtime regression
         shell: bash
         run: |
