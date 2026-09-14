@@ -7,7 +7,9 @@ on:
     tags: ['vault-*']
     paths:
       - 'character_import.py'
+      - 'import_integrity.py'
       - 'runtime_package.py'
+      - 'runtime_package_integrity.py'
       - 'rig_tools.py'
       - 'rig_edit.py'
       - 'animation_content.py'
@@ -15,9 +17,12 @@ on:
       - 'tools/build_core_vertical_slice.py'
       - 'tools/build_import_qa_matrix.py'
       - 'tools/import_character_package.py'
+      - 'tools/validate_runtime_package.py'
       - 'tests/test_character_import.py'
       - 'tests/test_character_import_modes.py'
       - 'tests/test_character_import_rig_edit.py'
+      - 'tests/test_import_integrity.py'
+      - 'tests/test_runtime_package_integrity.py'
       - 'tests/test_rig_edit.py'
       - 'tests/test_import_qa_matrix.py'
       - 'tests/test_core_vertical_slice.py'
@@ -44,8 +49,8 @@ jobs:
       - name: Core import syntax and regressions
         shell: pwsh
         run: |
-          python -m py_compile rig_edit.py character_import.py runtime_package.py rig_tools.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py
-          pytest -q tests/test_character_import.py tests/test_character_import_modes.py tests/test_character_import_rig_edit.py tests/test_rig_edit.py tests/test_import_qa_matrix.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
+          python -m py_compile rig_edit.py character_import.py import_integrity.py runtime_package.py runtime_package_integrity.py rig_tools.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py tools/validate_runtime_package.py
+          pytest -q tests/test_character_import.py tests/test_character_import_modes.py tests/test_character_import_rig_edit.py tests/test_import_integrity.py tests/test_runtime_package_integrity.py tests/test_rig_edit.py tests/test_import_qa_matrix.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
       - name: Build ordinary-image runtime package on Windows
         shell: pwsh
         run: |
@@ -73,13 +78,18 @@ jobs:
           '@ | Set-Content -Path $edit -Encoding utf8
           & .\dist\KROLIK_Character_Import.exe $source --project-root $workspace --character-id windows-exe-ci --name 'Windows EXE CI' --heuristic-rig --joint-overrides $edit
           if ($LASTEXITCODE -ne 0) { throw "Packaged import CLI exited $LASTEXITCODE" }
-          $manifestPath = Join-Path $workspace 'exports/runtime/windows-exe-ci/manifest.json'
+          $packageFolder = Join-Path $workspace 'exports/runtime/windows-exe-ci'
+          $manifestPath = Join-Path $packageFolder 'manifest.json'
+          $packageReceipt = Join-Path $packageFolder 'package_receipt.json'
           if (-not (Test-Path $manifestPath)) { throw 'Packaged CLI did not emit runtime manifest' }
+          if (-not (Test-Path $packageReceipt)) { throw 'Packaged CLI did not emit durable package receipt' }
           $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
           if ([math]::Abs([double]$manifest.rig.joints.left_wrist.x - 0.16) -gt 0.000001) { throw 'Packaged CLI did not preserve corrected wrist X' }
           if ([math]::Abs([double]$manifest.rig.joints.left_wrist.y - 0.49) -gt 0.000001) { throw 'Packaged CLI did not preserve corrected wrist Y' }
           $editFiles = Get-ChildItem (Join-Path $workspace 'imports/windows-exe-ci/derived/rig_edits/v1') -Recurse -Filter '*.json'
           if ($editFiles.Count -lt 1) { throw 'Packaged CLI did not persist rig edit provenance' }
+          python tools/validate_runtime_package.py $packageReceipt
+          if ($LASTEXITCODE -ne 0) { throw "Durable package reopen validator exited $LASTEXITCODE" }
       - name: Upload verified Windows import CLI
         uses: actions/upload-artifact@v4
         with:
