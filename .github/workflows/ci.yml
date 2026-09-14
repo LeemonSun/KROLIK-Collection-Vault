@@ -25,7 +25,7 @@ jobs:
       - name: Core module syntax
         run: |
           python -m py_compile \
-            animation_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
+            animation_content.py pose_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
             constraint_solver.py interaction_runtime.py life_sim.py tools/validate_content.py
       - name: Validate data-driven content
         run: python tools/validate_content.py
@@ -34,6 +34,7 @@ jobs:
           pytest -q \
             tests/test_animation_pose.py \
             tests/test_animation_content.py \
+            tests/test_pose_content.py \
             tests/test_fixture_content.py \
             tests/test_dwpose_backend.py \
             tests/test_mesh_deform.py \

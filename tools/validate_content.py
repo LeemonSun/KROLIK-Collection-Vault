@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from animation_content import ANIMATION_SCHEMA, validate_animation_document
+from pose_content import POSE_SCHEMA, validate_pose_document
 from prop_content import FIXTURE_SCHEMA, validate_fixture_document
 
 
@@ -25,12 +26,16 @@ def validate_file(path: Path) -> list[str]:
         return validate_animation_document(document)
     if schema == FIXTURE_SCHEMA:
         return validate_fixture_document(document)
+    if schema == POSE_SCHEMA:
+        return validate_pose_document(document)
     # Path hints keep diagnostics useful for malformed files whose schema field
     # itself is missing/wrong, while the validator still reports the schema.
     if "animations" in path.parts:
         return validate_animation_document(document)
     if "fixtures" in path.parts:
         return validate_fixture_document(document)
+    if "poses" in path.parts:
+        return validate_pose_document(document)
     return [f"unsupported content schema {schema!r}"]
 
 

@@ -1,0 +1,126 @@
+{
+  "schema": "krolik.pose-library/1",
+  "format_version": 1,
+  "poses": {
+    "neutral": {
+      "category": "base",
+      "tags": ["neutral", "standing", "foundation"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 1.0,
+      "joints": {},
+      "root": {}
+    },
+    "attentive": {
+      "category": "idle",
+      "tags": ["standing", "attention", "alert"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 1.2,
+      "joints": {
+        "head": [0.0, -0.008],
+        "neck": [0.0, -0.004],
+        "left_shoulder": [-0.004, -0.003],
+        "right_shoulder": [0.004, -0.003]
+      },
+      "root": {"y": -0.4}
+    },
+    "relaxed": {
+      "category": "idle",
+      "tags": ["standing", "relaxed", "casual"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 1.6,
+      "joints": {
+        "head": [0.008, 0.004],
+        "neck": [0.004, 0.003],
+        "left_shoulder": [-0.005, 0.005],
+        "right_shoulder": [0.003, 0.003],
+        "left_wrist": [-0.008, 0.006],
+        "right_wrist": [0.006, 0.004],
+        "pelvis": [-0.004, 0.004]
+      },
+      "root": {"rotation": 0.006, "y": 0.4}
+    },
+    "inspect_left": {
+      "category": "attention",
+      "tags": ["standing", "inspect", "left"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 1.3,
+      "joints": {
+        "head": [-0.025, 0.001],
+        "neck": [-0.010, 0.0],
+        "left_elbow": [0.010, -0.010],
+        "left_wrist": [0.018, -0.018],
+        "right_shoulder": [-0.002, 0.002]
+      },
+      "root": {"rotation": -0.008}
+    },
+    "lean_left": {
+      "category": "stance",
+      "tags": ["standing", "lean", "left"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 1.5,
+      "joints": {
+        "head": [-0.012, 0.003],
+        "neck": [-0.009, 0.002],
+        "left_shoulder": [-0.012, 0.004],
+        "right_shoulder": [-0.006, -0.001],
+        "pelvis": [-0.015, 0.003],
+        "left_hip": [-0.012, 0.0],
+        "right_hip": [-0.008, 0.002]
+      },
+      "root": {"x": -1.5, "rotation": -0.012}
+    },
+    "step_ready_left": {
+      "category": "locomotion",
+      "tags": ["standing", "step", "ready", "left"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 0.8,
+      "joints": {
+        "left_hip": [-0.006, -0.004],
+        "left_knee": [0.015, -0.016],
+        "left_ankle": [0.030, -0.025],
+        "right_knee": [-0.006, 0.006],
+        "right_ankle": [-0.012, 0.008],
+        "left_wrist": [0.012, 0.004],
+        "right_wrist": [-0.012, -0.004]
+      },
+      "root": {"y": -1.0, "rotation": -0.004}
+    },
+    "arms_close": {
+      "category": "stance",
+      "tags": ["standing", "compact", "arms"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 1.2,
+      "joints": {
+        "left_elbow": [0.020, 0.008],
+        "left_wrist": [0.055, -0.018],
+        "right_elbow": [-0.020, 0.008],
+        "right_wrist": [-0.055, -0.018],
+        "left_shoulder": [0.004, 0.0],
+        "right_shoulder": [-0.004, 0.0]
+      },
+      "root": {}
+    },
+    "rest_low": {
+      "category": "rest",
+      "tags": ["rest", "low_energy", "idle"],
+      "mode": "offset",
+      "mirrorable": true,
+      "duration_hint": 2.0,
+      "joints": {
+        "head": [0.0, 0.016],
+        "neck": [0.0, 0.010],
+        "left_shoulder": [0.0, 0.007],
+        "right_shoulder": [0.0, 0.007],
+        "pelvis": [0.0, 0.006]
+      },
+      "root": {"y": 0.8, "scale_y": 0.998}
+    }
+  }
+}
