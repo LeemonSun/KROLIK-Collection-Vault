@@ -108,6 +108,7 @@ func _run() -> void:
         agent.solved_joints, "left_shoulder", "left_elbow", "left_wrist"
     )
     if agent_angle < 29.99 or agent_angle > 118.01:
+        agent.free()
         _fail("CharacterAgent animation->IK path escaped authored limits: %.5f" % agent_angle, 88)
         return
 
@@ -125,9 +126,11 @@ func _run() -> void:
     )
     var defaults := VaultIKSolver.default_limits("left_elbow")
     if default_angle < defaults.x - 0.01 or default_angle > defaults.y + 0.01:
+        agent.free()
         _fail("CharacterAgent did not apply default elbow limits: %.5f" % default_angle, 89)
         return
 
+    agent.free()
     print("KROLIK_IK_LIMITS far=%.3f close=%.3f custom=%.3f agent=%.3f default=%.3f" % [
         far_angle, close_angle, custom_angle, agent_angle, default_angle
     ])
