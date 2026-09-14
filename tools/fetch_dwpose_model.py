@@ -23,7 +23,7 @@ from urllib.request import Request, urlopen
 MODEL_NAME = "dw-ll_ucoco_384.onnx"
 MODEL_SHA256 = "724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843"
 MODEL_SIZE_BYTES: int | None = None
-DEFAULT_URL = "https://huggingface.co/fashn-ai/DWPose/resolve/main/dw-ll_ucoco_384.onnx?download=true"
+DEFAULT_URL = "https://huggingface.co/yzd-v/DWPose/resolve/main/dw-ll_ucoco_384.onnx?download=true"
 DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "models" / "dwpose" / MODEL_NAME
 
 
