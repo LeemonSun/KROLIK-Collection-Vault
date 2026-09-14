@@ -7,6 +7,8 @@ const CollisionRigScript = preload("res://scripts/collision_rig.gd")
 var character_id := ""
 var brain := VaultAgentBrain.new()
 var animation_driver := VaultAnimationDriver.new()
+var facial_state := VaultFacialState.new()
+var facial_channels: Dictionary = {}
 var secondary_motion := VaultSecondaryMotion.new()
 var secondary_motion_enabled := false
 var contained := false
@@ -45,6 +47,8 @@ func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     target_position = spawn
     _navigation_target_valid = false
     brain.apply_snapshot(mind)
+    facial_state.configure({}, int(hash(character_id)))
+    facial_channels = facial_state.semantic_snapshot()
     configure_secondary_motion({})
     _ensure_visual_root()
     _ensure_navigation_agent()
@@ -66,6 +70,8 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     brain.apply_snapshot(mind)
     var animation_doc: Dictionary = manifest.get("animation", {})
     animation_driver.configure(animation_doc)
+    facial_state.configure(animation_doc, int(hash(character_id)))
+    facial_channels = facial_state.semantic_snapshot()
     var visual: Dictionary = manifest.get("visual", {})
     var image_name := str(visual.get("file", "character.png"))
     var image_path := manifest_path.get_base_dir().path_join(image_name)
@@ -117,6 +123,18 @@ func set_animation_layer(
 func clear_animation_layer(layer_name: String) -> bool:
     return animation_driver.clear_additive_layer(layer_name)
 
+func set_look_target(normalized_target: Vector2) -> void:
+    facial_state.set_look_target(normalized_target)
+
+func clear_look_target() -> void:
+    facial_state.clear_look_target()
+
+func set_mood(name: String, intensity: float = 1.0, transition: float = 0.20) -> bool:
+    return facial_state.set_mood(name, intensity, transition)
+
+func facial_snapshot() -> Dictionary:
+    return facial_channels.duplicate(true)
+
 func apply_runtime_interaction(data: Dictionary) -> void:
     runtime_constraints.clear()
     for raw in data.get("constraints", []):
@@ -165,6 +183,20 @@ func _solve_runtime_constraints(base_pose: Dictionary = {}) -> void:
             float(raw.get("max_joint_deg", default_limits.y))
         )
 
+func _apply_facial_pose(face_sample: Dictionary) -> void:
+    var channels = face_sample.get("channels", {})
+    facial_channels = channels.duplicate(true) if typeof(channels) == TYPE_DICTIONARY else {}
+    var offsets = face_sample.get("joint_offsets", {})
+    if typeof(offsets) != TYPE_DICTIONARY:
+        return
+    for raw_name in offsets.keys():
+        var joint_name := str(raw_name)
+        if not animated_joints.has(joint_name):
+            continue
+        var offset = offsets[raw_name]
+        if typeof(offset) == TYPE_VECTOR2:
+            animated_joints[joint_name] = animated_joints[joint_name] + offset
+
 func _apply_secondary_motion(delta: float) -> void:
     if not secondary_motion_enabled or animated_joints.is_empty():
         return
@@ -212,6 +244,8 @@ func _apply_animation_pose(sample: Dictionary, delta: float = 0.0) -> void:
             elif typeof(raw) == TYPE_DICTIONARY:
                 joint_delta = Vector2(float(raw.get("x", 0.0)), float(raw.get("y", 0.0)))
             animated_joints[name] = animated_joints[name] + joint_delta
+    if facial_state.enabled:
+        _apply_facial_pose(facial_state.step(delta))
     _apply_secondary_motion(delta)
     _solve_runtime_constraints(animated_joints)
 
