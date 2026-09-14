@@ -6,10 +6,11 @@ from typing import Any
 
 AI_POLICY_SCHEMA = "krolik.ai-policy/1"
 AI_POLICY_FORMAT_VERSION = 1
+TRAIT_NAMES = ("curiosity", "sociability", "boldness", "patience", "resilience")
+NEUTRAL_TRAITS = {name: 0.5 for name in TRAIT_NAMES}
 
 # Semantic source of truth for both editor-side Python simulation and the Godot
-# runtime brain. Keep formulas generic and move tunable policy values here so
-# runtime export can be generated/verified rather than hand-synchronized.
+# runtime brain. Tunable behavior belongs here and is exported to Godot.
 AI_POLICY: dict[str, Any] = {
     "schema": AI_POLICY_SCHEMA,
     "format_version": AI_POLICY_FORMAT_VERSION,
@@ -19,13 +20,14 @@ AI_POLICY: dict[str, Any] = {
             "autonomy": 0.75, "wander": 0.65, "social": 0.45,
             "rest_threshold": 0.24, "curiosity_threshold": 0.72,
             "home_bias": 0.35, "mobility": "auto", "walk_speed": 1.0,
-            "routine": "balanced",
+            "routine": "balanced", "traits": deepcopy(NEUTRAL_TRAITS),
         },
     },
     "valid": {
         "mobility": ["auto", "free", "contained", "disabled"],
         "routine": ["balanced", "homebody", "explorer", "social"],
         "bound_modes": ["bound", "anchored", "contained", "restrained"],
+        "traits": list(TRAIT_NAMES),
     },
     "state_order": ["return_home", "rest", "social", "inspect", "wander", "idle"],
     "hard_gates": {
@@ -45,6 +47,15 @@ AI_POLICY: dict[str, Any] = {
         "rest": {"base": 0.12, "inverse_energy": 0.88, "home_bonus": 0.18, "away_bonus": -0.25},
         "target": {"cap": 0.18, "step": 0.06},
         "routine_bonus": {"explorer": 0.18, "social": 0.18, "homebody": 0.20},
+    },
+    # Trait values are centered on 0.5, so old profiles and neutral traits add
+    # exactly zero utility. Effects express temperament, not duplicate raw knobs.
+    "trait_effects": {
+        "curiosity": {"inspect": 0.70, "wander": 0.10},
+        "sociability": {"social": 0.70},
+        "boldness": {"wander": 0.50, "return_home": -0.30},
+        "patience": {"idle": 0.50},
+        "resilience": {"rest": -0.45, "return_home": -0.20},
     },
     "need_rates_per_minute": {
         "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
@@ -71,13 +82,28 @@ def policy_document() -> dict[str, Any]:
 
 
 DEFAULT_NEEDS = dict(AI_POLICY["defaults"]["needs"])
-DEFAULT_PROFILE = dict(AI_POLICY["defaults"]["profile"])
+DEFAULT_PROFILE = deepcopy(AI_POLICY["defaults"]["profile"])
 MOBILE_STATES = {"idle", "wander", "inspect", "social", "return_home"}
 ANIMATION_BY_STATE = dict(AI_POLICY["animation_by_state"])
 
 
 def clamp01(v: float) -> float:
     return max(0.0, min(1.0, float(v)))
+
+
+def _merged_traits(value: Any) -> dict[str, float]:
+    out = dict(NEUTRAL_TRAITS)
+    if isinstance(value, dict):
+        for name in TRAIT_NAMES:
+            if name in value:
+                out[name] = clamp01(value[name])
+    return out
+
+
+def _trait_delta(profile: dict[str, Any], name: str) -> float:
+    traits = profile.get("traits", {})
+    value = traits.get(name, 0.5) if isinstance(traits, dict) else 0.5
+    return clamp01(value) - 0.5
 
 
 def derive_affect(needs: dict[str, float], state: str) -> dict[str, Any]:
@@ -94,8 +120,12 @@ def derive_affect(needs: dict[str, float], state: str) -> dict[str, Any]:
 
 
 def merged_profile(value: dict[str, Any] | None) -> dict[str, Any]:
-    out = dict(DEFAULT_PROFILE)
-    if value: out.update({k: v for k, v in value.items() if k in out})
+    out = deepcopy(DEFAULT_PROFILE)
+    if value:
+        out.update({k: v for k, v in value.items() if k in out and k != "traits"})
+        out["traits"] = _merged_traits(value.get("traits"))
+    else:
+        out["traits"] = dict(NEUTRAL_TRAITS)
     for key in ("autonomy", "wander", "social", "rest_threshold", "curiosity_threshold", "home_bias"):
         out[key] = clamp01(out[key])
     out["walk_speed"] = max(.05, min(4.0, float(out["walk_speed"])))
@@ -131,7 +161,7 @@ def activity_scores(profile: dict[str, Any], needs: dict[str, float], context: d
     home_bonus = float(bonuses["homebody"]) if routine == "homebody" else 0.0
     idle, wander_u, inspect = utility["idle"], utility["wander"], utility["inspect"]
     social_u, return_home, rest = utility["social"], utility["return_home"], utility["rest"]
-    return {
+    scores = {
         "idle": float(idle["base"]) + needs["comfort"] * float(idle["comfort"]) + (1-profile["autonomy"]) * float(idle["inverse_autonomy"]),
         "wander": float(wander_u["base"]) + profile["wander"]*float(wander_u["wander"]) + profile["autonomy"]*float(wander_u["autonomy"]) + needs["curiosity"]*float(wander_u["curiosity"]) + explorer_bonus,
         "inspect": float(inspect["base"]) + needs["curiosity"]*float(inspect["curiosity"]) + min(float(target["cap"]), interesting*float(target["step"])) + explorer_bonus,
@@ -139,6 +169,12 @@ def activity_scores(profile: dict[str, Any], needs: dict[str, float], context: d
         "return_home": (float(return_home["base"]) + profile["home_bias"]*float(return_home["home_bias"]) + home_bonus + (1-needs["comfort"])*float(return_home["inverse_comfort"]) + (1-needs["energy"])*float(return_home["inverse_energy"])) if away else 0.0,
         "rest": float(rest["base"]) + (1-needs["energy"])*float(rest["inverse_energy"]) + (float(rest["home_bonus"]) if not away else float(rest["away_bonus"])),
     }
+    for trait_name, effects in AI_POLICY["trait_effects"].items():
+        delta = _trait_delta(profile, trait_name)
+        for state_name, coefficient in effects.items():
+            if state_name in scores:
+                scores[state_name] += delta * float(coefficient)
+    return scores
 
 
 def choose_state(profile: dict[str, Any], needs: dict[str, float], context: dict[str, Any] | None = None) -> str:
