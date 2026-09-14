@@ -25,9 +25,9 @@ jobs:
       - name: Core module syntax
         run: |
           python -m py_compile \
-            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py rig_edit.py runtime_package.py mesh_deform.py character_import.py import_integrity.py runtime_package_integrity.py pose_accuracy.py \
+            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py rig_edit.py runtime_package.py mesh_deform.py character_import.py import_integrity.py runtime_package_integrity.py pose_accuracy.py dwpose_benchmark.py \
             constraint_solver.py interaction_runtime.py life_sim.py \
-            tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py tools/validate_runtime_package.py tools/fetch_dwpose_model.py tools/inspect_dwpose_model.py tools/evaluate_pose_accuracy.py
+            tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py tools/validate_runtime_package.py tools/fetch_dwpose_model.py tools/inspect_dwpose_model.py tools/evaluate_pose_accuracy.py tools/benchmark_dwpose_coco.py
       - name: Verify generated AI policy copies
         run: python tools/export_ai_policy.py --check
       - name: Validate data-driven content
@@ -52,6 +52,7 @@ jobs:
             tests/test_dwpose_backend.py \
             tests/test_dwpose_model_bootstrap.py \
             tests/test_dwpose_model_contract.py \
+            tests/test_dwpose_benchmark.py \
             tests/test_pose_accuracy.py \
             tests/test_mesh_deform.py \
             tests/test_runtime_skinning.py \
