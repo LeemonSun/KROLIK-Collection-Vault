@@ -7,9 +7,8 @@ safe to run repeatedly: an existing valid file is reused, downloads land in a
 temporary sibling file, SHA-256 is verified before replacement, and a failed or
 truncated download never overwrites the last known-good model.
 
-Integrity is pinned by SHA-256. We deliberately do not hard-code an artifact
-byte count unless it has been independently verified from the exact object;
-mirrors/UI display sizes are not authoritative integrity metadata.
+Integrity is pinned by SHA-256 plus the exact byte count observed from the
+SHA-matching official yzd-v/DWPose artifact in CI.
 """
 
 import argparse
@@ -22,7 +21,7 @@ from urllib.request import Request, urlopen
 
 MODEL_NAME = "dw-ll_ucoco_384.onnx"
 MODEL_SHA256 = "724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843"
-MODEL_SIZE_BYTES: int | None = None
+MODEL_SIZE_BYTES = 134_399_116
 DEFAULT_URL = "https://huggingface.co/yzd-v/DWPose/resolve/main/dw-ll_ucoco_384.onnx?download=true"
 DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "models" / "dwpose" / MODEL_NAME
 
@@ -109,7 +108,7 @@ def main() -> int:
         print(
             "KROLIK_DWPOSE_MODEL "
             f"status={'ok' if valid else 'missing_or_invalid'} path={output} reason={reason} "
-            f"expected_sha256={MODEL_SHA256}"
+            f"expected_sha256={MODEL_SHA256} expected_bytes={MODEL_SIZE_BYTES}"
         )
         return 0 if valid else 2
 
