@@ -26,16 +26,21 @@ def test_runtime_manifest_contains_data_driven_pose_clips():
     assert any(frame.get("joints") for frame in animation["clips"]["walk"]["keyframes"])
 
 
-def test_godot_animation_secondary_motion_and_ik_pipeline_order():
+def test_godot_animation_face_secondary_motion_and_ik_pipeline_order():
     root = Path(__file__).resolve().parents[1]
     driver = (root / "runtime_godot/scripts/animation_driver.gd").read_text(encoding="utf-8")
     agent = (root / "runtime_godot/scripts/character_agent.gd").read_text(encoding="utf-8")
+    face = (root / "runtime_godot/scripts/facial_state.gd").read_text(encoding="utf-8")
 
     assert "joint_offsets" in driver
     assert "_sample_clip" in driver
     assert "_lerp_samples" in driver
     assert "set_additive_layer" in driver
     assert "animation_driver.configure" in agent
+    assert "procedural_blink" in face
+    assert "look_at" in face
+    assert '"eye_openness"' in face
+    assert '"mouth_curve"' in face
 
     # Physics must sample the complete base + additive animation result before
     # handing the pose to CharacterAgent's post-animation pipeline.
@@ -45,17 +50,19 @@ def test_godot_animation_secondary_motion_and_ik_pipeline_order():
     assert pose_call in agent
     assert agent.index(sample_call) < agent.index(pose_call)
 
-    # Inside _apply_animation_pose the authored/animated joints are assembled,
-    # then secondary motion is applied, and only after that may interaction IK
-    # constrain endpoints. This ordering is the C4 contract.
+    # C5/C4/C2 production ordering is strict: authored body pose first, then the
+    # real head/neck part of the semantic facial layer, then inertial secondary
+    # motion, with interaction IK last so explicit endpoints stay authoritative.
     pose_start = agent.index("func _apply_animation_pose(")
     pose_end = agent.index("\nfunc ", pose_start + 1)
     pose_body = agent[pose_start:pose_end]
+    face_call = "_apply_facial_pose(facial_state.step(delta))"
     secondary_call = "_apply_secondary_motion(delta)"
     ik_call = "_solve_runtime_constraints(animated_joints)"
+    assert face_call in pose_body
     assert secondary_call in pose_body
     assert ik_call in pose_body
-    assert pose_body.index(secondary_call) < pose_body.index(ik_call)
+    assert pose_body.index(face_call) < pose_body.index(secondary_call) < pose_body.index(ik_call)
 
     # Empty secondary configuration must remain a cheap disabled path rather
     # than stepping springs for every runtime character.
@@ -64,3 +71,13 @@ def test_godot_animation_secondary_motion_and_ik_pipeline_order():
     secondary_body = agent[secondary_start:secondary_end]
     assert "if not secondary_motion_enabled" in secondary_body
     assert "secondary_motion.step(delta, velocity)" in secondary_body
+
+    # The current single-cutout rig must not pretend to have eyelid/mouth
+    # deformation. Production applies only face-authored joint offsets to actual
+    # joints and keeps the rest as semantic channels for future face geometry.
+    facial_start = agent.index("func _apply_facial_pose(")
+    facial_end = agent.index("\nfunc ", facial_start + 1)
+    facial_body = agent[facial_start:facial_end]
+    assert "facial_channels" in facial_body
+    assert "joint_offsets" in facial_body
+    assert "animated_joints" in facial_body
