@@ -1,105 +1,161 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-14 20:12 +03:00
+Last updated: 2026-09-14 20:49 +03:00
 
-## Current main
+## Current verified implementation
 
-Latest verified implementation commit: `c9d1a23d361122a1eb5ed3d4c3924aafdb39a1cd` (`feat: make animation content external and validated`).
+Latest verified implementation commit: `4ab7274fbd404ace559283a58806d9dc3aac6887` (`test: gate layered animation runtime behavior`).
 
-Verified stable checkpoints preserved in this substantial pass:
+This state update is documentation-only; use the latest `main` head for the next implementation parent, while `4ab7274f...` is the exact C3 code/workflow commit verified by both CI workflows.
+
+Verified stable checkpoints currently preserved:
 - `checkpoint/stable-nav-fallback-stress-20260914-1952` — A4 Linux/headless 220-agent movement/performance block.
 - `checkpoint/stable-a1-rendered-deformation-20260914-1956` — A1 rendered Skeleton2D/Polygon2D deformation regression.
-- `checkpoint/stable-a3-rig-migrations-20260914-2002` — A3 non-destructive rig migration layer + independent core Python CI.
-- `checkpoint/stable-a5-animation-validation-20260914-2006` — A5 runtime malformed-animation isolation/validation.
-- `checkpoint/stable-b1-external-animation-content-20260914-2011` — first Phase B vertical slice: external validated animation library integrated into runtime package export.
+- `checkpoint/stable-a3-rig-migrations-20260914-2002` — A3 non-destructive rig migration layer.
+- `checkpoint/stable-a5-animation-validation-20260914-2006` — A5 malformed-animation isolation/validation.
+- `checkpoint/stable-b1-external-animation-content-20260914-2011` — B1 external validated animation content.
+- `checkpoint/stable-b2-fixture-content-20260914-2020` — B2 data-driven reusable fixtures/anchors/slots/constraints.
+- `checkpoint/stable-b3-pose-library-20260914-2024` — B3 reusable pose library and authoring services.
+- `checkpoint/stable-c1-motion-library-20260914-2028` — C1 expanded motion library + Godot execution proof.
+- `checkpoint/stable-c2-ik-joint-limits-20260914-2043` — C2 joint-angle-limited IK through the production agent path.
+- `checkpoint/stable-c3-layered-animation-20260914-2048` — C3 masked additive animation layers.
 
-Relevant rollback checkpoints are also preserved, including `checkpoint/pre-nav-fallback-20260914-1948`, `checkpoint/pre-a1-rendered-deformation-20260914-1954`, `checkpoint/pre-a3-rig-migrations-20260914-2000`, `checkpoint/pre-a5-animation-validation-20260914-2003`, and `checkpoint/pre-b1-external-animation-content-20260914-2008`.
+Relevant rollback checkpoints include `checkpoint/pre-b3-pose-library-20260914-2022`, `checkpoint/pre-c1-motion-library-20260914-2025`, `checkpoint/pre-c2-joint-limits-20260914-2029`, and `checkpoint/pre-c3-layered-animation-20260914-2044` in addition to earlier Phase A/B rollback points.
 
-No existing versioned rig/skin/animation format was silently changed. Rig format remains v1 and animation format remains v1.
+No existing versioned rig/skin/animation contract was silently changed. Rig format remains v1 and animation content remains `krolik.animation-library/1`, format v1. C2 constraint angle fields and C3 additive layers are optional runtime capabilities layered on top of existing contracts.
 
-## What changed in this substantial pass
+## Completed foundation / authoring work
 
-### A4 production locomotion/stress failure repaired and verified
-`VaultCharacterAgent` navigation now falls back to its direct target when `NavigationAgent2D` has no usable path/region rather than accepting a near-current waypoint and silently stalling. Navigation targets are synchronized only when the target actually changes. This fixed the real production movement path rather than weakening the benchmark.
+### Phase A — currently unblocked foundation work verified
 
-Godot Runtime CI verified 220/220 live agents moving, 100% crossing the >=8 px threshold, ~99.59 px average travel, ~60 simulated physics FPS over 180 sample frames and ~107-108 MiB maximum RSS, well below the 512 MiB CI budget.
+A1 real GPU deformation is renderer-verified through `VaultSkinnedCharacter` using `Skeleton2D`, `Bone2D`, `Polygon2D`, mesh triangles and bone weights. The Xvfb/llvmpipe regression renders two body proportions and requires real changed pixels. Current repeated metric remains:
+- tall 128x256: 10182 changed pixels;
+- compact 192x192: 13685 changed pixels;
+- total: `23867` changed pixels;
+- four evidence PNGs uploaded on each successful Godot Runtime CI run.
 
-### A1 real rendered deformation proof completed
-Commit `130ef950be42acc59d90cc398146374f2d03492a` added a renderer-level regression for the actual `VaultSkinnedCharacter` path using `Skeleton2D`, `Bone2D`, `Polygon2D`, real mesh triangles and bone weights. It renders two procedural character proportions under Xvfb/llvmpipe, captures baseline/posed PNG frames and requires material pixel differences.
+A2 real local DWPose/RTMPose inference code and DirectML-preferred Windows provider path exist, but real-model accuracy remains dependency-blocked because the repository has no validated `.onnx` model artifact/source. No model bytes were invented or silently substituted.
 
-Verified evidence from Godot Runtime CI:
-- tall 128x256 case: 16810 foreground pixels, 10182 changed pixels (threshold 491);
-- compact 192x192 case: 18788 foreground pixels, 13685 changed pixels (threshold 552);
-- total changed pixels: 23867;
-- four PNG evidence files uploaded by CI.
+A3 explicit non-destructive rig migration infrastructure is verified. It preserves unknown/custom metadata, is idempotent for current v1 records, migrates supported older layouts and refuses unsafe downgrade of newer formats.
 
-### A2 inspected and dependency-blocked, not faked
-`rig_tools.py` already contains the real local DWPose/RTMPose WholeBody ONNX inference path and Windows provider preference including DirectML. `requirements-ai.txt` contains ONNX Runtime dependencies. The repository recursive tree contains no `.onnx` model artifact, therefore real-model accuracy measurement cannot be completed safely yet. No model binary was invented or silently downloaded.
+A4 Linux/headless live-agent performance remains verified with the real brain -> physics -> movement -> animation path. Current C3 run still reports 220/220 active and moved, 100% moved share, ~99.59 px average travel, ~60.11 simulated FPS and ~108 MiB RSS against a 512 MiB budget. Final Windows rendered performance remains unmeasured.
 
-### A3 non-destructive rig migration path completed
-`rig_migrations.py` now provides explicit versioned migration infrastructure independent of the missing legacy editor source. It migrates versionless/pre-v1 records and direct legacy joint maps, handles JSON database rows, preserves unknown/custom future joints/bones/metadata, is idempotent on current v1 records and refuses destructive downgrade of newer formats. Six migration regressions were added. `RIG_FORMAT_VERSION` remains 1 because no v1 semantics were changed.
+A5 `VaultAnimationDriver` rejects malformed clips/keyframes/root/joint values without poisoning valid clips and retains deterministic legacy fallback. The malformed-content harness remains green.
 
-Vault CI was split so source-independent foundation code runs even while `app.py` is unavailable. The repaired core job initially verified 20 tests green.
+### Phase B — source-independent authoring/content pipeline verified
 
-### A5 animation runtime validation completed
-Commit `cea941f7dca655b6cd1f9768646bcbc839df9293` hardened the real Godot `VaultAnimationDriver` without changing animation format v1. It rejects/isolates malformed data clips, validates finite positive duration, keyframe structure, timestamps/range/order, finite joint offsets, root transform values/scales, missing state clip references and invalid blends while retaining the legacy procedural fallback for old packages with no data clips.
+B1 moved animation content out of hardcoded Python into versioned `content/animations/default_v1.json`, added bounded loading/fallback and integrated fresh validated documents into runtime package export. `tools/validate_content.py` gates authored assets in CI.
 
-`animation_validation_harness.gd` executes the real driver against malformed content. Verified metric:
-`KROLIK_ANIMATION_VALIDATION valid_clips=1 errors=6 warnings=3 default=good head_half=(0.1000,-0.0500)`.
+B2 moved reusable fixture behavior into `content/fixtures/default_v1.json`. The catalog supports reusable fixture kinds such as frames/cages/barrels/chain/rope anchors and accessory mounts with named anchors/sockets, slots, render/occlusion data, collision profiles, occupancy/capacity and default constraint targets. `FixtureCatalog` provides cached loading and explicit reload; `interaction_runtime.py` resolves real constraints/targets through the catalog rather than a one-off scene table.
 
-Godot Runtime CI `34872535957` completed SUCCESS. In the same run A1 remained green and A4 remained green: 220/220 moved, moved_share=1.000, avg_travel=99.59 px, sim_fps=60.25, RSS=109676 KiB (~108 MiB).
+B3 added versioned `content/poses/default_v1.json` plus `pose_content.py` authoring services. Poses can be filtered, semantically mirrored left/right, blended onto rigs with strength, converted into the existing animation-v1 clip/state representation, and saved atomically with backup behavior. No runtime schema bump was required.
 
-### Phase B started: external animation content + loader + validator
-Commit `c9d1a23d361122a1eb5ed3d4c3924aafdb39a1cd` moved the default animation library out of Python hardcoded clip definitions into `content/animations/default_v1.json` while preserving the existing animation v1 document semantics.
+The graphical legacy editor UI remains blocked by the missing validated `app.py`; the source-independent authoring/content layer is intentionally usable without guessing those bytes.
 
-Added `animation_content.py` with bounded validation and loading:
-- explicit `krolik.animation-library/1` schema and format v1 validation;
-- limits for file size, clip/state/keyframe/joint counts;
-- finite numeric/root/joint checks and state->clip reference validation;
-- local user override through `KROLIK_ANIMATION_LIBRARY`;
-- invalid override falls back non-destructively to the bundled validated library and reports the reason;
-- fresh deep-copied documents prevent one export/caller from mutating future exports.
+## Phase C motion-quality progress
 
-`runtime_package.build_manifest()` now embeds a fresh validated animation document from the external JSON asset. Existing `DEFAULT_ANIMATION_GRAPH` / `DEFAULT_POSE_CLIPS` import names are retained for compatibility but are populated from the external library rather than being the source of truth.
+### C1 — expanded authored motion library verified
 
-Added `tools/validate_content.py` and wired it into the independent core CI. `tests/test_animation_content.py` proves bundled-library validity, runtime-package integration, independent manifest copies, adding a custom clip/state without runtime code changes, invalid override fallback and malformed-content rejection.
+The external motion library now contains 33 clips rather than the original 7, covering idle variants, locomotion variants, turns/steps/sidesteps, gestures, reactions and environment-specific motion. `motion_quality.py` rejects fake-static authored motions, broken loop continuity, insufficient family coverage and unreasonable offsets.
+
+The Godot end-to-end motion harness copies and loads the actual external JSON and executes every clip through the production `VaultAnimationDriver`. Verified metric:
+`KROLIK_MOTION_RUNTIME clips=33 states=10 samples=132 validation_errors=0 validation_warnings=0`.
+
+### C2 — joint-angle-limited IK verified
+
+`VaultIKSolver` now supports interior angle limits in addition to reach/stretch limits. Default elbow/knee bounds prevent pathological straight locking/folding, optional user-authored `min_joint_deg`, `max_joint_deg`, and `max_stretch` flow through `interaction_runtime.py` into `VaultCharacterAgent`, and fractional constraint strength preserves segment lengths rather than lerping solved bone positions into stretched geometry.
+
+`ik_limit_harness.gd` exercises both the low-level solver and the real CharacterAgent animation -> interaction IK path. The harness also frees its test-only agent cleanly before exit. Verified metric:
+`KROLIK_IK_LIMITS far=150.000 close=25.000 custom=125.000 agent=118.000 default=175.000`.
+
+### C3 — masked additive/layered animation verified
+
+`VaultAnimationDriver` now supports runtime additive layers without changing animation-v1 content format:
+- independent clip/phase/playback speed per layer;
+- weight 0..1;
+- optional joint masks, suitable for upper-body gestures over locomotion;
+- separate `root_weight` so overlays do not disturb locomotion root unless explicitly requested;
+- deterministic sorted layer application;
+- invalid layer clips are rejected non-destructively;
+- base cross-fade source is captured before overlays, preventing the active overlay from being baked and applied twice when the base animation changes.
+
+`layered_animation_harness.gd` verifies masking, weighted joint addition, root isolation/weighting, active-layer weight updates, invalid clip rejection without mutation, independent layer phase/speed, base-animation switching without double application, and clear-to-base behavior.
+
+Verified metric:
+`KROLIK_LAYERED_ANIMATION base_wrist=(0.1, 0.0) masked_wrist=(0.3, 0.1) masked_ankle=(0.2, 0.0) rooted_y=2.000 switched_wrist=(0.0, 0.05) layers=0`.
 
 ## Tests/checks actually run
 
-No local Python or Godot executable was available through this connector-only environment, so no local test execution is claimed.
+No local Python or Godot execution is claimed; this pass used the connected private GitHub repository and verified execution through GitHub Actions.
 
-Verified through GitHub Actions:
-- Godot Runtime CI `34872535957` for A5 commit `cea941f7dca655b6cd1f9768646bcbc839df9293`: SUCCESS; animation validation PASS; rendered deformation PASS; 220-agent stress PASS; deformation evidence uploaded.
-- Vault CI `34872535923` for the same A5 commit: SUCCESS.
-- Vault CI `34872999767` for Phase B commit `c9d1a23d361122a1eb5ed3d4c3924aafdb39a1cd`: SUCCESS; source-integrity PASS; core syntax PASS; content validator PASS (`files=1 failed=0`); core regression suite PASS with `26 passed`; backend/UI SKIPPED because validated `app.py` remains absent.
-- Godot Runtime CI `34872999503` for the same Phase B commit: SUCCESS; project import PASS; headless runtime smoke PASS; A5 animation validation PASS; A1 rendered deformation PASS; evidence upload PASS; A4 220-agent stress PASS.
+Latest coherent C3 verification for commit `4ab7274fbd404ace559283a58806d9dc3aac6887`:
+- Vault CI `34876857206`: SUCCESS.
+  - source-integrity: PASS;
+  - core Python syntax: PASS;
+  - content validation: PASS (`files=3 failed=0` for animations, fixtures, poses);
+  - core regression suite: PASS, `44 passed`;
+  - backend/UI: SKIPPED because validated `app.py` is still absent.
+- Godot Runtime CI `34876857171`: SUCCESS.
+  - verified Godot 4.7.2 download/hash: PASS;
+  - project parse/import: PASS;
+  - headless runtime smoke: PASS;
+  - malformed animation validation regression: PASS;
+  - authored 33-clip motion runtime regression: PASS;
+  - C3 layered animation regression: PASS;
+  - C2 IK joint limit regression: PASS;
+  - rendered Skeleton2D/Polygon2D deformation: PASS, total changed pixels `23867`;
+  - deformation evidence artifact upload: PASS;
+  - 220 live-agent stress: PASS, 220/220 moved, moved_share=1.000, sim_fps=60.11, avg_travel=99.59 px, max RSS `110412 KiB` (~108 MiB), process status 0.
 
-## Still unverified / incomplete
+C2 clean verification immediately before C3:
+- Vault CI `34876363130`: SUCCESS.
+- Godot Runtime CI `34876363134`: SUCCESS with `KROLIK_IK_LIMITS far=150.000 close=25.000 custom=125.000 agent=118.000 default=175.000`; no test-only RID/ObjectDB leak warnings after harness cleanup.
 
-- A2 real DWPose/RTMPose model accuracy remains blocked by absence of a validated ONNX model artifact/source.
-- A4 rendered Windows FPS/CPU/memory remains unmeasured. Linux/headless 220-agent performance is verified but is not a substitute for the final Windows rendered target.
-- Validated legacy Python/editor `app.py` is still unavailable, so backend/UI/scale tests and direct integration into the old professional editor UI cannot be executed without guessing missing source bytes.
-- `KROLIK_MASTER_PLAN.md` is still absent. Continue using the priority/phase order in `docs/AUTONOMOUS_RUNBOOK.md` rather than inventing missing roadmap text.
+C1 final end-to-end verification:
+- Godot Runtime CI `34874875805`: SUCCESS; all 33 external clips/10 states/132 samples executed through Godot, A1/A4 regressions remained green.
+- Vault CI `34874875885`: SUCCESS.
+
+B3 Vault CI `34874058867`: SUCCESS; content validation included animations/fixtures/poses and the then-current core suite passed.
+B2 Vault CI `34873673376`: SUCCESS; fixture content validation and regressions passed.
+
+## Still blocked / unverified
+
+- A2 real DWPose/RTMPose accuracy is blocked by absence of a validated ONNX model artifact/source.
+- Final rendered Windows FPS/CPU/memory at the intended 200–500 character scale remains unmeasured. Linux/headless 220-agent performance is verified but is not a substitute.
+- Validated legacy Python/editor `app.py` is still unavailable. Do not reconstruct or guess corrupted/missing source bytes. Backend/UI/scale jobs correctly remain skipped while source integrity is absent.
+- `KROLIK_MASTER_PLAN.md` is still absent from repository search as of this update. Continue following `docs/AUTONOMOUS_RUNBOOK.md`; do not invent roadmap text.
+- Graphical pose/animation authoring integration into the legacy editor remains blocked on `app.py`, although the independent data/services layer is functional and CI-gated.
 
 ## Phase status
 
-Phase A foundation is complete for all currently unblocked Linux/connector-verifiable work:
-- A1: verified;
-- A2: blocked on external validated ONNX model artifact;
-- A3: verified;
-- A4: Linux/headless verified; Windows rendered measurement remains;
-- A5: verified.
+Phase A:
+- A1 verified;
+- A2 blocked on validated ONNX artifact;
+- A3 verified;
+- A4 Linux/headless verified; Windows rendered measurement remains;
+- A5 verified.
 
-Phase B has started. External animation JSON + auto-loader and the first content-validator path are verified.
+Phase B:
+- B1 external animation content/loader/validator verified;
+- B2 reusable fixture/anchor/constraint content + reloadable catalog verified;
+- B3 reusable pose library + source-independent authoring services verified;
+- legacy graphical authoring UI integration blocked on validated `app.py`.
+
+Phase C:
+- C1 33-clip authored motion library + quality gates verified;
+- C2 joint-angle-limited interaction IK verified;
+- C3 masked additive/layered animation verified;
+- next unblocked item is C4 production secondary/spring motion integration.
 
 ## Next highest-priority unblocked task
 
-Continue Phase B with the general-purpose props/fixtures/interaction content layer while the legacy UI source and ONNX model remain blocked:
-1. Inventory current prop/fixture/anchor/constraint code and preserve existing contracts.
-2. Move reusable prop/fixture presets into versioned validated JSON rather than hardcoded runtime definitions.
-3. Define named sockets/anchors, render/occlusion layer, collision profile, occupancy/capacity and supported constraint targets as data, not one-off scenes.
-4. Add safe loader/cache + explicit reload path suitable for future editor hot reload.
-5. Extend `tools/validate_content.py` and source-independent CI regressions for these assets.
-6. Prove at least one exported/runtime interaction uses the data asset rather than merely checking file/string existence.
+C4 should integrate the existing `VaultSecondaryMotion` solver into the actual production character pipeline rather than writing a duplicate spring module.
 
-After that, continue Phase B with reusable pose-library assets and authoring services; the graphical animation/pose authoring UI remains dependent on recovery of the validated editor source unless a clean independent authoring surface is intentionally introduced later.
+Required vertical slice:
+1. Inspect runtime manifest/physics data already exported for secondary channels and preserve existing formats.
+2. Give `VaultCharacterAgent` a `VaultSecondaryMotion` instance and configure/reset it from existing manifest secondary-motion data when present.
+3. Apply secondary joint offsets after sampled base + additive animation and before interaction IK, so IK remains authoritative for constrained wrists/ankles while unconstrained hair/head/shoulders/hips/accessory channels retain inertial lag.
+4. Keep the feature zero-cost or near-zero when no secondary channels are configured; do not force spring work across all 200–500 agents.
+5. Add a deterministic Godot runtime harness proving acceleration produces lag, offsets stay bounded, damping returns toward rest, and the production CharacterAgent path applies secondary motion before IK without breaking C2 limits.
+6. Add the harness as a required Godot Runtime CI step and rerun the complete C1/C2/C3/A1/A4 suite.
+7. Only after green CI create a stable C4 checkpoint and update this state again with exact final SHA/run IDs.
