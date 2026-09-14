@@ -3,7 +3,7 @@ from __future__ import annotations
 """Durable, non-destructive validation for reusable runtime character packages.
 
 A runtime package is intentionally kept separate from the immutable import
-receipt and the existing krolik.runtime-character/1 manifest.  This module adds
+receipt and the existing krolik.runtime-character/1 manifest. This module adds
 a sidecar integrity contract that links those existing artifacts without
 silently changing either versioned schema.
 """
@@ -100,7 +100,10 @@ def build_runtime_package_receipt(
     if len(visual_sha) != 64 or visual_sha != image_sha:
         raise RuntimePackageIntegrityError("runtime image hash does not match manifest visual.sha256")
 
-    import_report = validate_import_receipt(import_receipt)
+    try:
+        import_report = validate_import_receipt(import_receipt)
+    except ImportIntegrityError as exc:
+        raise RuntimePackageIntegrityError(str(exc)) from exc
     if str(import_report.get("character_id") or "") != character_id:
         raise RuntimePackageIntegrityError("runtime/import character id mismatch")
 
@@ -116,10 +119,7 @@ def build_runtime_package_receipt(
             raise RuntimePackageIntegrityError("rig edit/import source hash mismatch")
         if str(edit_doc.get("cutout_sha256") or "") != str(import_report.get("cutout_sha256") or ""):
             raise RuntimePackageIntegrityError("rig edit/import cutout hash mismatch")
-        rig_edit = {
-            "path": str(edit_path),
-            "sha256": digest_file(edit_path),
-        }
+        rig_edit = {"path": str(edit_path), "sha256": digest_file(edit_path)}
 
     return {
         "schema": RUNTIME_PACKAGE_RECEIPT_SCHEMA,
@@ -250,3 +250,25 @@ def validate_runtime_package_receipt(receipt_path: str | Path) -> dict[str, Any]
         "cutout_sha256": str(import_report["cutout_sha256"]),
         "rig_edit_verified": rig_edit is not None,
     }
+
+
+def seal_built_runtime_package(result: dict[str, Any]) -> dict[str, Any]:
+    """Create and immediately verify a durable sidecar for a build result."""
+    if not isinstance(result, dict):
+        raise RuntimePackageIntegrityError("build result must be a dictionary")
+    manifest = _require_file(result.get("manifest"), "runtime manifest").resolve()
+    image = _require_file(result.get("image"), "runtime image").resolve()
+    import_receipt = _require_file(result.get("receipt"), "import receipt").resolve()
+    folder = manifest.parent
+    document = build_runtime_package_receipt(
+        package_folder=folder,
+        manifest_path=manifest,
+        image_path=image,
+        import_receipt_path=import_receipt,
+        rig_edit_path=result.get("rig_edit") or None,
+    )
+    receipt_path = folder / "package_receipt.json"
+    write_runtime_package_receipt(document, receipt_path)
+    report = validate_runtime_package_receipt(receipt_path)
+    report["package_receipt"] = str(receipt_path)
+    return report
