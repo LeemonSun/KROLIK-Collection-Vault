@@ -77,6 +77,13 @@ jobs:
           trap 'rm -f runtime_godot/.ci_motion_library.json' EXIT
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/motion_library_harness.gd
 
+      - name: IK joint angle limit regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/ik_limit_harness.gd
+
       - name: Rendered Skeleton2D Polygon2D deformation regression
         shell: bash
         env:
