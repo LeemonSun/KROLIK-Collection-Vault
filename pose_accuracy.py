@@ -1,0 +1,165 @@
+from __future__ import annotations
+
+"""Metrics and corpus contract for measuring KROLIK auto-rig accuracy.
+
+A2 is not considered complete just because a pose model runs.  This module
+provides the small, backend-independent scoring layer needed to compare detected
+normalized KROLIK joints against manually reviewed ground truth.
+"""
+
+from dataclasses import dataclass
+from math import hypot
+from pathlib import Path
+from typing import Any
+import json
+
+from rig_tools import JOINT_ORDER, detect_rig
+
+POSE_ACCURACY_SCHEMA = "krolik.pose-accuracy-corpus/1"
+POSE_ACCURACY_FORMAT_VERSION = 1
+
+
+class PoseAccuracyError(ValueError):
+    pass
+
+
+@dataclass(frozen=True)
+class PoseAccuracySummary:
+    samples: int
+    joints: int
+    mean_error: float
+    median_error: float
+    pck_05: float
+    pck_10: float
+    backend_counts: dict[str, int]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "samples": self.samples,
+            "joints": self.joints,
+            "mean_error": self.mean_error,
+            "median_error": self.median_error,
+            "pck_05": self.pck_05,
+            "pck_10": self.pck_10,
+            "backend_counts": dict(self.backend_counts),
+        }
+
+
+def _point(value: Any, label: str) -> tuple[float, float]:
+    if not isinstance(value, dict):
+        raise PoseAccuracyError(f"{label} must be an object")
+    try:
+        x = float(value["x"])
+        y = float(value["y"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise PoseAccuracyError(f"{label} must contain numeric x/y") from exc
+    if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
+        raise PoseAccuracyError(f"{label} must be normalized to [0,1]")
+    return x, y
+
+
+def score_joint_sets(
+    predicted: dict[str, Any],
+    expected: dict[str, Any],
+    *,
+    visible: list[str] | None = None,
+) -> list[float]:
+    names = visible if visible is not None else [name for name in JOINT_ORDER if name in expected]
+    if not names:
+        raise PoseAccuracyError("sample contains no visible ground-truth joints")
+    errors: list[float] = []
+    for name in names:
+        if name not in JOINT_ORDER:
+            raise PoseAccuracyError(f"unknown KROLIK joint: {name}")
+        if name not in expected:
+            raise PoseAccuracyError(f"visible joint missing from ground truth: {name}")
+        if name not in predicted:
+            raise PoseAccuracyError(f"predicted rig missing joint: {name}")
+        px, py = _point(predicted[name], f"predicted.{name}")
+        ex, ey = _point(expected[name], f"expected.{name}")
+        errors.append(hypot(px - ex, py - ey))
+    return errors
+
+
+def summarize_errors(
+    sample_errors: list[list[float]],
+    backend_names: list[str] | None = None,
+) -> PoseAccuracySummary:
+    if not sample_errors:
+        raise PoseAccuracyError("accuracy corpus produced no samples")
+    flat = [value for group in sample_errors for value in group]
+    if not flat:
+        raise PoseAccuracyError("accuracy corpus produced no scored joints")
+    ordered = sorted(flat)
+    count = len(ordered)
+    middle = count // 2
+    median = ordered[middle] if count % 2 else (ordered[middle - 1] + ordered[middle]) / 2.0
+    backends: dict[str, int] = {}
+    for name in backend_names or []:
+        backends[name] = backends.get(name, 0) + 1
+    return PoseAccuracySummary(
+        samples=len(sample_errors),
+        joints=count,
+        mean_error=round(sum(flat) / count, 6),
+        median_error=round(median, 6),
+        pck_05=round(sum(value <= 0.05 for value in flat) / count, 6),
+        pck_10=round(sum(value <= 0.10 for value in flat) / count, 6),
+        backend_counts=backends,
+    )
+
+
+def load_corpus(path: str | Path) -> dict[str, Any]:
+    source = Path(path)
+    try:
+        doc = json.loads(source.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise PoseAccuracyError(f"unable to read pose corpus: {exc}") from exc
+    if not isinstance(doc, dict):
+        raise PoseAccuracyError("pose corpus must be a JSON object")
+    if doc.get("schema") != POSE_ACCURACY_SCHEMA or int(doc.get("format_version", 0)) != POSE_ACCURACY_FORMAT_VERSION:
+        raise PoseAccuracyError("unsupported pose accuracy corpus schema/version")
+    samples = doc.get("samples")
+    if not isinstance(samples, list) or not samples:
+        raise PoseAccuracyError("pose corpus samples must be a non-empty array")
+    return doc
+
+
+def evaluate_corpus(
+    corpus_path: str | Path,
+    *,
+    required_backend: str | None = None,
+) -> PoseAccuracySummary:
+    corpus_file = Path(corpus_path).resolve()
+    doc = load_corpus(corpus_file)
+    all_errors: list[list[float]] = []
+    backends: list[str] = []
+
+    for index, sample in enumerate(doc["samples"]):
+        if not isinstance(sample, dict):
+            raise PoseAccuracyError(f"samples[{index}] must be an object")
+        image_value = str(sample.get("image") or "")
+        if not image_value:
+            raise PoseAccuracyError(f"samples[{index}] missing image")
+        image = (corpus_file.parent / image_value).resolve()
+        if not image.is_file():
+            raise PoseAccuracyError(f"samples[{index}] image missing: {image}")
+        expected = sample.get("joints")
+        if not isinstance(expected, dict):
+            raise PoseAccuracyError(f"samples[{index}] joints must be an object")
+        visible_raw = sample.get("visible")
+        visible = None
+        if visible_raw is not None:
+            if not isinstance(visible_raw, list) or not all(isinstance(v, str) for v in visible_raw):
+                raise PoseAccuracyError(f"samples[{index}] visible must be an array of joint names")
+            visible = list(visible_raw)
+
+        detection = detect_rig(image, prefer_ai=True)
+        backend = str(detection.settings.get("backend") or "unknown")
+        if required_backend and backend != required_backend:
+            raise PoseAccuracyError(
+                f"samples[{index}] required backend {required_backend!r}, got {backend!r}"
+            )
+        all_errors.append(score_joint_sets(detection.joints, expected, visible=visible))
+        backends.append(backend)
+
+    return summarize_errors(all_errors, backends)
