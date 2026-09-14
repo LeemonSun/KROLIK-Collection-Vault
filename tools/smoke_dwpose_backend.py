@@ -3,9 +3,10 @@ from __future__ import annotations
 """Exercise the real rig_tools.detect_rig DWPose path on a supplied image."""
 
 import argparse
+import json
 from pathlib import Path
 
-from rig_tools import JOINT_ORDER, capabilities, detect_rig
+from rig_tools import JOINT_ORDER, capabilities, detect_rig, dwpose_diagnostics
 
 
 def main() -> int:
@@ -23,6 +24,9 @@ def main() -> int:
     if not caps.get("dwpose"):
         print(f"KROLIK_DWPOSE_BACKEND status=failed error=dwpose_capability_unavailable caps={caps}")
         return 3
+
+    diagnostics = dwpose_diagnostics(image)
+    print("KROLIK_DWPOSE_DIAGNOSTICS " + json.dumps(diagnostics, sort_keys=True, separators=(",", ":")))
 
     detection = detect_rig(image, prefer_ai=True)
     backend = str(detection.settings.get("backend") or "")
