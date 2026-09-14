@@ -180,7 +180,7 @@ func choose_state(context: Dictionary = {}) -> String:
         scores["wander"] = -1.0
         scores["inspect"] = -1.0
     if energy > maxf(rest_threshold + float(gates.get("rest_energy_margin", 0.20)), float(gates.get("rest_energy_floor", 0.50))):
-        scores["rest"] = float(scores["rest"]) * 0.35
+        scores["rest"] = float(scores["rest"]) * float(gates.get("rest_ready_multiplier", 0.35))
     last_utility = scores.duplicate(true)
 
     var order = _policy.get("state_order", ["return_home", "rest", "social", "inspect", "wander", "idle"])
@@ -210,7 +210,6 @@ func step(delta: float, context_value: Variant = {}) -> String:
         context = {"bound": true, "interaction_mode": "contained"}
     var minute := clampf(delta, 0.0, 300.0) / 60.0
     state = choose_state(context)
-    var rates := _section("need_rates_per_minute")
     match state:
         "rest":
             _apply_rate(_subsection("need_rates_per_minute", "rest"), minute)
