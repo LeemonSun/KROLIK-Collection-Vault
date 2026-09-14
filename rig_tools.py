@@ -315,48 +315,61 @@ def _dwpose_keypoints_to_rig(points, scores, width: int, height: int, min_conf: 
     })
 
 
-def _dwpose_onnx_rig(path: str | Path) -> RigDetection | None:
-    """Run a local DWPose/RTMPose WholeBody ONNX model using the cutout bbox."""
+def _dwpose_third_point(a, b):
+    direction = a - b
+    return b + np.asarray([-direction[1], direction[0]], dtype=np.float32)
+
+
+def _dwpose_affine_preprocess(image_bgr, bbox, in_w: int, in_h: int):
+    """Match the official DWPose ONNX bbox->affine preprocessing path."""
+    x0, y0, x1, y1 = [float(v) for v in bbox]
+    center = np.asarray([(x0 + x1) * .5, (y0 + y1) * .5], dtype=np.float32)
+    scale = np.asarray([max(2.0, x1 - x0), max(2.0, y1 - y0)], dtype=np.float32) * 1.25
+    aspect = float(in_w) / float(in_h)
+    if float(scale[0]) > float(scale[1]) * aspect:
+        scale[1] = scale[0] / aspect
+    else:
+        scale[0] = scale[1] * aspect
+
+    src_dir = np.asarray([0.0, float(scale[0]) * -0.5], dtype=np.float32)
+    dst_dir = np.asarray([0.0, float(in_w) * -0.5], dtype=np.float32)
+    src = np.zeros((3, 2), dtype=np.float32)
+    dst = np.zeros((3, 2), dtype=np.float32)
+    src[0] = center
+    src[1] = center + src_dir
+    src[2] = _dwpose_third_point(src[0], src[1])
+    dst[0] = [float(in_w) * .5, float(in_h) * .5]
+    dst[1] = dst[0] + dst_dir
+    dst[2] = _dwpose_third_point(dst[0], dst[1])
+    matrix = cv2.getAffineTransform(src, dst)
+    warped = cv2.warpAffine(image_bgr, matrix, (int(in_w), int(in_h)), flags=cv2.INTER_LINEAR)
+    mean = np.asarray([123.675, 116.28, 103.53], dtype=np.float32)
+    std = np.asarray([58.395, 57.12, 57.375], dtype=np.float32)
+    normalized = (warped.astype(np.float32) - mean) / std
+    tensor = normalized.transpose(2, 0, 1)[None, ...].astype(np.float32)
+    return tensor, center, scale
+
+
+def _dwpose_infer_points(path: str | Path):
+    """Return raw DWPose points/scores plus diagnostics before KROLIK filtering."""
     model = find_dwpose_model()
     if model is None or ort is None or cv2 is None or np is None:
         return None
     im = _load(path)
-    rgb = np.asarray(im.convert("RGB"), dtype=np.uint8)
+    # Official DWPose ONNX example reads images with cv2.imread (B,G,R order).
+    image_bgr = np.asarray(im.convert("RGB"), dtype=np.uint8)[:, :, ::-1].copy()
     mask = _alpha_mask(im)
     x0, y0, x1, y1 = _bbox(mask)
-    src_h, src_w = rgb.shape[:2]
+    src_h, src_w = image_bgr.shape[:2]
     try:
         session = ort.InferenceSession(str(model), providers=_dwpose_provider_list())
         inp = session.get_inputs()[0]
         shape = inp.shape
         in_h = int(shape[2]) if isinstance(shape[2], int) else 384
         in_w = int(shape[3]) if isinstance(shape[3], int) else 288
-    except Exception:
-        return None
-
-    bw = max(2.0, float(x1 - x0 + 1))
-    bh = max(2.0, float(y1 - y0 + 1))
-    cx = (x0 + x1) * .5
-    cy = (y0 + y1) * .5
-    target_aspect = in_w / float(in_h)
-    if bw / bh > target_aspect:
-        bh = bw / target_aspect
-    else:
-        bw = bh * target_aspect
-    bw *= 1.18
-    bh *= 1.18
-    left, top = cx - bw*.5, cy - bh*.5
-    right, bottom = cx + bw*.5, cy + bh*.5
-    ix0, iy0 = int(max(0, round(left))), int(max(0, round(top)))
-    ix1, iy1 = int(min(src_w, round(right))), int(min(src_h, round(bottom)))
-    crop = rgb[iy0:iy1, ix0:ix1]
-    if crop.size == 0:
-        return None
-    resized = cv2.resize(crop, (in_w, in_h), interpolation=cv2.INTER_LINEAR).astype(np.float32)
-    mean = np.array([123.675, 116.28, 103.53], dtype=np.float32)
-    std = np.array([58.395, 57.12, 57.375], dtype=np.float32)
-    tensor = ((resized - mean) / std).transpose(2, 0, 1)[None, ...].astype(np.float32)
-    try:
+        tensor, center, scale = _dwpose_affine_preprocess(
+            image_bgr, (x0, y0, x1, y1), in_w, in_h
+        )
         outputs = session.run(None, {inp.name: tensor})
     except Exception:
         return None
@@ -366,15 +379,58 @@ def _dwpose_onnx_rig(path: str | Path) -> RigDetection | None:
     simcc_y = np.asarray(outputs[1])
     if simcc_x.ndim != 3 or simcc_y.ndim != 3:
         return None
+
     xs = np.argmax(simcc_x, axis=2).astype(np.float32) / 2.0
     ys = np.argmax(simcc_y, axis=2).astype(np.float32) / 2.0
     sx = np.max(simcc_x, axis=2)
     sy = np.max(simcc_y, axis=2)
     score = np.minimum(sx, sy)[0]
     points = np.stack([xs[0], ys[0]], axis=1)
-    points[:, 0] = points[:, 0] / max(1.0, float(in_w)) * max(1, ix1 - ix0) + ix0
-    points[:, 1] = points[:, 1] / max(1.0, float(in_h)) * max(1, iy1 - iy0) + iy0
-    return _dwpose_keypoints_to_rig(points, score, src_w, src_h)
+    points = points / np.asarray([float(in_w), float(in_h)], dtype=np.float32)
+    points = points * scale[None, :] + center[None, :] - scale[None, :] * .5
+
+    required = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    core_scores = [float(score[index]) for index in required if index < score.shape[0]]
+    diagnostics = {
+        "model": str(model),
+        "source_size": [int(src_w), int(src_h)],
+        "bbox": [int(x0), int(y0), int(x1), int(y1)],
+        "input_size": [int(in_w), int(in_h)],
+        "center": [round(float(center[0]), 4), round(float(center[1]), 4)],
+        "scale": [round(float(scale[0]), 4), round(float(scale[1]), 4)],
+        "output_x_shape": [int(v) for v in simcc_x.shape],
+        "output_y_shape": [int(v) for v in simcc_y.shape],
+        "score_min": round(float(np.min(score)), 6),
+        "score_max": round(float(np.max(score)), 6),
+        "score_mean": round(float(np.mean(score)), 6),
+        "core_scores": [round(value, 6) for value in core_scores],
+        "core_above_018": sum(value >= .18 for value in core_scores),
+        "providers": list(session.get_providers()),
+    }
+    return points, score, diagnostics
+
+
+def dwpose_diagnostics(path: str | Path) -> dict[str, Any]:
+    result = _dwpose_infer_points(path)
+    if result is None:
+        return {"status": "unavailable_or_inference_failed"}
+    points, scores, diagnostics = result
+    mapped = _dwpose_keypoints_to_rig(points, scores, diagnostics["source_size"][0], diagnostics["source_size"][1])
+    return {
+        **diagnostics,
+        "status": "ok" if mapped is not None else "insufficient_core_confidence",
+        "mapped": mapped is not None,
+    }
+
+
+def _dwpose_onnx_rig(path: str | Path) -> RigDetection | None:
+    """Run local DWPose using KROLIK's single-character cutout bbox."""
+    result = _dwpose_infer_points(path)
+    if result is None:
+        return None
+    points, score, diagnostics = result
+    src_w, src_h = diagnostics["source_size"]
+    return _dwpose_keypoints_to_rig(points, score, int(src_w), int(src_h))
 
 
 def detect_rig(path: str | Path, prefer_ai: bool = True) -> RigDetection:
