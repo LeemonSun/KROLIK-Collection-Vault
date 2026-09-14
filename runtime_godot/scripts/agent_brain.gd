@@ -459,8 +459,8 @@ func memory_snapshot() -> Array:
             out.append(entry)
     return out
 
-func learn_affinity(kind: String, subject: String, signal: float) -> bool:
-    return affinity_state.learn(kind, subject, signal)
+func learn_affinity(kind: String, subject: String, affinity_signal: float) -> bool:
+    return affinity_state.learn(kind, subject, affinity_signal)
 
 func decay_affinities(elapsed_hours: float) -> void:
     affinity_state.decay(elapsed_hours)
@@ -537,7 +537,7 @@ func activity_scores(context: Dictionary = {}) -> Dictionary:
     var social_bonus := float(bonus.get("social", 0.18)) if routine == "social" else 0.0
     var home_bonus := float(bonus.get("homebody", 0.20)) if routine == "homebody" else 0.0
     var focused_bias := _focused_memory_bias(context)
-    var affinity_bias := affinity_state.utility_bias(context)
+    var affinity_bias: Dictionary = affinity_state.utility_bias(context)
     return {
         "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)) + _trait_bias_idle + _combined_memory_bias("idle", focused_bias) + float(affinity_bias.get("idle", 0.0)),
         "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus + _trait_bias_wander + _combined_memory_bias("wander", focused_bias) + float(affinity_bias.get("wander", 0.0)),
