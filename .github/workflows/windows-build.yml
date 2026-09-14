@@ -12,9 +12,11 @@ on:
       - 'animation_content.py'
       - 'content/animations/**'
       - 'tools/build_core_vertical_slice.py'
+      - 'tools/build_import_qa_matrix.py'
       - 'tools/import_character_package.py'
       - 'tests/test_character_import.py'
       - 'tests/test_character_import_modes.py'
+      - 'tests/test_import_qa_matrix.py'
       - 'tests/test_core_vertical_slice.py'
       - 'tests/test_runtime_skinning.py'
       - '.github/workflows/windows-build.yml'
@@ -39,14 +41,20 @@ jobs:
       - name: Core import syntax and regressions
         shell: pwsh
         run: |
-          python -m py_compile character_import.py runtime_package.py rig_tools.py tools/build_core_vertical_slice.py tools/import_character_package.py
-          pytest -q tests/test_character_import.py tests/test_character_import_modes.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
+          python -m py_compile character_import.py runtime_package.py rig_tools.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py
+          pytest -q tests/test_character_import.py tests/test_character_import_modes.py tests/test_import_qa_matrix.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
       - name: Build ordinary-image runtime package on Windows
         shell: pwsh
         run: |
           $slice = Join-Path $env:RUNNER_TEMP 'krolik-core-slice'
           python tools/build_core_vertical_slice.py --output-root $slice
           if (-not (Test-Path (Join-Path $slice 'exports/runtime/ci_core_slice/manifest.json'))) { throw 'Windows vertical-slice manifest missing' }
+      - name: Build diverse import QA matrix on Windows
+        shell: pwsh
+        run: |
+          $matrix = Join-Path $env:RUNNER_TEMP 'krolik-import-matrix'
+          python tools/build_import_qa_matrix.py --output-root $matrix
+          if (-not (Test-Path (Join-Path $matrix 'matrix.json'))) { throw 'Windows import QA matrix missing' }
       - name: Build one-file headless import CLI
         shell: pwsh
         run: |
