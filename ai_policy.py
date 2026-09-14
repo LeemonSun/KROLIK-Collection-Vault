@@ -130,6 +130,23 @@ def validate_ai_policy_document(document: Any) -> list[str]:
                 if state_name not in UTILITY_STATES or not _finite(coefficient):
                     errors.append(f"short_term_memory.effects.{kind} contains invalid state/coefficient")
 
+    affinity = document.get("long_term_affinity")
+    if not isinstance(affinity, dict):
+        errors.append("long_term_affinity must be an object")
+        affinity = {}
+    for key, ceiling in (("character_capacity", 128), ("place_capacity", 64), ("max_subject_length", 256)):
+        if not _positive_int(affinity.get(key)) or int(affinity.get(key, 0)) > ceiling:
+            errors.append(f"long_term_affinity.{key} must be an integer in [1,{ceiling}]")
+    for key in ("learning_rate", "familiarity_gain", "decay_per_hour", "familiarity_decay_per_hour", "drop_epsilon", "max_abs_state_bias", "character_social_weight", "place_wander_weight", "place_inspect_weight", "home_return_weight"):
+        if not _finite(affinity.get(key)) or float(affinity.get(key, -1.0)) < 0.0:
+            errors.append(f"long_term_affinity.{key} must be finite and >= 0")
+    if _finite(affinity.get("drop_epsilon")) and float(affinity["drop_epsilon"]) > 1.0:
+        errors.append("long_term_affinity.drop_epsilon must be <= 1")
+    if _finite(affinity.get("max_abs_state_bias")) and float(affinity["max_abs_state_bias"]) > 1.0:
+        errors.append("long_term_affinity.max_abs_state_bias must be <= 1")
+    if not _finite(affinity.get("favorite_min_affinity")) or not -1.0 <= float(affinity.get("favorite_min_affinity", 2.0)) <= 1.0:
+        errors.append("long_term_affinity.favorite_min_affinity must be finite in [-1,1]")
+
     rates = document.get("need_rates_per_minute")
     if not isinstance(rates, dict): errors.append("need_rates_per_minute must be an object"); rates = {}
     for section in ("rest", "contained", "active", "inspect_override", "social_override", "idle"):
