@@ -106,6 +106,28 @@ jobs:
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 45s "$GODOT" --headless --path runtime_godot --script res://scripts/core_vertical_slice_harness.gd
+      - name: Render imported production character deformation evidence
+        shell: bash
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          command -v xvfb-run >/dev/null || { echo 'xvfb-run is required for imported-character render regression' >&2; exit 1; }
+          rm -rf runtime_godot/imported_character_artifacts
+          timeout 90s xvfb-run -a -s '-screen 0 1280x900x24' \
+            "$GODOT" --path runtime_godot --rendering-method gl_compatibility --audio-driver Dummy \
+            --script res://scripts/imported_character_render_harness.gd
+          test -s runtime_godot/imported_character_artifacts/imported_baseline.png
+          test -s runtime_godot/imported_character_artifacts/imported_posed.png
+      - name: Upload rendered imported-character evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: imported-character-render-evidence
+          path: runtime_godot/imported_character_artifacts/*.png
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload real-image import evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -121,7 +143,9 @@ jobs:
       - name: Cleanup vertical slice workspace
         if: always()
         shell: bash
-        run: rm -rf runtime_godot/.ci_vertical_slice
+        run: |
+          rm -rf runtime_godot/.ci_vertical_slice
+          rm -rf runtime_godot/imported_character_artifacts
       - name: Build multi-format import QA matrix
         shell: bash
         run: |
