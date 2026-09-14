@@ -52,3 +52,10 @@ jobs:
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
+
+      - name: 220 live-agent stress smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 45s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd
