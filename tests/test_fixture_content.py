@@ -94,6 +94,39 @@ def test_runtime_interaction_uses_fixture_anchor_data_for_targets():
     assert targets["right_ankle"] == pytest.approx({"x": 0.7, "y": 0.9})
 
 
+def test_runtime_interaction_preserves_and_normalizes_joint_angle_limits():
+    prop = {"id": 7, "kind": "x_frame", "x": 0.5, "y": 0.5, "w": 0.4, "h": 0.8, "rotation": 0.0}
+    authored = {
+        "joint": "left_wrist",
+        "prop_id": 7,
+        "anchor": "top_left",
+        "strength": 0.75,
+        "max_stretch": 1.05,
+        "min_joint_deg": 35.0,
+        "max_joint_deg": 120.0,
+    }
+    result = runtime_interaction(
+        placement_interaction={"mode": "anchored"},
+        constraint_doc={"items": [authored]},
+        props=[prop],
+    )
+    resolved = result["constraints"][0]
+    assert resolved["min_joint_deg"] == pytest.approx(35.0)
+    assert resolved["max_joint_deg"] == pytest.approx(120.0)
+    assert resolved["max_stretch"] == pytest.approx(1.05)
+
+    malformed = dict(authored, min_joint_deg=200.0, max_joint_deg=-5.0, max_stretch=float("nan"))
+    result = runtime_interaction(
+        placement_interaction={"mode": "anchored"},
+        constraint_doc={"items": [malformed]},
+        props=[prop],
+    )
+    resolved = result["constraints"][0]
+    assert resolved["min_joint_deg"] == pytest.approx(179.9)
+    assert resolved["max_joint_deg"] == pytest.approx(179.91)
+    assert resolved["max_stretch"] == pytest.approx(1.0)
+
+
 def test_custom_fixture_json_drives_runtime_without_code_change(tmp_path):
     path = tmp_path / "fixtures.json"
     path.write_text(json.dumps(_custom_document()), encoding="utf-8")
