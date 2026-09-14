@@ -74,7 +74,20 @@ jobs:
             exit 1
           fi
 
+          stress_metric="$(grep '^KROLIK_STRESS_METRIC ' "$output" | tail -n 1 || true)"
+          if [[ -z "$stress_metric" ]]; then
+            echo "Unable to parse KROLIK_STRESS_METRIC from harness output" >&2
+            exit 1
+          fi
+
           echo "KROLIK_STRESS_PROCESS max_rss_kb=${max_rss_kb} max_rss_mib=$(( (max_rss_kb + 1023) / 1024 )) budget_kb=${STRESS_MAX_RSS_KB}"
+          {
+            echo '### KROLIK 220-agent runtime stress'
+            echo
+            echo "- ${stress_metric}"
+            echo "- max_rss_kb=${max_rss_kb} (~$(( (max_rss_kb + 1023) / 1024 )) MiB), budget=${STRESS_MAX_RSS_KB} KiB"
+          } >> "$GITHUB_STEP_SUMMARY"
+
           if (( max_rss_kb > STRESS_MAX_RSS_KB )); then
             echo "Stress process exceeded conservative RSS budget: ${max_rss_kb} KiB > ${STRESS_MAX_RSS_KB} KiB" >&2
             exit 1
