@@ -123,10 +123,21 @@ func _solve_runtime_constraints(base_pose: Dictionary = {}) -> void:
         if not chains.has(joint):
             continue
         var chain: Array = chains[joint]
+        var root_name := str(chain[0])
+        var mid_name := str(chain[1])
+        var end_name := str(chain[2])
         var target: Vector2 = raw.get("target_v", Vector2(0.5, 0.5))
+        var default_limits := VaultIKSolver.default_limits(mid_name)
         solved_joints = VaultIKSolver.apply_chain(
-            solved_joints, str(chain[0]), str(chain[1]), str(chain[2]), target,
-            float(raw.get("strength", 1.0))
+            solved_joints,
+            root_name,
+            mid_name,
+            end_name,
+            target,
+            float(raw.get("strength", 1.0)),
+            float(raw.get("max_stretch", 1.0)),
+            float(raw.get("min_joint_deg", default_limits.x)),
+            float(raw.get("max_joint_deg", default_limits.y))
         )
 
 func _apply_animation_pose(sample: Dictionary) -> void:
