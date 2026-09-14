@@ -2,10 +2,10 @@ extends SceneTree
 
 ## Headless performance/behavior smoke for the actual VaultCharacterAgent runtime.
 ## Instantiates real CharacterBody2D agents and lets SceneTree drive their real
-## brain -> physics -> move_and_slide -> animation path on physics frames.
-## Agent-vs-agent collision is intentionally disabled here so this gate measures
-## runtime throughput/behavior rather than grid packing; collision behavior is
-## covered separately by collision-rig tests.
+## brain -> physics -> move_and_slide -> animation -> facial state path on physics
+## frames. Agent-vs-agent collision is intentionally disabled here so this gate
+## measures runtime throughput/behavior rather than grid packing; collision
+## behavior is covered separately by collision-rig tests.
 
 const AgentScript = preload("res://scripts/character_agent.gd")
 const AGENT_COUNT := 220
@@ -22,6 +22,21 @@ var _start_positions: Dictionary = {}
 
 func _initialize() -> void:
     call_deferred("_run")
+
+func _facial_config() -> Dictionary:
+    return {
+        "procedural_blink": {
+            "enabled": true,
+            "min_interval": 2.1,
+            "max_interval": 6.4,
+            "duration": 0.12,
+        },
+        "look_at": {
+            "enabled": true,
+            "max_head_deg": 16.0,
+            "max_eye": 0.06,
+        },
+    }
 
 func _spawn_agents() -> void:
     _root = Node2D.new()
@@ -48,6 +63,12 @@ func _spawn_agents() -> void:
             "profile": {"mobility": "free", "routine": "explorer", "autonomy": 1.0, "wander": 1.0, "walk_speed": 1.0},
             "needs": {"energy": 1.0, "comfort": 0.7, "curiosity": 1.0, "social": 0.35}
         })
+        # C5 is enabled for every stress agent so the scale gate includes the
+        # actual blink/look smoothing cost expected from the default library.
+        agent.facial_state.configure(_facial_config(), i + 1)
+        var look_x := -1.0 + 2.0 * float(i % 11) / 10.0
+        var look_y := -0.5 + float(i % 7) / 6.0
+        agent.set_look_target(Vector2(look_x, look_y))
         agent.collision_layer = 0
         agent.collision_mask = 0
         # setup() intentionally resets target_position to spawn, so assign the
@@ -76,6 +97,7 @@ func _run() -> void:
     var moving := 0
     var moved := 0
     var active := 0
+    var facial_active := 0
     var total_travel := 0.0
     var total_phase := 0.0
     var state_counts: Dictionary = {}
@@ -83,6 +105,8 @@ func _run() -> void:
         if not is_instance_valid(agent):
             continue
         active += 1
+        if agent.facial_state.enabled:
+            facial_active += 1
         total_phase += agent.phase
         var state_name := agent.brain.state
         state_counts[state_name] = int(state_counts.get(state_name, 0)) + 1
@@ -97,16 +121,20 @@ func _run() -> void:
     var moved_share := float(moved) / float(AGENT_COUNT)
     var avg_travel := total_travel / float(maxi(active, 1))
     var avg_phase := total_phase / float(maxi(active, 1))
-    print("KROLIK_STRESS agents=%d active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s" % [
-        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts)
+    print("KROLIK_STRESS agents=%d active=%d facial_active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s" % [
+        AGENT_COUNT, active, facial_active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts)
     ])
-    print("KROLIK_STRESS_METRIC agents=%d active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
-        AGENT_COUNT, active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
+    print("KROLIK_STRESS_METRIC agents=%d active=%d facial_active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
+        AGENT_COUNT, active, facial_active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
     ])
 
     if active != AGENT_COUNT:
         push_error("KROLIK stress: expected %d live agents, got %d" % [AGENT_COUNT, active])
         quit(2)
+        return
+    if facial_active != AGENT_COUNT:
+        push_error("KROLIK stress: expected %d active facial controllers, got %d" % [AGENT_COUNT, facial_active])
+        quit(6)
         return
     if elapsed > MAX_SAMPLE_SECONDS:
         push_error("KROLIK stress: %d physics frames took %.2fs (> %.2fs budget)" % [SAMPLE_FRAMES, elapsed, MAX_SAMPLE_SECONDS])
