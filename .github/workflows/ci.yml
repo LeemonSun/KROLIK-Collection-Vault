@@ -40,7 +40,8 @@ jobs:
             tests/test_dwpose_backend.py \
             tests/test_mesh_deform.py \
             tests/test_runtime_skinning.py \
-            tests/test_rig_migrations.py
+            tests/test_rig_migrations.py \
+            tests/test_life_sim.py
 
   source-integrity:
     runs-on: ubuntu-latest
