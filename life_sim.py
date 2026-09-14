@@ -4,6 +4,13 @@ from copy import deepcopy
 import math
 from typing import Any
 
+from affinity import (
+    DEFAULT_LONG_TERM_AFFINITY_POLICY,
+    affinity_utility_bias,
+    favorite_place,
+    normalize_affinity_records,
+)
+
 
 AI_POLICY_SCHEMA = "krolik.ai-policy/1"
 AI_POLICY_FORMAT_VERSION = 1
@@ -81,6 +88,9 @@ AI_POLICY: dict[str, Any] = {
             "rest": {"rest": 0.25},
         },
     },
+    # D4 long-term affinity is event-driven and independently bounded. Empty
+    # affinity is neutral; only explicit subject ids influence utility.
+    "long_term_affinity": deepcopy(DEFAULT_LONG_TERM_AFFINITY_POLICY),
     "need_rates_per_minute": {
         "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
         "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.020, "social": 0.010},
@@ -358,6 +368,7 @@ def activity_scores(
     needs: dict[str, float],
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
+    affinity_value: Any = None,
 ) -> dict[str, float]:
     context = context or {}
     away = bool(context.get("away_from_home", False))
@@ -393,6 +404,10 @@ def activity_scores(
     for state_name, amount in memory_bias.items():
         if state_name in scores:
             scores[state_name] += amount
+    affinity_bias = affinity_utility_bias(affinity_value, context, AI_POLICY["long_term_affinity"])
+    for state_name, amount in affinity_bias.items():
+        if state_name in scores:
+            scores[state_name] += amount
     return scores
 
 
@@ -401,6 +416,7 @@ def choose_state(
     needs: dict[str, float],
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
+    affinity_value: Any = None,
 ) -> str:
     context = context or {}
     if profile["mobility"] == "disabled":
@@ -413,7 +429,7 @@ def choose_state(
         return "return_home" if away else "rest"
     if away and needs["comfort"] < float(gates["away_comfort_return"]):
         return "return_home"
-    scores = activity_scores(profile, needs, context, memory_value)
+    scores = activity_scores(profile, needs, context, memory_value, affinity_value)
     if float(context.get("social_targets", 0.0)) <= 0.0:
         scores["social"] = -1.0
     if float(context.get("interesting_targets", 0.0)) <= 0.0:
@@ -453,22 +469,26 @@ def step_mind(
     dt: float,
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
+    affinity_value: Any = None,
 ) -> dict[str, Any]:
     profile = merged_profile(profile_value)
     needs = merged_needs(needs_value)
     memory = normalize_short_term_memory(memory_value)
-    state = choose_state(profile, needs, context, memory)
+    affinity = normalize_affinity_records(affinity_value, AI_POLICY["long_term_affinity"])
+    state = choose_state(profile, needs, context, memory, affinity)
     needs = step_needs(needs, state, dt)
     memory = step_memory(memory, dt)
-    next_state = choose_state(profile, needs, context, memory)
+    next_state = choose_state(profile, needs, context, memory, affinity)
     return {
         "state": next_state,
         "needs": needs,
         "profile": profile,
         "memory": memory,
+        "affinity": affinity,
+        "favorite_place": favorite_place(affinity, AI_POLICY["long_term_affinity"]),
         "mobile": next_state in MOBILE_STATES,
         "contained": next_state == "contained",
         "animation": ANIMATION_BY_STATE.get(next_state, "idle_breathe"),
         "affect": derive_affect(needs, next_state),
-        "utility": activity_scores(profile, needs, context, memory),
+        "utility": activity_scores(profile, needs, context, memory, affinity),
     }
