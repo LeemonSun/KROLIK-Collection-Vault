@@ -1,12 +1,14 @@
 extends SceneTree
 
 ## Headless performance/behavior smoke for the actual VaultCharacterAgent runtime.
-## Instantiates real CharacterBody2D agents and forces sustained locomotion.
+## Instantiates real CharacterBody2D agents and drives their real physics path
+## deterministically, avoiding headless SceneTree scheduling ambiguity.
 
 const AgentScript = preload("res://scripts/character_agent.gd")
 const AGENT_COUNT := 220
 const WARMUP_FRAMES := 30
 const SAMPLE_FRAMES := 180
+const FIXED_DELTA := 1.0 / 60.0
 const MAX_SAMPLE_SECONDS := 20.0
 const MIN_MOVED_SHARE := 0.80
 const MIN_TRAVEL_PX := 8.0
@@ -28,31 +30,38 @@ func _spawn_agents() -> void:
     for i in range(AGENT_COUNT):
         var agent := AgentScript.new() as VaultCharacterAgent
         _root.add_child(agent)
+        # The harness owns physics ticks explicitly; do not also let SceneTree
+        # schedule a second tick for the same agent.
+        agent.process_mode = Node.PROCESS_MODE_DISABLED
         var row := i / columns
         var col := i % columns
         var spawn := Vector2(40.0 + col * 34.0, 60.0 + row * 42.0)
         agent.setup("stress_%03d" % i, spawn, {
             "enabled": true,
             "state": "wander",
-            "profile": {"mobility": "free", "autonomy": 1.0, "wander": 1.0},
+            "profile": {"mobility": "free", "routine": "explorer", "autonomy": 1.0, "wander": 1.0, "walk_speed": 1.0},
             "needs": {"energy": 1.0, "comfort": 0.7, "curiosity": 1.0, "social": 0.35}
         })
         var direction := -1.0 if (i % 2) == 0 else 1.0
         agent.home_position = spawn
         agent.target_position = spawn + Vector2(direction * 420.0, 90.0 + float(i % 5) * 18.0)
         agent.world_targets = [agent.target_position]
-        agent.brain.state = "wander"
         _agents.append(agent)
         _start_positions[agent.get_instance_id()] = spawn
+
+func _tick_agents() -> void:
+    for agent in _agents:
+        if is_instance_valid(agent):
+            agent._physics_process(FIXED_DELTA)
 
 func _run() -> void:
     _spawn_agents()
     for _i in range(WARMUP_FRAMES):
-        await physics_frame
+        _tick_agents()
 
     var started_usec := Time.get_ticks_usec()
     for _i in range(SAMPLE_FRAMES):
-        await physics_frame
+        _tick_agents()
     var elapsed := float(Time.get_ticks_usec() - started_usec) / 1000000.0
     var fps := float(SAMPLE_FRAMES) / maxf(elapsed, 0.000001)
     var moving := 0
