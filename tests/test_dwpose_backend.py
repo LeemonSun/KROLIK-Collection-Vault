@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
-from rig_tools import _dwpose_keypoints_to_rig, capabilities
+from rig_tools import _dwpose_affine_preprocess, _dwpose_keypoints_to_rig, capabilities
 
 
 def test_dwpose_mapping_builds_portable_krolik_rig():
@@ -21,6 +22,21 @@ def test_dwpose_mapping_builds_portable_krolik_rig():
     assert set(["head", "neck", "pelvis", "left_wrist", "right_ankle"]).issubset(rig.joints)
     assert rig.joints["left_shoulder"]["x"] < rig.joints["right_shoulder"]["x"]
     assert 0.0 <= rig.joints["left_ankle"]["y"] <= 1.0
+
+
+def test_dwpose_affine_preprocess_matches_upstream_padding_and_aspect():
+    image = np.zeros((300, 200, 3), dtype=np.uint8)
+    tensor, center, scale = _dwpose_affine_preprocess(
+        image,
+        (10, 20, 110, 220),
+        288,
+        384,
+    )
+    assert tensor.shape == (1, 3, 384, 288)
+    assert tensor.dtype == np.float32
+    assert center.tolist() == pytest.approx([60.0, 120.0])
+    # bbox 100x200 * 1.25 -> 125x250, then width expands to 250*(288/384)=187.5
+    assert scale.tolist() == pytest.approx([187.5, 250.0])
 
 
 def test_capabilities_reports_dwpose_without_implicit_download():
