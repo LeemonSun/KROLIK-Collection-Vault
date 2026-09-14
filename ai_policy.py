@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-"""Versioned AI policy export/validation for the Godot runtime.
-
-`life_sim.py` remains the semantic source of truth. This module validates the
-portable policy document and verifies the committed runtime copy cannot drift
-silently from Python behavior.
-"""
+"""Versioned AI policy export/validation for the Godot runtime."""
 
 from copy import deepcopy
 import json
@@ -13,11 +8,12 @@ import math
 from pathlib import Path
 from typing import Any
 
-from life_sim import AI_POLICY_FORMAT_VERSION, AI_POLICY_SCHEMA, policy_document
+from life_sim import AI_POLICY_FORMAT_VERSION, AI_POLICY_SCHEMA, TRAIT_NAMES, policy_document
 
 ROOT = Path(__file__).resolve().parent
 CONTENT_POLICY_PATH = ROOT / "content" / "ai" / "default_policy_v1.json"
 RUNTIME_POLICY_PATH = ROOT / "runtime_godot" / "data" / "ai_policy_v1.json"
+UTILITY_STATES = {"idle", "wander", "inspect", "social", "return_home", "rest"}
 
 
 class AIPolicyError(ValueError):
@@ -38,8 +34,7 @@ def validate_ai_policy_document(document: Any) -> list[str]:
         errors.append(f"unsupported AI policy format_version {document.get('format_version')!r}; expected {AI_POLICY_FORMAT_VERSION}")
 
     defaults = document.get("defaults")
-    if not isinstance(defaults, dict):
-        errors.append("defaults must be an object"); defaults = {}
+    if not isinstance(defaults, dict): errors.append("defaults must be an object"); defaults = {}
     needs = defaults.get("needs") if isinstance(defaults, dict) else None
     profile = defaults.get("profile") if isinstance(defaults, dict) else None
     if not isinstance(needs, dict): errors.append("defaults.needs must be an object"); needs = {}
@@ -52,24 +47,31 @@ def validate_ai_policy_document(document: Any) -> list[str]:
             errors.append(f"defaults.profile.{key} must be finite in [0,1]")
     if not _finite(profile.get("walk_speed")) or not 0.05 <= float(profile.get("walk_speed", 0.0)) <= 4.0:
         errors.append("defaults.profile.walk_speed must be finite in [0.05,4]")
+    traits = profile.get("traits") if isinstance(profile, dict) else None
+    if not isinstance(traits, dict):
+        errors.append("defaults.profile.traits must be an object")
+        traits = {}
+    for name in TRAIT_NAMES:
+        if not _finite(traits.get(name)) or not 0.0 <= float(traits.get(name, -1.0)) <= 1.0:
+            errors.append(f"defaults.profile.traits.{name} must be finite in [0,1]")
 
     valid = document.get("valid")
     if not isinstance(valid, dict): errors.append("valid must be an object"); valid = {}
-    for key in ("mobility", "routine", "bound_modes"):
+    for key in ("mobility", "routine", "bound_modes", "traits"):
         values = valid.get(key)
         if not isinstance(values, list) or not values or not all(isinstance(v, str) and v for v in values):
             errors.append(f"valid.{key} must be a non-empty string array")
+    if isinstance(valid.get("traits"), list) and tuple(valid["traits"]) != TRAIT_NAMES:
+        errors.append("valid.traits must match the supported trait order")
 
     order = document.get("state_order")
-    expected_states = {"idle", "wander", "inspect", "social", "return_home", "rest"}
-    if not isinstance(order, list) or set(order) != expected_states or len(order) != len(expected_states):
+    if not isinstance(order, list) or set(order) != UTILITY_STATES or len(order) != len(UTILITY_STATES):
         errors.append("state_order must contain each utility state exactly once")
 
     gates = document.get("hard_gates")
     if not isinstance(gates, dict): errors.append("hard_gates must be an object"); gates = {}
     for key in ("away_comfort_return", "autonomy_lock", "inspect_no_target_multiplier", "rest_energy_margin", "rest_energy_floor", "rest_ready_multiplier"):
-        if not _finite(gates.get(key)):
-            errors.append(f"hard_gates.{key} must be finite numeric")
+        if not _finite(gates.get(key)): errors.append(f"hard_gates.{key} must be finite numeric")
     if _finite(gates.get("rest_ready_multiplier")) and not 0.0 <= float(gates["rest_ready_multiplier"]) <= 1.0:
         errors.append("hard_gates.rest_ready_multiplier must be in [0,1]")
 
@@ -81,6 +83,19 @@ def validate_ai_policy_document(document: Any) -> list[str]:
             errors.append(f"utility.{section} must be a non-empty object")
         elif not all(_finite(v) for v in values.values()):
             errors.append(f"utility.{section} values must be finite numeric")
+
+    trait_effects = document.get("trait_effects")
+    if not isinstance(trait_effects, dict):
+        errors.append("trait_effects must be an object")
+        trait_effects = {}
+    for name in TRAIT_NAMES:
+        effects = trait_effects.get(name)
+        if not isinstance(effects, dict) or not effects:
+            errors.append(f"trait_effects.{name} must be a non-empty object")
+            continue
+        for state_name, coefficient in effects.items():
+            if state_name not in UTILITY_STATES or not _finite(coefficient):
+                errors.append(f"trait_effects.{name} contains invalid state/coefficient")
 
     rates = document.get("need_rates_per_minute")
     if not isinstance(rates, dict): errors.append("need_rates_per_minute must be an object"); rates = {}
