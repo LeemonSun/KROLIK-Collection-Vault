@@ -84,6 +84,13 @@ jobs:
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/layered_animation_harness.gd
 
+      - name: Facial mood state regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/facial_state_harness.gd
+
       - name: Secondary motion production regression
         shell: bash
         run: |
@@ -132,9 +139,6 @@ jobs:
           metrics="${RUNNER_TEMP}/godot-stress-time.txt"
           output="${RUNNER_TEMP}/godot-stress-output.txt"
 
-          # Actions launches this shell with an outer `-e`. Keep the measured
-          # command in an `if` condition so Bash does not abort before its exact
-          # status is captured; all harness and RSS gates below remain strict.
           stress_status=0
           if /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1; then
             stress_status=0
