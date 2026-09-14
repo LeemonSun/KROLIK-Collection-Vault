@@ -3,10 +3,9 @@ extends CharacterBody2D
 
 const SkinnedCharacterScript = preload("res://scripts/skinned_character.gd")
 const CollisionRigScript = preload("res://scripts/collision_rig.gd")
-const RuntimeBrainScript = preload("res://scripts/agent_brain_runtime.gd")
 
 var character_id := ""
-var brain = RuntimeBrainScript.new()
+var brain := VaultAgentBrain.new()
 var animation_driver := VaultAnimationDriver.new()
 var facial_state := VaultFacialState.new()
 var facial_channels: Dictionary = {}
