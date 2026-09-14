@@ -8,7 +8,7 @@ with existing callers; optional catalog injection lets editor/content tools use
 custom libraries and hot reload them without changing runtime code.
 """
 
-from math import cos, radians, sin
+from math import cos, isfinite, radians, sin
 from typing import Any
 
 from prop_content import FixtureCatalog, default_fixture_catalog
@@ -50,9 +50,24 @@ FIXTURE_CONSTRAINT_PRESETS = _compat_constraint_presets()
 
 def _f(value: Any, default: float = 0.0) -> float:
     try:
-        return float(value)
+        result = float(value)
     except Exception:
         return float(default)
+    return result if isfinite(result) else float(default)
+
+
+def _normalize_joint_limit_fields(item: dict[str, Any]) -> None:
+    """Clamp optional, unversioned runtime IK controls without inventing them."""
+    has_min = "min_joint_deg" in item
+    has_max = "max_joint_deg" in item
+    if not (has_min or has_max):
+        return
+    min_deg = max(0.0, min(179.9, _f(item.get("min_joint_deg"), 0.0)))
+    max_deg = max(min_deg + 0.01, min(180.0, _f(item.get("max_joint_deg"), 180.0)))
+    if has_min:
+        item["min_joint_deg"] = min_deg
+    if has_max:
+        item["max_joint_deg"] = max_deg
 
 
 def anchor_point(
@@ -111,6 +126,7 @@ def resolve_constraint_items(
         item["strength"] = max(0.0, min(1.0, _f(item.get("strength"), 1.0)))
         item["enabled"] = bool(item.get("enabled", True))
         item["max_stretch"] = max(0.01, min(4.0, _f(item.get("max_stretch"), 1.0)))
+        _normalize_joint_limit_fields(item)
         out.append(item)
     return out
 
@@ -130,14 +146,22 @@ def preset_constraints(
         anchor = str(raw.get("anchor") or "")
         if not joint or not anchor:
             continue
-        out.append({
+        item: dict[str, Any] = {
             "joint": joint,
             "prop_id": int(prop.get("id") or 0),
             "anchor": anchor,
             "enabled": bool(raw.get("enabled", True)),
             "strength": max(0.0, min(1.0, _f(raw.get("strength"), 1.0) * scale)),
             "max_stretch": max(0.01, min(4.0, _f(raw.get("max_stretch"), 1.0))),
-        })
+        }
+        # Optional angle fields are passed through only when explicitly authored,
+        # preserving the existing fixture-v1 document meaning for old content.
+        if "min_joint_deg" in raw:
+            item["min_joint_deg"] = raw["min_joint_deg"]
+        if "max_joint_deg" in raw:
+            item["max_joint_deg"] = raw["max_joint_deg"]
+        _normalize_joint_limit_fields(item)
+        out.append(item)
     return out
 
 
