@@ -62,9 +62,8 @@ jobs:
           metrics="${RUNNER_TEMP}/godot-stress-time.txt"
           output="${RUNNER_TEMP}/godot-stress-output.txt"
 
-          # Capture the timed command directly instead of piping it through tee.
-          # This makes stress_status exactly the exit status of timeout/Godot and
-          # keeps stdout/stderr available for deterministic post-run diagnostics.
+          # GNU time returns the wrapped command's exit status. Do not let the
+          # shell's errexit consume that status before we can report diagnostics.
           set +e
           /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1
           stress_status=$?
