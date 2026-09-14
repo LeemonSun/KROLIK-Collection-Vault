@@ -39,6 +39,21 @@
     "patience": {"idle": 0.5},
     "resilience": {"rest": -0.45, "return_home": -0.2}
   },
+  "short_term_memory": {
+    "capacity": 8,
+    "default_ttl": 180.0,
+    "max_ttl": 900.0,
+    "max_subject_length": 64,
+    "max_abs_state_bias": 0.35,
+    "unfocused_subject_scale": 0.25,
+    "effects": {
+      "interesting": {"inspect": 0.32, "wander": 0.08},
+      "social": {"social": 0.32, "return_home": -0.1},
+      "home": {"return_home": 0.28},
+      "threat": {"return_home": -0.3, "inspect": 0.15},
+      "rest": {"rest": 0.25}
+    }
+  },
   "need_rates_per_minute": {
     "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
     "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.02, "social": 0.01},
