@@ -16,6 +16,8 @@ import json
 import math
 import shutil
 
+from animation_content import default_animation_document
+
 
 RADIUS_BY_BONE = {
     ("head", "neck"): 0.055,
@@ -34,71 +36,12 @@ RADIUS_BY_BONE = {
     ("right_knee", "right_ankle"): 0.050,
 }
 
-DEFAULT_ANIMATION_GRAPH = {
-    "idle": {"clip": "idle_breathe", "loop": True, "blend": 0.18},
-    "wander": {"clip": "walk", "loop": True, "blend": 0.12},
-    "inspect": {"clip": "inspect", "loop": True, "blend": 0.16},
-    "social": {"clip": "social_idle", "loop": True, "blend": 0.16},
-    "return_home": {"clip": "walk", "loop": True, "blend": 0.12},
-    "contained": {"clip": "contained_idle", "loop": True, "blend": 0.16},
-    "rest": {"clip": "rest", "loop": True, "blend": 0.24},
-    "disabled": {"clip": "idle_static", "loop": True, "blend": 0.0},
-}
-
-DEFAULT_POSE_CLIPS = {
-    "idle_breathe": {
-        "duration": 2.4, "loop": True,
-        "keyframes": [
-            {"t": 0.0, "joints": {}, "root": {}},
-            {"t": 1.2, "joints": {"neck": [0.0, -0.004], "left_shoulder": [0.0, -0.003], "right_shoulder": [0.0, -0.003], "pelvis": [0.0, 0.002]}, "root": {"y": -0.6, "scale_y": 1.003}},
-            {"t": 2.4, "joints": {}, "root": {}},
-        ],
-    },
-    "walk": {
-        "duration": 0.72, "loop": True,
-        "keyframes": [
-            {"t": 0.0, "joints": {"left_wrist": [0.020, 0.010], "right_wrist": [-0.020, -0.008], "left_knee": [0.018, -0.010], "right_knee": [-0.015, 0.014], "left_ankle": [0.025, -0.020], "right_ankle": [-0.020, 0.018]}, "root": {"y": 0.0, "rotation": -0.004}},
-            {"t": 0.18, "joints": {"left_wrist": [0.008, -0.006], "right_wrist": [-0.008, 0.006], "left_knee": [0.008, 0.006], "right_knee": [-0.006, -0.004]}, "root": {"y": -1.8}},
-            {"t": 0.36, "joints": {"left_wrist": [-0.020, -0.008], "right_wrist": [0.020, 0.010], "left_knee": [-0.015, 0.014], "right_knee": [0.018, -0.010], "left_ankle": [-0.020, 0.018], "right_ankle": [0.025, -0.020]}, "root": {"y": 0.0, "rotation": 0.004}},
-            {"t": 0.54, "joints": {"left_wrist": [-0.008, 0.006], "right_wrist": [0.008, -0.006], "left_knee": [-0.006, -0.004], "right_knee": [0.008, 0.006]}, "root": {"y": -1.8}},
-            {"t": 0.72, "joints": {"left_wrist": [0.020, 0.010], "right_wrist": [-0.020, -0.008], "left_knee": [0.018, -0.010], "right_knee": [-0.015, 0.014], "left_ankle": [0.025, -0.020], "right_ankle": [-0.020, 0.018]}, "root": {"y": 0.0, "rotation": -0.004}},
-        ],
-    },
-    "inspect": {
-        "duration": 3.2, "loop": True,
-        "keyframes": [
-            {"t": 0.0, "joints": {}, "root": {}},
-            {"t": 0.9, "joints": {"head": [-0.018, 0.004], "neck": [-0.006, 0.0], "left_elbow": [0.010, -0.008]}, "root": {"rotation": -0.006}},
-            {"t": 2.0, "joints": {"head": [0.020, -0.002], "neck": [0.006, 0.0], "right_elbow": [-0.010, -0.006]}, "root": {"rotation": 0.006}},
-            {"t": 3.2, "joints": {}, "root": {}},
-        ],
-    },
-    "social_idle": {
-        "duration": 2.8, "loop": True,
-        "keyframes": [
-            {"t": 0.0, "joints": {"head": [-0.008, 0.0]}, "root": {}},
-            {"t": 1.4, "joints": {"head": [0.010, -0.003], "left_wrist": [0.012, -0.008], "right_wrist": [-0.008, -0.004]}, "root": {"y": -0.7}},
-            {"t": 2.8, "joints": {"head": [-0.008, 0.0]}, "root": {}},
-        ],
-    },
-    "contained_idle": {
-        "duration": 3.0, "loop": True,
-        "keyframes": [
-            {"t": 0.0, "joints": {}, "root": {}},
-            {"t": 1.5, "joints": {"head": [0.010, 0.002], "neck": [0.003, -0.003], "pelvis": [-0.002, 0.003]}, "root": {"rotation": 0.003}},
-            {"t": 3.0, "joints": {}, "root": {}},
-        ],
-    },
-    "rest": {
-        "duration": 3.6, "loop": True,
-        "keyframes": [
-            {"t": 0.0, "joints": {"head": [0.0, 0.010], "neck": [0.0, 0.006]}, "root": {"scale_y": 0.997}},
-            {"t": 1.8, "joints": {"head": [0.0, 0.014], "neck": [0.0, 0.009], "left_shoulder": [0.0, 0.004], "right_shoulder": [0.0, 0.004]}, "root": {"y": 0.5, "scale_y": 1.002}},
-            {"t": 3.6, "joints": {"head": [0.0, 0.010], "neck": [0.0, 0.006]}, "root": {"scale_y": 0.997}},
-        ],
-    },
-    "idle_static": {"duration": 1.0, "loop": True, "keyframes": [{"t": 0.0, "joints": {}, "root": {}}]},
-}
+# Backwards-compatible public names for callers/tests that still import the
+# original defaults.  The source of truth is now the validated external JSON
+# library under content/animations, not Python code.
+_DEFAULT_ANIMATION = default_animation_document()
+DEFAULT_ANIMATION_GRAPH = _DEFAULT_ANIMATION["state_graph"]
+DEFAULT_POSE_CLIPS = _DEFAULT_ANIMATION["clips"]
 
 SECONDARY_CHANNELS = {
     "hair": {"stiffness": 0.34, "damping": 0.74, "gravity": 0.18, "max_angle": 18.0},
@@ -324,14 +267,7 @@ def build_manifest(
             "secondary": SECONDARY_CHANNELS,
             "floor_contact_joints": ["left_ankle", "right_ankle"],
         },
-        "animation": {
-            "format_version": 1,
-            "default_clip": "idle_breathe",
-            "state_graph": DEFAULT_ANIMATION_GRAPH,
-            "clips": DEFAULT_POSE_CLIPS,
-            "procedural_blink": {"enabled": True, "min_interval": 2.1, "max_interval": 6.4, "duration": 0.12},
-            "look_at": {"enabled": True, "max_head_deg": 16.0, "max_eye": 0.06},
-        },
+        "animation": default_animation_document(),
         "mind": {
             "enabled": bool((mind or {}).get("enabled", 0)),
             "state": str((mind or {}).get("state") or "idle"),
