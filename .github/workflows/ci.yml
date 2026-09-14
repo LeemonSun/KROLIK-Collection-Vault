@@ -26,7 +26,7 @@ jobs:
         run: |
           python -m py_compile \
             ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
-            constraint_solver.py interaction_runtime.py life_sim.py tools/export_ai_policy.py tools/validate_content.py
+            constraint_solver.py interaction_runtime.py life_sim.py tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py
       - name: Verify generated AI policy copies
         run: python tools/export_ai_policy.py --check
       - name: Validate data-driven content
@@ -44,29 +44,52 @@ jobs:
             tests/test_mesh_deform.py \
             tests/test_runtime_skinning.py \
             tests/test_rig_migrations.py \
-            tests/test_life_sim.py
+            tests/test_life_sim.py \
+            tests/test_source_readiness.py
 
-  source-integrity:
+  canonical-source-readiness:
     runs-on: ubuntu-latest
     outputs:
-      restored: ${{ steps.source.outputs.restored }}
+      source_present: ${{ steps.source.outputs.source_present }}
+      source_status: ${{ steps.source.outputs.source_status }}
     steps:
       - uses: actions/checkout@v4
       - id: source
-        name: Check application source integrity
+        name: Audit canonical application source and recovery candidates
         shell: bash
         run: |
-          if [[ -f app.py ]]; then
-            echo "restored=true" >> "$GITHUB_OUTPUT"
-            echo "Application source is present."
-          else
-            echo "restored=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Source restoration pending::app.py is not present in this repository revision. Backend/UI validation is intentionally deferred until the guarded source-recovery workflow restores the validated bundle."
+          set -euo pipefail
+          output="$(python3 tools/audit_source_readiness.py)"
+          printf '%s\n' "$output"
+          status="$(printf '%s\n' "$output" | awk '/^KROLIK_SOURCE_READINESS / {for (i=1;i<=NF;i++) if ($i ~ /^status=/) {sub(/^status=/,"",$i); print $i}}')"
+          if [[ -z "$status" ]]; then
+            echo "Unable to parse source readiness status" >&2
+            exit 1
           fi
+          echo "source_status=$status" >> "$GITHUB_OUTPUT"
+          if [[ "$status" == "present" ]]; then
+            echo "source_present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "source_present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=FULL PRODUCT SOURCE BLOCKED::Canonical app.py is absent. Core/runtime checks can pass, but backend/UI is NOT verified. Historical in-repo recovery artifacts are audit-only and must never be guessed into source."
+          fi
+          {
+            echo '### Canonical application source readiness'
+            echo
+            echo '```text'
+            printf '%s\n' "$output"
+            echo '```'
+            echo
+            if [[ "$status" == "present" ]]; then
+              echo '**FULL SOURCE AVAILABLE:** backend/UI validation is enabled.'
+            else
+              echo '**FULL PRODUCT BLOCKED:** canonical `app.py` is not available in this revision; backend/UI validation is intentionally not counted as verified.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   backend-and-ui:
-    needs: source-integrity
-    if: needs.source-integrity.outputs.restored == 'true'
+    needs: canonical-source-readiness
+    if: needs.canonical-source-readiness.outputs.source_present == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
