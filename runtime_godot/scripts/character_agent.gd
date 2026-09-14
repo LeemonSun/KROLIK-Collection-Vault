@@ -7,6 +7,8 @@ const CollisionRigScript = preload("res://scripts/collision_rig.gd")
 var character_id := ""
 var brain := VaultAgentBrain.new()
 var animation_driver := VaultAnimationDriver.new()
+var secondary_motion := VaultSecondaryMotion.new()
+var secondary_motion_enabled := false
 var contained := false
 var home_position := Vector2.ZERO
 var target_position := Vector2.ZERO
@@ -43,6 +45,7 @@ func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     target_position = spawn
     _navigation_target_valid = false
     brain.apply_snapshot(mind)
+    configure_secondary_motion({})
     _ensure_visual_root()
     _ensure_navigation_agent()
     collision_layer = 1
@@ -84,6 +87,8 @@ func load_runtime_manifest(manifest_path: String) -> bool:
         skin_recipe = rig.get("skinning", {}).duplicate(true)
     var physics_doc: Dictionary = manifest.get("physics", {})
     physics_proxies = physics_doc.get("collision", []).duplicate(true)
+    var secondary_doc = physics_doc.get("secondary", {})
+    configure_secondary_motion(secondary_doc if typeof(secondary_doc) == TYPE_DICTIONARY else {})
     animated_joints = rig_joints.duplicate(true)
     solved_joints = animated_joints.duplicate(true)
     _solve_runtime_constraints(animated_joints)
@@ -91,6 +96,26 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     _rebuild_collision_rig()
     queue_redraw()
     return true
+
+func configure_secondary_motion(doc: Dictionary) -> void:
+    secondary_motion.configure(doc)
+    secondary_motion_enabled = not doc.is_empty()
+
+func set_animation_layer(
+    layer_name: String,
+    clip_name: String,
+    weight: float = 1.0,
+    joint_mask: Array = [],
+    root_weight: float = 0.0,
+    playback_speed: float = 1.0,
+    restart: bool = true
+) -> bool:
+    return animation_driver.set_additive_layer(
+        layer_name, clip_name, weight, joint_mask, root_weight, playback_speed, restart
+    )
+
+func clear_animation_layer(layer_name: String) -> bool:
+    return animation_driver.clear_additive_layer(layer_name)
 
 func apply_runtime_interaction(data: Dictionary) -> void:
     runtime_constraints.clear()
@@ -140,7 +165,37 @@ func _solve_runtime_constraints(base_pose: Dictionary = {}) -> void:
             float(raw.get("max_joint_deg", default_limits.y))
         )
 
-func _apply_animation_pose(sample: Dictionary) -> void:
+func _apply_secondary_motion(delta: float) -> void:
+    if not secondary_motion_enabled or animated_joints.is_empty():
+        return
+    var channel_offsets := secondary_motion.step(delta, velocity)
+    if channel_offsets.is_empty():
+        return
+    var offsets := secondary_motion.joint_offsets(channel_offsets)
+    if offsets.is_empty():
+        return
+
+    # IK endpoints remain authoritative. A wrist/ankle explicitly constrained by
+    # an interaction is not pre-shifted by an accessory spring before the IK
+    # solve. Other secondary channels still contribute to the animated base pose.
+    var constrained_ends: Dictionary = {}
+    for raw in runtime_constraints:
+        if typeof(raw) != TYPE_DICTIONARY or not bool(raw.get("enabled", true)):
+            continue
+        var constrained_name := str(raw.get("joint", ""))
+        if not constrained_name.is_empty():
+            constrained_ends[constrained_name] = true
+
+    for raw_name in offsets.keys():
+        var joint_name := str(raw_name)
+        if constrained_ends.has(joint_name) or not animated_joints.has(joint_name):
+            continue
+        var offset = offsets[raw_name]
+        if typeof(offset) != TYPE_VECTOR2:
+            continue
+        animated_joints[joint_name] = animated_joints[joint_name] + offset
+
+func _apply_animation_pose(sample: Dictionary, delta: float = 0.0) -> void:
     animated_joints = rig_joints.duplicate(true)
     var offsets = sample.get("joint_offsets", {})
     if typeof(offsets) == TYPE_DICTIONARY:
@@ -149,14 +204,15 @@ func _apply_animation_pose(sample: Dictionary) -> void:
             if not animated_joints.has(name):
                 continue
             var raw = offsets[joint_name]
-            var delta := Vector2.ZERO
+            var joint_delta := Vector2.ZERO
             if typeof(raw) == TYPE_VECTOR2:
-                delta = raw
+                joint_delta = raw
             elif typeof(raw) == TYPE_ARRAY and raw.size() >= 2:
-                delta = Vector2(float(raw[0]), float(raw[1]))
+                joint_delta = Vector2(float(raw[0]), float(raw[1]))
             elif typeof(raw) == TYPE_DICTIONARY:
-                delta = Vector2(float(raw.get("x", 0.0)), float(raw.get("y", 0.0)))
-            animated_joints[name] = animated_joints[name] + delta
+                joint_delta = Vector2(float(raw.get("x", 0.0)), float(raw.get("y", 0.0)))
+            animated_joints[name] = animated_joints[name] + joint_delta
+    _apply_secondary_motion(delta)
     _solve_runtime_constraints(animated_joints)
 
 func _rig_to_local(p: Vector2, size: Vector2) -> Vector2:
@@ -307,7 +363,7 @@ func _physics_process(delta: float) -> void:
     _visual_offset = sample.get("offset", Vector2.ZERO)
     _visual_rotation = float(sample.get("rotation", 0.0))
     _visual_scale = sample.get("scale", Vector2.ONE)
-    _apply_animation_pose(sample)
+    _apply_animation_pose(sample, delta)
     _apply_visual_transform()
     queue_redraw()
 
