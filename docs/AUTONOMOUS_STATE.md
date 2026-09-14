@@ -1,11 +1,11 @@
 # KROLIK autonomous development state
 
-Updated: 2026-09-14, autonomous pass 12.
+Updated: 2026-09-14, autonomous pass 13.
 
 ## Current main / rollback
 
-- Current runtime/CI implementation commit: `e61faea362ddf28cf061961cd81254ddd0034ba3` (`ci: make stress harness status capture deterministic`).
-- Rollback checkpoint created before this change: `checkpoint/pre-stress-ci-simplify-20260914` at `d82811c198c8aaba1ec9ade257e50f95539bd09a`.
+- Current runtime/CI implementation commit: `eeeb6e085064e097af1c33d80c7394ff07d8b6d9` (`ci: preserve Godot stress exit status through time`).
+- Rollback checkpoint created before this change: `checkpoint/pre-fix-stress-godot-status-20260914` at `aab89c8610ecdf38b7c55aafa8910fb5f89fdedd`.
 - Earlier rollback checkpoints remain available.
 - No application/schema/data contract changed in this pass.
 
@@ -17,27 +17,27 @@ The Godot runtime tree is independently present and testable.
 
 `KROLIK_MASTER_PLAN.md` remains unavailable at the expected root/docs locations; use the phase order preserved in `docs/AUTONOMOUS_RUNBOOK.md` until the roadmap file is restored/found.
 
-## Work completed in pass 12
+## Work completed in pass 13
 
 1. Read `docs/AUTONOMOUS_RUNBOOK.md`, previous state, latest `main`, and current Actions status before editing.
-2. Inspected Godot Runtime CI run `34820638528` for `cd1636b1935ebd6ed97daf2842dc2ae2c569353d`: it completed **failure**. Godot download, project parse/import and ordinary headless runtime smoke succeeded; only `220 live-agent stress smoke with RSS budget` failed. Vault CI for that implementation completed success, but remains source-integrity-only while Python/editor source is absent.
-3. Created rollback checkpoint `checkpoint/pre-stress-ci-simplify-20260914` from the pre-change main state.
-4. Removed the nested child-shell + `tee` status-capture path from the stress step. `/usr/bin/time`/`timeout`/Godot now runs directly with stdout/stderr redirected to a file; `stress_status=$?` is therefore the direct command status, not pipeline state. Captured output and `/usr/bin/time` metrics are printed unconditionally after execution so the normal Actions step log is self-contained.
-5. Preserved all real gates: 220 live agents, harness movement/performance assertions, 90 s outer hang guard, and <=512 MiB RSS. No threshold was weakened.
-6. Pushed implementation commit `e61faea362ddf28cf061961cd81254ddd0034ba3` to `main`. Godot Runtime CI run `34825544369` and Vault CI run `34825544497` were queued automatically.
+2. Inspected Godot Runtime CI run `34825544369` for `e61faea362ddf28cf061961cd81254ddd0034ba3`. It failed only at the 220-agent stress/RSS step; project import and ordinary runtime smoke succeeded.
+3. Inspected the job log and identified the concrete CI-wrapper failure: GNU `/usr/bin/time` reports the wrapped Godot command's nonzero status through its own exit code. The workflow needs to preserve that exact status while keeping diagnostics available; the previous nested/pipeline experiments obscured the distinction.
+4. Created rollback checkpoint `checkpoint/pre-fix-stress-godot-status-20260914` from pre-change main.
+5. Kept the direct `/usr/bin/time -> timeout -> Godot` execution path and documented/enforced capture of its exact exit status before re-enabling shell errexit. Output and RSS diagnostics remain unconditional. No runtime threshold or data contract was changed.
+6. Pushed implementation commit `eeeb6e085064e097af1c33d80c7394ff07d8b6d9` to `main`. Godot Runtime CI run `34832236322` and Vault CI run `34832236349` were queued automatically.
 
 ## Tests / verification actually performed
 
-- Godot Runtime CI run `34820638528` for the previous implementation: **failure**. Parse/import: success. Ordinary headless runtime smoke: success. 220-agent stress/RSS step: failure.
-- Vault CI run `34820638567`: **success**, but this is source-integrity status only while `app.py` is absent.
-- Godot Runtime CI run `34825544369` for `e61faea362ddf28cf061961cd81254ddd0034ba3`: **queued** at state-write time. Do not claim the deterministic status-capture repair verified until it completes.
-- Vault CI run `34825544497`: **queued** at state-write time.
+- Godot Runtime CI run `34825544369` for previous implementation: **failure**. Download/import: success. Ordinary headless runtime smoke: success. 220-agent stress/RSS step: failure.
+- Vault CI run `34825544497` for previous implementation: **success**, but source-integrity-only while Python/editor source is absent.
+- Godot Runtime CI run `34832236322` for `eeeb6e085064e097af1c33d80c7394ff07d8b6d9`: **queued** at state-write time. Do not claim the repair verified until it completes.
+- Vault CI run `34832236349`: **queued** at state-write time.
 - No Python application tests were run because validated Python/editor source remains absent.
 
 ## Anything still unverified
 
-- Whether run `34825544369` passes the real 220-agent harness/RSS gates.
-- If it fails, the exact direct `stress_status`, stress harness output and RSS from that run must be used as the root-cause evidence; do not change timeouts/parsers again without that evidence.
+- Whether Godot Runtime CI run `34832236322` passes the real 220-agent harness/RSS gates.
+- If it fails, use its now-unconditional stress output, exact process status and `/usr/bin/time` RSS as the only root-cause evidence before another change.
 - Exact Linux/headless RSS/FPS baseline from a verified green run.
 - Rendered/Windows performance remains unmeasured, so A4 is not complete.
 
@@ -45,13 +45,13 @@ The Godot runtime tree is independently present and testable.
 
 Primary restoration blocker remains a byte-exact copy of the validated stable Python/editor source artifact (or complete exact base64 transport). Do not reconstruct it by guessing.
 
-Roadmap-document blocker: `KROLIK_MASTER_PLAN.md` is not discoverable at the expected paths. Do not recreate it from guesses; use the preserved runbook phase order.
+Roadmap-document blocker: `KROLIK_MASTER_PLAN.md` is not discoverable at expected paths. Do not recreate it from guesses; use the preserved runbook phase order.
 
 Next pass should:
 
-1. Inspect Godot Runtime CI run `34825544369` first. If it failed, use the now-direct `stress_status`, printed harness output and RSS to repair the actual runtime/harness failure. If it succeeded, preserve a stable checkpoint at `e61faea362ddf28cf061961cd81254ddd0034ba3` and record verified metrics.
-2. Once CI is green, continue A1: deterministic runtime verification that `VaultSkinnedCharacter`/`Skeleton2D`/`Polygon2D` bone transforms produce actual mesh deformation, followed by rendered/pixel evidence when CI-safe rendering is available.
-3. Do not call A4 complete until rendered Windows FPS/CPU/memory is measured. Linux/headless CI is a regression baseline only.
+1. Inspect Godot Runtime CI run `34832236322` first. If failed, repair the actual harness/runtime cause using its printed status/output/RSS. If green, create a stable checkpoint at the verified implementation/state commit and record the measured metrics.
+2. Once CI is green, continue A1: deterministic verification that `VaultSkinnedCharacter`/`Skeleton2D`/`Polygon2D` bone transforms produce actual mesh deformation, then add rendered/pixel evidence when CI-safe rendering is available.
+3. Do not call A4 complete until rendered Windows FPS/CPU/memory is measured. Linux/headless CI remains a regression baseline only.
 
 ## CI semantics until restoration
 
