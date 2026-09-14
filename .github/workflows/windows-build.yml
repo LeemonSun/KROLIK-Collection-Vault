@@ -14,6 +14,7 @@ on:
       - 'tools/build_core_vertical_slice.py'
       - 'tools/import_character_package.py'
       - 'tests/test_character_import.py'
+      - 'tests/test_character_import_modes.py'
       - 'tests/test_core_vertical_slice.py'
       - 'tests/test_runtime_skinning.py'
       - '.github/workflows/windows-build.yml'
@@ -39,7 +40,7 @@ jobs:
         shell: pwsh
         run: |
           python -m py_compile character_import.py runtime_package.py rig_tools.py tools/build_core_vertical_slice.py tools/import_character_package.py
-          pytest -q tests/test_character_import.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
+          pytest -q tests/test_character_import.py tests/test_character_import_modes.py tests/test_core_vertical_slice.py tests/test_runtime_skinning.py
       - name: Build ordinary-image runtime package on Windows
         shell: pwsh
         run: |
