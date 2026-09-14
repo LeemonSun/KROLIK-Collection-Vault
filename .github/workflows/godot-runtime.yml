@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'runtime_godot/**'
+      - 'content/animations/**'
+      - 'animation_content.py'
+      - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
       - 'tests/test_runtime_skinning.py'
@@ -12,9 +15,13 @@ on:
   pull_request:
     paths:
       - 'runtime_godot/**'
+      - 'content/animations/**'
+      - 'animation_content.py'
+      - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
       - 'tests/test_runtime_skinning.py'
+      - '.github/workflows/godot-runtime.yml'
   workflow_dispatch:
 
 jobs:
@@ -60,6 +67,15 @@ jobs:
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/animation_validation_harness.gd
+
+      - name: Authored motion library runtime regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          cp content/animations/default_v1.json runtime_godot/.ci_motion_library.json
+          trap 'rm -f runtime_godot/.ci_motion_library.json' EXIT
+          timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/motion_library_harness.gd
 
       - name: Rendered Skeleton2D Polygon2D deformation regression
         shell: bash
