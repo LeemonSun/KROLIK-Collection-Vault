@@ -1,5 +1,7 @@
 extends SceneTree
 
+const RuntimeBrainScript = preload("res://scripts/agent_brain_runtime.gd")
+
 func _init() -> void:
     call_deferred("_run")
 
@@ -27,7 +29,7 @@ func _count_kind(records: Array, kind: String) -> int:
     return count
 
 func _run() -> void:
-    var brain := VaultAgentBrainRuntime.new()
+    var brain = RuntimeBrainScript.new()
     if not brain.policy_loaded or brain.affinity_state.config.is_empty():
         _fail("generated long-term affinity policy was not loaded")
         return
@@ -108,7 +110,7 @@ func _run() -> void:
         "kind": "place", "subject": "garden", "affinity": 0.8, "familiarity": 0.9,
     }]
     agent.setup("AFFINITY-CI", Vector2.ZERO, production)
-    if not (agent.brain is VaultAgentBrainRuntime):
+    if agent.brain.get_script() != RuntimeBrainScript:
         _fail("production CharacterAgent is not using affinity-aware brain")
         agent.queue_free()
         return
