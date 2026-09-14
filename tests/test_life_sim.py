@@ -1,4 +1,6 @@
+from affinity import learn_affinity
 from life_sim import (
+    AI_POLICY,
     activity_scores,
     choose_state,
     memory_utility_bias,
@@ -57,12 +59,10 @@ def test_same_needs_and_context_produce_distinct_personality_decisions():
     needs = merged_needs({"energy": .8, "comfort": .7, "curiosity": .55, "social": .55})
     context = {"interesting_targets": 1, "social_targets": 1}
     base = {"autonomy": .6, "wander": .5, "social": .5, "routine": "balanced"}
-
     curious = merged_profile({**base, "traits": {"curiosity": 1.0}})
     sociable = merged_profile({**base, "traits": {"sociability": 1.0}})
     bold = merged_profile({**base, "traits": {"boldness": 1.0}})
     patient = merged_profile({**base, "traits": {"patience": 1.0}})
-
     assert choose_state(curious, needs, context) == "inspect"
     assert choose_state(sociable, needs, context) == "social"
     assert choose_state(bold, needs, context) == "wander"
@@ -87,7 +87,6 @@ def test_memory_deduplicates_is_bounded_and_evicts_weakest_deterministically():
     assert len(memory) == 1
     assert memory[0]["valence"] == .9
     assert memory[0]["importance"] == .9
-
     memory = remember_event([], "interesting", subject="weak", valence=1, importance=.01, ttl=120)
     for index in range(8):
         memory = remember_event(memory, "interesting", subject=f"strong-{index}", valence=1, importance=.8, ttl=120)
@@ -110,7 +109,6 @@ def test_focused_memory_can_shift_borderline_choice_while_unfocused_stays_legacy
     needs = merged_needs({"energy": .8, "comfort": .7, "curiosity": .25, "social": .25})
     context = {"interesting_targets": 1, "social_targets": 1}
     memory = remember_event([], "social", subject="alice", valence=1, importance=1, ttl=180)
-
     assert choose_state(profile, needs, context) == "idle"
     assert choose_state(profile, needs, context, memory) == "idle"
     focused = {**context, "memory_subject": "alice"}
@@ -126,14 +124,40 @@ def test_memory_never_overrides_hard_contained_or_exhaustion_gates():
     assert choose_state(profile, needs, {"interesting_targets": 9, "memory_subject": "door"}, memory) == "rest"
 
 
-def test_step_mind_exposes_traits_memory_and_utility_without_breaking_existing_fields():
+def test_empty_affinity_is_legacy_neutral_and_matching_friend_can_shift_social_choice():
+    profile = merged_profile({"autonomy": .2, "wander": .2, "social": .2, "routine": "balanced"})
+    needs = merged_needs({"energy": .8, "comfort": .7, "curiosity": .25, "social": .25})
+    context = {"interesting_targets": 1, "social_targets": 1, "social_subject": "alice"}
+    baseline = choose_state(profile, needs, context, [], [])
+    assert baseline == "idle"
+    affinity = []
+    for _ in range(10):
+        affinity = learn_affinity(affinity, "character", "alice", 1.0, AI_POLICY["long_term_affinity"])
+    assert choose_state(profile, needs, context, [], affinity) == "social"
+    assert choose_state(profile, needs, {**context, "social_subject": "bob"}, [], affinity) == baseline
+
+
+def test_affinity_does_not_override_hard_gates():
+    profile = merged_profile(None)
+    needs = merged_needs({"energy": .1})
+    affinity = [{"kind": "character", "subject": "alice", "affinity": 1, "familiarity": 1}]
+    assert choose_state(profile, needs, {"bound": True, "social_targets": 9, "social_subject": "alice"}, [], affinity) == "contained"
+    assert choose_state(profile, needs, {"social_targets": 9, "social_subject": "alice"}, [], affinity) == "rest"
+
+
+def test_step_mind_exposes_traits_memory_affinity_favorite_place_and_utility():
     memory = remember_event([], "interesting", subject="statue", valence=.7, importance=.8, ttl=120)
+    affinity = [
+        {"kind": "place", "subject": "garden", "affinity": .8, "familiarity": .9},
+        {"kind": "character", "subject": "alice", "affinity": .6, "familiarity": .7},
+    ]
     result = step_mind(
         {"routine": "balanced", "traits": {"curiosity": .8}},
         None,
         1.0,
-        {"interesting_targets": 1, "memory_subject": "statue"},
+        {"interesting_targets": 1, "memory_subject": "statue", "place_subject": "garden"},
         memory,
+        affinity,
     )
     assert result["state"] in {"idle", "wander", "inspect", "social", "return_home", "rest", "contained", "disabled"}
     assert result["animation"]
@@ -141,4 +165,6 @@ def test_step_mind_exposes_traits_memory_and_utility_without_breaking_existing_f
     assert result["profile"]["traits"]["curiosity"] == .8
     assert len(result["memory"]) == 1
     assert result["memory"][0]["age"] == 1.0
+    assert len(result["affinity"]) == 2
+    assert result["favorite_place"] == "garden"
     assert set(result["utility"]) == {"idle", "wander", "inspect", "social", "return_home", "rest"}
