@@ -1,66 +1,76 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-14 21:04 +03:00
+Last updated: 2026-09-14 21:14 +03:00
 
 ## Current verified implementation
 
-Latest verified code/test commit: `60a8ce82e220d44433d1e0f7250db3a05cd71acc` (`test: run life sim regression suite`).
+Latest verified code/test commit: `aebd5685fd9a919d2da6e362574c0808490fb32e` (`test: validate complete AI hard gate policy`).
 
-Stable checkpoint for this block: `checkpoint/stable-d1-life-sim-source-parity-20260914-2103`.
-Rollback checkpoint: `checkpoint/pre-d1-life-sim-parity-20260914-2101`.
+Stable checkpoint: `checkpoint/stable-d1-ai-policy-sync-20260914-2113`.
+Rollback checkpoint: `checkpoint/pre-d1-ai-policy-sync-20260914-2104`.
+Earlier verified Phase A/B/C checkpoints remain preserved, including `checkpoint/stable-c5-facial-mood-20260914-2101`.
 
-Earlier verified checkpoints remain intact through `checkpoint/stable-c5-facial-mood-20260914-2102`.
-
-No versioned rig/skin/animation contract changed. Rig remains v1; animation library remains `krolik.animation-library/1`, format v1.
+No versioned rig/skin/animation contract changed. D1 introduces a new independent AI policy contract: `krolik.ai-policy/1`, format version 1. Existing mind snapshot structure remains backward-compatible.
 
 ## Phase status
 
-- Phase A: A1/A3/A5 verified; A4 Linux/headless verified; A2 blocked on validated DWPose/RTMPose ONNX model; rendered Windows 200–500-agent measurement still pending.
+- Phase A: A1/A3/A5 verified; A4 Linux/headless verified; A2 blocked on validated DWPose/RTMPose ONNX model; rendered Windows 200–500-agent measurement pending.
 - Phase B: external animation/fixture/pose content pipeline verified; legacy graphical UI integration blocked because validated `app.py` is absent.
 - Phase C: complete for current source-asset capabilities: 33-clip motion library, angle-limited IK, additive layers, production secondary motion, semantic facial/mood state.
-- Phase D: D1 IN PROGRESS. This run repaired a real semantic drift between Python `life_sim.py` and Godot `agent_brain.gd`: Python now contains the richer utility scoring/routine/return-home policy already used by the runtime, so the documented Python source of truth no longer silently drops `routine` or uses the obsolete threshold-only chooser.
+- Phase D: D1 VERIFIED. Next unblocked item is D2 personality traits.
 
-## D1 work verified this run
+## D1 — generated AI policy sync VERIFIED
 
-`life_sim.py` now:
-- validates/preserves `routine` (`balanced`, `homebody`, `explorer`, `social`);
-- exposes the same utility-score families and bonuses used by `VaultAgentBrain`;
-- applies the same hard mobility/contained/rest/return-home gates and utility tie-break order;
-- returns utility telemetry while preserving existing mind snapshot fields;
-- keeps existing need-decay/recovery rates and animation mapping.
+`life_sim.py` is now the semantic and tuning source of truth. It owns a versioned `AI_POLICY` document containing defaults, valid mobility/routine/bound modes, utility state order, hard gates, utility coefficients, target/routine bonuses, need rates, affect thresholds and animation mapping. The final formerly duplicated rest-ready multiplier is also policy-owned.
 
-`tests/test_life_sim.py` adds regressions for profile validation, hard mobility gates, return-home behavior, context/routine utility decisions, and snapshot compatibility.
+`ai_policy.py` validates the portable contract. `tools/export_ai_policy.py` reproducibly generates/checks both committed copies:
+- `content/ai/default_policy_v1.json`;
+- `runtime_godot/data/ai_policy_v1.json`.
 
-CI initially did not execute the new test because Vault CI had an explicit test allowlist. Commit `60a8ce82e220d44433d1e0f7250db3a05cd71acc` fixes that omission by adding `tests/test_life_sim.py` to the core suite.
+Vault CI fails if either copy drifts from `life_sim.py`. `tools/validate_content.py` now includes AI policy assets alongside animation/fixture/pose content.
+
+`VaultAgentBrain` loads the bundled policy once through a static cache, so hundreds of agents do not reread JSON. Utility coefficients, hard gates, state order, need rates, affect thresholds and valid enum sets are policy-driven. Invalid/missing policy retains deterministic built-in fallback and does not require Python at runtime.
+
+`ai_policy_harness.gd` proves the runtime is actually data-driven: the default policy selects `social`; a valid runtime policy override changes the same brain decision to `idle` and changes a 60-second energy rate from 0.50 to 0.60 without GDScript code changes; invalid policy is rejected without replacing the active one. A real `VaultCharacterAgent` also loads the generated policy and makes the expected production decision.
+
+Verified runtime metric:
+`KROLIK_AI_POLICY schema=krolik.ai-policy/1 source=harness-custom default_state=social overridden_state=idle energy_after_rate=0.600 production_state=social production_loaded=true`.
+
+The 220-agent stress gate now requires every production brain to report a loaded generated policy in addition to the existing facial/movement gates.
 
 ## Tests/checks actually run
 
 No local execution is claimed; verification came from GitHub Actions.
 
-Vault CI run `34878405347` for `60a8ce82e220d44433d1e0f7250db3a05cd71acc`:
-- source-integrity: PASS;
-- core module syntax: PASS;
-- content validator: PASS (`files=3 failed=0`);
-- core regression suite: PASS, `48 passed`;
-- backend/UI: SKIPPED because validated `app.py` remains absent.
+Vault CI `34879229207` for `aebd5685fd9a919d2da6e362574c0808490fb32e`: SUCCESS.
+- source-integrity PASS;
+- Python syntax PASS;
+- generated-policy sync PASS: `KROLIK_AI_POLICY_SYNC targets=2 status=clean`;
+- content validation PASS: `files=4 failed=0`;
+- core regression suite PASS: `52 passed`;
+- backend/UI SKIPPED because validated `app.py` is absent.
 
-The immediately preceding run `34878313228` also passed 44 legacy core tests, but it did not include the new life-sim test; this was corrected before declaring the block verified.
-
-Godot CI was not triggered by this Python/CI-only block and no new Godot runtime result is claimed. Existing C5 Godot Runtime CI `34878051171` remains the latest verified runtime reference: project parse/import, headless smoke, animation/layer/facial/secondary/IK/deformation gates and 220-agent stress all passed; stress had 220/220 moved, `facial_active=220`, sim_fps `59.83`, max RSS about 110 MiB.
+Godot Runtime CI `34879229415` for the same commit: SUCCESS.
+- Godot 4.7.2 verified download/hash, project import and headless smoke PASS;
+- generated AI policy runtime regression PASS;
+- animation validation, 33-clip runtime, layered animation, facial state, secondary motion and IK limits PASS;
+- rendered Skeleton2D/Polygon2D deformation PASS, changed pixels total `23867`, evidence uploaded;
+- 220-agent stress PASS: `active=220`, `facial_active=220`, `ai_policy_active=220`, `moved=220`, `moved_share=1.000`, `sim_fps=60.06`, `avg_travel_px=99.59`, max RSS `117040 KiB` (~115 MiB), process status 0.
 
 ## Still blocked / unverified
 
 - A2 real DWPose/RTMPose accuracy: no validated ONNX model artifact/source.
 - Final rendered Windows FPS/CPU/memory at 200–500 characters remains unmeasured.
-- Validated legacy `app.py` is unavailable; backend/UI and direct graphical editor integration remain blocked.
+- Validated legacy `app.py` is unavailable; backend/UI and direct graphical editor integration remain blocked. Do not reconstruct or guess corrupted bytes.
 - `KROLIK_MASTER_PLAN.md` remains absent; follow `docs/AUTONOMOUS_RUNBOOK.md`.
-- Dedicated eyelid/eye/mouth geometry is not present; facial eye/mouth values remain semantic channels.
-- D1 is not complete yet: Python and Godot formulas are now intentionally aligned, but there is still no generated/versioned source-independent AI policy document or cross-runtime parity harness preventing future drift.
+- Dedicated eyelid/eye/mouth geometry is not present; facial eye/mouth values remain semantic channels until suitable source geometry exists.
 
 ## Next highest-priority task
 
-Finish D1 rather than starting personality breadth:
-1. Export a versioned AI policy document from Python-owned constants/semantics without changing existing runtime mind snapshots.
-2. Make `VaultAgentBrain` load that policy with deterministic built-in fallback when missing/invalid; runtime must not require Python.
-3. Add Python export validation plus a Godot parity harness using representative profiles/needs/contexts so Python/Godot state decisions cannot silently diverge again.
-4. Add `life_sim.py`/policy paths to Godot Runtime CI triggers, run both Vault and Godot CI, and only then mark D1 complete.
+Start D2 personality traits as a backward-compatible extension of the existing mind profile rather than a parallel AI system:
+1. Define a bounded default trait set with clear behavioral meaning and no duplication of raw utility weights.
+2. Let traits modulate policy utility/rates in Python source-of-truth and Godot through the same generated AI policy contract.
+3. Preserve old profiles with neutral defaults and keep existing `routine`, autonomy/social/wander controls valid.
+4. Add Python behavioral regressions showing distinct personalities choose differently under identical needs/context.
+5. Add a Godot production harness proving the same trait profiles produce the same expected decisions, then stress all 220 agents with mixed deterministic traits.
+6. Verify both CI workflows before creating a D2 stable checkpoint.
