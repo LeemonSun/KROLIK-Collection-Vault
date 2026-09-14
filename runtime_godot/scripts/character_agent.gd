@@ -33,12 +33,15 @@ var skinned_visual: VaultSkinnedCharacter
 var flat_sprite: Sprite2D
 var collision_rig: VaultCollisionRig
 var navigation_agent: NavigationAgent2D
+var _navigation_target_valid := false
+var _navigation_target := Vector2.ZERO
 
 func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     character_id = id_value
     position = spawn
     home_position = spawn
     target_position = spawn
+    _navigation_target_valid = false
     brain.apply_snapshot(mind)
     _ensure_visual_root()
     _ensure_navigation_agent()
@@ -173,6 +176,36 @@ func _ensure_navigation_agent() -> void:
     navigation_agent.neighbor_distance = 90.0
     navigation_agent.avoidance_enabled = false
     add_child(navigation_agent)
+    _navigation_target_valid = false
+
+func _sync_navigation_target() -> void:
+    if navigation_agent == null:
+        return
+    if _navigation_target_valid and _navigation_target.distance_squared_to(target_position) <= 0.01:
+        return
+    _navigation_target = target_position
+    _navigation_target_valid = true
+    navigation_agent.target_position = target_position
+
+func _movement_waypoint() -> Vector2:
+    if navigation_agent == null:
+        return target_position
+    _sync_navigation_target()
+    var map_rid := navigation_agent.get_navigation_map()
+    if not map_rid.is_valid() or NavigationServer2D.map_get_iteration_id(map_rid) <= 0:
+        return target_position
+    # NavigationAgent2D can be attached to a valid World2D map before that map
+    # contains a usable region/path. In that state get_next_path_position() may
+    # resolve to the character's current position and silently stall locomotion.
+    # Keep the direct-target path as a deterministic fallback until a genuine
+    # navigation path exists; once it does, the agent follows navigation again.
+    var path := navigation_agent.get_current_navigation_path()
+    if path.is_empty() or not navigation_agent.is_target_reachable() or navigation_agent.is_navigation_finished():
+        return target_position
+    var next_waypoint := navigation_agent.get_next_path_position()
+    if next_waypoint.distance_squared_to(global_position) <= 0.25:
+        return target_position
+    return next_waypoint
 
 func _rebuild_collision_rig() -> void:
     if collision_rig != null:
@@ -248,12 +281,7 @@ func _physics_process(delta: float) -> void:
         "wander", "inspect", "social", "return_home":
             if global_position.distance_to(target_position) < 8.0:
                 _choose_target()
-            var waypoint := target_position
-            if navigation_agent != null:
-                navigation_agent.target_position = target_position
-                var map_rid := navigation_agent.get_navigation_map()
-                if map_rid.is_valid() and NavigationServer2D.map_get_iteration_id(map_rid) > 0 and not navigation_agent.is_navigation_finished():
-                    waypoint = navigation_agent.get_next_path_position()
+            var waypoint := _movement_waypoint()
             var desired := global_position.direction_to(waypoint) * walk_speed
             velocity = velocity.move_toward(desired, acceleration * delta)
             move_and_slide()
@@ -285,8 +313,8 @@ func _animation_for_state(state_name: String) -> String:
 func _choose_target() -> void:
     if brain.state == "return_home":
         target_position = home_position
-        if navigation_agent != null:
-            navigation_agent.target_position = target_position
+        _navigation_target_valid = false
+        _sync_navigation_target()
         return
     if not world_targets.is_empty():
         var index := int(absf(sin(phase * 0.73)) * float(world_targets.size())) % world_targets.size()
@@ -294,8 +322,8 @@ func _choose_target() -> void:
     else:
         var radius := 130.0 if brain.state == "wander" else 80.0
         target_position = home_position + Vector2(cos(phase * 1.7), sin(phase * 1.13)) * radius
-    if navigation_agent != null:
-        navigation_agent.target_position = target_position
+    _navigation_target_valid = false
+    _sync_navigation_target()
 
 func _draw() -> void:
     if character_texture:
