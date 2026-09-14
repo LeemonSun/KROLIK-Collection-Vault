@@ -360,7 +360,7 @@ func _apply_additive_layer(base: Dictionary, overlay: Dictionary, layer: Diction
         out["joint_offsets"] = joints
         return out
     var mask = layer.get("joint_mask", {})
-    var mask_enabled := typeof(mask) == TYPE_DICTIONARY and not mask.is_empty()
+    var mask_enabled: bool = typeof(mask) == TYPE_DICTIONARY and not mask.is_empty()
     for raw_name in overlay_joints.keys():
         var joint_name := str(raw_name)
         if mask_enabled and not mask.has(joint_name):
