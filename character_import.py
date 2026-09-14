@@ -9,6 +9,7 @@ invariants that recovered UI code must call into later:
 - source bytes are immutable and content-addressed;
 - all image processing creates derived assets;
 - cutout preparation is deterministic and versioned;
+- auto-rig may be corrected through a versioned authoring document;
 - the existing rig/runtime-package contracts remain the only runtime path.
 """
 
@@ -23,6 +24,7 @@ import tempfile
 import numpy as np
 from PIL import Image, ImageOps
 
+from rig_edit import apply_joint_overrides
 from rig_tools import detect_rig
 from runtime_package import build_manifest, write_package
 
@@ -303,6 +305,38 @@ def _default_mind() -> dict[str, Any]:
     }
 
 
+def _persist_rig_edit(
+    root: Path,
+    asset: dict[str, Any],
+    character_id: str,
+    backend: str,
+    report: dict[str, Any],
+) -> str | None:
+    if int(report.get("override_count", 0)) <= 0:
+        return None
+    document = {
+        **report,
+        "character_id": str(character_id),
+        "source_sha256": str(asset["source_sha256"]),
+        "cutout_sha256": str(asset["cutout_sha256"]),
+        "detector_backend": str(backend),
+    }
+    canonical = json.dumps(document, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    edit_sha = _sha256_bytes(canonical)
+    edit_path = (
+        root
+        / "imports"
+        / _safe_id(character_id)
+        / "derived"
+        / "rig_edits"
+        / "v1"
+        / str(asset["source_sha256"])
+        / f"{edit_sha}.json"
+    )
+    _atomic_write_text(edit_path, json.dumps(document, ensure_ascii=False, indent=2))
+    return str(edit_path)
+
+
 def build_character_runtime_package(
     project_root: str | Path,
     source_image: str | Path,
@@ -311,6 +345,7 @@ def build_character_runtime_package(
     name: str | None = None,
     cutout_mode: str = "auto",
     prefer_ai_rig: bool = True,
+    joint_overrides: dict[str, Any] | None = None,
     mind: dict[str, Any] | None = None,
     cell_id: str | None = None,
 ) -> dict[str, Any]:
@@ -319,6 +354,14 @@ def build_character_runtime_package(
     asset = prepare_character_asset(root, source_image, character_id, cutout_mode=cutout_mode)
     detection = detect_rig(asset["cutout"], prefer_ai=prefer_ai_rig)
     settings = dict(detection.settings)
+    joints, edit_report = apply_joint_overrides(detection.joints, joint_overrides)
+    rig_edit_path = _persist_rig_edit(
+        root,
+        asset,
+        str(character_id),
+        str(settings.get("backend") or "none"),
+        edit_report,
+    )
 
     character = {
         "id": str(character_id),
@@ -333,7 +376,7 @@ def build_character_runtime_package(
     }
     rig = {
         "id": 0,
-        "rest_json": json.dumps({"joints": detection.joints}, ensure_ascii=False),
+        "rest_json": json.dumps({"joints": joints}, ensure_ascii=False),
         "settings_json": json.dumps(settings, ensure_ascii=False),
     }
     mind_doc = dict(mind) if mind is not None else _default_mind()
@@ -362,6 +405,11 @@ def build_character_runtime_package(
         "triangles": len(skin.get("triangles", [])) // 3,
         "bone_weights": len(skin.get("bone_weights", [])),
         "collision_proxies": len(written.get("physics", {}).get("collision", [])),
+        "joint_override_count": int(edit_report.get("override_count", 0)),
+        "joint_changed_count": int(edit_report.get("changed_count", 0)),
+        "joint_changed": list(edit_report.get("changed_joints", [])),
+        "joint_max_delta": float(edit_report.get("max_delta", 0.0)),
+        "rig_edit": rig_edit_path,
         "manifest": str(manifest_path),
         "image": str(package["image"]),
     }
