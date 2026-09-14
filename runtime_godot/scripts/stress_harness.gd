@@ -1,16 +1,16 @@
 extends SceneTree
 
 ## Headless performance/behavior smoke for the actual VaultCharacterAgent runtime.
-## Instantiates real CharacterBody2D agents and drives their real brain -> physics ->
-## animation path deterministically.  Agent-vs-agent collision is intentionally
-## disabled here so the movement assertion measures runtime behavior rather than
-## grid packing; collision behavior is covered separately by collision-rig tests.
+## Instantiates real CharacterBody2D agents and lets SceneTree drive their real
+## brain -> physics -> move_and_slide -> animation path on physics frames.
+## Agent-vs-agent collision is intentionally disabled here so this gate measures
+## runtime throughput/behavior rather than grid packing; collision behavior is
+## covered separately by collision-rig tests.
 
 const AgentScript = preload("res://scripts/character_agent.gd")
 const AGENT_COUNT := 220
 const WARMUP_FRAMES := 30
 const SAMPLE_FRAMES := 180
-const FIXED_DELTA := 1.0 / 60.0
 const MAX_SAMPLE_SECONDS := 20.0
 const MIN_MOVED_SHARE := 0.80
 const MIN_TRAVEL_PX := 8.0
@@ -32,7 +32,11 @@ func _spawn_agents() -> void:
     for i in range(AGENT_COUNT):
         var agent := AgentScript.new() as VaultCharacterAgent
         _root.add_child(agent)
-        agent.process_mode = Node.PROCESS_MODE_DISABLED
+        # Keep normal SceneTree physics processing enabled. Previous harness
+        # versions disabled processing and called _physics_process() from a tight
+        # deferred loop; that does not exercise CharacterBody2D/move_and_slide in
+        # its intended physics-frame context and produced a false movement gate.
+        agent.process_mode = Node.PROCESS_MODE_INHERIT
         var row := i / columns
         var col := i % columns
         var spawn := Vector2(40.0 + col * 34.0, 60.0 + row * 42.0)
@@ -42,15 +46,11 @@ func _spawn_agents() -> void:
             "profile": {"mobility": "free", "routine": "explorer", "autonomy": 1.0, "wander": 1.0, "walk_speed": 1.0},
             "needs": {"energy": 1.0, "comfort": 0.7, "curiosity": 1.0, "social": 0.35}
         })
-        # This stress case is a throughput/behavior gate, not a crowd-collision
-        # benchmark. setup() enables the production layer/mask, so explicitly
-        # isolate each CharacterBody2D after setup to prevent neighboring agents
-        # from blocking the movement assertion. move_and_slide() still executes.
         agent.collision_layer = 0
         agent.collision_mask = 0
-        # setup() intentionally resets target_position to spawn; assign the
-        # deterministic target afterwards and keep it farther than the movement
-        # threshold for the full sample.
+        # setup() intentionally resets target_position to spawn, so assign the
+        # deterministic target afterwards. The target stays well beyond the
+        # movement threshold throughout the sample.
         var direction := -1.0 if (i % 2) == 0 else 1.0
         var target := spawn + Vector2(direction * 96.0, 24.0 + float(i % 3) * 8.0)
         agent.home_position = spawn
@@ -59,19 +59,16 @@ func _spawn_agents() -> void:
         _agents.append(agent)
         _start_positions[agent.get_instance_id()] = spawn
 
-func _tick_agents() -> void:
-    for agent in _agents:
-        if is_instance_valid(agent):
-            agent._physics_process(FIXED_DELTA)
+func _wait_physics_frames(count: int) -> void:
+    for _i in range(count):
+        await physics_frame
 
 func _run() -> void:
     _spawn_agents()
-    for _i in range(WARMUP_FRAMES):
-        _tick_agents()
+    await _wait_physics_frames(WARMUP_FRAMES)
 
     var started_usec := Time.get_ticks_usec()
-    for _i in range(SAMPLE_FRAMES):
-        _tick_agents()
+    await _wait_physics_frames(SAMPLE_FRAMES)
     var elapsed := float(Time.get_ticks_usec() - started_usec) / 1000000.0
     var fps := float(SAMPLE_FRAMES) / maxf(elapsed, 0.000001)
     var moving := 0
@@ -104,7 +101,7 @@ func _run() -> void:
         quit(2)
         return
     if elapsed > MAX_SAMPLE_SECONDS:
-        push_error("KROLIK stress: %d frames took %.2fs (> %.2fs budget)" % [SAMPLE_FRAMES, elapsed, MAX_SAMPLE_SECONDS])
+        push_error("KROLIK stress: %d physics frames took %.2fs (> %.2fs budget)" % [SAMPLE_FRAMES, elapsed, MAX_SAMPLE_SECONDS])
         quit(3)
         return
     if moved_share < MIN_MOVED_SHARE:
