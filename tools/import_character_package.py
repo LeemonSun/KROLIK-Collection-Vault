@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from character_import import build_character_runtime_package
+from import_integrity import ImportIntegrityError, validate_built_import
 from rig_edit import load_joint_overrides
 
 
@@ -44,34 +45,24 @@ def main() -> int:
         joint_overrides=overrides,
     )
 
+    try:
+        integrity = validate_built_import(result)
+    except ImportIntegrityError as exc:
+        print(f"KROLIK_CHARACTER_IMPORT_INTEGRITY status=failed error={exc}")
+        return 3
+
     ordered = [
-        "character_id",
-        "source_sha256",
-        "cutout_method",
-        "cutout_confidence",
-        "review_required",
-        "alpha_coverage",
-        "backend",
-        "rig_score",
-        "runtime_ready",
-        "joints",
-        "bones",
-        "vertices",
-        "triangles",
-        "bone_weights",
-        "collision_proxies",
-        "joint_override_count",
-        "joint_changed_count",
-        "joint_changed",
-        "joint_max_delta",
-        "original",
-        "cutout",
-        "receipt",
-        "rig_edit",
-        "manifest",
-        "image",
+        "character_id", "source_sha256", "cutout_method", "cutout_confidence",
+        "review_required", "alpha_coverage", "backend", "rig_score", "runtime_ready",
+        "joints", "bones", "vertices", "triangles", "bone_weights", "collision_proxies",
+        "joint_override_count", "joint_changed_count", "joint_changed", "joint_max_delta",
+        "original", "cutout", "receipt", "rig_edit", "manifest", "image",
     ]
     print("KROLIK_CHARACTER_IMPORT " + " ".join(f"{key}={result.get(key)}" for key in ordered))
+    print(
+        "KROLIK_CHARACTER_IMPORT_INTEGRITY "
+        f"status=ok source_sha256={integrity['source_sha256']} cutout_sha256={integrity['cutout_sha256']}"
+    )
     return 0 if result.get("runtime_ready") else 2
 
 
