@@ -25,13 +25,16 @@ jobs:
       - name: Core module syntax
         run: |
           python -m py_compile \
-            animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
-            constraint_solver.py interaction_runtime.py life_sim.py tools/validate_content.py
+            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
+            constraint_solver.py interaction_runtime.py life_sim.py tools/export_ai_policy.py tools/validate_content.py
+      - name: Verify generated AI policy copies
+        run: python tools/export_ai_policy.py --check
       - name: Validate data-driven content
         run: python tools/validate_content.py
       - name: Core regression suite
         run: |
           pytest -q \
+            tests/test_ai_policy.py \
             tests/test_animation_pose.py \
             tests/test_animation_content.py \
             tests/test_motion_quality.py \
