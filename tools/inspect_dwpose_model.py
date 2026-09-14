@@ -32,6 +32,21 @@ def _static_dim(value: Any, label: str) -> int:
     raise DWPoseContractError(f"{label} must be a static positive integer, got {value!r}")
 
 
+def _batch_dim(value: Any) -> tuple[int, bool]:
+    """Use batch=1 for the smoke while accepting a symbolic ONNX batch axis."""
+    if isinstance(value, int):
+        if value <= 0:
+            raise DWPoseContractError(f"input batch must be positive, got {value!r}")
+        if value != 1:
+            raise DWPoseContractError(f"KROLIK smoke expects batch 1, model declares {value}")
+        return 1, False
+    if isinstance(value, str) and value.strip():
+        return 1, True
+    if value is None:
+        return 1, True
+    raise DWPoseContractError(f"unsupported input batch dimension: {value!r}")
+
+
 def validate_session_contract(session: Any, *, run_inference: bool = True) -> dict[str, Any]:
     inputs = list(session.get_inputs())
     if len(inputs) != 1:
@@ -41,12 +56,12 @@ def validate_session_contract(session: Any, *, run_inference: bool = True) -> di
     if len(shape) != 4:
         raise DWPoseContractError(f"expected NCHW rank-4 input, got {shape}")
 
-    batch = _static_dim(shape[0], "input batch")
+    batch, dynamic_batch = _batch_dim(shape[0])
     channels = _static_dim(shape[1], "input channels")
     height = _static_dim(shape[2], "input height")
     width = _static_dim(shape[3], "input width")
-    if batch != 1 or channels != 3:
-        raise DWPoseContractError(f"expected input [1,3,H,W], got {shape}")
+    if channels != 3:
+        raise DWPoseContractError(f"expected input [batch,3,H,W], got {shape}")
 
     declared_outputs = list(session.get_outputs())
     if len(declared_outputs) < 2:
@@ -59,7 +74,12 @@ def validate_session_contract(session: Any, *, run_inference: bool = True) -> di
     else:
         output_values = []
         for output in declared_outputs[:2]:
-            dims = [_static_dim(dim, f"output {output.name} dimension") for dim in output.shape]
+            dims: list[int] = []
+            for index, dim in enumerate(output.shape):
+                if index == 0 and (isinstance(dim, str) or dim is None):
+                    dims.append(1)
+                else:
+                    dims.append(_static_dim(dim, f"output {output.name} dimension {index}"))
             output_values.append(np.zeros(dims, dtype=np.float32))
 
     if len(output_values) < 2:
@@ -70,7 +90,7 @@ def validate_session_contract(session: Any, *, run_inference: bool = True) -> di
             f"expected rank-3 SimCC outputs, got x={simcc_x.shape} y={simcc_y.shape}"
         )
     if simcc_x.shape[0] != 1 or simcc_y.shape[0] != 1:
-        raise DWPoseContractError("SimCC output batch must be 1")
+        raise DWPoseContractError("SimCC output batch must resolve to 1 for the smoke")
     if simcc_x.shape[1] != simcc_y.shape[1] or simcc_x.shape[1] < 17:
         raise DWPoseContractError(
             f"invalid/mismatched keypoint dimension x={simcc_x.shape} y={simcc_y.shape}"
@@ -88,7 +108,9 @@ def validate_session_contract(session: Any, *, run_inference: bool = True) -> di
 
     return {
         "input_name": str(inp.name),
+        "declared_input_shape": shape,
         "input_shape": [batch, channels, height, width],
+        "dynamic_batch": dynamic_batch,
         "output_x_shape": [int(v) for v in simcc_x.shape],
         "output_y_shape": [int(v) for v in simcc_y.shape],
         "keypoints": int(simcc_x.shape[1]),
@@ -130,7 +152,8 @@ def main() -> int:
     print(
         "KROLIK_DWPOSE_CONTRACT status=ok "
         f"sha256={report['sha256']} bytes={report['bytes']} "
-        f"input={report['input_shape']} x={report['output_x_shape']} y={report['output_y_shape']} "
+        f"declared_input={report['declared_input_shape']} runtime_input={report['input_shape']} "
+        f"dynamic_batch={report['dynamic_batch']} x={report['output_x_shape']} y={report['output_y_shape']} "
         f"keypoints={report['keypoints']} split={report['simcc_split_ratio']} "
         f"providers={report['providers']}"
     )
