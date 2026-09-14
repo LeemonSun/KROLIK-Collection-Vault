@@ -3,14 +3,15 @@ extends CharacterBody2D
 
 const SkinnedCharacterScript = preload("res://scripts/skinned_character.gd")
 const CollisionRigScript = preload("res://scripts/collision_rig.gd")
+const RuntimeBrainScript = preload("res://scripts/agent_brain_runtime.gd")
 
 var character_id := ""
-var brain := VaultAgentBrainRuntime.new()
+var brain = RuntimeBrainScript.new()
 var animation_driver := VaultAnimationDriver.new()
 var facial_state := VaultFacialState.new()
 var facial_channels: Dictionary = {}
 var secondary_motion := VaultSecondaryMotion.new()
-var secondary_motion_enabled := false
+var secondary_motion_enabled = false
 var contained := false
 var home_position := Vector2.ZERO
 var target_position := Vector2.ZERO
