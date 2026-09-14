@@ -1,12 +1,12 @@
 # KROLIK autonomous development state
 
-Updated: 2026-09-14, autonomous pass 10.
+Updated: 2026-09-14, autonomous pass 11.
 
 ## Current main / rollback
 
-- Current runtime/CI implementation commit: `cfec1162ce8ebec11a423e4b523e651ae97c6f5d` (`ci: diagnose and harden stress harness timeout`).
-- New rollback checkpoint created before this change: `checkpoint/pre-ci-stress-timeout-20260914` at `50efae0077068dddc826cc0540fda192c417ff08`.
-- Earlier pre-A1 rollback checkpoint remains `checkpoint/pre-a1-render-deform-20260914`.
+- Current runtime/CI implementation commit: `cd1636b1935ebd6ed97daf2842dc2ae2c569353d` (`ci: preserve stress harness exit status through tee`).
+- New rollback checkpoint created before this change: `checkpoint/pre-stress-exit-diagnostic-20260914` at `e1a35c65a70e3e9768c9c8edc71b59b43b747b20`.
+- Earlier rollback checkpoints remain available.
 - No application/schema/data contract changed in this pass.
 
 ## Repository integrity status
@@ -15,37 +15,41 @@ The validated Python/editor application source (`app.py` and related UI/tests) i
 
 The Godot runtime tree is independently present and testable.
 
-## Work completed in pass 10
+`KROLIK_MASTER_PLAN.md` was not found at repository root or `docs/KROLIK_MASTER_PLAN.md` in this pass, and repository code search returned no match. Continue using the phase order already preserved in this state/runbook until the roadmap file is restored/found; record this as a repository documentation blocker rather than inventing its contents.
 
-1. Read `docs/AUTONOMOUS_RUNBOOK.md`, the previous autonomous state, repository roadmap material, current runtime scripts/workflow, latest main commit and Actions state before editing.
-2. Inspected Godot Runtime CI run `34811668598` from pass 9. It completed **failure** in `220 live-agent stress smoke with RSS budget`; `Parse and import Godot project` and `Headless runtime smoke` both succeeded. This proves the optional `KROLIK_STRESS_METRIC` parser was not the root cause.
-3. Created rollback branch `checkpoint/pre-ci-stress-timeout-20260914` before modifying the workflow.
-4. Hardened the stress process watchdog in `.github/workflows/godot-runtime.yml`: the external timeout is now 90 seconds with TERM then a 10-second kill grace. The harness's own measured-runtime assertion remains unchanged, so a genuine simulation performance regression still fails inside the harness; hosted-runner startup/teardown slowness no longer has to fit inside the previous 45-second outer watchdog.
-5. Added process status to the stress summary and explicit timeout-tail diagnostics for exit 124/137. RSS <= 512 MiB and non-zero harness status remain mandatory gates.
-6. Pushed implementation commit `cfec1162ce8ebec11a423e4b523e651ae97c6f5d` to `main`. New Godot Runtime CI run `34819317736` and Vault CI run `34819317704` started automatically.
+## Work completed in pass 11
+
+1. Read `docs/AUTONOMOUS_RUNBOOK.md`, previous `docs/AUTONOMOUS_STATE.md`, latest main commits and current Actions state before editing.
+2. Inspected Godot Runtime CI run `34819317736` for implementation commit `cfec1162ce8ebec11a423e4b523e651ae97c6f5d`. It completed **failure**. Download, project parse/import and ordinary headless runtime smoke all succeeded; only `220 live-agent stress smoke with RSS budget` failed after about six seconds. Therefore the previous 90-second watchdog change did not fix the failure and the process was not simply exhausting that watchdog.
+3. Created rollback checkpoint `checkpoint/pre-stress-exit-diagnostic-20260914` before modifying CI.
+4. Reworked the stress-step process-status capture so the timed Godot command persists its own exit code to a status file inside a child shell, independently of the outer `tee` pipeline. The workflow now reports both `process_status` and `pipeline_status`, validates the persisted status, and always prints the captured stress-log tail on any non-zero Godot/harness status.
+5. Kept the actual correctness/performance gates unchanged: the harness still requires all 220 agents live, >=80% travelling at least 8 px, <=20 s for the measured 180-frame sample; CI still requires maximum RSS <=512 MiB and a zero harness process exit.
+6. Pushed implementation commit `cd1636b1935ebd6ed97daf2842dc2ae2c569353d` to `main`. Godot Runtime CI run `34820638528` and Vault CI run `34820638567` started automatically.
 
 ## Tests / verification actually performed
 
-- Godot Runtime CI run `34811668598` for previous commit `8c382a3b932f4fd500e263d07f74a88c1e2c9e8f`: **failure**. Project parse/import: success. Ordinary headless runtime smoke: success. 220-agent stress/RSS step: failure.
-- New Godot Runtime CI run `34819317736` for `cfec1162ce8ebec11a423e4b523e651ae97c6f5d`: **in progress** at state-write time. Do not claim the watchdog repair verified until it completes.
-- New Vault CI run `34819317704`: **in progress** at state-write time. While `app.py` is absent, a green result is source-integrity status only, not backend/UI verification.
+- Godot Runtime CI run `34819317736` for `cfec1162ce8ebec11a423e4b523e651ae97c6f5d`: **failure**. Project parse/import: success. Ordinary headless runtime smoke: success. 220-agent stress/RSS step: failure. The failing step completed in roughly six seconds, ruling out the configured 90-second outer watchdog as the immediate cause.
+- Godot Runtime CI run `34820638528` for `cd1636b1935ebd6ed97daf2842dc2ae2c569353d`: **in progress** at state-write time. Do not claim the status-capture repair verified until it completes.
+- Vault CI run `34820638567`: queued/in progress at state-write time. While `app.py` is absent, green Vault CI is source-integrity status only, not backend/UI verification.
 - No Python application tests were run because validated Python/editor source remains absent.
 
 ## Anything still unverified
 
-- Exact exit reason/output of the prior stress failure was not exposed by the available connector response, so the 90-second watchdog repair is intentionally instrumented to make a repeated timeout diagnosable rather than pretending the root cause is proven.
-- Whether Godot Runtime CI run `34819317736` passes the real harness-exit/RSS gates.
-- Exact Linux/headless RSS/FPS baseline from the new run.
+- Exact Godot/harness exit code and captured output responsible for run `34819317736`; the available connector exposes step conclusions but not the Actions log archive. The new workflow deliberately makes the next failure self-describing in normal step output/summary.
+- Whether run `34820638528` passes the real harness-exit/RSS gates.
+- Exact Linux/headless RSS/FPS baseline from a verified green run.
 - Rendered/Windows performance remains unmeasured, so A4 is not complete.
 
 ## Exact blockers / safe continuation
 
 Primary restoration blocker remains a byte-exact copy of the validated stable Python/editor source artifact (or complete exact base64 transport). Do not reconstruct it by guessing.
 
+Roadmap-document blocker: `KROLIK_MASTER_PLAN.md` is currently not discoverable at the expected root/docs paths or by repository search. Do not recreate its priorities from guesses; use the preserved phase order in autonomous state/runbook until recovered.
+
 Next pass should:
 
-1. Inspect Godot Runtime CI run `34819317736` first. If it failed, use the new process-status/timeout-tail diagnostics to identify the real stress failure and fix it before feature work. If it succeeded, record the verified RSS/FPS/process status and preserve a stable checkpoint at the verified commit.
-2. Once CI is green, continue A1 visual deformation verification. Build a deterministic Godot test around the existing `VaultSkinnedCharacter`/`Skeleton2D`/`Polygon2D` path that proves a bone transform produces actual mesh/render deformation; prefer image/pixel evidence when a CI-safe renderer is available, otherwise establish deterministic geometry deformation assertions first and add rendered evidence next.
+1. Inspect Godot Runtime CI run `34820638528` first. If it failed, use the persisted `process_status`, `pipeline_status`, RSS and captured tail to fix the actual harness/runtime problem rather than changing timeouts/parsers again. If it succeeded, record verified RSS/FPS/process status and create/update a stable checkpoint at the verified implementation commit.
+2. Once CI is green, continue A1 visual deformation verification: deterministic test around `VaultSkinnedCharacter`/`Skeleton2D`/`Polygon2D` proving a bone transform produces actual mesh deformation, then rendered/pixel evidence when CI-safe rendering is available.
 3. Do not call A4 complete until rendered Windows FPS/CPU/memory is measured. Linux/headless CI remains a regression baseline only.
 
 ## CI semantics until restoration
