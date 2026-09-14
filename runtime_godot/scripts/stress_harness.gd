@@ -98,6 +98,7 @@ func _run() -> void:
     var moved := 0
     var active := 0
     var facial_active := 0
+    var ai_policy_active := 0
     var total_travel := 0.0
     var total_phase := 0.0
     var state_counts: Dictionary = {}
@@ -107,6 +108,8 @@ func _run() -> void:
         active += 1
         if agent.facial_state.enabled:
             facial_active += 1
+        if agent.brain.policy_loaded:
+            ai_policy_active += 1
         total_phase += agent.phase
         var state_name := agent.brain.state
         state_counts[state_name] = int(state_counts.get(state_name, 0)) + 1
@@ -121,11 +124,11 @@ func _run() -> void:
     var moved_share := float(moved) / float(AGENT_COUNT)
     var avg_travel := total_travel / float(maxi(active, 1))
     var avg_phase := total_phase / float(maxi(active, 1))
-    print("KROLIK_STRESS agents=%d active=%d facial_active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s" % [
-        AGENT_COUNT, active, facial_active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts)
+    print("KROLIK_STRESS agents=%d active=%d facial_active=%d ai_policy_active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s" % [
+        AGENT_COUNT, active, facial_active, ai_policy_active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts)
     ])
-    print("KROLIK_STRESS_METRIC agents=%d active=%d facial_active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
-        AGENT_COUNT, active, facial_active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
+    print("KROLIK_STRESS_METRIC agents=%d active=%d facial_active=%d ai_policy_active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
+        AGENT_COUNT, active, facial_active, ai_policy_active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
     ])
 
     if active != AGENT_COUNT:
@@ -135,6 +138,10 @@ func _run() -> void:
     if facial_active != AGENT_COUNT:
         push_error("KROLIK stress: expected %d active facial controllers, got %d" % [AGENT_COUNT, facial_active])
         quit(6)
+        return
+    if ai_policy_active != AGENT_COUNT:
+        push_error("KROLIK stress: expected %d brains on generated AI policy, got %d" % [AGENT_COUNT, ai_policy_active])
+        quit(7)
         return
     if elapsed > MAX_SAMPLE_SECONDS:
         push_error("KROLIK stress: %d physics frames took %.2fs (> %.2fs budget)" % [SAMPLE_FRAMES, elapsed, MAX_SAMPLE_SECONDS])
