@@ -1,12 +1,12 @@
 # KROLIK autonomous development state
 
-Updated: 2026-09-14, autonomous pass 9.
+Updated: 2026-09-14, autonomous pass 10.
 
 ## Current main / rollback
 
-- Current runtime/CI implementation commit: `8c382a3b932f4fd500e263d07f74a88c1e2c9e8f` (`ci: decouple stress observability from runtime gate`).
-- Existing rollback checkpoint for the stress-metric repair remains `checkpoint/pre-fix-stress-metric-20260914` at `2b2499ea807ab179c9805643dddc81602ac28c8f`; an attempted additional checkpoint creation in this pass was blocked by connector safety checks, so the existing pre-change checkpoint was preserved instead of rewriting history.
-- Earlier pre-A1 rollback checkpoint remains `checkpoint/pre-a1-render-deform-20260914` at `394a1bf06a4bbaa740b47fce8dec518be53d56bb`.
+- Current runtime/CI implementation commit: `cfec1162ce8ebec11a423e4b523e651ae97c6f5d` (`ci: diagnose and harden stress harness timeout`).
+- New rollback checkpoint created before this change: `checkpoint/pre-ci-stress-timeout-20260914` at `50efae0077068dddc826cc0540fda192c417ff08`.
+- Earlier pre-A1 rollback checkpoint remains `checkpoint/pre-a1-render-deform-20260914`.
 - No application/schema/data contract changed in this pass.
 
 ## Repository integrity status
@@ -15,24 +15,27 @@ The validated Python/editor application source (`app.py` and related UI/tests) i
 
 The Godot runtime tree is independently present and testable.
 
-## Work completed in pass 9
+## Work completed in pass 10
 
-1. Inspected Godot Runtime CI run `34809872076` from pass 8. It completed **failure** again in `220 live-agent stress smoke with RSS budget`; project import and ordinary headless runtime smoke both succeeded.
-2. Since broadening the stdout marker parser did not fix the run, stopped treating a captured human-readable summary line as a correctness condition. The actual correctness gates remain the stress harness process exit status (which enforces 220 live agents, sample-time budget and >=80% actual travel) plus the parsed process RSS budget.
-3. Hardened `.github/workflows/godot-runtime.yml` so `KROLIK_STRESS_METRIC` is now best-effort observability for the Actions summary: it is parsed with awk when present, and reported as unavailable with diagnostics when stdout capture omits it, without masking a real non-zero harness status or RSS regression.
-4. Preserved the existing pre-repair rollback checkpoint after the connector refused creation of an additional checkpoint branch.
+1. Read `docs/AUTONOMOUS_RUNBOOK.md`, the previous autonomous state, repository roadmap material, current runtime scripts/workflow, latest main commit and Actions state before editing.
+2. Inspected Godot Runtime CI run `34811668598` from pass 9. It completed **failure** in `220 live-agent stress smoke with RSS budget`; `Parse and import Godot project` and `Headless runtime smoke` both succeeded. This proves the optional `KROLIK_STRESS_METRIC` parser was not the root cause.
+3. Created rollback branch `checkpoint/pre-ci-stress-timeout-20260914` before modifying the workflow.
+4. Hardened the stress process watchdog in `.github/workflows/godot-runtime.yml`: the external timeout is now 90 seconds with TERM then a 10-second kill grace. The harness's own measured-runtime assertion remains unchanged, so a genuine simulation performance regression still fails inside the harness; hosted-runner startup/teardown slowness no longer has to fit inside the previous 45-second outer watchdog.
+5. Added process status to the stress summary and explicit timeout-tail diagnostics for exit 124/137. RSS <= 512 MiB and non-zero harness status remain mandatory gates.
+6. Pushed implementation commit `cfec1162ce8ebec11a423e4b523e651ae97c6f5d` to `main`. New Godot Runtime CI run `34819317736` and Vault CI run `34819317704` started automatically.
 
 ## Tests / verification actually performed
 
-- Godot Runtime CI run `34809872076` for previous repair commit `8c66a3630c7f56a96c76e2627771cfd18ae40138`: **failure**. `Parse and import Godot project`: success. `Headless runtime smoke`: success. `220 live-agent stress smoke with RSS budget`: failure.
-- New Godot Runtime CI run `34811668598` for implementation commit `8c382a3b932f4fd500e263d07f74a88c1e2c9e8f`: **queued** at state-write time. Do not claim this repair verified until it completes.
-- New Vault CI run `34811668509`: **queued** at state-write time. While `app.py` is absent, a green Vault CI result is source-integrity status only, not backend/UI verification.
+- Godot Runtime CI run `34811668598` for previous commit `8c382a3b932f4fd500e263d07f74a88c1e2c9e8f`: **failure**. Project parse/import: success. Ordinary headless runtime smoke: success. 220-agent stress/RSS step: failure.
+- New Godot Runtime CI run `34819317736` for `cfec1162ce8ebec11a423e4b523e651ae97c6f5d`: **in progress** at state-write time. Do not claim the watchdog repair verified until it completes.
+- New Vault CI run `34819317704`: **in progress** at state-write time. While `app.py` is absent, a green result is source-integrity status only, not backend/UI verification.
 - No Python application tests were run because validated Python/editor source remains absent.
 
 ## Anything still unverified
 
-- Whether run `34811668598` passes the real harness-exit/RSS gates after removing the optional stdout-summary marker as a failure condition.
-- Exact Linux/headless RSS/FPS baseline from the latest run; record it only if accessible from verified CI output.
+- Exact exit reason/output of the prior stress failure was not exposed by the available connector response, so the 90-second watchdog repair is intentionally instrumented to make a repeated timeout diagnosable rather than pretending the root cause is proven.
+- Whether Godot Runtime CI run `34819317736` passes the real harness-exit/RSS gates.
+- Exact Linux/headless RSS/FPS baseline from the new run.
 - Rendered/Windows performance remains unmeasured, so A4 is not complete.
 
 ## Exact blockers / safe continuation
@@ -41,7 +44,7 @@ Primary restoration blocker remains a byte-exact copy of the validated stable Py
 
 Next pass should:
 
-1. Inspect Godot Runtime CI run `34811668598` first. If it failed, the failure is now a real harness exit/RSS/parsing problem rather than the optional metric-summary marker; diagnose and repair it before feature work. If it succeeded, record that verification and any accessible RSS/FPS values.
+1. Inspect Godot Runtime CI run `34819317736` first. If it failed, use the new process-status/timeout-tail diagnostics to identify the real stress failure and fix it before feature work. If it succeeded, record the verified RSS/FPS/process status and preserve a stable checkpoint at the verified commit.
 2. Once CI is green, continue A1 visual deformation verification. Build a deterministic Godot test around the existing `VaultSkinnedCharacter`/`Skeleton2D`/`Polygon2D` path that proves a bone transform produces actual mesh/render deformation; prefer image/pixel evidence when a CI-safe renderer is available, otherwise establish deterministic geometry deformation assertions first and add rendered evidence next.
 3. Do not call A4 complete until rendered Windows FPS/CPU/memory is measured. Linux/headless CI remains a regression baseline only.
 
