@@ -16,7 +16,8 @@
     "autonomy_lock": 0.2,
     "inspect_no_target_multiplier": 0.82,
     "rest_energy_margin": 0.2,
-    "rest_energy_floor": 0.5
+    "rest_energy_floor": 0.5,
+    "rest_ready_multiplier": 0.35
   },
   "utility": {
     "idle": {"base": 0.2, "comfort": 0.12, "inverse_autonomy": 0.18},
