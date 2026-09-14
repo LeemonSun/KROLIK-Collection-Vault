@@ -40,6 +40,14 @@ var last_utility: Dictionary = {}
 var policy_loaded := false
 var policy_source := "fallback"
 var _policy: Dictionary = {}
+var _trait_bias: Dictionary = {
+    "idle": 0.0,
+    "wander": 0.0,
+    "inspect": 0.0,
+    "social": 0.0,
+    "return_home": 0.0,
+    "rest": 0.0,
+}
 
 func _init() -> void:
     var doc := _default_policy_document()
@@ -78,6 +86,7 @@ func configure_policy(doc: Dictionary, source: String = "runtime") -> bool:
     _policy = doc.duplicate(true)
     policy_loaded = true
     policy_source = source
+    _rebuild_trait_bias()
     return true
 
 func _valid_values(key: String, fallback: Array) -> Array:
@@ -106,8 +115,28 @@ func _normalized_traits(raw: Variant) -> Dictionary:
             out[name] = clampf(float(source[name]), 0.0, 1.0)
     return out
 
-func _trait_delta(name: String) -> float:
-    return clampf(float(traits.get(name, 0.5)), 0.0, 1.0) - 0.5
+func _rebuild_trait_bias() -> void:
+    _trait_bias = {
+        "idle": 0.0,
+        "wander": 0.0,
+        "inspect": 0.0,
+        "social": 0.0,
+        "return_home": 0.0,
+        "rest": 0.0,
+    }
+    var trait_effects := _section("trait_effects")
+    for raw_name in trait_effects.keys():
+        var name := str(raw_name)
+        var effects = trait_effects[raw_name]
+        if typeof(effects) != TYPE_DICTIONARY:
+            continue
+        var delta := clampf(float(traits.get(name, 0.5)), 0.0, 1.0) - 0.5
+        if absf(delta) <= 0.000001:
+            continue
+        for raw_state in effects.keys():
+            var state_name := str(raw_state)
+            if _trait_bias.has(state_name):
+                _trait_bias[state_name] = float(_trait_bias[state_name]) + delta * float(effects[raw_state])
 
 func _apply_policy_defaults() -> void:
     var defaults: Dictionary = _policy.get("defaults", {})
@@ -123,6 +152,7 @@ func _apply_policy_defaults() -> void:
     home_bias = clampf(float(p.get("home_bias", home_bias)), 0.0, 1.0)
     walk_speed = clampf(float(p.get("walk_speed", walk_speed)), 0.05, 4.0)
     traits = _normalized_traits(p.get("traits", {}))
+    _rebuild_trait_bias()
     energy = clampf(float(n.get("energy", energy)), 0.0, 1.0)
     comfort = clampf(float(n.get("comfort", comfort)), 0.0, 1.0)
     curiosity = clampf(float(n.get("curiosity", curiosity)), 0.0, 1.0)
@@ -147,6 +177,7 @@ func apply_snapshot(data: Dictionary) -> void:
     home_bias = clampf(float(p.get("home_bias", home_bias)), 0.0, 1.0)
     walk_speed = clampf(float(p.get("walk_speed", walk_speed)), 0.05, 4.0)
     traits = _normalized_traits(p.get("traits", {}))
+    _rebuild_trait_bias()
     energy = clampf(float(n.get("energy", energy)), 0.0, 1.0)
     comfort = clampf(float(n.get("comfort", comfort)), 0.0, 1.0)
     curiosity = clampf(float(n.get("curiosity", curiosity)), 0.0, 1.0)
@@ -168,26 +199,14 @@ func activity_scores(context: Dictionary = {}) -> Dictionary:
     var explorer_bonus := float(bonus.get("explorer", 0.18)) if routine == "explorer" else 0.0
     var social_bonus := float(bonus.get("social", 0.18)) if routine == "social" else 0.0
     var home_bonus := float(bonus.get("homebody", 0.20)) if routine == "homebody" else 0.0
-    var scores := {
-        "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)),
-        "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus,
-        "inspect": float(inspect.get("base", 0.12)) + curiosity * float(inspect.get("curiosity", 0.58)) + minf(float(target.get("cap", 0.18)), interesting * float(target.get("step", 0.06))) + explorer_bonus,
-        "social": float(social_u.get("base", 0.10)) + social * float(social_u.get("social_need", 0.48)) + social_drive * float(social_u.get("social_drive", 0.28)) + minf(float(target.get("cap", 0.18)), social_targets * float(target.get("step", 0.06))) + social_bonus,
-        "return_home": (float(return_home.get("base", 0.08)) + home_bias * float(return_home.get("home_bias", 0.35)) + home_bonus + (1.0 - comfort) * float(return_home.get("inverse_comfort", 0.32)) + (1.0 - energy) * float(return_home.get("inverse_energy", 0.26))) if away else 0.0,
-        "rest": float(rest.get("base", 0.12)) + (1.0 - energy) * float(rest.get("inverse_energy", 0.88)) + (float(rest.get("home_bonus", 0.18)) if not away else float(rest.get("away_bonus", -0.25))),
+    return {
+        "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)) + float(_trait_bias.get("idle", 0.0)),
+        "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus + float(_trait_bias.get("wander", 0.0)),
+        "inspect": float(inspect.get("base", 0.12)) + curiosity * float(inspect.get("curiosity", 0.58)) + minf(float(target.get("cap", 0.18)), interesting * float(target.get("step", 0.06))) + explorer_bonus + float(_trait_bias.get("inspect", 0.0)),
+        "social": float(social_u.get("base", 0.10)) + social * float(social_u.get("social_need", 0.48)) + social_drive * float(social_u.get("social_drive", 0.28)) + minf(float(target.get("cap", 0.18)), social_targets * float(target.get("step", 0.06))) + social_bonus + float(_trait_bias.get("social", 0.0)),
+        "return_home": ((float(return_home.get("base", 0.08)) + home_bias * float(return_home.get("home_bias", 0.35)) + home_bonus + (1.0 - comfort) * float(return_home.get("inverse_comfort", 0.32)) + (1.0 - energy) * float(return_home.get("inverse_energy", 0.26))) if away else 0.0) + float(_trait_bias.get("return_home", 0.0)),
+        "rest": float(rest.get("base", 0.12)) + (1.0 - energy) * float(rest.get("inverse_energy", 0.88)) + (float(rest.get("home_bonus", 0.18)) if not away else float(rest.get("away_bonus", -0.25))) + float(_trait_bias.get("rest", 0.0)),
     }
-    var trait_effects := _section("trait_effects")
-    for raw_name in trait_effects.keys():
-        var name := str(raw_name)
-        var effects = trait_effects[raw_name]
-        if typeof(effects) != TYPE_DICTIONARY:
-            continue
-        var delta := _trait_delta(name)
-        for raw_state in effects.keys():
-            var state_name := str(raw_state)
-            if scores.has(state_name):
-                scores[state_name] = float(scores[state_name]) + delta * float(effects[raw_state])
-    return scores
 
 func _is_bound(context: Dictionary) -> bool:
     if bool(context.get("locked", false)) or bool(context.get("bound", false)):
