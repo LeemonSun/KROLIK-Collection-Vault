@@ -7,7 +7,7 @@ from tools.inspect_dwpose_model import DWPoseContractError, validate_session_con
 
 
 class _Info:
-    def __init__(self, name: str, shape: list[int]):
+    def __init__(self, name: str, shape):
         self.name = name
         self.shape = shape
 
@@ -28,17 +28,26 @@ class _FakeSession:
         return ["CPUExecutionProvider"]
 
     def run(self, _outputs, feeds):
-        assert list(feeds.values())[0].shape == tuple(self.input_shape)
+        runtime_shape = tuple(1 if (isinstance(v, str) or v is None) else v for v in self.input_shape)
+        assert list(feeds.values())[0].shape == runtime_shape
         return [np.zeros(self.x_shape, np.float32), np.zeros(self.y_shape, np.float32)]
 
 
 def test_accepts_expected_dwpose_wholebody_simcc_contract() -> None:
     report = validate_session_contract(_FakeSession())
     assert report["input_shape"] == [1, 3, 384, 288]
+    assert report["dynamic_batch"] is False
     assert report["output_x_shape"] == [1, 133, 576]
     assert report["output_y_shape"] == [1, 133, 768]
     assert report["keypoints"] == 133
     assert report["simcc_split_ratio"] == 2.0
+
+
+def test_accepts_symbolic_batch_and_runs_batch_one() -> None:
+    report = validate_session_contract(_FakeSession(input_shape=["batch", 3, 384, 288]))
+    assert report["declared_input_shape"] == ["batch", 3, 384, 288]
+    assert report["input_shape"] == [1, 3, 384, 288]
+    assert report["dynamic_batch"] is True
 
 
 def test_rejects_model_that_would_break_hardcoded_split_ratio() -> None:
@@ -52,5 +61,5 @@ def test_rejects_too_few_keypoints() -> None:
 
 
 def test_rejects_wrong_input_layout() -> None:
-    with pytest.raises(DWPoseContractError, match="\[1,3,H,W\]"):
+    with pytest.raises(DWPoseContractError, match=r"\[batch,3,H,W\]"):
         validate_session_contract(_FakeSession(input_shape=[1, 384, 288, 3]))
