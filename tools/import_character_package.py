@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from character_import import build_character_runtime_package
+from rig_edit import load_joint_overrides
 
 
 def main() -> int:
@@ -25,8 +26,14 @@ def main() -> int:
         action="store_true",
         help="Force the deterministic silhouette rig instead of trying available local AI pose backends first",
     )
+    parser.add_argument(
+        "--joint-overrides",
+        default=None,
+        help="Optional krolik.rig-joint-overrides/1 JSON produced by a manual rig editor",
+    )
     args = parser.parse_args()
 
+    overrides = load_joint_overrides(args.joint_overrides) if args.joint_overrides else None
     result = build_character_runtime_package(
         Path(args.project_root),
         Path(args.source),
@@ -34,6 +41,7 @@ def main() -> int:
         name=args.name,
         cutout_mode=args.cutout_mode,
         prefer_ai_rig=not args.heuristic_rig,
+        joint_overrides=overrides,
     )
 
     ordered = [
@@ -52,9 +60,14 @@ def main() -> int:
         "triangles",
         "bone_weights",
         "collision_proxies",
+        "joint_override_count",
+        "joint_changed_count",
+        "joint_changed",
+        "joint_max_delta",
         "original",
         "cutout",
         "receipt",
+        "rig_edit",
         "manifest",
         "image",
     ]
