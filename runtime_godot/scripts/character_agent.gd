@@ -5,7 +5,7 @@ const SkinnedCharacterScript = preload("res://scripts/skinned_character.gd")
 const CollisionRigScript = preload("res://scripts/collision_rig.gd")
 
 var character_id := ""
-var brain := VaultAgentBrain.new()
+var brain := VaultAgentBrainRuntime.new()
 var animation_driver := VaultAnimationDriver.new()
 var facial_state := VaultFacialState.new()
 var facial_channels: Dictionary = {}
