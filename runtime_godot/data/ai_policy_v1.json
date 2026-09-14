@@ -3,21 +3,24 @@
   "format_version": 1,
   "defaults": {
     "needs": {"energy": 0.82, "comfort": 0.72, "curiosity": 0.35, "social": 0.45},
-    "profile": {"autonomy": 0.75, "wander": 0.65, "social": 0.45, "rest_threshold": 0.24, "curiosity_threshold": 0.72, "home_bias": 0.35, "mobility": "auto", "walk_speed": 1.0, "routine": "balanced"}
+    "profile": {
+      "autonomy": 0.75, "wander": 0.65, "social": 0.45, "rest_threshold": 0.24,
+      "curiosity_threshold": 0.72, "home_bias": 0.35, "mobility": "auto",
+      "walk_speed": 1.0, "routine": "balanced",
+      "traits": {"curiosity": 0.5, "sociability": 0.5, "boldness": 0.5, "patience": 0.5, "resilience": 0.5}
+    }
   },
   "valid": {
     "mobility": ["auto", "free", "contained", "disabled"],
     "routine": ["balanced", "homebody", "explorer", "social"],
-    "bound_modes": ["bound", "anchored", "contained", "restrained"]
+    "bound_modes": ["bound", "anchored", "contained", "restrained"],
+    "traits": ["curiosity", "sociability", "boldness", "patience", "resilience"]
   },
   "state_order": ["return_home", "rest", "social", "inspect", "wander", "idle"],
   "hard_gates": {
-    "away_comfort_return": 0.22,
-    "autonomy_lock": 0.2,
-    "inspect_no_target_multiplier": 0.82,
-    "rest_energy_margin": 0.2,
-    "rest_energy_floor": 0.5,
-    "rest_ready_multiplier": 0.35
+    "away_comfort_return": 0.22, "autonomy_lock": 0.2,
+    "inspect_no_target_multiplier": 0.82, "rest_energy_margin": 0.2,
+    "rest_energy_floor": 0.5, "rest_ready_multiplier": 0.35
   },
   "utility": {
     "idle": {"base": 0.2, "comfort": 0.12, "inverse_autonomy": 0.18},
@@ -29,6 +32,13 @@
     "target": {"cap": 0.18, "step": 0.06},
     "routine_bonus": {"explorer": 0.18, "social": 0.18, "homebody": 0.2}
   },
+  "trait_effects": {
+    "curiosity": {"inspect": 0.7, "wander": 0.1},
+    "sociability": {"social": 0.7},
+    "boldness": {"wander": 0.5, "return_home": -0.3},
+    "patience": {"idle": 0.5},
+    "resilience": {"rest": -0.45, "return_home": -0.2}
+  },
   "need_rates_per_minute": {
     "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
     "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.02, "social": 0.01},
@@ -37,20 +47,9 @@
     "social_override": {"social": -0.025},
     "idle": {"energy": -0.005, "comfort": 0.0, "curiosity": 0.008, "social": 0.005}
   },
-  "affect_thresholds": {
-    "tired_energy": 0.22,
-    "uneasy_comfort": 0.28,
-    "alert_curiosity": 0.78,
-    "seeking_social": 0.78
-  },
+  "affect_thresholds": {"tired_energy": 0.22, "uneasy_comfort": 0.28, "alert_curiosity": 0.78, "seeking_social": 0.78},
   "animation_by_state": {
-    "idle": "idle_breathe",
-    "wander": "walk",
-    "inspect": "inspect",
-    "social": "social_idle",
-    "return_home": "walk",
-    "contained": "contained_idle",
-    "rest": "rest",
-    "disabled": "idle_static"
+    "idle": "idle_breathe", "wander": "walk", "inspect": "inspect", "social": "social_idle",
+    "return_home": "walk", "contained": "contained_idle", "rest": "rest", "disabled": "idle_static"
   }
 }
