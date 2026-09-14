@@ -29,6 +29,7 @@ func _run() -> void:
         return
 
     var passed := 0
+    var corrected := 0
     var total_travel := 0.0
     var methods: Dictionary = {}
     for raw_entry in entries:
@@ -91,6 +92,22 @@ func _run() -> void:
             agent.queue_free()
             return
 
+        var expected_joint = entry.get("expected_joint", null)
+        if typeof(expected_joint) == TYPE_DICTIONARY:
+            var expected: Dictionary = expected_joint
+            var joint_name := str(expected.get("name", ""))
+            if not agent.rig_joints.has(joint_name):
+                _fail(character_id + ": corrected joint missing in runtime")
+                agent.queue_free()
+                return
+            var expected_point := Vector2(float(expected.get("x", 0.0)), float(expected.get("y", 0.0)))
+            var actual_point: Vector2 = agent.rig_joints[joint_name]
+            if actual_point.distance_to(expected_point) > 0.00001:
+                _fail(character_id + ": corrected joint changed during runtime load")
+                agent.queue_free()
+                return
+            corrected += 1
+
         var start := agent.global_position
         agent.home_position = start
         agent.target_position = start
@@ -121,10 +138,14 @@ func _run() -> void:
     if not methods.has("embedded-alpha") or not methods.has("uniform-border-v1"):
         _fail("matrix did not exercise both embedded-alpha and automatic cutout paths")
         return
+    if corrected < 1:
+        _fail("matrix did not exercise a manually corrected rig")
+        return
 
     print(
         "KROLIK_IMPORT_MATRIX_GODOT cases=", entries.size(),
         " passed=", passed,
+        " corrected=", corrected,
         " methods=", methods.keys(),
         " total_travel=", snappedf(total_travel, 0.01),
         " gpu_skin_all=true collisions_all=true policy_all=true"
