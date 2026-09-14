@@ -28,12 +28,20 @@ def test_policy_validation_rejects_drift_prone_structural_damage():
     broken["short_term_memory"]["capacity"] = 0
     broken["short_term_memory"]["max_ttl"] = 1
     broken["short_term_memory"]["effects"]["social"] = {"bogus": .5}
+    broken["long_term_affinity"]["character_capacity"] = 0
+    broken["long_term_affinity"]["max_subject_length"] = 999
+    broken["long_term_affinity"]["max_abs_state_bias"] = 4
+    broken["long_term_affinity"]["favorite_min_affinity"] = 2
     errors = validate_ai_policy_document(broken)
     assert any("state_order" in item for item in errors)
     assert any("utility.wander" in item for item in errors)
     assert any("short_term_memory.capacity" in item for item in errors)
     assert any("max_ttl" in item for item in errors)
     assert any("short_term_memory.effects.social" in item for item in errors)
+    assert any("long_term_affinity.character_capacity" in item for item in errors)
+    assert any("long_term_affinity.max_subject_length" in item for item in errors)
+    assert any("long_term_affinity.max_abs_state_bias" in item for item in errors)
+    assert any("long_term_affinity.favorite_min_affinity" in item for item in errors)
 
 
 def test_python_behavior_still_uses_policy_values():
