@@ -116,6 +116,7 @@ jobs:
             runtime_godot/.ci_vertical_slice/imports/**
             runtime_godot/.ci_vertical_slice/exports/runtime/ci_core_slice/**
           if-no-files-found: warn
+          include-hidden-files: true
           retention-days: 14
       - name: Cleanup vertical slice workspace
         if: always()
@@ -139,7 +140,8 @@ jobs:
         with:
           name: import-qa-matrix-evidence
           path: runtime_godot/.ci_import_matrix/**
-          if-no-files-found: warn
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 14
       - name: Cleanup import QA matrix
         if: always()
