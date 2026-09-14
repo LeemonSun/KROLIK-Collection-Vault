@@ -13,6 +13,7 @@ on:
       - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
+      - 'rig_edit.py'
       - 'character_import.py'
       - 'tools/build_core_vertical_slice.py'
       - 'tools/build_import_qa_matrix.py'
@@ -20,6 +21,8 @@ on:
       - 'tests/test_runtime_skinning.py'
       - 'tests/test_character_import.py'
       - 'tests/test_character_import_modes.py'
+      - 'tests/test_character_import_rig_edit.py'
+      - 'tests/test_rig_edit.py'
       - 'tests/test_import_qa_matrix.py'
       - 'tests/test_core_vertical_slice.py'
       - '.github/workflows/godot-runtime.yml'
@@ -34,6 +37,7 @@ on:
       - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
+      - 'rig_edit.py'
       - 'character_import.py'
       - 'tools/build_core_vertical_slice.py'
       - 'tools/build_import_qa_matrix.py'
@@ -41,6 +45,8 @@ on:
       - 'tests/test_runtime_skinning.py'
       - 'tests/test_character_import.py'
       - 'tests/test_character_import_modes.py'
+      - 'tests/test_character_import_rig_edit.py'
+      - 'tests/test_rig_edit.py'
       - 'tests/test_import_qa_matrix.py'
       - 'tests/test_core_vertical_slice.py'
       - '.github/workflows/godot-runtime.yml'
@@ -64,7 +70,7 @@ jobs:
       - name: Install vertical-slice builder dependencies
         run: python -m pip install Pillow numpy
       - name: Import-pipeline syntax
-        run: python -m py_compile character_import.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py
+        run: python -m py_compile rig_edit.py character_import.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py
       - name: Download verified Godot
         shell: bash
         run: |
