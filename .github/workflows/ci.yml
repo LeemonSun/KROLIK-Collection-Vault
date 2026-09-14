@@ -25,9 +25,9 @@ jobs:
       - name: Core module syntax
         run: |
           python -m py_compile \
-            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py rig_edit.py runtime_package.py mesh_deform.py character_import.py import_integrity.py \
+            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py rig_edit.py runtime_package.py mesh_deform.py character_import.py import_integrity.py runtime_package_integrity.py \
             constraint_solver.py interaction_runtime.py life_sim.py \
-            tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py
+            tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py tools/build_core_vertical_slice.py tools/build_import_qa_matrix.py tools/import_character_package.py tools/validate_runtime_package.py
       - name: Verify generated AI policy copies
         run: python tools/export_ai_policy.py --check
       - name: Validate data-driven content
@@ -36,6 +36,10 @@ jobs:
         run: python tools/build_core_vertical_slice.py --output-root "${RUNNER_TEMP}/krolik-core-slice"
       - name: Build diverse import QA matrix
         run: python tools/build_import_qa_matrix.py --output-root "${RUNNER_TEMP}/krolik-import-matrix"
+      - name: Durable import and package reopen smoke
+        run: |
+          python tools/import_character_package.py "${RUNNER_TEMP}/krolik-core-slice/fixture_input.png" --project-root "${RUNNER_TEMP}/krolik-reopen" --character-id reopen-ci --name "Reopen CI" --heuristic-rig
+          python tools/validate_runtime_package.py "${RUNNER_TEMP}/krolik-reopen/exports/runtime/reopen-ci/package_receipt.json"
       - name: Core regression suite
         run: |
           pytest -q \
@@ -56,6 +60,7 @@ jobs:
             tests/test_character_import_modes.py \
             tests/test_character_import_rig_edit.py \
             tests/test_import_integrity.py \
+            tests/test_runtime_package_integrity.py \
             tests/test_import_qa_matrix.py \
             tests/test_core_vertical_slice.py
 
