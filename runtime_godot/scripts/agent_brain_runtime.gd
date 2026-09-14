@@ -1,5 +1,4 @@
-class_name VaultAgentBrainRuntime
-extends VaultAgentBrain
+extends "res://scripts/agent_brain.gd"
 
 ## Production extension of the policy-driven brain with bounded long-term affinity.
 ## Affinity lookups are O(1); slow decay is materialized at most once per minute
@@ -27,8 +26,8 @@ func apply_snapshot(data: Dictionary) -> void:
     _affinity_elapsed_hours = 0.0
 
 func activity_scores(context: Dictionary = {}) -> Dictionary:
-    var scores := super(context)
-    var bias := affinity_state.utility_bias(context)
+    var scores: Dictionary = super(context)
+    var bias: Dictionary = affinity_state.utility_bias(context)
     for state_name in bias.keys():
         if scores.has(state_name):
             scores[state_name] = float(scores[state_name]) + float(bias[state_name])
@@ -54,7 +53,7 @@ func favorite_place() -> String:
 
 func snapshot() -> Dictionary:
     _materialize_affinity()
-    var out := super()
+    var out: Dictionary = super()
     out["affinity"] = affinity_state.snapshot()
     out["favorite_place"] = affinity_state.favorite_place()
     return out
