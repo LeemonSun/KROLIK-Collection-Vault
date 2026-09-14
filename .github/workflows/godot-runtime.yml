@@ -62,8 +62,15 @@ jobs:
           metrics="${RUNNER_TEMP}/godot-stress-time.txt"
           output="${RUNNER_TEMP}/godot-stress-output.txt"
 
-          /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1
-          stress_status=$?
+          # Actions launches this shell with an outer `-e`. Keep the measured
+          # command in an `if` condition so Bash does not abort before its exact
+          # status is captured; all harness and RSS gates below remain strict.
+          stress_status=0
+          if /usr/bin/time -v -o "$metrics" timeout --signal=TERM --kill-after=10s 90s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd >"$output" 2>&1; then
+            stress_status=0
+          else
+            stress_status=$?
+          fi
 
           cat "$output"
           cat "$metrics"
