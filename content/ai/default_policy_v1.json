@@ -1,0 +1,55 @@
+{
+  "schema": "krolik.ai-policy/1",
+  "format_version": 1,
+  "defaults": {
+    "needs": {"energy": 0.82, "comfort": 0.72, "curiosity": 0.35, "social": 0.45},
+    "profile": {"autonomy": 0.75, "wander": 0.65, "social": 0.45, "rest_threshold": 0.24, "curiosity_threshold": 0.72, "home_bias": 0.35, "mobility": "auto", "walk_speed": 1.0, "routine": "balanced"}
+  },
+  "valid": {
+    "mobility": ["auto", "free", "contained", "disabled"],
+    "routine": ["balanced", "homebody", "explorer", "social"],
+    "bound_modes": ["bound", "anchored", "contained", "restrained"]
+  },
+  "state_order": ["return_home", "rest", "social", "inspect", "wander", "idle"],
+  "hard_gates": {
+    "away_comfort_return": 0.22,
+    "autonomy_lock": 0.2,
+    "inspect_no_target_multiplier": 0.82,
+    "rest_energy_margin": 0.2,
+    "rest_energy_floor": 0.5
+  },
+  "utility": {
+    "idle": {"base": 0.2, "comfort": 0.12, "inverse_autonomy": 0.18},
+    "wander": {"base": 0.16, "wander": 0.42, "autonomy": 0.2, "curiosity": 0.16},
+    "inspect": {"base": 0.12, "curiosity": 0.58},
+    "social": {"base": 0.1, "social_need": 0.48, "social_drive": 0.28},
+    "return_home": {"base": 0.08, "home_bias": 0.35, "inverse_comfort": 0.32, "inverse_energy": 0.26},
+    "rest": {"base": 0.12, "inverse_energy": 0.88, "home_bonus": 0.18, "away_bonus": -0.25},
+    "target": {"cap": 0.18, "step": 0.06},
+    "routine_bonus": {"explorer": 0.18, "social": 0.18, "homebody": 0.2}
+  },
+  "need_rates_per_minute": {
+    "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
+    "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.02, "social": 0.01},
+    "active": {"energy": -0.018, "comfort": -0.004, "curiosity": -0.008, "social": -0.003},
+    "inspect_override": {"curiosity": -0.028},
+    "social_override": {"social": -0.025},
+    "idle": {"energy": -0.005, "comfort": 0.0, "curiosity": 0.008, "social": 0.005}
+  },
+  "affect_thresholds": {
+    "tired_energy": 0.22,
+    "uneasy_comfort": 0.28,
+    "alert_curiosity": 0.78,
+    "seeking_social": 0.78
+  },
+  "animation_by_state": {
+    "idle": "idle_breathe",
+    "wander": "walk",
+    "inspect": "inspect",
+    "social": "social_idle",
+    "return_home": "walk",
+    "contained": "contained_idle",
+    "rest": "rest",
+    "disabled": "idle_static"
+  }
+}
