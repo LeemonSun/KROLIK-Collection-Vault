@@ -1,10 +1,10 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-14 21:03 +03:00
+Last updated: 2026-09-14 21:05 +03:00
 
 ## Current verified implementation
 
-Latest verified code/test commit: `28924b4e918f496ccfb171b4c9440485dc9f1d31` (`test: gate facial mood runtime behavior`).
+Latest verified code/test commit: `b6335eb9fdc4ee3f5226b3b22026a493b85c9626` (`test: assert animation face secondary IK ordering`).
 
 Verified stable checkpoints:
 - `checkpoint/stable-nav-fallback-stress-20260914-1952` — A4 220-agent Linux/headless movement/performance.
@@ -18,7 +18,7 @@ Verified stable checkpoints:
 - `checkpoint/stable-c2-ik-joint-limits-20260914-2043` — C2 angle-limited production IK.
 - `checkpoint/stable-c3-layered-animation-20260914-2048` — C3 masked additive animation layers.
 - `checkpoint/stable-c4-secondary-motion-20260914-2056` — C4 production spring/secondary motion.
-- `checkpoint/stable-c5-facial-mood-20260914-2101` — C5 deterministic facial/mood semantic layer + production head/neck response.
+- `checkpoint/stable-c5-facial-mood-20260914-2102` — C5 deterministic facial/mood semantic layer + production head/neck response.
 
 Latest rollback checkpoints include `checkpoint/pre-c3-layered-animation-20260914-2044`, `checkpoint/pre-c4-secondary-runtime-20260914-2050`, and `checkpoint/pre-c5-facial-mood-20260914-2100`.
 
@@ -54,19 +54,17 @@ Independent additive layers support weight, joint masks, root weight, phase/spee
 Existing `VaultSecondaryMotion` is wired after animation/layers and before IK. Empty secondary config disables spring work. Explicitly constrained wrist/ankle endpoints remain IK-authoritative. Runtime proof: `KROLIK_SECONDARY_MOTION impulse=(-0.000462, 0.0) peak=0.000462 relaxed=0.000000 head_shift=0.000462 ik_error=0.000000 disabled=true`.
 
 ### C5 facial/mood runtime state — VERIFIED
-`VaultFacialState` now consumes the existing animation-v1 `procedural_blink` and `look_at` configuration instead of introducing another incompatible contract. It provides deterministic/decorrelated blink scheduling, bounded smoothed gaze, mood presets/transitions and semantic face channels (`eye_openness`, `brow`, `mouth_curve`, `mouth_open`, gaze/blink) for future dedicated face geometry. The current single-cutout character can honestly render only head/neck posture, which is applied in production after base/additive animation and before C4 secondary motion and C2 IK. No fake eyelid/mouth deformation is claimed.
+`VaultFacialState` consumes existing animation-v1 `procedural_blink` and `look_at` configuration. It provides deterministic/decorrelated blink scheduling, bounded smoothed gaze, mood presets/transitions and semantic face channels (`eye_openness`, `brow`, `mouth_curve`, `mouth_open`, gaze/blink) for future dedicated face geometry. The current single-cutout character honestly renders only head/neck posture; no fake eyelid/mouth deformation is claimed.
 
-Production agent exposes mood/look target and stores the current semantic facial snapshot. The runtime regression proves deterministic blink behavior, bounded gaze, mood interpolation, actual head movement and zero interference with constrained IK.
+Production ordering is now guarded as `base/additive animation -> facial head/neck posture -> secondary motion -> interaction IK`. Runtime proof: `KROLIK_FACIAL_STATE first_blink=29 decorrelated=30 peak_blink=0.985 gaze=(0.06, -0.06) mood_curve=0.440 head_shift=0.018023 ik_error=0.000000 semantic=true`.
 
-Runtime proof: `KROLIK_FACIAL_STATE first_blink=29 decorrelated=30 peak_blink=0.985 gaze=(0.06, -0.06) mood_curve=0.440 head_shift=0.018023 ik_error=0.000000 semantic=true`.
-
-The 220-agent stress harness now confirms facial state is active on all agents rather than merely testing one controller.
+The 220-agent stress harness runs facial state on all 220 agents. Final C5 stress remained 220/220 active/moved with `facial_active=220`, moved_share `1.000`, sim_fps `59.83`, avg_travel `99.59 px`, max RSS `112148 KiB` (~110 MiB), process status 0.
 
 ## Tests/checks actually run
 
 No local Python/Godot execution is claimed; verification came from GitHub Actions.
 
-C5 final commit `28924b4e918f496ccfb171b4c9440485dc9f1d31`:
+C5 runtime commit `28924b4e918f496ccfb171b4c9440485dc9f1d31`:
 - Godot Runtime CI `34878051171`: SUCCESS.
   - project parse/import PASS;
   - headless runtime smoke PASS;
@@ -77,12 +75,20 @@ C5 final commit `28924b4e918f496ccfb171b4c9440485dc9f1d31`:
   - C4 secondary motion PASS;
   - C2 IK joint-limit regression PASS;
   - rendered deformation PASS, total changed pixels `23867`, evidence upload PASS;
-  - 220-agent stress PASS with `facial_active=220`, 220/220 active/moved, moved_share `1.000`, sim_fps `59.83`, avg_travel `99.59 px`, max RSS `112148 KiB` (~110 MiB), process status 0.
+  - 220-agent stress PASS with `facial_active=220`, sim_fps `59.83`, max RSS ~110 MiB.
 - Vault CI `34878051026`: SUCCESS.
+
+C5 final source-order guard commit `b6335eb9fdc4ee3f5226b3b22026a493b85c9626`:
+- Vault CI `34878181653`: SUCCESS.
+- source-integrity PASS;
+- core syntax PASS;
+- content validator PASS (`files=3 failed=0`);
+- core regression suite PASS: `44 passed`;
+- backend/UI SKIPPED because validated `app.py` is absent.
 
 C4 reference verification:
 - Godot Runtime CI `34877357474`: SUCCESS, C4 metric verified and 220-agent stress ~60.08 FPS / ~109 MiB RSS.
-- Vault CI `34877523944`: SUCCESS, content validator `files=3 failed=0`, core regression suite `44 passed`; backend/UI skipped because validated `app.py` is absent.
+- Vault CI `34877523944`: SUCCESS, content validator `files=3 failed=0`, core regression suite `44 passed`.
 
 ## Still blocked / unverified
 
