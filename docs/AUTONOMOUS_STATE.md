@@ -1,47 +1,50 @@
 # KROLIK autonomous development state
 
-Updated: 2026-09-14, autonomous pass 3.
+Updated: 2026-09-14, autonomous pass 4.
 
 ## Current main / rollback
 
-- Latest substantive infrastructure commit: `2b66eb55c4a8a416d21190ba4279345bb475d709` (`Make Vault CI source-integrity aware`).
-- Existing rollback checkpoints remain available, including `checkpoint/pre-source-restore-20260913-2356`, `checkpoint/pre-complete-source-restore-20260914-0024`, and `checkpoint/pre-source-recovery-fix-20260914-0054`.
-- No application/schema contract was changed in this pass.
+- Latest verified runtime block: `32e029f1e443f0feedaf6e679158b87ccafecb0d` (`Run live-agent stress test in Godot CI`).
+- Pre-change rollback checkpoint: `checkpoint/pre-godot-stress-harness-20260914-0356` at `20f35d15752762ca6ecee85e0efdaa4480ae589b`.
+- No application/schema/data contract changed in this pass.
 
 ## Repository integrity status
 
-The repository is still missing the validated stable application source (`app.py` and related source/UI/tests), so Phase A application feature development must not proceed on this incomplete tree. The exact stable local artifact had previously passed `python -m py_compile app.py` and `PYTHONPATH=. python -m pytest -q` with **67 passed**, but those source bytes are not currently reconstructible from repository data alone.
+The validated Python/editor application source (`app.py` and related UI/tests) is still absent, so Python application feature work remains blocked. The canonical recovery transport is still incomplete (`tools/source_restore_parts/part_10.b64` absent); never guess missing source bytes. Vault CI's source-integrity gate remains intentional until restoration.
 
-The canonical recovery transport is still incomplete: `tools/source_restore_parts/part_10.b64` is absent and the existing staged fragments cannot safely be treated as one byte-exact source bundle. Do not guess missing bytes.
+The Godot runtime tree is independently present and testable, so this pass advanced Phase A runtime infrastructure without touching missing application source.
 
-## Work completed in pass 3
+## Work completed in pass 4
 
-1. Re-read the autonomous runbook/state and inspected current main plus the actual latest Vault CI failure.
-2. Confirmed run `34788386857` failed only because CI blindly executed `python -m py_compile app.py` while the repository is in the known source-restoration state; backend tests/smokes were then skipped.
-3. Checked existing checkpoint branches for `app.py`; the inspected checkpoints do not contain it, so rollback branches cannot restore the missing application source.
-4. Checked the last successful Godot Runtime CI artifact list; it contains no downloadable source artifact that can recover the Python/editor tree.
-5. Changed `.github/workflows/ci.yml` to add an explicit `source-integrity` gate. When `app.py` is absent, CI records a clear restoration-pending notice and intentionally skips backend/UI validation instead of producing a misleading red application-regression result. As soon as `app.py` returns, the existing syntax/test/HTTP/UI jobs automatically run unchanged.
-6. Verified GitHub Actions run `34791249734` for commit `2b66eb55c4a8a416d21190ba4279345bb475d709`: `source-integrity` completed successfully and `backend-and-ui` was correctly skipped. Overall `Vault CI` conclusion is **success** for the repository's current recovery state.
+1. Added `runtime_godot/scripts/stress_harness.gd`, a real headless SceneTree stress harness that instantiates **220 actual `VaultCharacterAgent` CharacterBody2D nodes**. Each agent runs the existing brain/animation/navigation/physics process path; these are not lightweight test doubles.
+2. Added warmup + 180-frame measured sample, active-agent integrity assertion, elapsed-time guard, and machine-readable `KROLIK_STRESS` telemetry.
+3. Wired the harness into `Godot Runtime CI`, after project import and the existing headless runtime smoke, so future runtime changes continuously re-run the 220-agent test.
+4. Created rollback checkpoint `checkpoint/pre-godot-stress-harness-20260914-0356` before the runtime/CI change.
 
 ## Tests / verification actually performed
 
-- Inspected failed Vault CI run `34788386857` and job log: exact failure was `[Errno 2] No such file or directory: 'app.py'`; backend tests, HTTP smoke and UI smoke did not execute.
-- Inspected checkpoint branches `checkpoint-2026-09-13-pre-runtime-hardening` and `checkpoint/pre-source-restore-20260913-2356` for `app.py`: not present.
-- Inspected successful Godot Runtime CI run `34778333664` artifacts: none available.
-- Verified new Vault CI run `34791249734`: `source-integrity` = success; `backend-and-ui` = skipped by the explicit gate; overall workflow = success.
-- No Python application tests were run because the application source remains absent. Do not interpret the green integrity-gated Vault CI as application-test coverage.
+GitHub Actions `Godot Runtime CI` run `34794301160`, job `103824327954`, completed **success** on Godot `4.7.2.stable`:
 
-## Exact blocker / safe continuation
+- verified Godot download/hash: success;
+- parse/import project: success;
+- existing headless runtime smoke: success;
+- new 220 live-agent stress smoke: success;
+- measured telemetry: `agents=220 active=220 frames=180 seconds=1.2485 avg_fps=144.17 moving=0` on the hosted Ubuntu runner.
 
-A byte-exact copy of the validated stable source artifact (or its exact base64) is still required to finish repository restoration. The current repository fragments must not be guessed/recombined because the canonical 11-part set is incomplete.
+Interpretation: the current non-rendered/headless runtime can keep 220 full agent nodes alive and process 180 sampled frames well inside the 20-second guard. This is **not** yet a Windows/rendered GPU performance claim. `moving=0` also means this first harness validates live processing/scale but does not yet exercise sustained locomotion/navigation load.
+
+No Python application tests were run because the validated Python/editor source remains absent. A green Vault CI in this recovery state is source-integrity status only, not backend/UI coverage.
+
+## Exact blockers / safe continuation
+
+Primary restoration blocker remains a byte-exact copy of the validated stable Python/editor source artifact (or complete exact base64 transport). Do not reconstruct it by guessing.
 
 Next pass should:
 
-1. Check first whether the original stable ZIP/source has become available to the automation environment or repository. If yes, regenerate **all 11 canonical chunks** from that exact artifact and let guarded restore validate ZIP CRC before writing source.
-2. After restoration, require `python -m py_compile app.py`, full pytest, HTTP/UI smokes, Vault CI and Godot Runtime CI before creating `checkpoint/stable-source-restored-<timestamp>`.
-3. If the stable artifact is still unavailable, do not invent replacement application source. Continue only repository-safe foundation/infrastructure work that cannot conflict with the missing validated tree.
-4. Once integrity is restored, return immediately to earliest unfinished Phase A: A1 real Godot runtime validation; otherwise A5 clip-validation edge coverage or A4 200+ live-agent stress harness depending on available assets/runner.
+1. Check first whether the exact stable source artifact has become available. If yes, regenerate all canonical recovery chunks, validate ZIP CRC, restore, then require `py_compile`, full pytest, HTTP/UI smokes, Vault CI and Godot Runtime CI before a stable-source checkpoint.
+2. If source is still unavailable, continue repository-safe Phase A Godot work. Highest-value follow-up is to harden A4: force a meaningful share of the 220 agents into sustained movement/navigation, record process memory alongside FPS, and keep thresholds conservative enough for CI variance. After that, pursue A1 visual deformation verification using repository-contained synthetic/reference assets if available.
+3. Do not call A4 complete from this pass alone: rendered Windows FPS/CPU/memory and active navigation/locomotion remain unmeasured.
 
 ## CI semantics until restoration
 
-`Vault CI` now distinguishes repository/source integrity from application verification. A green run while `app.py` is absent means only that the repository correctly detected the recovery state; it does **not** mean backend/UI tests passed. Once `app.py` is restored, the backend/UI job becomes mandatory again automatically.
+`Vault CI` distinguishes repository/source integrity from application verification. While `app.py` is absent, green Vault CI means only that recovery state was detected correctly. Godot Runtime CI is independently meaningful for the present `runtime_godot` tree and now includes the 220-agent stress smoke.
