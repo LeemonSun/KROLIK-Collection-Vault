@@ -1,44 +1,77 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-14 23:00 +03:00
+Last updated: 2026-09-14 23:27 +03:00
 
 ## Current repository state
 
-Latest main observed during this run: `421f9c1932b151229fc7d73fabe77d124bfefb19`. This includes this run's import-integrity implementation through parent `776b18f3f7bf01ea605fe9e04a8fce5767048855` plus a concurrent Windows packaging fix.
+Current verified `main`: `6de69e371b1fa6fba9db372739e484eec279c0f9` (`ci: capture rendered imported-character evidence`).
 
-Rollback checkpoint created before the integrity block: `checkpoint/pre-import-validation-20260914-2255` at `d7e1e62078a7ee93097a9d077d3207291803dbd6`.
+Stable checkpoint: `checkpoint/stable-import-render-proof-20260914-2327` at `6de69e371b1fa6fba9db372739e484eec279c0f9`.
 
-No rig/skin/animation/runtime-character/AI-policy/asset-import contract changed.
+Previous coherent import/reopen Windows block at `54cc1c8ff9a0d90365a277481c5961e7119384a9` is also verified: Vault CI and Windows Build both concluded success.
 
-## This run — durable import integrity gate
+No rig/skin/animation/runtime-character/AI-policy schema was changed in this block.
 
-Added `import_integrity.py` as a non-destructive verifier for existing `krolik.asset-import/1` receipts. It streams SHA-256 verification for immutable originals and derived cutouts, validates receipt schema/version and required files, and cross-checks build-result identity against the durable receipt.
+## Verified vertical path now available
 
-`tools/import_character_package.py` now performs this integrity gate after package build, returns exit code 3 on integrity failure, and emits `KROLIK_CHARACTER_IMPORT_INTEGRITY` evidence on success/failure.
+The source-independent core now proves this continuous path:
 
-Added `tests/test_import_integrity.py` with four regressions: untouched asset acceptance, immutable-original tamper detection, derived-cutout tamper detection, and forged build-result/receipt mismatch. Vault CI syntax/test allowlists include the new module/tests.
+ordinary image -> immutable original -> derived cutout -> heuristic/manual-correctable rig -> skin recipe -> runtime package -> durable import/package receipts -> production `VaultCharacterAgent` -> GPU `Skeleton2D/Polygon2D` skin -> animation/IK/physics/AI -> safe reopen validation.
 
-This adds no per-agent runtime cost and does not mutate originals.
+The Windows one-file headless importer is built and executed in CI, including manual joint correction and durable package reopen validation.
 
-## Validation actually observed
+## New in this run — rendered imported-character evidence
 
-Vault CI run `34889954378` for implementation commit `776b18f3f7bf01ea605fe9e04a8fce5767048855` started successfully. At the last observation it was still IN PROGRESS, so no passing result is claimed. Checkout passed; setup/core regression steps were still running/pending. No local Python/Godot execution environment was available through this connector.
+Added `runtime_godot/scripts/imported_character_render_harness.gd` and wired it into Godot Runtime CI.
 
-A concurrent main commit `421f9c1932b151229fc7d73fabe77d124bfefb19` changed Windows PyInstaller data bundling after the integrity commit. Inspect CI for the newest main before creating any stable checkpoint.
+This regression does NOT create a procedural checker texture or synthetic 2-bone rig. Python first imports the ordinary-image fixture through the real `character_import.py` path and writes the same production runtime package used by the headless vertical slice. Godot then loads that exact package through `VaultCharacterAgent`, requires the production GPU skin (no flat fallback), renders the imported character at rest, applies a visible pose through `VaultSkinnedCharacter`, renders again, and requires a material pixel difference.
 
-## Existing verified baseline
+PNG evidence is uploaded as `imported-character-render-evidence` (`imported_baseline.png`, `imported_posed.png`).
 
-Prior verified baseline includes ordinary-image import, immutable originals, derived cutout modes, heuristic rig fallback, versioned manual joint correction, runtime package export, production Godot GPU skin/collision/AI movement, multi-format import QA, rendered deformation, and 220-agent Linux stress. D1 AI-policy sync, D2 personality and D3 bounded short-term memory remain verified. D4 affinity stays paused.
+Verified metric from Godot Runtime CI run `34892777728`:
 
-## Blockers / unverified
+- character=`ci_core_slice`
+- packaged texture=`256x512`
+- skin vertices=`264`
+- skin bones=`14`
+- rig joints=`15`
+- rig bones=`14`
+- rendered foreground pixels=`41971`
+- changed pixels after pose=`8687`
+- required minimum=`1800`
+- `gpu_skin=true`
+- `evidence=true`
+- renderer=`gl_compatibility`
 
-- Canonical `app.py` remains absent. Never synthesize it from damaged recovery artifacts; reconcile the authoritative external `KROLIK_Collection_Vault_FULL_2026-09-13_2158.zip` when available.
-- Backend/UI remains source-blocked and unverified.
-- A2 real DWPose/RTMPose accuracy remains blocked on a validated ONNX model.
+Artifact ID: `10368100305`.
+
+The same run also reconfirmed:
+
+- production ordinary-image headless runtime: joints=15, bones=14, weights=14, collisions=14, GPU skin=true, policy=true, state=wander, travel=41.4 px;
+- import QA matrix: 4/4 cases passed, one manually corrected rig, GPU skin/collisions/policy all true;
+- 33-clip motion runtime: 132 samples, 0 validation errors/warnings;
+- layered animation, facial state, secondary motion and IK regressions pass;
+- procedural rendered deformation baseline remains green: 23867 changed pixels total;
+- 220-agent stress: 220/220 active and moved, moved_share=1.000, avg_travel=99.59 px, 44.26 simulated FPS on this runner, max RSS 121304 KiB (~119 MiB), process status 0.
+
+Vault CI run `34892777545` for the same SHA is green for canonical-source audit, durable import/package reopen smoke and the full core regression suite. Backend/UI remains intentionally skipped because canonical `app.py` is absent.
+
+## Source reconciliation / blockers
+
+- Canonical graphical `app.py` is still absent from Git. Historical in-repo recovery candidates are not a clean authoritative replacement. Never synthesize/guess the missing source. Reconcile the external `KROLIK_Collection_Vault_FULL_2026-09-13_2158.zip` when it becomes available in this workspace.
+- Backend/UI therefore remains source-blocked and unverified.
+- A2 real DWPose/RTMPose quality is still incomplete. The existing ONNX backend is real, but no validated model artifact + measured accuracy corpus has yet been committed/verified.
 - Final rendered Windows 200–500-agent performance remains unmeasured.
-- `KROLIK_MASTER_PLAN.md` is absent; use `docs/AUTONOMOUS_RUNBOOK.md`.
 - Busy-background matting remains conservative/review-required rather than destructive.
+- `KROLIK_MASTER_PLAN.md` is absent; `docs/AUTONOMOUS_RUNBOOK.md` is the authoritative roadmap.
 
 ## Next highest-priority task
 
-First inspect the newest Vault/Windows/Godot CI after `421f9c1932b151229fc7d73fabe77d124bfefb19`. Repair failures before expanding work. If green, create a stable checkpoint for the coherent import/Windows block. If canonical source is still unavailable, continue the same vertical path by adding durable reopen/reload validation for an existing imported package, including receipt integrity plus runtime manifest/image hash/schema validation before reuse. Keep D4/D5 paused.
+Keep D4/D5 paused while the end-to-end product path is still being strengthened.
+
+Next source-independent priority is A2 enablement plus real-asset QA:
+
+1. add a reproducible, checksum-pinned DWPose model bootstrap for `dw-ll_ucoco_384.onnx` without committing the 134 MB binary to Git;
+2. verify the actual model session/input/output contract against `rig_tools.py` and add a real-model smoke path that can be run explicitly/manual CI without slowing every normal push;
+3. build a small measured pose-quality corpus before claiming A2 complete;
+4. continue expanding import/render evidence from deterministic fixtures toward user-provided real art when an appropriate asset is available without committing user art unintentionally.
