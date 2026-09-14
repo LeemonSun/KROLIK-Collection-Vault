@@ -1,0 +1,97 @@
+name: Recover historical binary source snapshot
+
+on:
+  push:
+    branches:
+      - recovery/binary-source-20260913
+    paths:
+      - '.github/workflows/recover-binary-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify-binary-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout binary recovery branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate and extract historical binary archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib
+          from pathlib import Path, PurePosixPath
+          import zipfile
+
+          root = Path('.')
+          bundle = root / 'tools' / 'source_restore.zip'
+          if not bundle.is_file():
+              raise SystemExit('historical tools/source_restore.zip is missing')
+          print(f'KROLIK_BINARY_SOURCE archive_bytes={bundle.stat().st_size} sha256={hashlib.sha256(bundle.read_bytes()).hexdigest()}')
+
+          with zipfile.ZipFile(bundle, 'r') as archive:
+              bad = archive.testzip()
+              if bad is not None:
+                  raise SystemExit(f'corrupt archive member: {bad}')
+              names = [i.filename for i in archive.infolist() if not i.is_dir()]
+              if 'app.py' not in names:
+                  raise SystemExit('app.py missing from historical binary archive')
+              for info in archive.infolist():
+                  if info.is_dir():
+                      continue
+                  rel = PurePosixPath(info.filename)
+                  if rel.is_absolute() or '..' in rel.parts:
+                      raise SystemExit(f'unsafe archive path: {info.filename}')
+                  target = root.joinpath(*rel.parts)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  data = archive.read(info)
+                  target.write_bytes(data)
+                  print(f'KROLIK_BINARY_FILE path={info.filename} bytes={len(data)} sha256={hashlib.sha256(data).hexdigest()}')
+
+          app = root / 'app.py'
+          app_text = app.read_text(encoding='utf-8')
+          print(f'KROLIK_BINARY_APP bytes={app.stat().st_size} lines={len(app_text.splitlines())} sha256={hashlib.sha256(app.read_bytes()).hexdigest()}')
+          PY
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Compile recovered app
+        run: python -m py_compile app.py
+
+      - name: Run recovered test suite
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q
+
+      - name: Commit verified recovered files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'KROLIK Binary Recovery Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add \
+            app.py smart_cutout.py runtime_package.py rig_tools.py constraint_solver.py interaction_runtime.py life_sim.py mesh_deform.py \
+            web tests runtime_godot/scripts/runtime_prop.gd tools/prepare_ai_models.py tools/qa_all_characters.py
+          if git diff --cached --quiet; then
+            echo 'Historical binary source already matches branch.'
+            exit 0
+          fi
+          git commit -m 'recover: verified historical binary source snapshot'
+          git push origin HEAD:${GITHUB_REF_NAME}
