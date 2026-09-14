@@ -33,6 +33,16 @@ func _traits_for(index: int) -> Dictionary:
     out[name] = 0.8
     return out
 
+func _memory_for(index: int) -> Array:
+    return [{
+        "kind": "interesting",
+        "subject": "stress-%03d" % index,
+        "valence": 0.2,
+        "importance": 0.5,
+        "age": 0.0,
+        "ttl": 600.0,
+    }]
+
 func _spawn_agents() -> void:
     _root = Node2D.new()
     _root.name = "StressWorld"
@@ -55,7 +65,8 @@ func _spawn_agents() -> void:
                 "mobility": "free", "routine": "explorer", "autonomy": 1.0,
                 "wander": 1.0, "walk_speed": 1.0, "traits": _traits_for(i),
             },
-            "needs": {"energy": 1.0, "comfort": 0.7, "curiosity": 1.0, "social": 0.35}
+            "needs": {"energy": 1.0, "comfort": 0.7, "curiosity": 1.0, "social": 0.35},
+            "memory": _memory_for(i),
         })
         agent.facial_state.configure(_facial_config(), i + 1)
         var look_x := -1.0 + 2.0 * float(i % 11) / 10.0
@@ -88,6 +99,7 @@ func _run() -> void:
     var facial_active := 0
     var ai_policy_active := 0
     var personality_active := 0
+    var memory_active := 0
     var total_travel := 0.0
     var total_phase := 0.0
     var state_counts: Dictionary = {}
@@ -97,6 +109,7 @@ func _run() -> void:
         active += 1
         if agent.facial_state.enabled: facial_active += 1
         if agent.brain.policy_loaded: ai_policy_active += 1
+        if not agent.brain.memory_snapshot().is_empty(): memory_active += 1
         var varied := false
         var dominant := "neutral"
         for raw_name in TRAIT_NAMES:
@@ -119,11 +132,11 @@ func _run() -> void:
     var moved_share := float(moved) / float(AGENT_COUNT)
     var avg_travel := total_travel / float(maxi(active, 1))
     var avg_phase := total_phase / float(maxi(active, 1))
-    print("KROLIK_STRESS agents=%d active=%d facial_active=%d ai_policy_active=%d personality_active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s traits=%s" % [
-        AGENT_COUNT, active, facial_active, ai_policy_active, personality_active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts), str(dominant_trait_counts)
+    print("KROLIK_STRESS agents=%d active=%d facial_active=%d ai_policy_active=%d personality_active=%d memory_active=%d frames=%d seconds=%.4f avg_fps=%.2f moving=%d moved=%d moved_share=%.3f avg_travel=%.2f avg_phase=%.2f states=%s traits=%s" % [
+        AGENT_COUNT, active, facial_active, ai_policy_active, personality_active, memory_active, SAMPLE_FRAMES, elapsed, fps, moving, moved, moved_share, avg_travel, avg_phase, str(state_counts), str(dominant_trait_counts)
     ])
-    print("KROLIK_STRESS_METRIC agents=%d active=%d facial_active=%d ai_policy_active=%d personality_active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
-        AGENT_COUNT, active, facial_active, ai_policy_active, personality_active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
+    print("KROLIK_STRESS_METRIC agents=%d active=%d facial_active=%d ai_policy_active=%d personality_active=%d memory_active=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f moved_share=%.3f avg_travel_px=%.2f avg_phase=%.2f" % [
+        AGENT_COUNT, active, facial_active, ai_policy_active, personality_active, memory_active, SAMPLE_FRAMES, elapsed, fps, moved_share, avg_travel, avg_phase
     ])
 
     if active != AGENT_COUNT:
@@ -134,6 +147,8 @@ func _run() -> void:
         push_error("KROLIK stress: expected %d brains on generated AI policy, got %d" % [AGENT_COUNT, ai_policy_active]); quit(7); return
     if personality_active != AGENT_COUNT:
         push_error("KROLIK stress: expected %d non-neutral mixed personalities, got %d" % [AGENT_COUNT, personality_active]); quit(8); return
+    if memory_active != AGENT_COUNT:
+        push_error("KROLIK stress: expected %d brains with bounded short-term memory, got %d" % [AGENT_COUNT, memory_active]); quit(10); return
     if dominant_trait_counts.size() != TRAIT_NAMES.size():
         push_error("KROLIK stress: expected all %d personality trait families, got %s" % [TRAIT_NAMES.size(), str(dominant_trait_counts)]); quit(9); return
     if elapsed > MAX_SAMPLE_SECONDS:
