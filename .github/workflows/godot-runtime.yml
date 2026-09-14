@@ -54,6 +54,32 @@ jobs:
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
 
+      - name: Rendered Skeleton2D Polygon2D deformation regression
+        shell: bash
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          command -v xvfb-run >/dev/null || { echo 'xvfb-run is required for rendered deformation regression' >&2; exit 1; }
+          rm -rf runtime_godot/deformation_artifacts
+          timeout 90s xvfb-run -a -s '-screen 0 1280x720x24' \
+            "$GODOT" --path runtime_godot --rendering-method gl_compatibility --audio-driver Dummy \
+            --script res://scripts/deformation_harness.gd
+          test -s runtime_godot/deformation_artifacts/tall_baseline.png
+          test -s runtime_godot/deformation_artifacts/tall_posed.png
+          test -s runtime_godot/deformation_artifacts/compact_baseline.png
+          test -s runtime_godot/deformation_artifacts/compact_posed.png
+
+      - name: Upload deformation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-deformation-evidence
+          path: runtime_godot/deformation_artifacts/*.png
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: 220 live-agent stress smoke with RSS budget
         shell: bash
         run: |
