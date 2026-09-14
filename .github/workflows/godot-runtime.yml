@@ -24,6 +24,7 @@ jobs:
     env:
       GODOT_VERSION: '4.7.2'
       GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
+      STRESS_MAX_RSS_KB: '524288'
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +54,32 @@ jobs:
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
 
-      - name: 220 live-agent stress smoke
+      - name: 220 live-agent stress smoke with RSS budget
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-          timeout 45s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd
+          metrics="${RUNNER_TEMP}/godot-stress-time.txt"
+          output="${RUNNER_TEMP}/godot-stress-output.txt"
+
+          set +e
+          /usr/bin/time -v -o "$metrics" timeout 45s "$GODOT" --headless --path runtime_godot --script res://scripts/stress_harness.gd 2>&1 | tee "$output"
+          stress_status=${PIPESTATUS[0]}
+          set -e
+
+          cat "$metrics"
+          max_rss_kb="$(awk -F: '/Maximum resident set size \(kbytes\)/ {gsub(/^[[:space:]]+/, "", $2); print $2}' "$metrics")"
+          if [[ ! "$max_rss_kb" =~ ^[0-9]+$ ]]; then
+            echo "Unable to parse maximum RSS from /usr/bin/time output" >&2
+            exit 1
+          fi
+
+          echo "KROLIK_STRESS_PROCESS max_rss_kb=${max_rss_kb} max_rss_mib=$(( (max_rss_kb + 1023) / 1024 )) budget_kb=${STRESS_MAX_RSS_KB}"
+          if (( max_rss_kb > STRESS_MAX_RSS_KB )); then
+            echo "Stress process exceeded conservative RSS budget: ${max_rss_kb} KiB > ${STRESS_MAX_RSS_KB} KiB" >&2
+            exit 1
+          fi
+          if (( stress_status != 0 )); then
+            echo "Godot stress harness exited with status ${stress_status}" >&2
+            exit "$stress_status"
+          fi
