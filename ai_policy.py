@@ -24,6 +24,10 @@ def _finite(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
 
 
+def _positive_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
 def validate_ai_policy_document(document: Any) -> list[str]:
     errors: list[str] = []
     if not isinstance(document, dict):
@@ -96,6 +100,35 @@ def validate_ai_policy_document(document: Any) -> list[str]:
         for state_name, coefficient in effects.items():
             if state_name not in UTILITY_STATES or not _finite(coefficient):
                 errors.append(f"trait_effects.{name} contains invalid state/coefficient")
+
+    memory = document.get("short_term_memory")
+    if not isinstance(memory, dict):
+        errors.append("short_term_memory must be an object")
+        memory = {}
+    if not _positive_int(memory.get("capacity")) or int(memory.get("capacity", 0)) > 64:
+        errors.append("short_term_memory.capacity must be an integer in [1,64]")
+    if not _finite(memory.get("default_ttl")) or float(memory.get("default_ttl", 0.0)) <= 0.0:
+        errors.append("short_term_memory.default_ttl must be finite and > 0")
+    if not _finite(memory.get("max_ttl")) or float(memory.get("max_ttl", 0.0)) <= 0.0:
+        errors.append("short_term_memory.max_ttl must be finite and > 0")
+    if _finite(memory.get("default_ttl")) and _finite(memory.get("max_ttl")) and float(memory["max_ttl"]) < float(memory["default_ttl"]):
+        errors.append("short_term_memory.max_ttl must be >= default_ttl")
+    if not _positive_int(memory.get("max_subject_length")) or int(memory.get("max_subject_length", 0)) > 256:
+        errors.append("short_term_memory.max_subject_length must be an integer in [1,256]")
+    for key in ("max_abs_state_bias", "unfocused_subject_scale"):
+        if not _finite(memory.get(key)) or not 0.0 <= float(memory.get(key, -1.0)) <= 1.0:
+            errors.append(f"short_term_memory.{key} must be finite in [0,1]")
+    memory_effects = memory.get("effects")
+    if not isinstance(memory_effects, dict) or not memory_effects:
+        errors.append("short_term_memory.effects must be a non-empty object")
+    else:
+        for kind, effects in memory_effects.items():
+            if not isinstance(kind, str) or not kind or not isinstance(effects, dict) or not effects:
+                errors.append("short_term_memory.effects entries must be named non-empty objects")
+                continue
+            for state_name, coefficient in effects.items():
+                if state_name not in UTILITY_STATES or not _finite(coefficient):
+                    errors.append(f"short_term_memory.effects.{kind} contains invalid state/coefficient")
 
     rates = document.get("need_rates_per_minute")
     if not isinstance(rates, dict): errors.append("need_rates_per_minute must be an object"); rates = {}
