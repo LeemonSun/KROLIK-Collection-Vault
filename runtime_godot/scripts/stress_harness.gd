@@ -128,7 +128,7 @@ func _run() -> void:
         if agent.facial_state.enabled: facial_active += 1
         if agent.brain.policy_loaded: ai_policy_active += 1
         if not agent.brain.memory_snapshot().is_empty(): memory_active += 1
-        if agent.brain is VaultAgentBrainRuntime and not agent.brain.affinity_snapshot().is_empty(): affinity_active += 1
+        if agent.brain.has_method("affinity_snapshot") and not agent.brain.affinity_snapshot().is_empty(): affinity_active += 1
         var varied := false
         var dominant := "neutral"
         for raw_name in TRAIT_NAMES:
