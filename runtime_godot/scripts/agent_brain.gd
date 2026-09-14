@@ -3,6 +3,7 @@ extends RefCounted
 
 ## Realtime mirror of life_sim.py driven by a generated versioned policy asset.
 
+const AffinityStateScript = preload("res://scripts/affinity_state.gd")
 const POLICY_SCHEMA := "krolik.ai-policy/1"
 const POLICY_FORMAT_VERSION := 1
 const DEFAULT_POLICY_PATH := "res://data/ai_policy_v1.json"
@@ -38,7 +39,7 @@ var social := 0.45
 var mood := "calm"
 var last_utility: Dictionary = {}
 var memory: Array = []
-var affinity_state := VaultAffinityState.new()
+var affinity_state = AffinityStateScript.new()
 
 var policy_loaded := false
 var policy_source := "fallback"
