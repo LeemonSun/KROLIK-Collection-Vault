@@ -26,13 +26,41 @@ def test_runtime_manifest_contains_data_driven_pose_clips():
     assert any(frame.get("joints") for frame in animation["clips"]["walk"]["keyframes"])
 
 
-def test_godot_animation_is_sampled_before_ik():
+def test_godot_animation_secondary_motion_and_ik_pipeline_order():
     root = Path(__file__).resolve().parents[1]
     driver = (root / "runtime_godot/scripts/animation_driver.gd").read_text(encoding="utf-8")
     agent = (root / "runtime_godot/scripts/character_agent.gd").read_text(encoding="utf-8")
+
     assert "joint_offsets" in driver
     assert "_sample_clip" in driver
     assert "_lerp_samples" in driver
+    assert "set_additive_layer" in driver
     assert "animation_driver.configure" in agent
-    assert "_apply_animation_pose(sample)" in agent
-    assert "_solve_runtime_constraints(animated_joints)" in agent
+
+    # Physics must sample the complete base + additive animation result before
+    # handing the pose to CharacterAgent's post-animation pipeline.
+    sample_call = "var sample := animation_driver.step(delta)"
+    pose_call = "_apply_animation_pose(sample, delta)"
+    assert sample_call in agent
+    assert pose_call in agent
+    assert agent.index(sample_call) < agent.index(pose_call)
+
+    # Inside _apply_animation_pose the authored/animated joints are assembled,
+    # then secondary motion is applied, and only after that may interaction IK
+    # constrain endpoints. This ordering is the C4 contract.
+    pose_start = agent.index("func _apply_animation_pose(")
+    pose_end = agent.index("\nfunc ", pose_start + 1)
+    pose_body = agent[pose_start:pose_end]
+    secondary_call = "_apply_secondary_motion(delta)"
+    ik_call = "_solve_runtime_constraints(animated_joints)"
+    assert secondary_call in pose_body
+    assert ik_call in pose_body
+    assert pose_body.index(secondary_call) < pose_body.index(ik_call)
+
+    # Empty secondary configuration must remain a cheap disabled path rather
+    # than stepping springs for every runtime character.
+    secondary_start = agent.index("func _apply_secondary_motion(")
+    secondary_end = agent.index("\nfunc ", secondary_start + 1)
+    secondary_body = agent[secondary_start:secondary_end]
+    assert "if not secondary_motion_enabled" in secondary_body
+    assert "secondary_motion.step(delta, velocity)" in secondary_body
