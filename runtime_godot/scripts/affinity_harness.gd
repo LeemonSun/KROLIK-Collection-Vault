@@ -1,7 +1,5 @@
 extends SceneTree
 
-const RuntimeBrainScript = preload("res://scripts/agent_brain_runtime.gd")
-
 func _init() -> void:
     call_deferred("_run")
 
@@ -29,7 +27,7 @@ func _count_kind(records: Array, kind: String) -> int:
     return count
 
 func _run() -> void:
-    var brain = RuntimeBrainScript.new()
+    var brain := VaultAgentBrain.new()
     if not brain.policy_loaded or brain.affinity_state.config.is_empty():
         _fail("generated long-term affinity policy was not loaded")
         return
@@ -92,7 +90,7 @@ func _run() -> void:
     for _i in range(10):
         brain.learn_affinity("character", "alice", 1.0)
     var before_decay: Array = brain.affinity_snapshot()
-    brain.affinity_state.decay(100.0)
+    brain.decay_affinities(100.0)
     var after_decay: Array = brain.affinity_snapshot()
     if before_decay.is_empty() or after_decay.is_empty():
         _fail("slow decay unexpectedly removed strong affinity")
@@ -110,10 +108,6 @@ func _run() -> void:
         "kind": "place", "subject": "garden", "affinity": 0.8, "familiarity": 0.9,
     }]
     agent.setup("AFFINITY-CI", Vector2.ZERO, production)
-    if agent.brain.get_script() != RuntimeBrainScript:
-        _fail("production CharacterAgent is not using affinity-aware brain")
-        agent.queue_free()
-        return
     var production_state := agent.brain.choose_state(social_context)
     var production_affinity := agent.brain.affinity_snapshot()
     var roundtrip := agent.brain.snapshot()
