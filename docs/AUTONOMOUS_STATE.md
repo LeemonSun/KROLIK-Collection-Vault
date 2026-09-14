@@ -1,10 +1,10 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-14 20:58 +03:00
+Last updated: 2026-09-14 21:03 +03:00
 
 ## Current verified implementation
 
-Latest verified code/test commit: `b49a2d024d751dfc9f39bb3aec08de4a0ff1b426` (`test: assert animation secondary IK pipeline ordering`).
+Latest verified code/test commit: `28924b4e918f496ccfb171b4c9440485dc9f1d31` (`test: gate facial mood runtime behavior`).
 
 Verified stable checkpoints:
 - `checkpoint/stable-nav-fallback-stress-20260914-1952` — A4 220-agent Linux/headless movement/performance.
@@ -18,106 +18,96 @@ Verified stable checkpoints:
 - `checkpoint/stable-c2-ik-joint-limits-20260914-2043` — C2 angle-limited production IK.
 - `checkpoint/stable-c3-layered-animation-20260914-2048` — C3 masked additive animation layers.
 - `checkpoint/stable-c4-secondary-motion-20260914-2056` — C4 production spring/secondary motion.
+- `checkpoint/stable-c5-facial-mood-20260914-2101` — C5 deterministic facial/mood semantic layer + production head/neck response.
 
-Latest rollback checkpoints include `checkpoint/pre-c2-joint-limits-20260914-2029`, `checkpoint/pre-c3-layered-animation-20260914-2044`, and `checkpoint/pre-c4-secondary-runtime-20260914-2050`.
+Latest rollback checkpoints include `checkpoint/pre-c3-layered-animation-20260914-2044`, `checkpoint/pre-c4-secondary-runtime-20260914-2050`, and `checkpoint/pre-c5-facial-mood-20260914-2100`.
 
-No existing versioned rig/skin/animation contract was silently changed. Rig format remains v1; external animation content remains `krolik.animation-library/1`, format v1. New IK limits, additive layers and secondary motion are compatible optional runtime capabilities.
+No existing versioned rig/skin/animation contract was silently changed. Rig format remains v1; external animation content remains `krolik.animation-library/1`, format v1. IK limits, additive layers, secondary motion and facial semantic state are compatible runtime capabilities.
 
 ## Phase A
 
-- A1 VERIFIED: real `VaultSkinnedCharacter` deformation through Skeleton2D/Bone2D/Polygon2D. Current repeated rendered regression: tall changed pixels `10182`, compact `13685`, total `23867`; evidence PNGs uploaded by Godot CI.
-- A2 BLOCKED: real DWPose/RTMPose local ONNX path exists, but repository has no validated `.onnx` model artifact/source. Do not invent model bytes.
-- A3 VERIFIED: explicit non-destructive rig migrations, preservation of unknown/custom data, idempotence and downgrade refusal.
-- A4 VERIFIED on Linux/headless: real brain -> physics -> movement -> animation path with 220 live agents. Windows rendered 200–500-character measurement still unverified.
-- A5 VERIFIED: malformed clip/keyframe/root/joint data is isolated/rejected without poisoning valid animation data.
+- A1 VERIFIED: real renderer-level Skeleton2D/Bone2D/Polygon2D deformation. Repeated regression remains tall `10182` changed pixels + compact `13685`, total `23867`, with evidence PNG artifacts.
+- A2 BLOCKED: real DWPose/RTMPose ONNX path exists, but there is no validated `.onnx` model artifact/source in the repository. Do not invent model bytes.
+- A3 VERIFIED: explicit non-destructive rig migrations.
+- A4 VERIFIED on Linux/headless: real brain -> physics -> movement -> animation path with 220 live agents. Final Windows rendered 200–500-character measurement remains unverified.
+- A5 VERIFIED: malformed animation data is isolated/rejected without poisoning valid clips.
 
 ## Phase B
 
-- B1 VERIFIED: default animation library moved to versioned `content/animations/default_v1.json`; bounded loader/fallback and CI content validation.
-- B2 VERIFIED: `content/fixtures/default_v1.json` drives reusable fixtures, anchors/sockets, slots, render/occlusion metadata, collision profile, occupancy/capacity and default constraints; explicit catalog reload exists; runtime constraints resolve through content data.
-- B3 VERIFIED: `content/poses/default_v1.json` + `pose_content.py` provide reusable poses, filters, semantic left/right mirroring, strength blending, conversion to animation-v1 and atomic save/backup.
-- Legacy graphical authoring UI remains blocked because validated legacy `app.py` is missing. Do not reconstruct/guess corrupted bytes.
+- B1 VERIFIED: versioned external animation JSON, bounded loader/fallback and CI validation.
+- B2 VERIFIED: data-driven fixtures/anchors/sockets/slots/collision/occupancy/default constraints with explicit reload.
+- B3 VERIFIED: reusable pose library, semantic mirror, strength blend, animation-v1 conversion and atomic save/backup services.
+- Legacy graphical authoring UI integration remains blocked because validated legacy `app.py` is missing. Do not reconstruct/guess corrupted bytes.
 
-## Phase C
+## Phase C — motion quality COMPLETE for currently representable runtime
 
-### C1 — authored motion library
+### C1 authored motion library — VERIFIED
+33 authored clips across idle, locomotion, turns/steps/sidestep, gestures, reactions and environment motion. Runtime proof: `KROLIK_MOTION_RUNTIME clips=33 states=10 samples=132 validation_errors=0 validation_warnings=0`.
 
-VERIFIED. External motion library now has 33 clips covering idle, locomotion, turns/steps/sidestep, gestures, reactions and environment-specific motion. `motion_quality.py` rejects fake-static clips, bad loop continuity, insufficient family coverage and unreasonable offsets.
+### C2 joint-angle-limited IK — VERIFIED
+Reach/stretch + interior angle limits flow through production interactions. Runtime proof: `KROLIK_IK_LIMITS far=150.000 close=25.000 custom=125.000 agent=118.000 default=175.000`.
 
-Godot proof: `KROLIK_MOTION_RUNTIME clips=33 states=10 samples=132 validation_errors=0 validation_warnings=0`.
+### C3 masked additive animation — VERIFIED
+Independent additive layers support weight, joint masks, root weight, phase/speed and safe base cross-fade behavior. Runtime proof: `KROLIK_LAYERED_ANIMATION base_wrist=(0.1, 0.0) masked_wrist=(0.3, 0.1) masked_ankle=(0.2, 0.0) rooted_y=2.000 switched_wrist=(0.0, 0.05) layers=0`.
 
-### C2 — joint-angle-limited IK
+### C4 production secondary motion — VERIFIED
+Existing `VaultSecondaryMotion` is wired after animation/layers and before IK. Empty secondary config disables spring work. Explicitly constrained wrist/ankle endpoints remain IK-authoritative. Runtime proof: `KROLIK_SECONDARY_MOTION impulse=(-0.000462, 0.0) peak=0.000462 relaxed=0.000000 head_shift=0.000462 ik_error=0.000000 disabled=true`.
 
-VERIFIED. `VaultIKSolver` supports reach/stretch and interior joint-angle limits. Optional `min_joint_deg`, `max_joint_deg`, `max_stretch` flow from interaction payload into `VaultCharacterAgent`. Fractional strength preserves segment lengths.
+### C5 facial/mood runtime state — VERIFIED
+`VaultFacialState` now consumes the existing animation-v1 `procedural_blink` and `look_at` configuration instead of introducing another incompatible contract. It provides deterministic/decorrelated blink scheduling, bounded smoothed gaze, mood presets/transitions and semantic face channels (`eye_openness`, `brow`, `mouth_curve`, `mouth_open`, gaze/blink) for future dedicated face geometry. The current single-cutout character can honestly render only head/neck posture, which is applied in production after base/additive animation and before C4 secondary motion and C2 IK. No fake eyelid/mouth deformation is claimed.
 
-Godot proof: `KROLIK_IK_LIMITS far=150.000 close=25.000 custom=125.000 agent=118.000 default=175.000`.
+Production agent exposes mood/look target and stores the current semantic facial snapshot. The runtime regression proves deterministic blink behavior, bounded gaze, mood interpolation, actual head movement and zero interference with constrained IK.
 
-### C3 — masked additive animation
+Runtime proof: `KROLIK_FACIAL_STATE first_blink=29 decorrelated=30 peak_blink=0.985 gaze=(0.06, -0.06) mood_curve=0.440 head_shift=0.018023 ik_error=0.000000 semantic=true`.
 
-VERIFIED. `VaultAnimationDriver` supports independent additive layers with clip/phase/speed, weight, joint mask, optional root weight, deterministic order, non-destructive invalid-clip rejection, and correct base cross-fade behavior without double application.
-
-Godot proof: `KROLIK_LAYERED_ANIMATION base_wrist=(0.1, 0.0) masked_wrist=(0.3, 0.1) masked_ankle=(0.2, 0.0) rooted_y=2.000 switched_wrist=(0.0, 0.05) layers=0`.
-
-### C4 — production secondary/spring motion
-
-VERIFIED. Existing `VaultSecondaryMotion` is now connected to `VaultCharacterAgent` rather than remaining a disconnected helper.
-
-Implementation behavior:
-- `load_runtime_manifest()` consumes existing `physics.secondary`; no manifest schema bump.
-- empty secondary config disables the path and resets solver state, avoiding spring work for characters without configured channels;
-- sampled base + C3 additive animation is assembled first;
-- secondary offsets are applied next;
-- interaction IK is applied last and remains authoritative for explicitly constrained wrist/ankle endpoints;
-- C3 layer wrapper methods are exposed on CharacterAgent for runtime callers.
-
-Godot runtime harness proves acceleration lag, max-offset bounding, damping toward rest, real CharacterAgent head motion, constrained wrist authority, and zero-work disabled path.
-
-Godot proof: `KROLIK_SECONDARY_MOTION impulse=(-0.000462, 0.0) peak=0.000462 relaxed=0.000000 head_shift=0.000462 ik_error=0.000000 disabled=true`.
-
-The source-level Python regression was strengthened to assert the actual production ordering `animation -> secondary motion -> IK`, rather than matching the obsolete `_apply_animation_pose(sample)` call signature.
+The 220-agent stress harness now confirms facial state is active on all agents rather than merely testing one controller.
 
 ## Tests/checks actually run
 
 No local Python/Godot execution is claimed; verification came from GitHub Actions.
 
-C4 production/runtime commit `9fbcc2ce959b8b1d8dbefd0b8844f5f6ce2ec4c9`:
-- Godot Runtime CI `34877357474`: SUCCESS.
-- project parse/import PASS; headless smoke PASS.
-- malformed animation regression PASS.
-- 33-clip authored motion regression PASS.
-- C3 layered animation regression PASS.
-- C4 secondary motion production regression PASS.
-- C2 IK joint-limit regression PASS.
-- rendered deformation PASS with total changed pixels `23867`; evidence upload PASS.
-- 220-agent stress PASS: 220/220 active/moved, moved_share `1.000`, sim_fps `60.08`, avg_travel `99.59 px`, max RSS `111000 KiB` (~109 MiB), process status 0.
+C5 final commit `28924b4e918f496ccfb171b4c9440485dc9f1d31`:
+- Godot Runtime CI `34878051171`: SUCCESS.
+  - project parse/import PASS;
+  - headless runtime smoke PASS;
+  - malformed animation validation PASS;
+  - 33-clip authored motion runtime PASS;
+  - C3 layered animation PASS;
+  - C5 facial mood state regression PASS;
+  - C4 secondary motion PASS;
+  - C2 IK joint-limit regression PASS;
+  - rendered deformation PASS, total changed pixels `23867`, evidence upload PASS;
+  - 220-agent stress PASS with `facial_active=220`, 220/220 active/moved, moved_share `1.000`, sim_fps `59.83`, avg_travel `99.59 px`, max RSS `112148 KiB` (~110 MiB), process status 0.
+- Vault CI `34878051026`: SUCCESS.
 
-Final C4 test-fix commit `b49a2d024d751dfc9f39bb3aec08de4a0ff1b426`:
-- Vault CI `34877523944`: SUCCESS.
-- source-integrity PASS.
-- core syntax PASS.
-- content validator PASS (`files=3 failed=0`).
-- core regression suite PASS: `44 passed`.
-- backend/UI SKIPPED because validated `app.py` remains absent.
-
-Recent C3 verification:
-- Vault CI `34876857206`: SUCCESS, 44 passed.
-- Godot Runtime CI `34876857171`: SUCCESS, all C1/C2/C3/A1/A4 gates green.
+C4 reference verification:
+- Godot Runtime CI `34877357474`: SUCCESS, C4 metric verified and 220-agent stress ~60.08 FPS / ~109 MiB RSS.
+- Vault CI `34877523944`: SUCCESS, content validator `files=3 failed=0`, core regression suite `44 passed`; backend/UI skipped because validated `app.py` is absent.
 
 ## Still blocked / unverified
 
-- A2 real DWPose/RTMPose accuracy: blocked on a validated ONNX model artifact/source.
-- Final rendered Windows FPS/CPU/memory at intended 200–500 character scale remains unmeasured.
-- Validated legacy `app.py` is unavailable; backend/UI and direct legacy editor integration remain blocked. Do not guess/rebuild corrupted source bytes.
-- `KROLIK_MASTER_PLAN.md` is still absent from repository search; follow `docs/AUTONOMOUS_RUNBOOK.md` rather than inventing missing roadmap content.
+- A2 real DWPose/RTMPose accuracy is blocked on a validated ONNX model artifact/source.
+- Final rendered Windows FPS/CPU/memory at the intended 200–500 character scale remains unmeasured.
+- Validated legacy `app.py` remains unavailable; backend/UI and direct legacy graphical editor integration remain blocked. Do not guess corrupted source bytes.
+- `KROLIK_MASTER_PLAN.md` remains absent; use `docs/AUTONOMOUS_RUNBOOK.md` as the authoritative roadmap instead of inventing missing content.
+- Dedicated eyelid/eye/mouth geometry is not yet present, so C5 semantic eye/mouth channels are prepared but only head/neck posture is visibly rendered today.
+
+## Phase status
+
+Phase A: A1/A3/A5 verified; A4 Linux/headless verified; A2 dependency-blocked; Windows rendered performance pending.
+
+Phase B: source-independent animation/fixture/pose content pipeline verified; legacy graphical UI integration blocked on `app.py`.
+
+Phase C: COMPLETE for current source-asset capabilities — C1 motion library, C2 IK limits, C3 layered animation, C4 secondary motion, C5 facial/mood state all verified.
 
 ## Next highest-priority unblocked task
 
-Continue Phase C with C5 facial/mood runtime layers, but do not fake visual facial deformation that the current single-cutout rig cannot represent.
+Start Phase D with D1: eliminate drift between Python `life_sim.py` (semantic source of truth) and Godot `agent_brain.gd`.
 
-Required approach:
-1. Inventory existing `procedural_blink` / `look_at` animation content and any runtime face-capable joints/channels.
-2. Add a deterministic face/mood state layer that can expose blink/look target/mood parameters independently of body locomotion, while using actual head/neck joint offsets where the current rig can honestly render them.
-3. Keep facial state optional and near-zero-cost when disabled/unconfigured.
-4. If there is no deformable eye/mouth geometry yet, represent eye/mouth controls as runtime semantic channels for future face mesh/sprite layers rather than pretending a whole-body PNG can visibly blink.
-5. Add Godot regression proving deterministic blink scheduling, bounded look-at/head response, mood transitions, and no interference with C3/C4/C2 ordering.
-6. Re-run complete Godot and Vault CI; only create stable C5 checkpoint after green.
+Required vertical slice:
+1. Inventory state/need/utility semantics in both Python and Godot and identify duplicated constants/thresholds/state names.
+2. Define a source-independent, versioned AI policy document generated/exported from Python source-of-truth data without changing existing runtime mind snapshots.
+3. Load that policy in Godot and drive `VaultAgentBrain` from it instead of hardcoded duplicate policy values where practical.
+4. Preserve deterministic fallback if the policy document is missing/invalid; do not make runtime dependent on Python being installed.
+5. Add Python regression proving exported policy matches `life_sim.py` semantics and Godot regression proving the production brain consumes the generated policy and reaches expected states.
+6. Re-run Vault + Godot CI, then create a stable D1 checkpoint only after both are green.
