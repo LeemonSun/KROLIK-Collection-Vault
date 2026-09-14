@@ -6,7 +6,10 @@ on:
     paths:
       - 'runtime_godot/**'
       - 'content/animations/**'
+      - 'content/ai/**'
       - 'animation_content.py'
+      - 'ai_policy.py'
+      - 'life_sim.py'
       - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
@@ -16,7 +19,10 @@ on:
     paths:
       - 'runtime_godot/**'
       - 'content/animations/**'
+      - 'content/ai/**'
       - 'animation_content.py'
+      - 'ai_policy.py'
+      - 'life_sim.py'
       - 'motion_quality.py'
       - 'runtime_package.py'
       - 'rig_tools.py'
@@ -60,6 +66,13 @@ jobs:
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 30s "$GODOT" --headless --path runtime_godot --quit-after 2
+
+      - name: Generated AI policy runtime regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --script res://scripts/ai_policy_harness.gd
 
       - name: Animation clip validation regression
         shell: bash
