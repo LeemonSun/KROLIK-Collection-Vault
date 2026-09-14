@@ -25,14 +25,14 @@ jobs:
       - name: Core module syntax
         run: |
           python -m py_compile \
-            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py \
+            ai_policy.py animation_content.py motion_quality.py pose_content.py prop_content.py rig_tools.py rig_migrations.py runtime_package.py mesh_deform.py character_import.py \
             constraint_solver.py interaction_runtime.py life_sim.py \
-            tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py tools/build_core_vertical_slice.py
+            tools/export_ai_policy.py tools/validate_content.py tools/audit_source_readiness.py tools/build_core_vertical_slice.py tools/import_character_package.py
       - name: Verify generated AI policy copies
         run: python tools/export_ai_policy.py --check
       - name: Validate data-driven content
         run: python tools/validate_content.py
-      - name: Build headless image-to-runtime core vertical slice
+      - name: Build real-image-to-runtime core vertical slice
         run: python tools/build_core_vertical_slice.py --output-root "${RUNNER_TEMP}/krolik-core-slice"
       - name: Core regression suite
         run: |
@@ -49,6 +49,7 @@ jobs:
             tests/test_rig_migrations.py \
             tests/test_life_sim.py \
             tests/test_source_readiness.py \
+            tests/test_character_import.py \
             tests/test_core_vertical_slice.py
 
   canonical-source-readiness:
