@@ -4,7 +4,8 @@ from __future__ import annotations
 
 The matrix intentionally stays synthetic/deterministic so CI is reproducible,
 but unlike the single vertical-slice fixture it covers multiple file formats,
-alpha conditions and body/image proportions through the production import API.
+alpha conditions, body/image proportions and one manual rig correction through
+the same production import API.
 """
 
 import argparse
@@ -106,11 +107,12 @@ def _fixture_compact_png(path: Path) -> tuple[int, int]:
     return width, height
 
 
+COMPACT_EDIT = {"left_wrist": {"x": 0.16, "y": 0.49}}
 FIXTURES = (
-    ("qa-alpha-png", "alpha.png", _fixture_alpha_png, "embedded-alpha"),
-    ("qa-opaque-png", "opaque.png", _fixture_opaque_png, "uniform-border-v1"),
-    ("qa-jpeg", "ordinary.jpg", _fixture_jpeg, "uniform-border-v1"),
-    ("qa-compact-png", "compact.png", _fixture_compact_png, "uniform-border-v1"),
+    ("qa-alpha-png", "alpha.png", _fixture_alpha_png, "embedded-alpha", None),
+    ("qa-opaque-png", "opaque.png", _fixture_opaque_png, "uniform-border-v1", None),
+    ("qa-jpeg", "ordinary.jpg", _fixture_jpeg, "uniform-border-v1", None),
+    ("qa-compact-png", "compact.png", _fixture_compact_png, "uniform-border-v1", COMPACT_EDIT),
 )
 
 
@@ -120,7 +122,7 @@ def build_import_qa_matrix(output_root: Path) -> dict[str, object]:
     fixture_root.mkdir(parents=True, exist_ok=True)
     entries: list[dict[str, object]] = []
 
-    for character_id, filename, builder, expected_cutout in FIXTURES:
+    for character_id, filename, builder, expected_cutout, overrides in FIXTURES:
         source = fixture_root / filename
         expected_width, expected_height = builder(source)
         result = build_character_runtime_package(
@@ -130,6 +132,7 @@ def build_import_qa_matrix(output_root: Path) -> dict[str, object]:
             name=character_id,
             cutout_mode="auto",
             prefer_ai_rig=False,
+            joint_overrides=overrides,
             cell_id="qa-room",
         )
         if result["cutout_method"] != expected_cutout:
@@ -146,13 +149,16 @@ def build_import_qa_matrix(output_root: Path) -> dict[str, object]:
             raise RuntimeError(f"{character_id}: collision proxy contract is incomplete")
         if int(result["width"]) != expected_width or int(result["height"]) != expected_height:
             raise RuntimeError(f"{character_id}: normalized dimensions changed unexpectedly")
+        expected_override_count = 1 if overrides else 0
+        if int(result["joint_override_count"]) != expected_override_count:
+            raise RuntimeError(f"{character_id}: joint edit did not propagate through import")
 
         manifest_path = Path(str(result["manifest"])).resolve()
         try:
             manifest_rel = manifest_path.relative_to(root).as_posix()
         except ValueError as exc:
             raise RuntimeError(f"{character_id}: manifest escaped matrix root") from exc
-        entries.append({
+        entry: dict[str, object] = {
             "character_id": character_id,
             "source_name": filename,
             "source_sha256": result["source_sha256"],
@@ -165,7 +171,15 @@ def build_import_qa_matrix(output_root: Path) -> dict[str, object]:
             "rig_score": result["rig_score"],
             "vertices": result["vertices"],
             "triangles": result["triangles"],
-        })
+            "joint_override_count": result["joint_override_count"],
+        }
+        if overrides:
+            entry["expected_joint"] = {
+                "name": "left_wrist",
+                "x": COMPACT_EDIT["left_wrist"]["x"],
+                "y": COMPACT_EDIT["left_wrist"]["y"],
+            }
+        entries.append(entry)
 
     matrix = {
         "schema": "krolik.import-qa-matrix/1",
@@ -183,7 +197,11 @@ def main() -> int:
     args = parser.parse_args()
     result = build_import_qa_matrix(Path(args.output_root))
     methods = ",".join(str(entry["cutout_method"]) for entry in result["entries"])
-    print(f"KROLIK_IMPORT_QA_MATRIX count={result['count']} methods={methods} matrix={result['matrix']}")
+    edited = sum(int(entry.get("joint_override_count", 0)) > 0 for entry in result["entries"])
+    print(
+        f"KROLIK_IMPORT_QA_MATRIX count={result['count']} methods={methods} "
+        f"edited={edited} matrix={result['matrix']}"
+    )
     return 0
 
 
