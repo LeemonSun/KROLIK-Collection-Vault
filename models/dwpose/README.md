@@ -1,6 +1,6 @@
 # DWPose model slot
 
-KROLIK does **not** commit the 134 MB ONNX binary to Git.
+KROLIK does **not** commit the large ONNX binary to Git.
 
 The runtime candidate path used by `rig_tools.py` is:
 
@@ -22,11 +22,12 @@ Pinned model metadata:
 
 - file: `dw-ll_ucoco_384.onnx`
 - expected SHA-256: `724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843`
-- expected bytes: `140839825`
 - model family: DWPose/RTMPose WholeBody ONNX
 - upstream project: `IDEA-Research/DWPose`
 - upstream repository license: Apache-2.0
 
-The official DWPose repository documents this exact ONNX filename for its ONNX/ControlNet path. The bootstrap uses a mirror URL but refuses any payload whose SHA-256/size does not match the pinned artifact. Override `--url` if the mirror moves; checksum verification remains mandatory.
+The official DWPose repository documents this exact ONNX filename for its ONNX/ControlNet path. The bootstrap uses a mirror URL but refuses any payload whose SHA-256 does not match the pinned artifact. Override `--url` if the mirror moves; checksum verification remains mandatory.
+
+No exact byte count is treated as authoritative until independently verified from the exact object. SHA-256 is the identity/integrity pin.
 
 Do not mark A2 complete merely because the binary exists. A2 also requires a real inference smoke and measured pose accuracy on a representative art corpus.
