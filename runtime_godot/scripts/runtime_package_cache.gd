@@ -13,7 +13,9 @@ extends RefCounted
 ## Vault containing hundreds of unique sleeping characters cannot pin hundreds of
 ## full-resolution Texture2D resources. Evicting a cache reference is safe: active
 ## agents keep their own RefCounted Texture2D reference and continue rendering.
-## A later request for an evicted package simply re-decodes its immutable image.
+## Metadata-only loads intentionally avoid decoding the full image so reduced and
+## sleeping LOD tiers do not populate the full-resolution texture cache at spawn.
+## A later full-res request decodes the immutable image on demand.
 ##
 ## Entries are invalidated when either the manifest or referenced image mtime or
 ## size changes. The cache never changes package files or their versioned schema.
@@ -170,19 +172,19 @@ static func load_package(manifest_path: String, include_texture: bool = true) ->
         var image_path := str(existing.get("image_path", ""))
         var image_stamp := _file_stamp(image_path)
         if _same_stamp(existing.get("manifest_stamp", {}), manifest_stamp) and _same_stamp(existing.get("image_stamp", {}), image_stamp):
-  if include_texture:
-      var texture: Texture2D = existing.get("texture", null) as Texture2D
-      if texture == null:
-          texture = _decode_texture(existing)
-          if texture == null:
-              return {}
-          _entries[clean_path] = existing
-      else:
-          _touch_texture(existing)
-          _entries[clean_path] = existing
-      _trim_texture_cache(clean_path)
-  _cache_hits += 1
-  return _cached_result(existing, include_texture)
+            if include_texture:
+                var texture: Texture2D = existing.get("texture", null) as Texture2D
+                if texture == null:
+                    texture = _decode_texture(existing)
+                    if texture == null:
+                        return {}
+                    _entries[clean_path] = existing
+                else:
+                    _touch_texture(existing)
+                    _entries[clean_path] = existing
+                _trim_texture_cache(clean_path)
+            _cache_hits += 1
+            return _cached_result(existing, include_texture)
         _entries.erase(clean_path)
         _invalidations += 1
 
@@ -221,8 +223,8 @@ static func load_package(manifest_path: String, include_texture: bool = true) ->
     if include_texture:
         var texture := _decode_texture(entry)
         if texture == null:
-  _entries.erase(clean_path)
-  return {}
+            _entries.erase(clean_path)
+            return {}
         _entries[clean_path] = entry
         _trim_texture_cache(clean_path)
     return _cached_result(entry, include_texture)
