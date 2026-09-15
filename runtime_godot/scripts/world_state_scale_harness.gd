@@ -142,8 +142,11 @@ func _run() -> void:
         _fail("unexpected initial tier distribution: " + str(lod.tier_snapshot()))
         return
 
-    for _frame in range(12):
-        await physics_frame
+    # LOD reassessment queues visual/collision nodes for deletion. We only need
+    # ordinary process-frame flushes before capture; physics simulation warmup is
+    # unnecessary here and becomes extremely expensive with 500 live agents.
+    await process_frame
+    await process_frame
     _stage("simulation_ready")
 
     var persistence := VaultWorldState.new()
