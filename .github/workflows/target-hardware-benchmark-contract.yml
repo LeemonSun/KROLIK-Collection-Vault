@@ -99,6 +99,7 @@ jobs:
           $collectorExit = $LASTEXITCODE
           Write-Host "KROLIK_TARGET_SMOKE_EXIT code=$collectorExit"
           if ($collectorExit -ne 2) { throw "Expected collector to reject hosted software renderer with exit 2; actual=$collectorExit" }
+          exit 0
 
       - name: Verify full-run evidence and software-render rejection
         shell: pwsh
