@@ -50,6 +50,91 @@ JOINT_ORDER = [
     "right_hip", "right_knee", "right_ankle",
 ]
 
+JOINT_CONFIDENCE_THRESHOLDS = {
+    "head": 0.35,
+    "neck": 0.40,
+    "left_shoulder": 0.45,
+    "right_shoulder": 0.45,
+    "left_elbow": 0.45,
+    "right_elbow": 0.45,
+    "left_wrist": 0.45,
+    "right_wrist": 0.45,
+    "pelvis": 0.45,
+    "left_hip": 0.45,
+    "right_hip": 0.45,
+    "left_knee": 0.40,
+    "right_knee": 0.40,
+    "left_ankle": 0.40,
+    "right_ankle": 0.40,
+}
+
+EXACT_ANCHOR_THRESHOLDS = {
+    "head": 0.50,
+    "left_wrist": 0.60,
+    "right_wrist": 0.60,
+    "left_ankle": 0.55,
+    "right_ankle": 0.55,
+}
+
+
+def classify_joint_confidence(
+    joint_confidence: dict[str, float],
+    fallback: float = 0.18,
+) -> dict[str, Any]:
+    """Turn raw detector scores into conservative runtime confidence policy.
+
+    DWPose's low detection floor answers "did the model find enough of a body?".
+    It is intentionally not the same as "is this joint precise enough for IK or
+    an exact interaction anchor?". Distal joints need stricter thresholds.
+    """
+    thresholds: dict[str, float] = {}
+    status: dict[str, str] = {}
+    low: list[str] = []
+    guarded: list[str] = []
+    exact_anchors: list[str] = []
+
+    for name in JOINT_ORDER:
+        raw = joint_confidence.get(name, 0.0)
+        try:
+            value = max(0.0, min(1.0, float(raw)))
+        except (TypeError, ValueError):
+            value = 0.0
+        threshold = max(float(fallback), float(JOINT_CONFIDENCE_THRESHOLDS.get(name, fallback)))
+        thresholds[name] = round(threshold, 6)
+        if value < threshold:
+            status[name] = "uncertain"
+            low.append(name)
+        elif value < min(1.0, threshold + 0.15):
+            status[name] = "guarded"
+            guarded.append(name)
+        else:
+            status[name] = "reliable"
+
+        anchor_threshold = EXACT_ANCHOR_THRESHOLDS.get(name)
+        if anchor_threshold is not None and value >= max(threshold, float(anchor_threshold)):
+            exact_anchors.append(name)
+
+    uncertain_limbs: list[str] = []
+    chains = {
+        "left_arm": ("left_elbow", "left_wrist"),
+        "right_arm": ("right_elbow", "right_wrist"),
+        "left_leg": ("left_knee", "left_ankle"),
+        "right_leg": ("right_knee", "right_ankle"),
+    }
+    for limb, names in chains.items():
+        if any(status.get(name) == "uncertain" for name in names):
+            uncertain_limbs.append(limb)
+
+    return {
+        "thresholds": thresholds,
+        "status": status,
+        "low_confidence_joints": sorted(low),
+        "guarded_joints": sorted(guarded),
+        "uncertain_limbs": sorted(uncertain_limbs),
+        "exact_anchor_joints": sorted(exact_anchors),
+    }
+
+
 
 @dataclass
 class RigDetection:
@@ -328,6 +413,7 @@ def _dwpose_keypoints_to_rig(points, scores, width: int, height: int, min_conf: 
         "right_knee": conf_value(14),
         "right_ankle": conf_value(16),
     }
+    confidence_policy = classify_joint_confidence(joint_confidence, fallback=min_conf)
     return RigDetection(joints=joints, settings={
         "backend": "dwpose-onnx",
         "rig_format_version": RIG_FORMAT_VERSION,
@@ -338,9 +424,12 @@ def _dwpose_keypoints_to_rig(points, scores, width: int, height: int, min_conf: 
         "preserve_volume": .68,
         "pose_confidence": round(float(quality), 5),
         "joint_confidence": joint_confidence,
-        "low_confidence_joints": sorted(
-            name for name, value in joint_confidence.items() if float(value) < min_conf
-        ),
+        "joint_confidence_thresholds": confidence_policy["thresholds"],
+        "joint_confidence_status": confidence_policy["status"],
+        "low_confidence_joints": confidence_policy["low_confidence_joints"],
+        "guarded_joints": confidence_policy["guarded_joints"],
+        "uncertain_limbs": confidence_policy["uncertain_limbs"],
+        "exact_anchor_joints": confidence_policy["exact_anchor_joints"],
     })
 
 
