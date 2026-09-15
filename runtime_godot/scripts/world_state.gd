@@ -376,10 +376,12 @@ func restore(doc: Dictionary, parent: Node, package_root: String) -> Dictionary:
         var record: Dictionary = item.get("record", {})
         var manifest := str(item.get("manifest", ""))
         var position := _read_vec(record.get("position", {}))
+        var saved_lod: Dictionary = record.get("lod", {})
+        var expected_tier := str(saved_lod.get("tier", VaultPopulationLOD.TIER_FULL))
         var agent := VaultCharacterAgent.new()
         parent.add_child(agent)
         agent.setup(str(record.get("character_id", "")), position, {})
-        if not agent.load_runtime_manifest(manifest):
+        if not agent.load_runtime_manifest(manifest, expected_tier == VaultPopulationLOD.TIER_FULL):
             return _restore_failed(parent, lod, agents, "runtime package rejected during world restore")
 
         agent.character_id = str(record.get("character_id", ""))
@@ -398,7 +400,6 @@ func restore(doc: Dictionary, parent: Node, package_root: String) -> Dictionary:
 
         # Sleeping agents hold semantic time outside VaultAgentBrain. Materialize
         # that saved interval exactly once before they re-enter the new LOD manager.
-        var saved_lod: Dictionary = record.get("lod", {})
         var pending_sleep := clampf(float(saved_lod.get("sleep_elapsed", 0.0)), 0.0, 300.0)
         if pending_sleep > 0.0:
             agent.brain.state = agent.brain.step(pending_sleep, _semantic_context(agent))
@@ -410,7 +411,6 @@ func restore(doc: Dictionary, parent: Node, package_root: String) -> Dictionary:
         agents.append(agent)
 
         var restored_tier := lod.tier_for(agent)
-        var expected_tier := str(saved_lod.get("tier", VaultPopulationLOD.TIER_FULL))
         if restored_tier != expected_tier:
             return _restore_failed(
                 parent, lod, agents,
