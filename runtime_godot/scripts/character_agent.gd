@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 const SkinnedCharacterScript = preload("res://scripts/skinned_character.gd")
 const CollisionRigScript = preload("res://scripts/collision_rig.gd")
+const RuntimePackageCacheScript = preload("res://scripts/runtime_package_cache.gd")
 
 var character_id := ""
 var brain := VaultAgentBrain.new()
@@ -56,14 +57,19 @@ func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     collision_mask = 1
     queue_redraw()
 
-func load_runtime_manifest(manifest_path: String) -> bool:
-    var file := FileAccess.open(manifest_path, FileAccess.READ)
-    if file == null:
+func load_runtime_manifest(manifest_path: String, build_runtime_resources: bool = true) -> bool:
+    var package: Dictionary = RuntimePackageCacheScript.load_package(manifest_path)
+    if package.is_empty():
         return false
-    var parsed = JSON.parse_string(file.get_as_text())
-    if typeof(parsed) != TYPE_DICTIONARY:
+    var manifest_value: Variant = package.get("manifest", {})
+    if typeof(manifest_value) != TYPE_DICTIONARY:
         return false
-    var manifest: Dictionary = parsed
+    var manifest: Dictionary = manifest_value
+    var shared_texture: Texture2D = package.get("texture", null) as Texture2D
+    if shared_texture == null:
+        return false
+    character_texture = shared_texture
+
     var c: Dictionary = manifest.get("character", {})
     character_id = str(c.get("id", character_id))
     var mind: Dictionary = manifest.get("mind", {})
@@ -73,11 +79,6 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     facial_state.configure(animation_doc, int(hash(character_id)))
     facial_channels = facial_state.semantic_snapshot()
     var visual: Dictionary = manifest.get("visual", {})
-    var image_name := str(visual.get("file", "character.png"))
-    var image_path := manifest_path.get_base_dir().path_join(image_name)
-    if not set_character_image(image_path):
-        return false
-    var pivot: Dictionary = visual.get("pivot", {})
     texture_scale = float(visual.get("runtime_scale", texture_scale))
     contained = str(mind.get("state", "")) == "contained"
     var rig: Dictionary = manifest.get("rig", {})
@@ -98,8 +99,14 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     animated_joints = rig_joints.duplicate(true)
     solved_joints = animated_joints.duplicate(true)
     _solve_runtime_constraints(animated_joints)
-    _rebuild_character_visual()
-    _rebuild_collision_rig()
+    if build_runtime_resources:
+        _rebuild_character_visual()
+        _rebuild_collision_rig()
+    else:
+        _clear_character_visual()
+        if collision_rig != null:
+            collision_rig.clear()
+            collision_rig = null
     queue_redraw()
     return true
 
