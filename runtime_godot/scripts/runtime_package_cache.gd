@@ -144,10 +144,12 @@ static func _trim_texture_cache(protected_path: String = "") -> void:
         _entries[oldest_path] = oldest
         _texture_evictions += 1
 
-static func _cached_result(entry: Dictionary) -> Dictionary:
+static func _cached_result(entry: Dictionary, include_texture: bool = true) -> Dictionary:
     var manifest_value: Variant = entry.get("manifest", {})
-    var texture_value: Variant = entry.get("texture", null)
-    if typeof(manifest_value) != TYPE_DICTIONARY or texture_value == null:
+    if typeof(manifest_value) != TYPE_DICTIONARY:
+        return {}
+    var texture_value: Variant = entry.get("texture", null) if include_texture else null
+    if include_texture and texture_value == null:
         return {}
     var manifest: Dictionary = manifest_value
     return {
@@ -156,7 +158,7 @@ static func _cached_result(entry: Dictionary) -> Dictionary:
         "image_path": str(entry.get("image_path", "")),
     }
 
-static func load_package(manifest_path: String) -> Dictionary:
+static func load_package(manifest_path: String, include_texture: bool = true) -> Dictionary:
     var clean_path := manifest_path.strip_edges()
     if clean_path.is_empty() or not FileAccess.file_exists(clean_path):
         return {}
@@ -168,18 +170,19 @@ static func load_package(manifest_path: String) -> Dictionary:
         var image_path := str(existing.get("image_path", ""))
         var image_stamp := _file_stamp(image_path)
         if _same_stamp(existing.get("manifest_stamp", {}), manifest_stamp) and _same_stamp(existing.get("image_stamp", {}), image_stamp):
-            var texture: Texture2D = existing.get("texture", null) as Texture2D
-            if texture == null:
-                texture = _decode_texture(existing)
-                if texture == null:
-                    return {}
-                _entries[clean_path] = existing
-            else:
-                _touch_texture(existing)
-                _entries[clean_path] = existing
-            _cache_hits += 1
-            _trim_texture_cache(clean_path)
-            return _cached_result(existing)
+  if include_texture:
+      var texture: Texture2D = existing.get("texture", null) as Texture2D
+      if texture == null:
+          texture = _decode_texture(existing)
+          if texture == null:
+              return {}
+          _entries[clean_path] = existing
+      else:
+          _touch_texture(existing)
+          _entries[clean_path] = existing
+      _trim_texture_cache(clean_path)
+  _cache_hits += 1
+  return _cached_result(existing, include_texture)
         _entries.erase(clean_path)
         _invalidations += 1
 
@@ -214,9 +217,12 @@ static func load_package(manifest_path: String) -> Dictionary:
         "texture": null,
         "texture_access_tick": 0,
     }
-    var texture := _decode_texture(entry)
-    if texture == null:
-        return {}
     _entries[clean_path] = entry
-    _trim_texture_cache(clean_path)
-    return _cached_result(entry)
+    if include_texture:
+        var texture := _decode_texture(entry)
+        if texture == null:
+  _entries.erase(clean_path)
+  return {}
+        _entries[clean_path] = entry
+        _trim_texture_cache(clean_path)
+    return _cached_result(entry, include_texture)

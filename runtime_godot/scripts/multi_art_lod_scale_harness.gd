@@ -279,8 +279,8 @@ func _run() -> void:
     var static_max_mib := float(Performance.get_monitor(Performance.MEMORY_STATIC_MAX)) / 1048576.0
     var render_evidence := await _capture_render_evidence()
 
-    print("KROLIK_MULTI_ART_SCALE_METRIC agents=%d unique_packages=%d full=%d reduced=%d sleeping=%d resident=%d proxy=%d released=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f awake=%d awake_moved=%d awake_moved_share=%.3f sleep_drift_max=%.3f cache_entries=%d cache_parses=%d cache_decodes=%d cache_hits=%d static_mib=%.2f static_max_mib=%.2f renderer=%s" % [
-        _agent_count, _manifest_paths.size(), int(tiers.get("full", 0)), int(tiers.get("reduced", 0)), int(tiers.get("sleeping", 0)), int(tiers.get("resident", 0)), int(tiers.get("proxy", 0)), int(tiers.get("released", 0)), _sample_frames, elapsed, fps, awake, awake_moved, awake_moved_share, sleeping_drift_max, int(cache.get("entries", 0)), int(cache.get("manifest_parses", 0)), int(cache.get("texture_decodes", 0)), int(cache.get("hits", 0)), static_mib, static_max_mib, renderer_name
+    print("KROLIK_MULTI_ART_SCALE_METRIC agents=%d unique_packages=%d full=%d reduced=%d sleeping=%d resident=%d proxy=%d released=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f awake=%d awake_moved=%d awake_moved_share=%.3f sleep_drift_max=%.3f cache_entries=%d cache_texture_entries=%d cache_limit=%d cache_parses=%d cache_decodes=%d cache_evictions=%d cache_hits=%d static_mib=%.2f static_max_mib=%.2f renderer=%s" % [
+        _agent_count, _manifest_paths.size(), int(tiers.get("full", 0)), int(tiers.get("reduced", 0)), int(tiers.get("sleeping", 0)), int(tiers.get("resident", 0)), int(tiers.get("proxy", 0)), int(tiers.get("released", 0)), _sample_frames, elapsed, fps, awake, awake_moved, awake_moved_share, sleeping_drift_max, int(cache.get("entries", 0)), int(cache.get("texture_entries", 0)), int(cache.get("texture_limit", 0)), int(cache.get("manifest_parses", 0)), int(cache.get("texture_decodes", 0)), int(cache.get("texture_evictions", 0)), int(cache.get("hits", 0)), static_mib, static_max_mib, renderer_name
     ])
     print("KROLIK_MULTI_ART_RENDER saved=%s foreground=%d width=%d height=%d path=%s" % [
         str(bool(render_evidence.get("saved", false))), int(render_evidence.get("sampled_foreground", 0)), int(render_evidence.get("width", 0)), int(render_evidence.get("height", 0)), str(render_evidence.get("path", ""))
@@ -298,8 +298,18 @@ func _run() -> void:
         push_error("KROLIK MULTI ART scale: awake movement share too low %.3f" % awake_moved_share); quit(6); return
     if sleeping_drift_max > 0.01:
         push_error("KROLIK MULTI ART scale: sleeping agents drifted %.3f" % sleeping_drift_max); quit(7); return
-    if int(cache.get("entries", 0)) != _manifest_paths.size() or int(cache.get("manifest_parses", 0)) != _manifest_paths.size() or int(cache.get("texture_decodes", 0)) != _manifest_paths.size():
-        push_error("KROLIK MULTI ART scale: package cache did not preserve one entry/decode per unique package: " + str(cache)); quit(8); return
+    var cache_entries := int(cache.get("entries", 0))
+    var cache_texture_entries := int(cache.get("texture_entries", 0))
+    var cache_texture_limit := int(cache.get("texture_limit", 0))
+    var cache_decodes := int(cache.get("texture_decodes", 0))
+    if cache_entries != _manifest_paths.size() or int(cache.get("manifest_parses", 0)) != _manifest_paths.size():
+        push_error("KROLIK MULTI ART scale: manifest cache shape mismatch: " + str(cache)); quit(8); return
+    if cache_texture_limit <= 0 or cache_texture_entries > cache_texture_limit:
+        push_error("KROLIK MULTI ART scale: decoded texture cache exceeded its bound: " + str(cache)); quit(13); return
+    if cache_decodes > awake:
+        push_error("KROLIK MULTI ART scale: full texture decodes exceeded awake population: " + str(cache)); quit(14); return
+    if _manifest_paths.size() > cache_texture_limit and cache_decodes >= _manifest_paths.size():
+        push_error("KROLIK MULTI ART scale: lazy texture decode did not reduce unique-package residency: " + str(cache)); quit(15); return
     for package_index in range(_manifest_paths.size()):
         if int(package_counts.get(package_index, 0)) <= 0:
             push_error("KROLIK MULTI ART scale: package %d received no agents" % package_index); quit(9); return

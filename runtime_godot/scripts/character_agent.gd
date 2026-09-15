@@ -58,7 +58,7 @@ func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     queue_redraw()
 
 func load_runtime_manifest(manifest_path: String, build_runtime_resources: bool = true) -> bool:
-    var package: Dictionary = RuntimePackageCacheScript.load_package(manifest_path)
+    var package: Dictionary = RuntimePackageCacheScript.load_package(manifest_path, build_runtime_resources)
     if package.is_empty():
         return false
     var manifest_value: Variant = package.get("manifest", {})
@@ -66,9 +66,9 @@ func load_runtime_manifest(manifest_path: String, build_runtime_resources: bool 
         return false
     var manifest: Dictionary = manifest_value
     var shared_texture: Texture2D = package.get("texture", null) as Texture2D
-    if shared_texture == null:
+    if build_runtime_resources and shared_texture == null:
         return false
-    character_texture = shared_texture
+    character_texture = shared_texture if build_runtime_resources else null
 
     var c: Dictionary = manifest.get("character", {})
     character_id = str(c.get("id", character_id))
@@ -103,6 +103,7 @@ func load_runtime_manifest(manifest_path: String, build_runtime_resources: bool 
         _rebuild_character_visual()
         _rebuild_collision_rig()
     else:
+        character_texture = null
         _clear_character_visual()
         if collision_rig != null:
             collision_rig.clear()
