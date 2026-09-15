@@ -1,18 +1,22 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-15 08:10 +02:00
+Last updated: 2026-09-15
 
 ## Current verified engineering baseline
 
-Latest verified engineering/code baseline before this state-only update:
+Latest fully verified production-code SHA before cleanup/state-only commits:
 
-`fb7e4261e9fb9c8b4c8ee37e57cf6f0515c6b534` (`ci: lock in measured Windows LOD performance floor`).
+`f292ab6082fbae9aa14a54a53a4a81c7bd6ee3b8` (`fix: preserve lazy package cache GDScript nesting`).
 
-This baseline has green evidence from:
+All five relevant production regressions are green on this exact SHA:
 
-- Windows Godot LOD Scale run `34935517813`;
-- Vault CI run `34935517863`;
-- Godot Runtime CI run `34935292690` on the same runtime LOD implementation before the workflow-only performance-floor commit.
+- Windows Godot LOD Scale run `34943207027` — success;
+- Godot World State Scale run `34943207122` — success;
+- Windows Multi-Art LOD Scale run `34943207023` — success;
+- Godot Multi-Art World State run `34943207059` — success;
+- Windows Unique-Package Scale run `34943207141` — success.
+
+The temporary patch workflow used during development was removed afterward; it is not part of the intended product/CI architecture.
 
 No rig/skin/animation/runtime-character/AI-policy schema was bumped. The portable KROLIK rig remains the existing 15-joint / 14-bone contract.
 
@@ -35,7 +39,9 @@ ordinary image
 -> authored animation/layers/facial/secondary motion
 -> IK/physics/navigation/AI
 -> rendered deformation evidence
--> distance-based full/reduced/sleep population LOD.
+-> distance-based full/reduced/sleep population LOD
+-> versioned world-state save/destroy/reload
+-> multi-package identity-preserving restore.
 
 Windows also builds and executes a one-file `KROLIK_Character_Import.exe`. The packaged executable has been verified both with deterministic/manual-correction import and with the real DWPose ONNX backend.
 
@@ -87,19 +93,17 @@ Measured no-LOD population:
 | 300 | 6.12 | 775.41 MiB | 300/300 moved, 300/300 visual |
 | 500 | 3.42 | 1172.12 MiB | 500/500 moved, 500/500 visual |
 
-This proves that the upper 500-character target executes on Windows with the production runtime path before LOD; the low FPS reflects the hosted software renderer.
-
-Stable pre-LOD checkpoint already preserved:
+Stable pre-LOD checkpoint:
 
 `checkpoint/stable-a4-windows-rendered-500-20260915-0844`
 
-## Phase F population LOD / sleep — FIRST PRODUCTION TIER CLOSED
+## Phase F population LOD / sleep — PRODUCTION TIER CLOSED
 
-New production component:
+Production component:
 
 `VaultPopulationLOD`
 
-Three explicit tiers are implemented without changing the full-detail character contract:
+Three explicit tiers are implemented without changing the full-detail character contract.
 
 ### Full
 
@@ -110,39 +114,19 @@ Three explicit tiers are implemented without changing the full-detail character 
 
 - AI and locomotion remain live;
 - detailed GPU skin pose updates are suspended;
-- a cheap flat visual proxy remains visible and follows the root character motion;
-- detailed collision proxy updates / collision participation are suspended;
+- a cheap flat visual proxy remains visible and follows root motion;
+- detailed collision participation is suspended;
 - procedural face and secondary motion are suspended.
 
 ### Sleep
 
 - rendering is hidden;
 - physical movement and collision participation stop;
-- the LOD manager accumulates deterministic simulation `delta`, not wall-clock time;
-- on wake the semantic brain catches up in one bounded step so needs and short-term memory continue aging;
-- full or reduced visual/physics state is restored without recreating the character contract.
+- deterministic simulation delta is accumulated instead of wall-clock time;
+- the semantic brain catches up on wake;
+- full/reduced runtime state is reconstructable from the sealed runtime package.
 
-`VaultCollisionRig` now supports explicit enable/disable so reduced/sleep tiers can suspend detailed capsule proxy updates safely.
-
-### Sleep/wake continuity proof
-
-Windows LOD runs `34935337605` and `34935517813` both pass the real production-package continuity regression.
-
-Representative marker:
-
-`KROLIK_POPULATION_LOD status=ok registered=1 full=1 reduced=0 sleeping=0 reduced_travel=25.4 caught_up=0.3 memory_age_before=0.383 memory_age_after=0.683 sleep_drift=0.0 wake_travel=42.73 gpu_skin_restored=true collision_restored=true`
-
-The regression verifies:
-
-- full -> reduced;
-- reduced character remains visible and keeps moving;
-- reduced GPU deformable skin / detailed collision / procedural detail are suspended;
-- reduced -> sleep;
-- sleeping character has zero physical drift;
-- semantic time is accumulated while asleep;
-- short-term memory ages while asleep;
-- sleep -> full wake restores the original GPU skin, collision rig and controller flags;
-- locomotion resumes after wake.
+Windows run `34943207027` re-verifies the production full -> reduced -> sleep -> wake path on the final F3 runtime cache implementation. GPU skin, collision and locomotion restore correctly after wake.
 
 ## 500-agent rendered LOD performance
 
@@ -150,30 +134,8 @@ Dedicated workflow:
 
 `.github/workflows/windows-godot-lod-scale.yml`
 
-### First measured green run
+Earlier locked hosted-Windows baseline run `34935517813`:
 
-Run `34935337605`:
-
-- agents: 500;
-- full: 76;
-- reduced: 152;
-- sleeping: 272;
-- awake: 228;
-- awake moved: 228/228;
-- sleeping max physical drift: `0.000`;
-- 120 sample frames in `9.6674 s`;
-- `12.41 FPS`;
-- peak working set `1108.38 MiB`;
-- screenshot evidence `1028x720`, sampled foreground `21494`;
-- renderer: Microsoft Basic Render Driver via ANGLE.
-
-Compared with the no-LOD 500-agent reference (`3.42 FPS`, `1172.12 MiB`), this is about `3.63x` higher measured FPS and about `5.4%` lower peak working set on the hosted software renderer.
-
-### Locked performance-floor rerun
-
-Run `34935517813` on commit `fb7e4261e9fb9c8b4c8ee37e57cf6f0515c6b534`:
-
-- continuity regression: success;
 - full: 76;
 - reduced: 152;
 - sleeping: 272;
@@ -181,22 +143,125 @@ Run `34935517813` on commit `fb7e4261e9fb9c8b4c8ee37e57cf6f0515c6b534`:
 - sleeping max drift: `0.000`;
 - `11.98 FPS`;
 - peak working set `1105.21 MiB`;
-- measured speedup recorded by workflow: `3.5x` vs the 3.42 FPS reference;
-- process exit 0;
-- rendered screenshot evidence present.
+- measured speedup `3.5x` vs the 3.42 FPS no-LOD reference.
 
-Permanent CI floor now rejects regressions below:
+Permanent CI floor remains:
 
-- `8.0 FPS` on this exact hosted-Windows workload;
-- `1.5 GiB` peak working set.
+- minimum `8.0 FPS` on this exact hosted-Windows workload;
+- maximum `1.5 GiB` peak working set.
 
-Artifact from the locked rerun:
+The hosted runner uses Microsoft Basic Render Driver via ANGLE. These metrics prove regression behavior, not expected RX 6650 XT performance.
 
-- ID `10382608361`;
-- name `windows-godot-lod-scale-500`;
-- SHA-256 `46e3ddd333258abaddbcf29eb88afb44d75a52b942b1077949c9966a679b1672`.
+## H2 world-state persistence — CLOSED
 
-The benchmark repeats one production runtime package across the population. It proves runtime/LOD scaling behavior; it does **not** claim the memory footprint of 500 unique high-resolution character textures.
+The production runtime now has a verified large-population save lifecycle:
+
+spawn -> runtime activity -> save -> destroy -> reload -> restore.
+
+The 500-character world-state workflow is green on final F3 production code (`34943207122`). Character brain/runtime state and package identity survive the lifecycle.
+
+Stable H2 checkpoint already preserved:
+
+`checkpoint/stable-h2-world-state-scale-20260915-1010`
+
+## F2 multi-art runtime + persistence — CLOSED
+
+A four-art checksum-pinned QA corpus is imported into separately sealed runtime packages and exercised through the production Godot runtime.
+
+Windows multi-art 500-agent measurement before F3 cache specialization:
+
+- 500 production agents;
+- 4 distinct sealed runtime packages/textures;
+- about `10.48 FPS`;
+- about `572 MiB` peak working set;
+- all three LOD tiers populated;
+- all awake agents move;
+- sleeping agents remain physically stable.
+
+Mixed world-state persistence is also verified with 200 characters across four package identities:
+
+- save size about `0.290 MiB`;
+- spawn about `654 ms`;
+- save about `18.7 ms`;
+- load about `10 ms`;
+- restore about `817 ms`;
+- each restored character returns to its original runtime manifest/package rather than an arbitrary cache entry.
+
+Final F3 regression run `34943207059` confirms mixed-package save/reload still succeeds after lazy texture residency changes.
+
+Stable F2 checkpoint already preserved:
+
+`checkpoint/stable-f2-multi-art-scale-20260915-1017`
+
+## F3 unique-package residency — CLOSED
+
+### Problem measured
+
+A dedicated QA fan-out tool now creates hundreds of independently sealed package paths from the four verified template packages. This isolates the cost of package/texture uniqueness from ordinary repeated-character population cost.
+
+Initial Windows unique-package curve with the old always-decode cache:
+
+| Unique packages | Agents | FPS | Peak working set |
+| ---: | ---: | ---: | ---: |
+| 32 | 500 | 7.35 | 640.73 MiB |
+| 128 | 500 | 9.79 | 876.16 MiB |
+| 500 | 500 | 9.71 | 1707.34 MiB |
+
+The runtime remained CPU/render viable, but peak memory scaled badly because every package request decoded and pinned a full-resolution `Texture2D`, including reduced/sleeping characters.
+
+### Production fix
+
+`VaultRuntimePackageCache` now separates cheap package metadata residency from full decoded texture residency:
+
+- manifest/image metadata stays cached for all seen packages;
+- `load_package(manifest_path, include_texture)` supports metadata-only loads;
+- `VaultCharacterAgent.load_runtime_manifest(..., build_runtime_resources=false)` no longer decodes or retains a full character texture;
+- reduced LOD can build its small proxy directly from the immutable image file;
+- sleeping LOD holds no full texture;
+- waking/full LOD rehydrates the full immutable texture on demand;
+- decoded full textures are additionally protected by a bounded LRU cache;
+- default full-texture cache limit is `96` entries;
+- active agents remain safe when a cache reference is evicted because they retain their own RefCounted texture reference;
+- cache metrics expose metadata entries, decoded texture entries, limit, parses, decodes and evictions.
+
+No runtime-package schema changed.
+
+### Final measured unique-package curve
+
+Windows Unique-Package Scale run `34943207141`, artifact `windows-unique-package-scale` ID `10385483863`, artifact SHA-256 `b8ed9af2aa7e7943ffc2ab596b88c5bf390459d46daa70a5dd5dc277aa82c603`:
+
+| Unique packages | Full textures cached | Full decodes | FPS | Peak working set |
+| ---: | ---: | ---: | ---: | ---: |
+| 32 | 22 | 22 | 8.60 | 629.02 MiB |
+| 128 | 83 | 83 | 10.69 | 804.20 MiB |
+| 500 | 96 | 100 | 10.47 | 1111.06 MiB |
+
+At the hardest 500-unique point versus the old implementation:
+
+- peak working set: `1707.34 -> 1111.06 MiB`;
+- memory saved: `596.28 MiB`, about `34.9%`;
+- FPS: `9.71 -> 10.47`, about `7.8%` improvement;
+- full texture decodes: `500 -> 100`, an `80%` reduction;
+- resident full-texture cache is bounded at `96` rather than 500.
+
+LOD shape in the final 500-unique run:
+
+- full: 76;
+- reduced: 161;
+- sleeping: 263;
+- resident: 76;
+- proxy: 161;
+- released: 263;
+- awake moved share: `1.000`;
+- sleeping physical drift: `0.000`.
+
+This closes the concrete 500-unique RAM bottleneck found by profiling.
+
+### Offline-room / unloaded-cell tier decision
+
+A more aggressive fourth tier where a closed room/cell fully unloads its character remains a valid future optimization, especially for collections materially larger than the current 200–500 target.
+
+It is intentionally **not** required for the current 500-character target after F3: the measured 500-unique workload is green at about 1.11 GiB peak on the hosted software-render Windows runner. Add the offline-room tier only when a >500/1000+ exploratory workload or target-machine profiling demonstrates a new concrete residency bottleneck.
 
 ## Existing runtime foundation retained
 
@@ -221,7 +286,10 @@ Previously verified systems remain part of the baseline:
 - manual rig-joint override contract;
 - rendered imported-character evidence;
 - Windows one-file headless importer;
-- Phase-F full/reduced/sleep population LOD with Windows 500-agent regression gate.
+- Phase-F full/reduced/sleep population LOD;
+- H2 500-character world-state save/destroy/reload;
+- F2 mixed-art runtime and identity-preserving persistence;
+- F3 bounded/lazy unique-package texture residency.
 
 D4/D5 life-sim expansion remains intentionally paused while source-independent product/performance/QA work is completed.
 
@@ -241,7 +309,7 @@ Rules remain:
 ## Remaining important limitations
 
 - Hosted Windows performance uses Microsoft Basic Render Driver; target RX 6650 XT performance still requires a real target-hardware run.
-- Current 500-agent rendered benchmark repeats one runtime character package and therefore is not a 500-unique-art memory test.
+- F3 uses 500 independent sealed package/cache identities built from four checksum-pinned source artworks; it validates package uniqueness and residency scaling, not 500 genuinely different artistic source images.
 - Anime/fantasy A2 QA is still a small regression corpus rather than the eventual 100–200-art Phase-F corpus.
 - Busy-background matting remains conservative/review-required rather than destructive.
 - Multi-person source-image UX is outside the current single-selected-character import contract.
@@ -253,14 +321,13 @@ Rules remain:
 
 Keep D4/D5 paused unless the product/performance path stops yielding useful work.
 
-Next source-independent priority is **Phase F real-art diversity + production QA**:
+Next source-independent priorities:
 
-1. Inventory currently available real/stylized character fixtures and build an explicit corpus manifest rather than inventing assets.
-2. Expand import -> rig -> skin -> package -> Godot QA beyond the current four-anime regression set, preserving review-required semantics instead of lowering DWPose acceptance thresholds.
-3. Add a multi-art rendered runtime stress mode using genuinely distinct existing assets where available; record unique-texture memory separately from repeated-package population performance.
-4. Add target-hardware benchmark instructions/collector for the user's RX 6650 XT so the same 220/300/500 workloads can later be compared honestly against hosted software-render results.
-5. Only add further pooling/caching/LOD complexity when profiling of the multi-art or target-hardware workload shows a concrete bottleneck.
-6. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests and build the first complete graphical vertical slice.
+1. Preserve F3 on `main` and create a stable checkpoint branch.
+2. Expand real/stylized import QA beyond the current four-art regression corpus using only accessible, provenance-known fixtures; keep explicit review-required semantics rather than lowering DWPose acceptance thresholds.
+3. Add target-hardware benchmark instructions/collector so the same 220/300/500 workloads can be run on the user's RX 6650 XT and compared honestly with hosted software-render metrics.
+4. Add further pooling/offline-room/streaming complexity only if >500 exploratory or real target-hardware profiling identifies a concrete bottleneck.
+5. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests and build the first complete graphical vertical slice.
 
 ## Concurrency / writer discipline
 
