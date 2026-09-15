@@ -28,6 +28,7 @@ func _run() -> void:
     if not agent.load_runtime_manifest(manifest_abs):
         _fail("production manifest rejected")
         return
+    agent.character_id = "lod-proof"
     agent.brain.apply_snapshot({
         "enabled": true,
         "state": "wander",
@@ -58,40 +59,52 @@ func _run() -> void:
     var original_collision_rig := agent.collision_rig
     var original_facial_enabled := agent.facial_state.enabled
     var original_secondary_enabled := agent.secondary_motion_enabled
+    var original_texture_size := agent.character_texture.get_size()
 
     var lod := VaultPopulationLOD.new()
     root.add_child(lod)
     lod.configure({
         "enabled": true,
+        "resource_residency": true,
         "focus_position": agent.global_position,
         "full_radius": 90.0,
         "sleep_radius": 240.0,
         "wake_radius": 180.0,
         "reassess_interval": 0.05,
+        "proxy_max_height": 128,
     })
-    if not lod.register_agent(agent):
+    if not lod.register_agent(agent, manifest_abs):
         _fail("failed to register production agent")
         return
     lod.force_reassess()
     if lod.tier_for(agent) != VaultPopulationLOD.TIER_FULL:
         _fail("near production agent did not start in full tier")
         return
+    if lod.resource_mode_for(agent) != VaultPopulationLOD.RESIDENT:
+        _fail("full agent did not start resident")
+        return
 
-    # Middle-distance tier: keep locomotion live while replacing deformable skin
-    # with a cheap visible proxy and suspending detailed collision/face/secondary.
+    # Middle-distance tier: keep AI/locomotion live, but release full skin and
+    # collision resources and keep only a downscaled visual proxy.
     var reduced_start := agent.global_position
     lod.set_focus_position(agent.global_position + Vector2(150.0, 0.0), true)
     if lod.tier_for(agent) != VaultPopulationLOD.TIER_REDUCED:
         _fail("middle-distance agent did not enter reduced tier")
         return
+    if lod.resource_mode_for(agent) != VaultPopulationLOD.PROXY:
+        _fail("reduced tier did not enter proxy residency mode")
+        return
     if not agent.visible or not agent.is_physics_processing():
         _fail("reduced tier incorrectly disabled visible physics")
         return
-    if agent.skinned_visual != null or original_skin.visible:
-        _fail("reduced tier did not suspend deformable GPU skin")
+    if agent.skinned_visual != null or agent.collision_rig != null:
+        _fail("reduced tier retained full skin/collision resources")
         return
-    if agent.collision_rig != null or bool(original_collision_rig.stats().get("enabled", true)):
-        _fail("reduced tier did not suspend detailed collision updates")
+    if agent.character_texture == null or agent.character_texture.get_height() > 128:
+        _fail("reduced tier did not retain only a bounded proxy texture")
+        return
+    if agent.character_texture.get_size() == original_texture_size:
+        _fail("reduced tier proxy was not downscaled")
         return
     if agent.collision_layer != 0 or agent.collision_mask != 0:
         _fail("reduced tier did not drop collision participation")
@@ -106,14 +119,19 @@ func _run() -> void:
         _fail("reduced tier stopped locomotion: " + str(reduced_travel))
         return
 
-    # Far tier: stop physical simulation, but let the manager accumulate semantic
-    # simulation delta so brain needs and short-term memory can catch up on wake.
+    # Far tier: release even the proxy texture and freeze physical simulation.
     var sleep_start := agent.global_position
     var phase_before_sleep := agent.phase
     var age_before_sleep := _memory_age(agent)
     lod.set_focus_position(agent.global_position + Vector2(1000.0, 0.0), true)
     if lod.tier_for(agent) != VaultPopulationLOD.TIER_SLEEP:
         _fail("far agent did not enter sleep tier")
+        return
+    if lod.resource_mode_for(agent) != VaultPopulationLOD.RELEASED:
+        _fail("sleep tier did not release visual resources")
+        return
+    if agent.character_texture != null or agent.skinned_visual != null or agent.collision_rig != null:
+        _fail("sleep tier retained character texture/skin/collision")
         return
     if agent.visible or agent.is_physics_processing():
         _fail("sleep tier did not disable render/physics")
@@ -127,23 +145,42 @@ func _run() -> void:
     if absf(agent.phase - phase_before_sleep) > 0.01:
         _fail("sleeping agent physics phase advanced before wake")
         return
+    if lod.pending_sleep_seconds(agent) < 0.15:
+        _fail("sleep tier did not accumulate deterministic simulation time")
+        return
 
-    # Wake directly into full detail and require state/collision/skin restoration.
+    # Wake into full detail. Full GPU skin/collision are rebuilt from the same
+    # runtime package while the live brain/id/position remain authoritative.
     lod.set_focus_position(agent.global_position, true)
     if lod.tier_for(agent) != VaultPopulationLOD.TIER_FULL:
-        _fail("agent did not wake into full tier")
+        _fail("agent did not wake into full tier: " + str(lod.entry_snapshot(agent)))
+        return
+    if lod.resource_mode_for(agent) != VaultPopulationLOD.RESIDENT:
+        _fail("wake did not restore resident resources")
         return
     if not agent.visible or not agent.is_physics_processing():
         _fail("agent did not wake cleanly")
         return
+    if agent.character_id != "lod-proof":
+        _fail("runtime package reload overwrote live character identity")
+        return
     if agent.collision_layer != 5 or agent.collision_mask != 3:
         _fail("wake did not restore collision layers")
         return
-    if agent.skinned_visual != original_skin or not original_skin.visible:
-        _fail("wake did not restore original GPU skin")
+    if agent.skinned_visual == null or not is_instance_valid(agent.skinned_visual):
+        _fail("wake did not reconstruct GPU skin")
         return
-    if agent.collision_rig != original_collision_rig or not bool(original_collision_rig.stats().get("enabled", false)):
-        _fail("wake did not restore collision rig")
+    if agent.collision_rig == null or agent.collision_rig.stats().get("capsules", 0) <= 0:
+        _fail("wake did not reconstruct collision rig")
+        return
+    if agent.character_texture == null or agent.character_texture.get_size() != original_texture_size:
+        _fail("wake did not restore full-resolution character texture")
+        return
+    if agent.skinned_visual == original_skin:
+        _fail("wake reused old skin instead of reconstructing released resources")
+        return
+    if agent.collision_rig == original_collision_rig:
+        _fail("wake reused old collision rig instead of reconstructing released resources")
         return
     if agent.facial_state.enabled != original_facial_enabled or agent.secondary_motion_enabled != original_secondary_enabled:
         _fail("wake did not restore detailed animation controller flags")
@@ -169,18 +206,24 @@ func _run() -> void:
         return
 
     var tiers := lod.tier_snapshot()
+    if int(tiers.get("residency_failures", 0)) != 0:
+        _fail("resource residency emitted errors: " + str(lod.entry_snapshot(agent)))
+        return
     print(
         "KROLIK_POPULATION_LOD status=ok registered=", tiers.get("registered"),
         " full=", tiers.get("full"),
         " reduced=", tiers.get("reduced"),
         " sleeping=", tiers.get("sleeping"),
+        " resident=", tiers.get("resident"),
+        " proxy=", tiers.get("proxy"),
+        " released=", tiers.get("released"),
         " reduced_travel=", snappedf(reduced_travel, 0.01),
         " caught_up=", snappedf(caught_up, 0.001),
         " memory_age_before=", snappedf(age_before_sleep, 0.001),
         " memory_age_after=", snappedf(age_after_sleep, 0.001),
         " sleep_drift=", snappedf(sleep_drift, 0.001),
         " wake_travel=", snappedf(wake_travel, 0.01),
-        " gpu_skin_restored=true collision_restored=true"
+        " gpu_skin_reconstructed=true collision_reconstructed=true"
     )
     lod.clear(true)
     agent.queue_free()
