@@ -632,7 +632,7 @@ func reinforce_relationship(subject_value: String, valence: float, importance: f
     if subject.is_empty():
         return false
     var config := _long_term_config()
-    var signal := clampf(valence, -1.0, 1.0)
+    var relationship_signal := clampf(valence, -1.0, 1.0)
     var weight := clampf(importance, 0.0, 1.0)
     var alpha := clampf(float(config.get("relationship_learning_rate", 0.35)) * weight, 0.0, 1.0)
     var familiarity_gain := float(config.get("familiarity_gain", 0.18)) * weight
@@ -642,7 +642,7 @@ func reinforce_relationship(subject_value: String, valence: float, importance: f
     for entry in relationships:
         if str(entry.get("subject", "")) != subject:
             continue
-        entry["affinity"] = clampf(float(entry.get("affinity", 0.0)) * (1.0 - alpha) + signal * alpha, -1.0, 1.0)
+        entry["affinity"] = clampf(float(entry.get("affinity", 0.0)) * (1.0 - alpha) + relationship_signal * alpha, -1.0, 1.0)
         var familiarity := float(entry.get("familiarity", 0.0))
         entry["familiarity"] = clampf(familiarity + familiarity_gain * (1.0 - familiarity), 0.0, 1.0)
         entry["interactions"] = mini(1000000, int(entry.get("interactions", 0)) + 1)
@@ -651,7 +651,7 @@ func reinforce_relationship(subject_value: String, valence: float, importance: f
         break
     if not found:
         relationships.append({
-            "subject": subject, "affinity": signal * alpha, "familiarity": clampf(familiarity_gain, 0.0, 1.0),
+            "subject": subject, "affinity": relationship_signal * alpha, "familiarity": clampf(familiarity_gain, 0.0, 1.0),
             "interactions": 1, "hours_since_contact": 0.0,
         })
     long_term_memory = _normalize_long_term_memory({"relationships": relationships, "places": normalized.get("places", [])})
@@ -662,7 +662,7 @@ func remember_place_visit(place_value: String, preference: float = 0.0, importan
     if place.is_empty():
         return false
     var config := _long_term_config()
-    var signal := clampf(preference, -1.0, 1.0)
+    var place_signal := clampf(preference, -1.0, 1.0)
     var weight := clampf(importance, 0.0, 1.0)
     var alpha := clampf(float(config.get("place_learning_rate", 0.30)) * weight, 0.0, 1.0)
     var familiarity_gain := float(config.get("familiarity_gain", 0.18)) * weight
@@ -672,7 +672,7 @@ func remember_place_visit(place_value: String, preference: float = 0.0, importan
     for entry in places:
         if str(entry.get("place", "")) != place:
             continue
-        entry["preference"] = clampf(float(entry.get("preference", 0.0)) * (1.0 - alpha) + signal * alpha, -1.0, 1.0)
+        entry["preference"] = clampf(float(entry.get("preference", 0.0)) * (1.0 - alpha) + place_signal * alpha, -1.0, 1.0)
         var familiarity := float(entry.get("familiarity", 0.0))
         entry["familiarity"] = clampf(familiarity + familiarity_gain * (1.0 - familiarity), 0.0, 1.0)
         entry["visits"] = mini(1000000, int(entry.get("visits", 0)) + 1)
@@ -681,7 +681,7 @@ func remember_place_visit(place_value: String, preference: float = 0.0, importan
         break
     if not found:
         places.append({
-            "place": place, "preference": signal * alpha, "familiarity": clampf(familiarity_gain, 0.0, 1.0),
+            "place": place, "preference": place_signal * alpha, "familiarity": clampf(familiarity_gain, 0.0, 1.0),
             "visits": 1, "hours_since_visit": 0.0,
         })
     long_term_memory = _normalize_long_term_memory({"relationships": normalized.get("relationships", []), "places": places})
