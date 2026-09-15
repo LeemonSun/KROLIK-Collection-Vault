@@ -29,6 +29,54 @@
       "path": "ControlNet-v1-1-nightly/test_imgs/anime4.jpg",
       "git_blob_sha1": "60ddbedfb53c0245d4ea1e6681f7f63f6c85b8f4",
       "size_bytes": 37662
+    },
+    {
+      "id": "photo-boy",
+      "path": "ControlNet-v1-1-nightly/test_imgs/boy.png",
+      "git_blob_sha1": "c4a751e31da45af83c8a3d5ec02cf8c22c7bb8e9",
+      "size_bytes": 337869
+    },
+    {
+      "id": "photo-human",
+      "path": "ControlNet-v1-1-nightly/test_imgs/human.png",
+      "git_blob_sha1": "646628c758479f5401618c4e49ded080b3db00b1",
+      "size_bytes": 767736
+    },
+    {
+      "id": "photo-man",
+      "path": "ControlNet-v1-1-nightly/test_imgs/man.png",
+      "git_blob_sha1": "680889ed588457c6fe50dca3a4ed0f8451756d61",
+      "size_bytes": 950228
+    },
+    {
+      "id": "photo-man2",
+      "path": "ControlNet-v1-1-nightly/test_imgs/man2.jpg",
+      "git_blob_sha1": "1ee9170519689896d16cdc44d5146c13b4bf87d3",
+      "size_bytes": 109312
+    },
+    {
+      "id": "photo-person-leaves",
+      "path": "ControlNet-v1-1-nightly/test_imgs/person-leaves.png",
+      "git_blob_sha1": "b06dd4da1f667bea9592be50d6b502a28fb2bbbd",
+      "size_bytes": 1179446
+    },
+    {
+      "id": "photo-person-1",
+      "path": "ControlNet-v1-1-nightly/test_imgs/person_1.jpeg",
+      "git_blob_sha1": "b7d979810e0da25f863a8eb873bd15cf8293acee",
+      "size_bytes": 340919
+    },
+    {
+      "id": "photo-person-2",
+      "path": "ControlNet-v1-1-nightly/test_imgs/person_2.jpeg",
+      "git_blob_sha1": "3779cc6766e192e201ec69c2986da55958129130",
+      "size_bytes": 384210
+    },
+    {
+      "id": "stylized-violet",
+      "path": "ControlNet-v1-1-nightly/test_imgs/violet.jpg",
+      "git_blob_sha1": "6014b2b23efe936a1e744cbbeee21846e52119e5",
+      "size_bytes": 66999
     }
   ]
 }
