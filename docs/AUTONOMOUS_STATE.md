@@ -1,20 +1,24 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-15 08:33 +03:00
+Last updated: 2026-09-15 08:10 +02:00
 
 ## Current verified engineering baseline
 
-Latest verified engineering/code baseline before this state-only update: `27a8f20be7b34a2350a0d686775ccfc44c6549ac` (`docs: close verified A2 DWPose production baseline`).
+Latest verified engineering/code baseline before this state-only update:
 
-A2 implementation itself is already green on its relevant production gates. After this state update lands and ordinary Vault CI remains green, create/preserve stable checkpoint:
+`fb7e4261e9fb9c8b4c8ee37e57cf6f0515c6b534` (`ci: lock in measured Windows LOD performance floor`).
 
-`checkpoint/stable-a2-production-dwpose-20260915-0833`
+This baseline has green evidence from:
 
-No rig/skin/animation/runtime-character/AI-policy schema was bumped in A2. The portable KROLIK rig remains the existing 15-joint / 14-bone contract.
+- Windows Godot LOD Scale run `34935517813`;
+- Vault CI run `34935517863`;
+- Godot Runtime CI run `34935292690` on the same runtime LOD implementation before the workflow-only performance-floor commit.
 
-## Product path now verified
+No rig/skin/animation/runtime-character/AI-policy schema was bumped. The portable KROLIK rig remains the existing 15-joint / 14-bone contract.
 
-The source-independent product core now proves the continuous path:
+## Product path verified
+
+The source-independent product core proves the continuous path:
 
 ordinary image
 -> immutable original
@@ -30,109 +34,178 @@ ordinary image
 -> GPU `Skeleton2D/Polygon2D` skin
 -> authored animation/layers/facial/secondary motion
 -> IK/physics/navigation/AI
--> rendered deformation evidence.
+-> rendered deformation evidence
+-> distance-based full/reduced/sleep population LOD.
 
-Windows also builds and executes a one-file `KROLIK_Character_Import.exe`. The packaged executable has been verified both with the deterministic/manual-correction path and with the real DWPose ONNX backend.
+Windows also builds and executes a one-file `KROLIK_Character_Import.exe`. The packaged executable has been verified both with deterministic/manual-correction import and with the real DWPose ONNX backend.
 
-## A2 DWPose / RTMPose — CLOSED as verified production baseline
+## A2 DWPose / RTMPose — CLOSED
 
-Detailed evidence is recorded in `docs/A2_DWPOSE_VALIDATION.md`.
+Detailed evidence remains in `docs/A2_DWPOSE_VALIDATION.md`.
 
-### Exact model
+Exact production model:
 
 - `dw-ll_ucoco_384.onnx`
 - SHA-256 `724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843`
-- exact bytes `134399116`
-- reproducible checksum-pinned bootstrap; model binary is not committed to Git.
+- bytes `134399116`
+- model binary is checksum-pinned and not committed to Git.
 
-### Real ONNX contract
+Measured compact human ground-truth baseline:
 
-Measured with ONNXRuntime:
+- 4 people / 63 visible evaluated joints;
+- mean normalized error `0.014758`;
+- median normalized error `0.010237`;
+- mean pixel error `5.809 px`;
+- PCK@0.05 `96.8%`;
+- PCK@0.10 `100%`.
 
-- input `['batch', 3, 384, 288]`
-- runtime smoke input `[1, 3, 384, 288]`
-- outputs `[1, 133, 576]` and `[1, 133, 768]`
-- 133 keypoints
-- SimCC split ratio 2.0.
+Stylized/anime regression corpus:
 
-Production preprocessing now follows upstream DWPose/RTMPose behavior: BGR, bbox center/scale, fixed aspect ratio, 1.25 padding, affine warp and upstream normalization.
+- 4/4 runtime-ready packages;
+- 3/4 accepted by real `dwpose-onnx`;
+- known `anime1.png` fallback remains explicitly `rig_review_required=true` rather than silently accepted.
 
-### Measured human ground-truth accuracy
+This is a compact regression baseline, not a universal anime/fantasy accuracy claim.
 
-COCO/MMPose compact fixture benchmark, run `34895056906`:
+## A4 Windows rendered scale — CLOSED as measured baseline
 
-- 4 people
-- 63 visible evaluated joints
-- 0 failed samples
-- mean normalized error `0.014758`
-- median normalized error `0.010237`
-- mean pixel error `5.809 px`
-- PCK@0.05 `0.968254` (96.8%)
-- PCK@0.10 `1.000000` (100%).
+Workflow: `.github/workflows/windows-godot-scale.yml`.
 
-This is a compact regression baseline, not a universal fantasy/anime accuracy claim.
+Reference run `34933824299` used Windows Server 2025, Godot 4.7.2 and the same production `VaultCharacterAgent` path with runtime manifest, GPU skin, AI policy, personality, memory, facial state and actual locomotion.
 
-### Linux/Godot real product integration
+Renderer was:
 
-DWPose Model Smoke run `34931833809`: success.
+`ANGLE / Microsoft Basic Render Driver`
 
-The real import/package/Godot path produced:
+This is a GitHub-hosted software-render baseline, **not** target RX 6650 XT hardware and not a promise of target-machine FPS.
 
-- backend `dwpose-onnx`
-- rig score 100
-- runtime-ready true
-- joints 15 / bones 14
-- vertices 480 / triangles 870
-- weight sets 14
-- collision proxies 14
-- production Godot texture `563x855`
-- GPU skin true
-- AI policy true
-- mobile state `wander`
-- measured travel `41.4 px`
-- rendered foreground `198410` pixels
-- rendered pose difference `110381` pixels (gate minimum 1800).
+Measured no-LOD population:
 
-Evidence artifact ID `10381279121`, ZIP SHA-256 `9beb29018ea8e59a3221ea13583bec02e93c8fbf895880a94963b6bd4c123c0e`.
+| Agents | FPS | Peak working set | Movement / visuals |
+| ---: | ---: | ---: | --- |
+| 220 | 6.96 | 603.45 MiB | 220/220 moved, 220/220 visual |
+| 300 | 6.12 | 775.41 MiB | 300/300 moved, 300/300 visual |
+| 500 | 3.42 | 1172.12 MiB | 500/500 moved, 500/500 visual |
 
-### Windows packaged EXE
+This proves that the upper 500-character target executes on Windows with the production runtime path before LOD; the low FPS reflects the hosted software renderer.
 
-Windows Build run `34932156436`: success after fixing only the CI PowerShell assertion found by the previous attempt.
+Stable pre-LOD checkpoint already preserved:
 
-Windows Build run `34932467531`: success again after the explicit AI-fallback review metadata was added.
+`checkpoint/stable-a4-windows-rendered-500-20260915-0844`
 
-The built `KROLIK_Character_Import.exe` itself:
+## Phase F population LOD / sleep — FIRST PRODUCTION TIER CLOSED
 
-- loads the checksum-verified ONNX model through `KROLIK_DWPOSE_MODEL`;
-- imports the upstream pose fixture without `--heuristic-rig`;
-- emits `rig.backend=dwpose-onnx`;
-- emits 15 joints / 14 bones;
-- remains runtime-ready;
-- seals and re-validates the durable package receipt.
+New production component:
 
-### Stylized/anime domain coverage and safe fallback
+`VaultPopulationLOD`
 
-Domain run `34932762783`: success.
+Three explicit tiers are implemented without changing the full-detail character contract:
 
-Upstream DWPose anime fixtures through the actual product path:
+### Full
 
-- 4/4 produce runtime-ready packages;
-- 3/4 use real `dwpose-onnx`;
-- DWPose share 75%;
-- unsafe silent fallbacks 0;
-- explicit review fallbacks 1.
+- ordinary `VaultCharacterAgent` behavior remains unchanged;
+- GPU deformable skin, IK/collision proxies, facial and secondary motion stay live.
 
-`anime1.png` is the known fallback case. Its cutout itself is high-confidence (`0.9729`), but DWPose has only 7/12 core body joints >=0.18 while production acceptance requires 8. KROLIK therefore uses the deterministic silhouette rig and sets `rig_review_required=true` instead of silently presenting it as a confidently accepted AI rig.
+### Reduced
 
-Follow-up domain product/Godot run `34932929973`: success after the product-slice builder was aligned with the exact production acceptance rule. It selects a real accepted DWPose anime case, seals the package and loads it through production Godot `VaultCharacterAgent`.
+- AI and locomotion remain live;
+- detailed GPU skin pose updates are suspended;
+- a cheap flat visual proxy remains visible and follows the root character motion;
+- detailed collision proxy updates / collision participation are suspended;
+- procedural face and secondary motion are suspended.
+
+### Sleep
+
+- rendering is hidden;
+- physical movement and collision participation stop;
+- the LOD manager accumulates deterministic simulation `delta`, not wall-clock time;
+- on wake the semantic brain catches up in one bounded step so needs and short-term memory continue aging;
+- full or reduced visual/physics state is restored without recreating the character contract.
+
+`VaultCollisionRig` now supports explicit enable/disable so reduced/sleep tiers can suspend detailed capsule proxy updates safely.
+
+### Sleep/wake continuity proof
+
+Windows LOD runs `34935337605` and `34935517813` both pass the real production-package continuity regression.
+
+Representative marker:
+
+`KROLIK_POPULATION_LOD status=ok registered=1 full=1 reduced=0 sleeping=0 reduced_travel=25.4 caught_up=0.3 memory_age_before=0.383 memory_age_after=0.683 sleep_drift=0.0 wake_travel=42.73 gpu_skin_restored=true collision_restored=true`
+
+The regression verifies:
+
+- full -> reduced;
+- reduced character remains visible and keeps moving;
+- reduced GPU deformable skin / detailed collision / procedural detail are suspended;
+- reduced -> sleep;
+- sleeping character has zero physical drift;
+- semantic time is accumulated while asleep;
+- short-term memory ages while asleep;
+- sleep -> full wake restores the original GPU skin, collision rig and controller flags;
+- locomotion resumes after wake.
+
+## 500-agent rendered LOD performance
+
+Dedicated workflow:
+
+`.github/workflows/windows-godot-lod-scale.yml`
+
+### First measured green run
+
+Run `34935337605`:
+
+- agents: 500;
+- full: 76;
+- reduced: 152;
+- sleeping: 272;
+- awake: 228;
+- awake moved: 228/228;
+- sleeping max physical drift: `0.000`;
+- 120 sample frames in `9.6674 s`;
+- `12.41 FPS`;
+- peak working set `1108.38 MiB`;
+- screenshot evidence `1028x720`, sampled foreground `21494`;
+- renderer: Microsoft Basic Render Driver via ANGLE.
+
+Compared with the no-LOD 500-agent reference (`3.42 FPS`, `1172.12 MiB`), this is about `3.63x` higher measured FPS and about `5.4%` lower peak working set on the hosted software renderer.
+
+### Locked performance-floor rerun
+
+Run `34935517813` on commit `fb7e4261e9fb9c8b4c8ee37e57cf6f0515c6b534`:
+
+- continuity regression: success;
+- full: 76;
+- reduced: 152;
+- sleeping: 272;
+- awake moved share: `1.000`;
+- sleeping max drift: `0.000`;
+- `11.98 FPS`;
+- peak working set `1105.21 MiB`;
+- measured speedup recorded by workflow: `3.5x` vs the 3.42 FPS reference;
+- process exit 0;
+- rendered screenshot evidence present.
+
+Permanent CI floor now rejects regressions below:
+
+- `8.0 FPS` on this exact hosted-Windows workload;
+- `1.5 GiB` peak working set.
+
+Artifact from the locked rerun:
+
+- ID `10382608361`;
+- name `windows-godot-lod-scale-500`;
+- SHA-256 `46e3ddd333258abaddbcf29eb88afb44d75a52b942b1077949c9966a679b1672`.
+
+The benchmark repeats one production runtime package across the population. It proves runtime/LOD scaling behavior; it does **not** claim the memory footprint of 500 unique high-resolution character textures.
 
 ## Existing runtime foundation retained
 
 Previously verified systems remain part of the baseline:
 
 - A1 rendered real `Skeleton2D/Polygon2D` deformation;
+- A2 real DWPose product integration;
 - A3 rig migration discipline;
-- A4 real 220-agent Godot stress on Linux/headless;
+- A4 Windows rendered population scaling through 500 agents;
 - A5 animation clip validation;
 - data-driven animations/poses/fixtures;
 - 33-clip motion library;
@@ -147,9 +220,10 @@ Previously verified systems remain part of the baseline:
 - real-image import QA matrix;
 - manual rig-joint override contract;
 - rendered imported-character evidence;
-- Windows one-file headless importer.
+- Windows one-file headless importer;
+- Phase-F full/reduced/sleep population LOD with Windows 500-agent regression gate.
 
-D4/D5 life-sim expansion remains intentionally paused while the product/performance vertical path is strengthened.
+D4/D5 life-sim expansion remains intentionally paused while source-independent product/performance/QA work is completed.
 
 ## Source reconciliation / hard blocker
 
@@ -166,36 +240,37 @@ Rules remain:
 
 ## Remaining important limitations
 
-- Final rendered Windows 200–500-agent performance is not yet measured.
-- Current 220-agent stress is useful Linux/headless regression evidence, not a Windows rendered performance promise.
-- LOD/sleep/throttle tiers for 200–500 persistent characters are not yet production-complete.
-- Anime/fantasy A2 QA is currently a small regression corpus, not the eventual 100–200-art Phase-F corpus.
+- Hosted Windows performance uses Microsoft Basic Render Driver; target RX 6650 XT performance still requires a real target-hardware run.
+- Current 500-agent rendered benchmark repeats one runtime character package and therefore is not a 500-unique-art memory test.
+- Anime/fantasy A2 QA is still a small regression corpus rather than the eventual 100–200-art Phase-F corpus.
 - Busy-background matting remains conservative/review-required rather than destructive.
 - Multi-person source-image UX is outside the current single-selected-character import contract.
 - Final graphical manual-rig correction UX remains source-blocked with `app.py`.
+- D4 long-term affinity / D5 encounter expansion remains paused, not deleted.
 - `KROLIK_MASTER_PLAN.md` is absent; `docs/AUTONOMOUS_RUNBOOK.md` remains the roadmap.
 
 ## Next highest-priority large pass
 
-Keep D4/D5 paused for now.
+Keep D4/D5 paused unless the product/performance path stops yielding useful work.
 
-Next source-independent priority is **Phase F / Windows-scale proof**, not more isolated AI features:
+Next source-independent priority is **Phase F real-art diversity + production QA**:
 
-1. Add a real Windows Godot performance workflow that measures a rendered production-like population rather than only Linux/headless simulation. Start at 200–220 agents with deterministic workload and record wall time/FPS/RSS; if CI GPU access is unavailable, explicitly record software-render constraints rather than pretending they are target-hardware numbers.
-2. Use measured profiling to implement the first production LOD/sleep/throttle tiers: full near simulation, reduced visible simulation, and far/asleep semantic simulation. Preserve behavior/snapshot compatibility and prove that sleeping agents can wake without state loss.
-3. Re-run scale gates at 220 and then 300+ agents; target 500 only after the workload is honestly defined and lower tiers are stable. Do not add pooling unless profiling shows it helps.
-4. Expand real-art/domain QA incrementally beyond the four upstream anime fixtures, retaining explicit review flags rather than lowering DWPose acceptance to make the percentage look better.
-5. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests, and build the first complete graphical vertical slice.
+1. Inventory currently available real/stylized character fixtures and build an explicit corpus manifest rather than inventing assets.
+2. Expand import -> rig -> skin -> package -> Godot QA beyond the current four-anime regression set, preserving review-required semantics instead of lowering DWPose acceptance thresholds.
+3. Add a multi-art rendered runtime stress mode using genuinely distinct existing assets where available; record unique-texture memory separately from repeated-package population performance.
+4. Add target-hardware benchmark instructions/collector for the user's RX 6650 XT so the same 220/300/500 workloads can later be compared honestly against hosted software-render results.
+5. Only add further pooling/caching/LOD complexity when profiling of the multi-art or target-hardware workload shows a concrete bottleneck.
+6. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests and build the first complete graphical vertical slice.
 
 ## Concurrency / writer discipline
 
-There may be multiple normal chat sessions with GitHub access. Automation cannot revoke another chat's connector permission.
+Multiple normal chat sessions may still have GitHub access. Always re-read fresh `main` before every write and never force-push over concurrent work.
 
-For autonomous/hourly work:
+Current user instruction: scheduled/hourly writer remains disabled. Do **not** re-enable it unless the user explicitly asks later.
 
-- only one scheduled writer should be enabled;
-- always re-read fresh `main` before every write;
-- never force-push over concurrent work;
+For manual development:
+
+- fresh-read `main` before each write;
 - treat 409/conflict as a signal to refetch and merge logically;
-- prefer one large coherent capability block over many checkpoint-marker/micro commits;
-- create real Git checkpoint branches for rollback instead of temporary marker files in the repository.
+- prefer one large coherent capability block over checkpoint-marker/micro commits;
+- create real Git checkpoint branches for rollback instead of temporary marker files.
