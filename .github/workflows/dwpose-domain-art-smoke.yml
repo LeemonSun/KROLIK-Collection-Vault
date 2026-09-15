@@ -10,7 +10,7 @@ on:
       - 'runtime_package.py'
       - 'import_integrity.py'
       - 'runtime_package_integrity.py'
-      - 'content/qa/dwpose_domain_art_corpus_v1.json'
+      - 'qa/corpora/dwpose_domain_art_corpus_v1.json'
       - 'tools/fetch_dwpose_model.py'
       - 'tools/fetch_pinned_qa_corpus.py'
       - 'tools/smoke_dwpose_corpus.py'
@@ -29,7 +29,7 @@ jobs:
       KROLIK_DWPOSE_MODEL: models/dwpose/dw-ll_ucoco_384.onnx
       GODOT_VERSION: '4.7.2'
       GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
-      QA_CORPUS_MANIFEST: content/qa/dwpose_domain_art_corpus_v1.json
+      QA_CORPUS_MANIFEST: qa/corpora/dwpose_domain_art_corpus_v1.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
