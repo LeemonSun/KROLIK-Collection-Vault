@@ -1,0 +1,84 @@
+name: Godot Population LOD CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'work/**'
+    paths:
+      - 'runtime_godot/scripts/population_lod.gd'
+      - 'runtime_godot/scripts/population_lod_harness.gd'
+      - 'runtime_godot/scripts/character_agent.gd'
+      - 'runtime_godot/scripts/collision_rig.gd'
+      - 'runtime_godot/scripts/skinned_character.gd'
+      - 'runtime_package.py'
+      - 'character_import.py'
+      - 'rig_tools.py'
+      - 'tools/build_core_vertical_slice.py'
+      - '.github/workflows/godot-population-lod.yml'
+  pull_request:
+    paths:
+      - 'runtime_godot/scripts/population_lod.gd'
+      - 'runtime_godot/scripts/population_lod_harness.gd'
+      - 'runtime_godot/scripts/character_agent.gd'
+      - 'runtime_godot/scripts/collision_rig.gd'
+      - 'runtime_godot/scripts/skinned_character.gd'
+      - 'runtime_package.py'
+      - 'character_import.py'
+      - 'rig_tools.py'
+      - 'tools/build_core_vertical_slice.py'
+      - '.github/workflows/godot-population-lod.yml'
+
+jobs:
+  continuity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: '.'
+      GODOT_VERSION: '4.7.2'
+      GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install package builder dependencies
+        run: pip install Pillow numpy
+      - name: Build production runtime package
+        run: |
+          rm -rf runtime_godot/.ci_vertical_slice
+          python tools/build_core_vertical_slice.py --output-root runtime_godot/.ci_vertical_slice
+          test -s runtime_godot/.ci_vertical_slice/exports/runtime/ci_core_slice/manifest.json
+      - name: Download checksum-pinned Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl --fail --location --retry 4 \
+            --output "$archive" \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${archive}"
+          echo "${GODOT_SHA256}  ${archive}" | sha256sum --check --strict
+          unzip -q "$archive" -d godot-bin
+          chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+      - name: Parse project
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+      - name: Full reduced sleep wake continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          output="$(timeout 45s "$GODOT" --headless --path runtime_godot --audio-driver Dummy --script res://scripts/population_lod_harness.gd 2>&1)"
+          printf '%s\n' "$output"
+          grep -q 'KROLIK_POPULATION_LOD status=ok' <<< "$output"
+          if grep -Eq 'KROLIK_POPULATION_LOD_FAIL|SCRIPT ERROR|Parse Error|Failed to load script' <<< "$output"; then
+            exit 1
+          fi
+      - name: Cleanup
+        if: always()
+        run: rm -rf runtime_godot/.ci_vertical_slice
