@@ -14,6 +14,22 @@ const FALLBACK_TRAITS := {
     "resilience": 0.5,
 }
 const UTILITY_STATES := ["return_home", "rest", "social", "inspect", "wander", "idle"]
+const LONG_TERM_FALLBACK := {
+    "relationship_capacity": 32,
+    "place_capacity": 16,
+    "max_id_length": 64,
+    "relationship_learning_rate": 0.35,
+    "place_learning_rate": 0.30,
+    "familiarity_gain": 0.18,
+    "affinity_decay_per_hour": 0.0025,
+    "preference_decay_per_hour": 0.0015,
+    "familiarity_decay_per_hour": 0.0005,
+    "max_abs_state_bias": 0.30,
+    "relationship_effects": {"social": 0.42, "return_home": -0.16},
+    "current_place_effects": {"idle": 0.14, "rest": 0.12},
+    "target_place_effects": {"wander": 0.18, "inspect": 0.10},
+    "favorite_home_return_bonus": 0.16,
+}
 
 static var _default_policy_cache: Dictionary = {}
 static var _default_policy_checked := false
@@ -38,6 +54,7 @@ var social := 0.45
 var mood := "calm"
 var last_utility: Dictionary = {}
 var memory: Array = []
+var long_term_memory: Dictionary = {"relationships": [], "places": [], "favorite_place": ""}
 
 var policy_loaded := false
 var policy_source := "fallback"
@@ -107,6 +124,7 @@ func configure_policy(doc: Dictionary, source: String = "runtime") -> bool:
     policy_source = source
     _rebuild_trait_bias()
     memory = _normalize_memory(memory)
+    long_term_memory = _normalize_long_term_memory(long_term_memory)
     _rebuild_memory_cache()
     return true
 
@@ -455,6 +473,296 @@ func memory_snapshot() -> Array:
             out.append(entry)
     return out
 
+func _long_term_config() -> Dictionary:
+    var out := LONG_TERM_FALLBACK.duplicate(true)
+    var configured := _section("long_term_memory")
+    for key in configured.keys():
+        out[key] = configured[key]
+    return out
+
+func _bounded_long_id(value: Variant) -> String:
+    var limit := maxi(1, int(_long_term_config().get("max_id_length", 64)))
+    var text := str(value if value != null else "")
+    return text.substr(0, limit) if text.length() > limit else text
+
+func _decay_signed(value: float, amount: float) -> float:
+    if value > 0.0:
+        return maxf(0.0, value - amount)
+    if value < 0.0:
+        return minf(0.0, value + amount)
+    return 0.0
+
+func _sanitize_relationship(raw: Variant) -> Dictionary:
+    if typeof(raw) != TYPE_DICTIONARY:
+        return {}
+    var source: Dictionary = raw
+    var subject := _bounded_long_id(source.get("subject", ""))
+    if subject.is_empty():
+        return {}
+    return {
+        "subject": subject,
+        "affinity": clampf(float(source.get("affinity", 0.0)), -1.0, 1.0),
+        "familiarity": clampf(float(source.get("familiarity", 0.0)), 0.0, 1.0),
+        "interactions": clampi(int(source.get("interactions", 0)), 0, 1000000),
+        "hours_since_contact": clampf(float(source.get("hours_since_contact", 0.0)), 0.0, 1000000.0),
+    }
+
+func _sanitize_place(raw: Variant) -> Dictionary:
+    if typeof(raw) != TYPE_DICTIONARY:
+        return {}
+    var source: Dictionary = raw
+    var place := _bounded_long_id(source.get("place", ""))
+    if place.is_empty():
+        return {}
+    return {
+        "place": place,
+        "preference": clampf(float(source.get("preference", 0.0)), -1.0, 1.0),
+        "familiarity": clampf(float(source.get("familiarity", 0.0)), 0.0, 1.0),
+        "visits": clampi(int(source.get("visits", 0)), 0, 1000000),
+        "hours_since_visit": clampf(float(source.get("hours_since_visit", 0.0)), 0.0, 1000000.0),
+    }
+
+func _relationship_strength(entry: Dictionary) -> float:
+    return absf(float(entry.get("affinity", 0.0))) * 0.7 + float(entry.get("familiarity", 0.0)) * 0.3
+
+func _place_strength(entry: Dictionary) -> float:
+    return absf(float(entry.get("preference", 0.0))) * 0.6 + float(entry.get("familiarity", 0.0)) * 0.4
+
+func _favorite_place_from(places: Array) -> String:
+    var best_place := ""
+    var best_score := -INF
+    var best_familiarity := -INF
+    var best_age := INF
+    for raw in places:
+        if typeof(raw) != TYPE_DICTIONARY:
+            continue
+        var entry: Dictionary = raw
+        var score := float(entry.get("preference", 0.0)) * 0.7 + float(entry.get("familiarity", 0.0)) * 0.3
+        var familiarity := float(entry.get("familiarity", 0.0))
+        var age := float(entry.get("hours_since_visit", 0.0))
+        var place := str(entry.get("place", ""))
+        if score > best_score + 0.000001 or (absf(score - best_score) <= 0.000001 and familiarity > best_familiarity + 0.000001) or (absf(score - best_score) <= 0.000001 and absf(familiarity - best_familiarity) <= 0.000001 and age < best_age - 0.000001):
+            best_place = place
+            best_score = score
+            best_familiarity = familiarity
+            best_age = age
+    return best_place
+
+func _evict_weakest_relationship(entries: Array) -> void:
+    if entries.is_empty():
+        return
+    var worst_index := 0
+    var worst_strength := INF
+    var worst_age := -INF
+    for index in range(entries.size()):
+        var entry: Dictionary = entries[index]
+        var strength := _relationship_strength(entry)
+        var age := float(entry.get("hours_since_contact", 0.0))
+        if strength < worst_strength - 0.000001 or (absf(strength - worst_strength) <= 0.000001 and age > worst_age):
+            worst_index = index
+            worst_strength = strength
+            worst_age = age
+    entries.remove_at(worst_index)
+
+func _evict_weakest_place(entries: Array) -> void:
+    if entries.is_empty():
+        return
+    var worst_index := 0
+    var worst_strength := INF
+    var worst_age := -INF
+    for index in range(entries.size()):
+        var entry: Dictionary = entries[index]
+        var strength := _place_strength(entry)
+        var age := float(entry.get("hours_since_visit", 0.0))
+        if strength < worst_strength - 0.000001 or (absf(strength - worst_strength) <= 0.000001 and age > worst_age):
+            worst_index = index
+            worst_strength = strength
+            worst_age = age
+    entries.remove_at(worst_index)
+
+func _normalize_long_term_memory(raw_value: Variant) -> Dictionary:
+    var source: Dictionary = raw_value if typeof(raw_value) == TYPE_DICTIONARY else {}
+    var relationships: Array = []
+    var relationship_index: Dictionary = {}
+    var raw_relationships = source.get("relationships", [])
+    if typeof(raw_relationships) == TYPE_ARRAY:
+        for raw in raw_relationships:
+            var entry := _sanitize_relationship(raw)
+            if entry.is_empty():
+                continue
+            var subject := str(entry["subject"])
+            if relationship_index.has(subject):
+                var index := int(relationship_index[subject])
+                var old: Dictionary = relationships[index]
+                if float(entry["hours_since_contact"]) < float(old["hours_since_contact"]) or (absf(float(entry["hours_since_contact"]) - float(old["hours_since_contact"])) <= 0.000001 and float(entry["familiarity"]) > float(old["familiarity"])):
+                    relationships[index] = entry
+            else:
+                relationship_index[subject] = relationships.size()
+                relationships.append(entry)
+    var relationship_capacity := maxi(1, int(_long_term_config().get("relationship_capacity", 32)))
+    while relationships.size() > relationship_capacity:
+        _evict_weakest_relationship(relationships)
+    relationships.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a.get("subject", "")) < str(b.get("subject", "")))
+
+    var places: Array = []
+    var place_index: Dictionary = {}
+    var raw_places = source.get("places", [])
+    if typeof(raw_places) == TYPE_ARRAY:
+        for raw in raw_places:
+            var entry := _sanitize_place(raw)
+            if entry.is_empty():
+                continue
+            var place := str(entry["place"])
+            if place_index.has(place):
+                var index := int(place_index[place])
+                var old: Dictionary = places[index]
+                if float(entry["hours_since_visit"]) < float(old["hours_since_visit"]) or (absf(float(entry["hours_since_visit"]) - float(old["hours_since_visit"])) <= 0.000001 and float(entry["familiarity"]) > float(old["familiarity"])):
+                    places[index] = entry
+            else:
+                place_index[place] = places.size()
+                places.append(entry)
+    var place_capacity := maxi(1, int(_long_term_config().get("place_capacity", 16)))
+    while places.size() > place_capacity:
+        _evict_weakest_place(places)
+    places.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a.get("place", "")) < str(b.get("place", "")))
+    return {"relationships": relationships, "places": places, "favorite_place": _favorite_place_from(places)}
+
+func reinforce_relationship(subject_value: String, valence: float, importance: float = 0.5) -> bool:
+    var subject := _bounded_long_id(subject_value)
+    if subject.is_empty():
+        return false
+    var config := _long_term_config()
+    var signal := clampf(valence, -1.0, 1.0)
+    var weight := clampf(importance, 0.0, 1.0)
+    var alpha := clampf(float(config.get("relationship_learning_rate", 0.35)) * weight, 0.0, 1.0)
+    var familiarity_gain := float(config.get("familiarity_gain", 0.18)) * weight
+    var normalized := _normalize_long_term_memory(long_term_memory)
+    var relationships: Array = normalized.get("relationships", []).duplicate(true)
+    var found := false
+    for entry in relationships:
+        if str(entry.get("subject", "")) != subject:
+            continue
+        entry["affinity"] = clampf(float(entry.get("affinity", 0.0)) * (1.0 - alpha) + signal * alpha, -1.0, 1.0)
+        var familiarity := float(entry.get("familiarity", 0.0))
+        entry["familiarity"] = clampf(familiarity + familiarity_gain * (1.0 - familiarity), 0.0, 1.0)
+        entry["interactions"] = mini(1000000, int(entry.get("interactions", 0)) + 1)
+        entry["hours_since_contact"] = 0.0
+        found = true
+        break
+    if not found:
+        relationships.append({
+            "subject": subject, "affinity": signal * alpha, "familiarity": clampf(familiarity_gain, 0.0, 1.0),
+            "interactions": 1, "hours_since_contact": 0.0,
+        })
+    long_term_memory = _normalize_long_term_memory({"relationships": relationships, "places": normalized.get("places", [])})
+    return true
+
+func remember_place_visit(place_value: String, preference: float = 0.0, importance: float = 0.5) -> bool:
+    var place := _bounded_long_id(place_value)
+    if place.is_empty():
+        return false
+    var config := _long_term_config()
+    var signal := clampf(preference, -1.0, 1.0)
+    var weight := clampf(importance, 0.0, 1.0)
+    var alpha := clampf(float(config.get("place_learning_rate", 0.30)) * weight, 0.0, 1.0)
+    var familiarity_gain := float(config.get("familiarity_gain", 0.18)) * weight
+    var normalized := _normalize_long_term_memory(long_term_memory)
+    var places: Array = normalized.get("places", []).duplicate(true)
+    var found := false
+    for entry in places:
+        if str(entry.get("place", "")) != place:
+            continue
+        entry["preference"] = clampf(float(entry.get("preference", 0.0)) * (1.0 - alpha) + signal * alpha, -1.0, 1.0)
+        var familiarity := float(entry.get("familiarity", 0.0))
+        entry["familiarity"] = clampf(familiarity + familiarity_gain * (1.0 - familiarity), 0.0, 1.0)
+        entry["visits"] = mini(1000000, int(entry.get("visits", 0)) + 1)
+        entry["hours_since_visit"] = 0.0
+        found = true
+        break
+    if not found:
+        places.append({
+            "place": place, "preference": signal * alpha, "familiarity": clampf(familiarity_gain, 0.0, 1.0),
+            "visits": 1, "hours_since_visit": 0.0,
+        })
+    long_term_memory = _normalize_long_term_memory({"relationships": normalized.get("relationships", []), "places": places})
+    return true
+
+func clear_long_term_memory() -> void:
+    long_term_memory = {"relationships": [], "places": [], "favorite_place": ""}
+
+func long_term_snapshot() -> Dictionary:
+    return _normalize_long_term_memory(long_term_memory)
+
+func _step_long_term_memory(delta: float) -> void:
+    var hours := clampf(delta, 0.0, 604800.0) / 3600.0
+    if hours <= 0.0:
+        return
+    var config := _long_term_config()
+    var normalized := _normalize_long_term_memory(long_term_memory)
+    var relationships: Array = normalized.get("relationships", []).duplicate(true)
+    for entry in relationships:
+        entry["affinity"] = _decay_signed(float(entry.get("affinity", 0.0)), float(config.get("affinity_decay_per_hour", 0.0025)) * hours)
+        entry["familiarity"] = maxf(0.0, float(entry.get("familiarity", 0.0)) - float(config.get("familiarity_decay_per_hour", 0.0005)) * hours)
+        entry["hours_since_contact"] = minf(1000000.0, float(entry.get("hours_since_contact", 0.0)) + hours)
+    var places: Array = normalized.get("places", []).duplicate(true)
+    for entry in places:
+        entry["preference"] = _decay_signed(float(entry.get("preference", 0.0)), float(config.get("preference_decay_per_hour", 0.0015)) * hours)
+        entry["familiarity"] = maxf(0.0, float(entry.get("familiarity", 0.0)) - float(config.get("familiarity_decay_per_hour", 0.0005)) * hours)
+        entry["hours_since_visit"] = minf(1000000.0, float(entry.get("hours_since_visit", 0.0)) + hours)
+    long_term_memory = _normalize_long_term_memory({"relationships": relationships, "places": places})
+
+func _long_term_bias(context: Dictionary) -> Dictionary:
+    var out := _zero_bias()
+    var normalized := _normalize_long_term_memory(long_term_memory)
+    var config := _long_term_config()
+    var subjects := _focused_subjects(context)
+    var social_single = context.get("social_subject", null)
+    if social_single != null and not str(social_single).is_empty():
+        subjects[str(social_single)] = true
+    var social_many = context.get("social_subjects", null)
+    if typeof(social_many) == TYPE_ARRAY:
+        for raw in social_many:
+            if not str(raw).is_empty():
+                subjects[str(raw)] = true
+    var relationship_effects = config.get("relationship_effects", {})
+    if typeof(relationship_effects) == TYPE_DICTIONARY:
+        for raw in normalized.get("relationships", []):
+            var entry: Dictionary = raw
+            if not subjects.has(str(entry.get("subject", ""))):
+                continue
+            var strength := float(entry.get("affinity", 0.0)) * float(entry.get("familiarity", 0.0))
+            for raw_state in relationship_effects.keys():
+                var state_name := str(raw_state)
+                if out.has(state_name):
+                    out[state_name] = float(out[state_name]) + strength * float(relationship_effects[raw_state])
+    var current_place := _bounded_long_id(context.get("current_place", ""))
+    var target_place := _bounded_long_id(context.get("target_place", ""))
+    var current_effects = config.get("current_place_effects", {})
+    var target_effects = config.get("target_place_effects", {})
+    for raw in normalized.get("places", []):
+        var entry: Dictionary = raw
+        var place := str(entry.get("place", ""))
+        var strength := float(entry.get("preference", 0.0)) * float(entry.get("familiarity", 0.0))
+        if not current_place.is_empty() and place == current_place and typeof(current_effects) == TYPE_DICTIONARY:
+            for raw_state in current_effects.keys():
+                var state_name := str(raw_state)
+                if out.has(state_name):
+                    out[state_name] = float(out[state_name]) + strength * float(current_effects[raw_state])
+        if not target_place.is_empty() and place == target_place and typeof(target_effects) == TYPE_DICTIONARY:
+            for raw_state in target_effects.keys():
+                var state_name := str(raw_state)
+                if out.has(state_name):
+                    out[state_name] = float(out[state_name]) + strength * float(target_effects[raw_state])
+    var favorite := str(normalized.get("favorite_place", ""))
+    var home_place := _bounded_long_id(context.get("home_place", ""))
+    if bool(context.get("away_from_home", false)) and not favorite.is_empty() and favorite == home_place:
+        out["return_home"] = float(out["return_home"]) + float(config.get("favorite_home_return_bonus", 0.16))
+    var cap := maxf(0.0, float(config.get("max_abs_state_bias", 0.30)))
+    for state_name in out.keys():
+        out[state_name] = clampf(float(out[state_name]), -cap, cap)
+    return out
+
+
 func _apply_policy_defaults() -> void:
     var defaults: Dictionary = _policy.get("defaults", {})
     var p: Dictionary = defaults.get("profile", {})
@@ -500,6 +808,7 @@ func apply_snapshot(data: Dictionary) -> void:
     curiosity = clampf(float(n.get("curiosity", curiosity)), 0.0, 1.0)
     social = clampf(float(n.get("social", social)), 0.0, 1.0)
     memory = _normalize_memory(data.get("memory", []))
+    long_term_memory = _normalize_long_term_memory(data.get("long_term_memory", {}))
     _memory_elapsed = 0.0
     _rebuild_memory_cache()
     _update_mood()
@@ -520,13 +829,14 @@ func activity_scores(context: Dictionary = {}) -> Dictionary:
     var social_bonus := float(bonus.get("social", 0.18)) if routine == "social" else 0.0
     var home_bonus := float(bonus.get("homebody", 0.20)) if routine == "homebody" else 0.0
     var focused_bias := _focused_memory_bias(context)
+    var long_bias := _long_term_bias(context)
     return {
-        "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)) + _trait_bias_idle + _combined_memory_bias("idle", focused_bias),
-        "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus + _trait_bias_wander + _combined_memory_bias("wander", focused_bias),
-        "inspect": float(inspect.get("base", 0.12)) + curiosity * float(inspect.get("curiosity", 0.58)) + minf(float(target.get("cap", 0.18)), interesting * float(target.get("step", 0.06))) + explorer_bonus + _trait_bias_inspect + _combined_memory_bias("inspect", focused_bias),
-        "social": float(social_u.get("base", 0.10)) + social * float(social_u.get("social_need", 0.48)) + social_drive * float(social_u.get("social_drive", 0.28)) + minf(float(target.get("cap", 0.18)), social_targets * float(target.get("step", 0.06))) + social_bonus + _trait_bias_social + _combined_memory_bias("social", focused_bias),
-        "return_home": ((float(return_home.get("base", 0.08)) + home_bias * float(return_home.get("home_bias", 0.35)) + home_bonus + (1.0 - comfort) * float(return_home.get("inverse_comfort", 0.32)) + (1.0 - energy) * float(return_home.get("inverse_energy", 0.26))) if away else 0.0) + _trait_bias_return_home + _combined_memory_bias("return_home", focused_bias),
-        "rest": float(rest.get("base", 0.12)) + (1.0 - energy) * float(rest.get("inverse_energy", 0.88)) + (float(rest.get("home_bonus", 0.18)) if not away else float(rest.get("away_bonus", -0.25))) + _trait_bias_rest + _combined_memory_bias("rest", focused_bias),
+        "idle": float(idle.get("base", 0.20)) + comfort * float(idle.get("comfort", 0.12)) + (1.0 - autonomy) * float(idle.get("inverse_autonomy", 0.18)) + _trait_bias_idle + _combined_memory_bias("idle", focused_bias) + float(long_bias.get("idle", 0.0)),
+        "wander": float(wander_u.get("base", 0.16)) + wander * float(wander_u.get("wander", 0.42)) + autonomy * float(wander_u.get("autonomy", 0.20)) + curiosity * float(wander_u.get("curiosity", 0.16)) + explorer_bonus + _trait_bias_wander + _combined_memory_bias("wander", focused_bias) + float(long_bias.get("wander", 0.0)),
+        "inspect": float(inspect.get("base", 0.12)) + curiosity * float(inspect.get("curiosity", 0.58)) + minf(float(target.get("cap", 0.18)), interesting * float(target.get("step", 0.06))) + explorer_bonus + _trait_bias_inspect + _combined_memory_bias("inspect", focused_bias) + float(long_bias.get("inspect", 0.0)),
+        "social": float(social_u.get("base", 0.10)) + social * float(social_u.get("social_need", 0.48)) + social_drive * float(social_u.get("social_drive", 0.28)) + minf(float(target.get("cap", 0.18)), social_targets * float(target.get("step", 0.06))) + social_bonus + _trait_bias_social + _combined_memory_bias("social", focused_bias) + float(long_bias.get("social", 0.0)),
+        "return_home": ((float(return_home.get("base", 0.08)) + home_bias * float(return_home.get("home_bias", 0.35)) + home_bonus + (1.0 - comfort) * float(return_home.get("inverse_comfort", 0.32)) + (1.0 - energy) * float(return_home.get("inverse_energy", 0.26))) if away else 0.0) + _trait_bias_return_home + _combined_memory_bias("return_home", focused_bias) + float(long_bias.get("return_home", 0.0)),
+        "rest": float(rest.get("base", 0.12)) + (1.0 - energy) * float(rest.get("inverse_energy", 0.88)) + (float(rest.get("home_bonus", 0.18)) if not away else float(rest.get("away_bonus", -0.25))) + _trait_bias_rest + _combined_memory_bias("rest", focused_bias) + float(long_bias.get("rest", 0.0)),
     }
 
 func _is_bound(context: Dictionary) -> bool:
@@ -587,6 +897,7 @@ func step(delta: float, context_value: Variant = {}) -> String:
         if _memory_elapsed >= _memory_next_expiry:
             _materialize_memory()
             _rebuild_memory_cache()
+    _step_long_term_memory(clamped_delta)
     var minute := clamped_delta / 60.0
     state = choose_state(context)
     match state:
@@ -621,6 +932,7 @@ func snapshot() -> Dictionary:
         },
         "needs": {"energy": energy, "comfort": comfort, "curiosity": curiosity, "social": social},
         "memory": memory_snapshot(),
+        "long_term_memory": long_term_snapshot(),
         "affect": {"mood": mood},
         "utility": last_utility.duplicate(true),
     }

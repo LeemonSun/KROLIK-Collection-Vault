@@ -130,6 +130,30 @@ def validate_ai_policy_document(document: Any) -> list[str]:
                 if state_name not in UTILITY_STATES or not _finite(coefficient):
                     errors.append(f"short_term_memory.effects.{kind} contains invalid state/coefficient")
 
+    long_term = document.get("long_term_memory")
+    if long_term is not None:
+        if not isinstance(long_term, dict):
+            errors.append("long_term_memory must be an object")
+            long_term = {}
+        for key, upper in (("relationship_capacity", 128), ("place_capacity", 64), ("max_id_length", 256)):
+            if not _positive_int(long_term.get(key)) or int(long_term.get(key, 0)) > upper:
+                errors.append(f"long_term_memory.{key} must be an integer in [1,{upper}]")
+        for key in (
+            "relationship_learning_rate", "place_learning_rate", "familiarity_gain",
+            "affinity_decay_per_hour", "preference_decay_per_hour", "familiarity_decay_per_hour",
+            "max_abs_state_bias", "favorite_home_return_bonus",
+        ):
+            if not _finite(long_term.get(key)) or not 0.0 <= float(long_term.get(key, -1.0)) <= 1.0:
+                errors.append(f"long_term_memory.{key} must be finite in [0,1]")
+        for section in ("relationship_effects", "current_place_effects", "target_place_effects"):
+            effects = long_term.get(section)
+            if not isinstance(effects, dict) or not effects:
+                errors.append(f"long_term_memory.{section} must be a non-empty object")
+                continue
+            for state_name, coefficient in effects.items():
+                if state_name not in UTILITY_STATES or not _finite(coefficient):
+                    errors.append(f"long_term_memory.{section} contains invalid state/coefficient")
+
     rates = document.get("need_rates_per_minute")
     if not isinstance(rates, dict): errors.append("need_rates_per_minute must be an object"); rates = {}
     for section in ("rest", "contained", "active", "inspect_override", "social_override", "idle"):
