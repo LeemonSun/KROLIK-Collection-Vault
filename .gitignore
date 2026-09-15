@@ -9,4 +9,8 @@ dist/
 models/dwpose/*.onnx
 models/dwpose/*.download
 
+.target_benchmark/
+target_benchmark_artifacts/
+runtime_godot/.target_benchmark_core/
+
 tests/ui_*_screenshot.png
