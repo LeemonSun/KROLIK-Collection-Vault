@@ -1,0 +1,214 @@
+name: Windows Multi-Art LOD Scale
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'work/**'
+    paths:
+      - 'runtime_godot/scripts/multi_art_lod_scale_harness.gd'
+      - 'runtime_godot/scripts/population_lod.gd'
+      - 'runtime_godot/scripts/character_agent.gd'
+      - 'runtime_godot/scripts/runtime_package_cache.gd'
+      - 'character_import.py'
+      - 'runtime_package.py'
+      - 'rig_tools.py'
+      - 'qa/corpora/dwpose_domain_art_corpus_v1.json'
+      - 'tools/fetch_pinned_qa_corpus.py'
+      - 'tools/import_character_package.py'
+      - '.github/workflows/windows-multi-art-scale.yml'
+
+jobs:
+  production-multi-art-500:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: .
+      GODOT_VERSION: '4.7.2'
+      GODOT_WIN_SHA256: '731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953'
+      MULTI_ART_MIN_FPS: '5.0'
+      MULTI_ART_MAX_WORKING_SET_BYTES: '1610612736'
+      QA_CORPUS_MANIFEST: 'qa/corpora/dwpose_domain_art_corpus_v1.json'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install import dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow numpy
+
+      - name: Fetch checksum-pinned distinct art corpus
+        shell: pwsh
+        run: |
+          $sourceDir = Join-Path $env:RUNNER_TEMP 'krolik-multi-art-sources'
+          if (Test-Path $sourceDir) { Remove-Item $sourceDir -Recurse -Force }
+          python tools/fetch_pinned_qa_corpus.py --manifest $env:QA_CORPUS_MANIFEST --output-dir $sourceDir
+          if ($LASTEXITCODE -ne 0) { throw 'QA art corpus fetch failed' }
+          foreach ($name in @('anime1.png','anime2.png','anime3.jpg','anime4.jpg')) {
+            if (-not (Test-Path (Join-Path $sourceDir $name))) { throw "missing pinned fixture: $name" }
+          }
+
+      - name: Build four sealed runtime packages
+        shell: pwsh
+        run: |
+          $sourceDir = Join-Path $env:RUNNER_TEMP 'krolik-multi-art-sources'
+          $projectRoot = 'runtime_godot/.ci_multi_art'
+          if (Test-Path $projectRoot) { Remove-Item $projectRoot -Recurse -Force }
+          $cases = @(
+            @('anime1.png','multi_art_1'),
+            @('anime2.png','multi_art_2'),
+            @('anime3.jpg','multi_art_3'),
+            @('anime4.jpg','multi_art_4')
+          )
+          foreach ($case in $cases) {
+            $source = Join-Path $sourceDir $case[0]
+            $id = $case[1]
+            python tools/import_character_package.py $source --project-root $projectRoot --character-id $id --heuristic-rig
+            if ($LASTEXITCODE -ne 0) { throw "runtime package build failed: $id" }
+            $manifest = Join-Path $projectRoot "exports/runtime/$id/manifest.json"
+            $receipt = Join-Path $projectRoot "exports/runtime/$id/package_receipt.json"
+            if (-not (Test-Path $manifest)) { throw "manifest missing: $id" }
+            if (-not (Test-Path $receipt)) { throw "package receipt missing: $id" }
+          }
+
+      - name: Download checksum-pinned official Godot for Windows
+        shell: pwsh
+        run: |
+          $archive = "Godot_v$env:GODOT_VERSION-stable_win64.exe.zip"
+          $url = "https://github.com/godotengine/godot/releases/download/$env:GODOT_VERSION-stable/$archive"
+          Invoke-WebRequest -Uri $url -OutFile $archive
+          $actual = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $env:GODOT_WIN_SHA256) { throw "Godot Windows SHA256 mismatch: $actual" }
+          Expand-Archive -Path $archive -DestinationPath godot-bin -Force
+          $godot = Resolve-Path "godot-bin/Godot_v$env:GODOT_VERSION-stable_win64.exe"
+          $versionOutput = (& $godot --version 2>&1 | Out-String).Trim()
+          Write-Host $versionOutput
+          if ($versionOutput -notmatch [regex]::Escape($env:GODOT_VERSION)) { throw 'unexpected Godot version output' }
+          $global:LASTEXITCODE = 0
+
+      - name: Parse and import Godot project
+        shell: pwsh
+        run: |
+          $godot = (Resolve-Path "godot-bin/Godot_v$env:GODOT_VERSION-stable_win64.exe").Path
+          $importOutput = (& $godot --headless --path runtime_godot --editor --quit 2>&1 | Out-String)
+          Write-Host $importOutput
+          foreach ($pattern in @('SCRIPT ERROR', 'Parse Error', 'Failed to load script', 'Cannot get class', 'Could not resolve class')) {
+            if ($importOutput -match [regex]::Escape($pattern)) { throw "Godot project import contained fatal marker: $pattern" }
+          }
+          if ($importOutput -notmatch 'Godot Engine v4\.7\.2') { throw 'Godot project import did not start expected engine' }
+          $global:LASTEXITCODE = 0
+
+      - name: Render and measure 500 agents across four distinct packages
+        shell: pwsh
+        run: |
+          $godot = (Resolve-Path "godot-bin/Godot_v$env:GODOT_VERSION-stable_win64.exe").Path
+          New-Item -ItemType Directory -Force -Path runtime_godot/windows_multi_art_artifacts | Out-Null
+          $artifactDir = (Resolve-Path runtime_godot/windows_multi_art_artifacts).Path
+          $stdout = $artifactDir + '\stress_stdout.txt'
+          $stderr = $artifactDir + '\stress_stderr.txt'
+          $metrics = $artifactDir + '\process_metrics.json'
+
+          $env:KROLIK_MULTI_ART_AGENTS = '500'
+          $env:KROLIK_MULTI_ART_WARMUP_FRAMES = '30'
+          $env:KROLIK_MULTI_ART_SAMPLE_FRAMES = '120'
+          $env:KROLIK_MULTI_ART_MAX_SECONDS = '90'
+          $env:KROLIK_MULTI_ART_FULL_RADIUS = '180'
+          $env:KROLIK_MULTI_ART_SLEEP_RADIUS = '360'
+          $env:KROLIK_MULTI_ART_WAKE_RADIUS = '330'
+          $env:KROLIK_MULTI_ART_MANIFEST_PATHS = 'res://.ci_multi_art/exports/runtime/multi_art_1/manifest.json;res://.ci_multi_art/exports/runtime/multi_art_2/manifest.json;res://.ci_multi_art/exports/runtime/multi_art_3/manifest.json;res://.ci_multi_art/exports/runtime/multi_art_4/manifest.json'
+          $env:KROLIK_MULTI_ART_SCREENSHOT_PATH = 'res://windows_multi_art_artifacts/stress_multi_art_500.png'
+
+          $arguments = @(
+            '--path', 'runtime_godot',
+            '--rendering-method', 'gl_compatibility',
+            '--audio-driver', 'Dummy',
+            '--script', 'res://scripts/multi_art_lod_scale_harness.gd'
+          )
+          $process = Start-Process -FilePath $godot -ArgumentList $arguments -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          $deadline = (Get-Date).AddSeconds(240)
+          [long]$peak = 0
+          while (-not $process.HasExited) {
+            Start-Sleep -Milliseconds 100
+            $process.Refresh()
+            if ($process.WorkingSet64 -gt $peak) { $peak = $process.WorkingSet64 }
+            if ((Get-Date) -gt $deadline) {
+              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+              throw 'Windows multi-art rendered stress exceeded 240 second watchdog'
+            }
+          }
+          $process.WaitForExit()
+          $exitCode = $process.ExitCode
+          $out = if (Test-Path $stdout) { Get-Content $stdout -Raw } else { '' }
+          $err = if (Test-Path $stderr) { Get-Content $stderr -Raw } else { '' }
+          Write-Host $out
+          if ($err) { Write-Host '--- Godot stderr ---'; Write-Host $err }
+
+          $metricLine = ($out -split "`r?`n" | Where-Object { $_ -like 'KROLIK_MULTI_ART_SCALE_METRIC *' } | Select-Object -Last 1)
+          $renderLine = ($out -split "`r?`n" | Where-Object { $_ -like 'KROLIK_MULTI_ART_RENDER *' } | Select-Object -Last 1)
+          [double]$fps = 0.0
+          [int]$uniquePackages = 0
+          [int]$cacheParses = 0
+          [int]$cacheDecodes = 0
+          if ($metricLine -match 'sim_fps=([0-9]+(?:\.[0-9]+)?)') { $fps = [double]$Matches[1] }
+          if ($metricLine -match 'unique_packages=([0-9]+)') { $uniquePackages = [int]$Matches[1] }
+          if ($metricLine -match 'cache_parses=([0-9]+)') { $cacheParses = [int]$Matches[1] }
+          if ($metricLine -match 'cache_decodes=([0-9]+)') { $cacheDecodes = [int]$Matches[1] }
+
+          $record = [ordered]@{
+            platform = 'windows-latest'
+            godot = $env:GODOT_VERSION
+            agents = 500
+            unique_packages = $uniquePackages
+            peak_working_set_bytes = $peak
+            peak_working_set_mib = [math]::Round($peak / 1MB, 2)
+            process_exit_code = $exitCode
+            measured_fps = $fps
+            minimum_fps = [double]$env:MULTI_ART_MIN_FPS
+            cache_parses = $cacheParses
+            cache_decodes = $cacheDecodes
+            single_art_lod_reference = '11.91 FPS / 1039.27 MiB after streaming residency optimization'
+            note = 'GitHub-hosted Windows runner using Microsoft Basic Render Driver via ANGLE; not target RX 6650 XT hardware.'
+            metric = $metricLine
+            render = $renderLine
+          }
+          $record | ConvertTo-Json -Depth 4 | Set-Content -Path $metrics -Encoding utf8
+          Write-Host "KROLIK_WINDOWS_MULTI_ART fps=$fps min_fps=$env:MULTI_ART_MIN_FPS peak_working_set_mib=$($record.peak_working_set_mib) unique_packages=$uniquePackages cache_parses=$cacheParses cache_decodes=$cacheDecodes exit=$exitCode"
+          Write-Host $metricLine
+          Write-Host $renderLine
+
+          if ($exitCode -ne 0) { throw "multi-art Godot process failed: $exitCode" }
+          if (-not $metricLine) { throw 'KROLIK_MULTI_ART_SCALE_METRIC missing' }
+          if (-not $renderLine) { throw 'KROLIK_MULTI_ART_RENDER missing' }
+          if ($uniquePackages -ne 4 -or $cacheParses -ne 4 -or $cacheDecodes -ne 4) { throw 'multi-art package/cache diversity gate failed' }
+          if ($fps -lt [double]$env:MULTI_ART_MIN_FPS) { throw "multi-art performance regression: $fps FPS < $env:MULTI_ART_MIN_FPS FPS floor" }
+          if ($peak -gt [long]$env:MULTI_ART_MAX_WORKING_SET_BYTES) { throw "multi-art stress exceeded working-set budget: $peak > $env:MULTI_ART_MAX_WORKING_SET_BYTES" }
+          if ($out -match 'KROLIK MULTI ART scale:' -or $err -match 'SCRIPT ERROR|Parse Error|Failed to load script') { throw 'multi-art stress contains failure marker' }
+          if (-not (Test-Path runtime_godot/windows_multi_art_artifacts/stress_multi_art_500.png)) { throw 'multi-art screenshot evidence missing' }
+          $global:LASTEXITCODE = 0
+
+      - name: Upload multi-art Windows evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-multi-art-lod-scale-500
+          path: |
+            runtime_godot/windows_multi_art_artifacts/**
+            runtime_godot/.ci_multi_art/exports/runtime/*/manifest.json
+            runtime_godot/.ci_multi_art/exports/runtime/*/package_receipt.json
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 14
+
+      - name: Cleanup generated fixtures and packages
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path runtime_godot/.ci_multi_art) { Remove-Item runtime_godot/.ci_multi_art -Recurse -Force }
+          $sourceDir = Join-Path $env:RUNNER_TEMP 'krolik-multi-art-sources'
+          if (Test-Path $sourceDir) { Remove-Item $sourceDir -Recurse -Force }
