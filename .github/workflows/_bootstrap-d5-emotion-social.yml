@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - work/d5-emotion-encounters-20260915
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
