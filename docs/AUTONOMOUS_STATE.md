@@ -377,7 +377,7 @@ F3 promotion and the first import-QA expansion are complete. Next source-indepen
 
 Multiple normal chat sessions may still have GitHub access. Always re-read fresh `main` before every write and never force-push over concurrent work.
 
-Current user instruction: scheduled/hourly writer remains disabled. Do **not** re-enable it unless the user explicitly asks later.
+Current user instruction (2026-09-15): the dedicated KROLIK hourly autonomous continuation is **enabled for 24 hourly runs**. Each run must follow this state + `docs/AUTONOMOUS_RUNBOOK.md`, fresh-read `main`, fix prior failures first, and commit only verified coherent blocks. The current manual pass is finished; do not start extra manual development between scheduled runs unless the user explicitly asks.
 
 For manual development:
 
