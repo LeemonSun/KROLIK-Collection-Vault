@@ -4,11 +4,21 @@ Last updated: 2026-09-15
 
 ## Current verified engineering baseline
 
-Latest fully verified production-code SHA before cleanup/state-only commits:
+F3 unique-package residency is now promoted to `main`.
+
+Current F3 promotion SHA:
+
+`48adbb963a41312ca1984cae4a3f7275f0deef73` (`ci: make world-state scale harness frame-free`).
+
+Stable rollback branch:
+
+`checkpoint/stable-f3-unique-package-residency-20260915`
+
+Latest fully verified production-code SHA before cleanup/state/harness-only commits:
 
 `f292ab6082fbae9aa14a54a53a4a81c7bd6ee3b8` (`fix: preserve lazy package cache GDScript nesting`).
 
-All five relevant production regressions are green on this exact SHA:
+All five relevant production regressions are green on this production SHA:
 
 - Windows Godot LOD Scale run `34943207027` — success;
 - Godot World State Scale run `34943207122` — success;
@@ -16,7 +26,11 @@ All five relevant production regressions are green on this exact SHA:
 - Godot Multi-Art World State run `34943207059` — success;
 - Windows Unique-Package Scale run `34943207141` — success.
 
-The temporary patch workflow used during development was removed afterward; it is not part of the intended product/CI architecture.
+The final F3 PR world-state regression is also green on promoted head `48adbb963a41312ca1984cae4a3f7275f0deef73`:
+
+- Godot World State Scale PR run `34944917660` — success.
+
+That last harness change removes expensive SceneTree frame waits from the persistence-only scale regression. The production runtime behavior/schema was not changed by it. The temporary lazy-texture patch workflow used during development was removed before promotion and is not part of the intended product/CI architecture.
 
 No rig/skin/animation/runtime-character/AI-policy schema was bumped. The portable KROLIK rig remains the existing 15-joint / 14-bone contract.
 
@@ -99,9 +113,7 @@ Stable pre-LOD checkpoint:
 
 ## Phase F population LOD / sleep — PRODUCTION TIER CLOSED
 
-Production component:
-
-`VaultPopulationLOD`
+Production component: `VaultPopulationLOD`.
 
 Three explicit tiers are implemented without changing the full-detail character contract.
 
@@ -130,9 +142,7 @@ Windows run `34943207027` re-verifies the production full -> reduced -> sleep ->
 
 ## 500-agent rendered LOD performance
 
-Dedicated workflow:
-
-`.github/workflows/windows-godot-lod-scale.yml`
+Dedicated workflow: `.github/workflows/windows-godot-lod-scale.yml`.
 
 Earlier locked hosted-Windows baseline run `34935517813`:
 
@@ -154,15 +164,17 @@ The hosted runner uses Microsoft Basic Render Driver via ANGLE. These metrics pr
 
 ## H2 world-state persistence — CLOSED
 
-The production runtime now has a verified large-population save lifecycle:
+The production runtime has a verified large-population lifecycle:
 
 spawn -> runtime activity -> save -> destroy -> reload -> restore.
 
-The 500-character world-state workflow is green on final F3 production code (`34943207122`). Character brain/runtime state and package identity survive the lifecycle.
+The 500-character workflow is green on final F3 production code. Character brain/runtime state and package identity survive the lifecycle.
 
-Stable H2 checkpoint already preserved:
+Stable H2 checkpoint:
 
 `checkpoint/stable-h2-world-state-scale-20260915-1010`
+
+The final F3 PR exposed an old harness-only timing problem: the regression printed `status=ok` but could then be killed by the 180-second external watchdog while spending time on irrelevant SceneTree frames/cleanup. Commit `48adbb963a41312ca1984cae4a3f7275f0deef73` makes the persistence harness frame-free and the PR run `34944917660` completes successfully without changing production persistence semantics.
 
 ## F2 multi-art runtime + persistence — CLOSED
 
@@ -178,7 +190,7 @@ Windows multi-art 500-agent measurement before F3 cache specialization:
 - all awake agents move;
 - sleeping agents remain physically stable.
 
-Mixed world-state persistence is also verified with 200 characters across four package identities:
+Mixed world-state persistence is verified with 200 characters across four package identities:
 
 - save size about `0.290 MiB`;
 - spawn about `654 ms`;
@@ -189,15 +201,15 @@ Mixed world-state persistence is also verified with 200 characters across four p
 
 Final F3 regression run `34943207059` confirms mixed-package save/reload still succeeds after lazy texture residency changes.
 
-Stable F2 checkpoint already preserved:
+Stable F2 checkpoint:
 
 `checkpoint/stable-f2-multi-art-scale-20260915-1017`
 
-## F3 unique-package residency — CLOSED
+## F3 unique-package residency — CLOSED AND PROMOTED
 
 ### Problem measured
 
-A dedicated QA fan-out tool now creates hundreds of independently sealed package paths from the four verified template packages. This isolates the cost of package/texture uniqueness from ordinary repeated-character population cost.
+A dedicated QA fan-out tool creates hundreds of independently sealed package paths from the four verified template packages. This isolates package/texture uniqueness from ordinary repeated-character population cost.
 
 Initial Windows unique-package curve with the old always-decode cache:
 
@@ -211,7 +223,7 @@ The runtime remained CPU/render viable, but peak memory scaled badly because eve
 
 ### Production fix
 
-`VaultRuntimePackageCache` now separates cheap package metadata residency from full decoded texture residency:
+`VaultRuntimePackageCache` separates cheap package metadata residency from full decoded texture residency:
 
 - manifest/image metadata stays cached for all seen packages;
 - `load_package(manifest_path, include_texture)` supports metadata-only loads;
@@ -219,9 +231,9 @@ The runtime remained CPU/render viable, but peak memory scaled badly because eve
 - reduced LOD can build its small proxy directly from the immutable image file;
 - sleeping LOD holds no full texture;
 - waking/full LOD rehydrates the full immutable texture on demand;
-- decoded full textures are additionally protected by a bounded LRU cache;
+- decoded full textures are protected by a bounded LRU cache;
 - default full-texture cache limit is `96` entries;
-- active agents remain safe when a cache reference is evicted because they retain their own RefCounted texture reference;
+- active agents remain safe after cache eviction because they retain their own RefCounted texture reference;
 - cache metrics expose metadata entries, decoded texture entries, limit, parses, decodes and evictions.
 
 No runtime-package schema changed.
@@ -321,13 +333,12 @@ Rules remain:
 
 Keep D4/D5 paused unless the product/performance path stops yielding useful work.
 
-Next source-independent priorities:
+F3 promotion is complete. Next source-independent priorities are now:
 
-1. Preserve F3 on `main` and create a stable checkpoint branch.
-2. Expand real/stylized import QA beyond the current four-art regression corpus using only accessible, provenance-known fixtures; keep explicit review-required semantics rather than lowering DWPose acceptance thresholds.
-3. Add target-hardware benchmark instructions/collector so the same 220/300/500 workloads can be run on the user's RX 6650 XT and compared honestly with hosted software-render metrics.
-4. Add further pooling/offline-room/streaming complexity only if >500 exploratory or real target-hardware profiling identifies a concrete bottleneck.
-5. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests and build the first complete graphical vertical slice.
+1. Expand real/stylized import QA beyond the current four-art regression corpus using only accessible, provenance-known fixtures; keep explicit review-required semantics rather than lowering DWPose acceptance thresholds.
+2. Add target-hardware benchmark instructions/collector so the same 220/300/500 workloads can be run on the user's RX 6650 XT and compared honestly with hosted software-render metrics.
+3. Add further pooling/offline-room/streaming complexity only if >500 exploratory or real target-hardware profiling identifies a concrete bottleneck.
+4. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests and build the first complete graphical vertical slice.
 
 ## Concurrency / writer discipline
 
