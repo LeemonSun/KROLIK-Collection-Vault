@@ -191,7 +191,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--manifest",
         type=Path,
-        default=Path("content/qa/dwpose_domain_art_corpus_v1.json"),
+        default=Path("qa/corpora/dwpose_domain_art_corpus_v1.json"),
         help="versioned QA corpus manifest",
     )
     parser.add_argument("--output-dir", type=Path, required=True, help="directory for verified fixtures")
