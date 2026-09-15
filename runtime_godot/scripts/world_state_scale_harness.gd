@@ -142,11 +142,19 @@ func _run() -> void:
         _fail("unexpected initial tier distribution: " + str(lod.tier_snapshot()))
         return
 
-    # LOD reassessment queues visual/collision nodes for deletion. We only need
-    # ordinary process-frame flushes before capture; physics simulation warmup is
-    # unnecessary here and becomes extremely expensive with 500 live agents.
+    # LOD reassessment queues visual/collision nodes for deletion. Capture needs
+    # those deferred frees flushed, but it does not need to simulate 500 brains,
+    # animations, navigation agents and collision rigs while waiting for the tree.
+    # Suspend physics only for the flush, then restore the production processing
+    # state before the persistence snapshot is captured.
+    lod.set_physics_process(false)
+    for agent in agents:
+        agent.set_physics_process(false)
     await process_frame
     await process_frame
+    for agent in agents:
+        agent.set_physics_process(true)
+    lod.set_physics_process(true)
     _stage("simulation_ready")
 
     var persistence := VaultWorldState.new()
