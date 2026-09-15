@@ -1,8 +1,9 @@
 extends SceneTree
 
 ## Production-like rendered scale benchmark for the three-tier population LOD.
-## It intentionally mirrors stress_harness.gd's character/mind/animation workload,
-## then adds VaultPopulationLOD over the same production runtime package.
+## Agents are registered with LOD immediately after package load, so the benchmark
+## does not create an artificial 500-character full-res residency spike before
+## measuring the same world. This mirrors a streaming Vault population loader.
 
 const AgentScript = preload("res://scripts/character_agent.gd")
 const TRAIT_NAMES := ["curiosity", "sociability", "boldness", "patience", "resilience"]
@@ -11,11 +12,12 @@ var _agent_count := 500
 var _warmup_frames := 30
 var _sample_frames := 120
 var _max_sample_seconds := 60.0
-var _manifest_path := "res://.ci_windows_lod/exports/runtime/ci_core_slice/manifest.json"
+var _manifest_path := "res://.ci_vertical_slice/exports/runtime/ci_core_slice/manifest.json"
 var _screenshot_path := "res://windows_lod_artifacts/stress_lod_500.png"
 var _full_radius := 180.0
 var _sleep_radius := 360.0
 var _wake_radius := 330.0
+var _proxy_max_height := 160
 
 var _world: Node2D
 var _lod: VaultPopulationLOD
@@ -46,6 +48,7 @@ func _load_config() -> void:
     _full_radius = _env_float("KROLIK_LOD_FULL_RADIUS", 180.0, 1.0, 5000.0)
     _sleep_radius = _env_float("KROLIK_LOD_SLEEP_RADIUS", 360.0, _full_radius, 10000.0)
     _wake_radius = _env_float("KROLIK_LOD_WAKE_RADIUS", 330.0, _full_radius, _sleep_radius)
+    _proxy_max_height = _env_int("KROLIK_LOD_PROXY_MAX_HEIGHT", 160, 48, 512)
     var manifest_env := OS.get_environment("KROLIK_LOD_MANIFEST_PATH").strip_edges()
     if not manifest_env.is_empty():
         _manifest_path = manifest_env
@@ -87,6 +90,20 @@ func _mind_for(index: int) -> Dictionary:
         }],
     }
 
+func _spawn_point(index: int, columns: int) -> Vector2:
+    var row := index / columns
+    var col := index % columns
+    return Vector2(36.0 + col * 34.0, 52.0 + row * 40.0)
+
+func _world_focus(columns: int) -> Vector2:
+    var rows := int(ceil(float(_agent_count) / float(maxi(columns, 1))))
+    var min_point := Vector2(36.0, 52.0)
+    var max_point := Vector2(
+        36.0 + float(maxi(columns - 1, 0)) * 34.0,
+        52.0 + float(maxi(rows - 1, 0)) * 40.0
+    )
+    return (min_point + max_point) * 0.5
+
 func _spawn_agents() -> void:
     _world = Node2D.new()
     _world.name = "LODStressWorld"
@@ -101,17 +118,24 @@ func _spawn_agents() -> void:
         return
 
     var columns := maxi(1, int(ceil(sqrt(float(_agent_count) * 2.2))))
-    var min_point := Vector2(INF, INF)
-    var max_point := Vector2(-INF, -INF)
-    for i in range(_agent_count):
-        var row := i / columns
-        var col := i % columns
-        var spawn := Vector2(36.0 + col * 34.0, 52.0 + row * 40.0)
-        min_point.x = minf(min_point.x, spawn.x)
-        min_point.y = minf(min_point.y, spawn.y)
-        max_point.x = maxf(max_point.x, spawn.x)
-        max_point.y = maxf(max_point.y, spawn.y)
+    _lod = VaultPopulationLOD.new()
+    _world.add_child(_lod)
+    _lod.configure({
+        "enabled": true,
+        "resource_residency": true,
+        "runtime_manifest_path": manifest_abs,
+        "focus_position": _world_focus(columns),
+        "full_radius": _full_radius,
+        "sleep_radius": _sleep_radius,
+        "wake_radius": _wake_radius,
+        "proxy_max_height": _proxy_max_height,
+        "reassess_interval": 0.10,
+    })
 
+    # Streaming population load: each character is tiered immediately after its
+    # production package is loaded instead of retaining all 500 full textures.
+    for i in range(_agent_count):
+        var spawn := _spawn_point(i, columns)
         var agent := AgentScript.new() as VaultCharacterAgent
         _world.add_child(agent)
         var mind := _mind_for(i)
@@ -119,6 +143,7 @@ func _spawn_agents() -> void:
         if not agent.load_runtime_manifest(manifest_abs):
             _spawn_error = "production manifest rejected for LOD agent %d" % i
             return
+        agent.character_id = "lod_stress_%03d" % i
         agent.brain.apply_snapshot(mind)
         agent.position = spawn
         agent.home_position = spawn
@@ -134,8 +159,8 @@ func _spawn_agents() -> void:
         var look_x := -1.0 + 2.0 * float(i % 11) / 10.0
         var look_y := -0.5 + float(i % 7) / 6.0
         agent.set_look_target(Vector2(look_x, look_y))
-        # Match the existing rendered baseline: bodies do not collide with each
-        # other, but full-tier collision proxy transforms are still updated.
+        # Match the previous rendered baseline: bodies do not collide with one
+        # another, while full-tier proxy transforms still update.
         agent.collision_layer = 0
         agent.collision_mask = 0
         var direction := -1.0 if (i % 2) == 0 else 1.0
@@ -144,21 +169,10 @@ func _spawn_agents() -> void:
         agent.world_targets = [target]
         _agents.append(agent)
         _start_positions[agent.get_instance_id()] = spawn
-
-    _lod = VaultPopulationLOD.new()
-    _world.add_child(_lod)
-    _lod.configure({
-        "enabled": true,
-        "focus_position": (min_point + max_point) * 0.5,
-        "full_radius": _full_radius,
-        "sleep_radius": _sleep_radius,
-        "wake_radius": _wake_radius,
-        "reassess_interval": 0.10,
-    })
-    for agent in _agents:
-        if not _lod.register_agent(agent):
-            _spawn_error = "failed to register agent with population LOD"
+        if not _lod.register_agent(agent, manifest_abs):
+            _spawn_error = "failed to register LOD agent %d" % i
             return
+
     _lod.force_reassess()
 
 func _wait_physics_frames(count: int) -> void:
@@ -227,6 +241,7 @@ func _run() -> void:
     var awake := 0
     var awake_moved := 0
     var sleeping_drift_max := 0.0
+    var residency_shape_errors := 0
     var dominant_trait_counts: Dictionary = {}
     for agent in _agents:
         if not is_instance_valid(agent):
@@ -246,7 +261,21 @@ func _run() -> void:
         dominant_trait_counts[dominant] = int(dominant_trait_counts.get(dominant, 0)) + 1
 
         var start: Vector2 = _start_positions.get(agent.get_instance_id(), agent.global_position)
-        if not _lod.is_sleeping(agent):
+        var tier := _lod.tier_for(agent)
+        var resource_mode := _lod.resource_mode_for(agent)
+        if tier == VaultPopulationLOD.TIER_FULL:
+            if resource_mode != VaultPopulationLOD.RESIDENT or agent.skinned_visual == null or agent.collision_rig == null:
+                residency_shape_errors += 1
+        elif tier == VaultPopulationLOD.TIER_REDUCED:
+            if resource_mode != VaultPopulationLOD.PROXY or agent.skinned_visual != null or agent.collision_rig != null or agent.character_texture == null:
+                residency_shape_errors += 1
+            elif agent.character_texture.get_height() > _proxy_max_height:
+                residency_shape_errors += 1
+        elif tier == VaultPopulationLOD.TIER_SLEEP:
+            if resource_mode != VaultPopulationLOD.RELEASED or agent.character_texture != null or agent.skinned_visual != null or agent.collision_rig != null:
+                residency_shape_errors += 1
+
+        if tier != VaultPopulationLOD.TIER_SLEEP:
             awake += 1
             if agent.global_position.distance_to(start) >= 8.0:
                 awake_moved += 1
@@ -258,13 +287,18 @@ func _run() -> void:
 
     var awake_moved_share := float(awake_moved) / float(maxi(awake, 1))
     var renderer_name := RenderingServer.get_video_adapter_name()
-    print("KROLIK_LOD_SCALE agents=%d full=%d reduced=%d sleeping=%d frames=%d seconds=%.4f avg_fps=%.2f awake=%d awake_moved=%d awake_moved_share=%.3f sleep_drift_max=%.3f renderer=%s" % [
+    var static_mib := float(Performance.get_monitor(Performance.MEMORY_STATIC)) / 1048576.0
+    var static_max_mib := float(Performance.get_monitor(Performance.MEMORY_STATIC_MAX)) / 1048576.0
+    print("KROLIK_LOD_SCALE agents=%d full=%d reduced=%d sleeping=%d resident=%d proxy=%d released=%d frames=%d seconds=%.4f avg_fps=%.2f awake=%d awake_moved=%d awake_moved_share=%.3f sleep_drift_max=%.3f static_mib=%.2f static_max_mib=%.2f renderer=%s" % [
         _agent_count, int(tiers.get("full", 0)), int(tiers.get("reduced", 0)), int(tiers.get("sleeping", 0)),
-        _sample_frames, elapsed, fps, awake, awake_moved, awake_moved_share, sleeping_drift_max, renderer_name
+        int(tiers.get("resident", 0)), int(tiers.get("proxy", 0)), int(tiers.get("released", 0)),
+        _sample_frames, elapsed, fps, awake, awake_moved, awake_moved_share, sleeping_drift_max,
+        static_mib, static_max_mib, renderer_name
     ])
-    print("KROLIK_LOD_SCALE_METRIC agents=%d full=%d reduced=%d sleeping=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f awake_moved_share=%.3f sleep_drift_max=%.3f renderer=%s" % [
+    print("KROLIK_LOD_SCALE_METRIC agents=%d full=%d reduced=%d sleeping=%d resident=%d proxy=%d released=%d sample_frames=%d sample_seconds=%.4f sim_fps=%.2f awake_moved_share=%.3f sleep_drift_max=%.3f static_mib=%.2f static_max_mib=%.2f renderer=%s" % [
         _agent_count, int(tiers.get("full", 0)), int(tiers.get("reduced", 0)), int(tiers.get("sleeping", 0)),
-        _sample_frames, elapsed, fps, awake_moved_share, sleeping_drift_max, renderer_name
+        int(tiers.get("resident", 0)), int(tiers.get("proxy", 0)), int(tiers.get("released", 0)),
+        _sample_frames, elapsed, fps, awake_moved_share, sleeping_drift_max, static_mib, static_max_mib, renderer_name
     ])
 
     if int(tiers.get("registered", 0)) != _agent_count:
@@ -273,6 +307,14 @@ func _run() -> void:
         push_error("KROLIK LOD scale: all three tiers must be populated: " + str(tiers)); quit(3); return
     if int(tiers_before.get("sleeping", 0)) <= 0:
         push_error("KROLIK LOD scale: warmup produced no sleeping population"); quit(4); return
+    if int(tiers.get("resident", 0)) != int(tiers.get("full", 0)):
+        push_error("KROLIK LOD scale: full/resident count mismatch: " + str(tiers)); quit(12); return
+    if int(tiers.get("proxy", 0)) != int(tiers.get("reduced", 0)):
+        push_error("KROLIK LOD scale: reduced/proxy count mismatch: " + str(tiers)); quit(13); return
+    if int(tiers.get("released", 0)) != int(tiers.get("sleeping", 0)):
+        push_error("KROLIK LOD scale: sleeping/released count mismatch: " + str(tiers)); quit(14); return
+    if int(tiers.get("legacy", 0)) != 0 or int(tiers.get("residency_failures", 0)) != 0 or residency_shape_errors != 0:
+        push_error("KROLIK LOD scale: residency errors tiers=%s shape_errors=%d" % [str(tiers), residency_shape_errors]); quit(15); return
     if ai_policy_active != _agent_count or personality_active != _agent_count or memory_active != _agent_count:
         push_error("KROLIK LOD scale: semantic state missing policy=%d personality=%d memory=%d" % [ai_policy_active, personality_active, memory_active]); quit(5); return
     if dominant_trait_counts.size() != TRAIT_NAMES.size():
