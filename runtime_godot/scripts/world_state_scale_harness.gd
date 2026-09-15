@@ -142,19 +142,13 @@ func _run() -> void:
         _fail("unexpected initial tier distribution: " + str(lod.tier_snapshot()))
         return
 
-    # LOD reassessment queues visual/collision nodes for deletion. Capture needs
-    # those deferred frees flushed, but it does not need to simulate 500 brains,
-    # animations, navigation agents and collision rigs while waiting for the tree.
-    # Suspend physics only for the flush, then restore the production processing
-    # state before the persistence snapshot is captured.
-    lod.set_physics_process(false)
-    for agent in agents:
-        agent.set_physics_process(false)
-    await process_frame
-    await process_frame
-    for agent in agents:
-        agent.set_physics_process(true)
-    lod.set_physics_process(true)
+    # force_reassess() updates the authoritative LOD/resource state synchronously.
+    # The visual/collision nodes it releases are queued for deferred deletion, but
+    # persistence captures logical agent/LOD state rather than SceneTree lifetime.
+    # Advancing even one process frame on 500 software-rendered agents makes this
+    # headless persistence regression spend tens of seconds doing irrelevant render
+    # work. Keep the test frame-free and destroy the temporary world synchronously
+    # after capture/save so queued descendants are reclaimed without a render tick.
     _stage("simulation_ready")
 
     var persistence := VaultWorldState.new()
@@ -180,9 +174,8 @@ func _run() -> void:
     _stage("saved")
 
     lod.clear(false)
-    world.queue_free()
-    await process_frame
-    await process_frame
+    world.free()
+    agents.clear()
     _stage("destroyed")
 
     var load_start := Time.get_ticks_usec()
@@ -246,8 +239,8 @@ func _run() -> void:
     )
 
     restored_lod.clear(false)
-    restored_world.queue_free()
+    restored_world.free()
+    restored_agents.clear()
     if FileAccess.file_exists(saved_file):
         DirAccess.remove_absolute(saved_file)
-    await process_frame
     quit(0)
