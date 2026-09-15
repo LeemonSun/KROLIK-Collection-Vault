@@ -1,77 +1,201 @@
 # AUTONOMOUS STATE
 
-Last updated: 2026-09-14 23:27 +03:00
+Last updated: 2026-09-15 08:33 +03:00
 
-## Current repository state
+## Current verified engineering baseline
 
-Current verified `main`: `6de69e371b1fa6fba9db372739e484eec279c0f9` (`ci: capture rendered imported-character evidence`).
+Latest verified engineering/code baseline before this state-only update: `27a8f20be7b34a2350a0d686775ccfc44c6549ac` (`docs: close verified A2 DWPose production baseline`).
 
-Stable checkpoint: `checkpoint/stable-import-render-proof-20260914-2327` at `6de69e371b1fa6fba9db372739e484eec279c0f9`.
+A2 implementation itself is already green on its relevant production gates. After this state update lands and ordinary Vault CI remains green, create/preserve stable checkpoint:
 
-Previous coherent import/reopen Windows block at `54cc1c8ff9a0d90365a277481c5961e7119384a9` is also verified: Vault CI and Windows Build both concluded success.
+`checkpoint/stable-a2-production-dwpose-20260915-0833`
 
-No rig/skin/animation/runtime-character/AI-policy schema was changed in this block.
+No rig/skin/animation/runtime-character/AI-policy schema was bumped in A2. The portable KROLIK rig remains the existing 15-joint / 14-bone contract.
 
-## Verified vertical path now available
+## Product path now verified
 
-The source-independent core now proves this continuous path:
+The source-independent product core now proves the continuous path:
 
-ordinary image -> immutable original -> derived cutout -> heuristic/manual-correctable rig -> skin recipe -> runtime package -> durable import/package receipts -> production `VaultCharacterAgent` -> GPU `Skeleton2D/Polygon2D` skin -> animation/IK/physics/AI -> safe reopen validation.
+ordinary image
+-> immutable original
+-> derived/reviewable cutout
+-> real DWPose auto-rig when accepted OR explicit review-required heuristic fallback
+-> optional manual joint corrections
+-> skin recipe
+-> collision proxies
+-> versioned runtime manifest
+-> durable import/runtime-package receipts
+-> safe package reopen validation
+-> production `VaultCharacterAgent`
+-> GPU `Skeleton2D/Polygon2D` skin
+-> authored animation/layers/facial/secondary motion
+-> IK/physics/navigation/AI
+-> rendered deformation evidence.
 
-The Windows one-file headless importer is built and executed in CI, including manual joint correction and durable package reopen validation.
+Windows also builds and executes a one-file `KROLIK_Character_Import.exe`. The packaged executable has been verified both with the deterministic/manual-correction path and with the real DWPose ONNX backend.
 
-## New in this run — rendered imported-character evidence
+## A2 DWPose / RTMPose — CLOSED as verified production baseline
 
-Added `runtime_godot/scripts/imported_character_render_harness.gd` and wired it into Godot Runtime CI.
+Detailed evidence is recorded in `docs/A2_DWPOSE_VALIDATION.md`.
 
-This regression does NOT create a procedural checker texture or synthetic 2-bone rig. Python first imports the ordinary-image fixture through the real `character_import.py` path and writes the same production runtime package used by the headless vertical slice. Godot then loads that exact package through `VaultCharacterAgent`, requires the production GPU skin (no flat fallback), renders the imported character at rest, applies a visible pose through `VaultSkinnedCharacter`, renders again, and requires a material pixel difference.
+### Exact model
 
-PNG evidence is uploaded as `imported-character-render-evidence` (`imported_baseline.png`, `imported_posed.png`).
+- `dw-ll_ucoco_384.onnx`
+- SHA-256 `724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843`
+- exact bytes `134399116`
+- reproducible checksum-pinned bootstrap; model binary is not committed to Git.
 
-Verified metric from Godot Runtime CI run `34892777728`:
+### Real ONNX contract
 
-- character=`ci_core_slice`
-- packaged texture=`256x512`
-- skin vertices=`264`
-- skin bones=`14`
-- rig joints=`15`
-- rig bones=`14`
-- rendered foreground pixels=`41971`
-- changed pixels after pose=`8687`
-- required minimum=`1800`
-- `gpu_skin=true`
-- `evidence=true`
-- renderer=`gl_compatibility`
+Measured with ONNXRuntime:
 
-Artifact ID: `10368100305`.
+- input `['batch', 3, 384, 288]`
+- runtime smoke input `[1, 3, 384, 288]`
+- outputs `[1, 133, 576]` and `[1, 133, 768]`
+- 133 keypoints
+- SimCC split ratio 2.0.
 
-The same run also reconfirmed:
+Production preprocessing now follows upstream DWPose/RTMPose behavior: BGR, bbox center/scale, fixed aspect ratio, 1.25 padding, affine warp and upstream normalization.
 
-- production ordinary-image headless runtime: joints=15, bones=14, weights=14, collisions=14, GPU skin=true, policy=true, state=wander, travel=41.4 px;
-- import QA matrix: 4/4 cases passed, one manually corrected rig, GPU skin/collisions/policy all true;
-- 33-clip motion runtime: 132 samples, 0 validation errors/warnings;
-- layered animation, facial state, secondary motion and IK regressions pass;
-- procedural rendered deformation baseline remains green: 23867 changed pixels total;
-- 220-agent stress: 220/220 active and moved, moved_share=1.000, avg_travel=99.59 px, 44.26 simulated FPS on this runner, max RSS 121304 KiB (~119 MiB), process status 0.
+### Measured human ground-truth accuracy
 
-Vault CI run `34892777545` for the same SHA is green for canonical-source audit, durable import/package reopen smoke and the full core regression suite. Backend/UI remains intentionally skipped because canonical `app.py` is absent.
+COCO/MMPose compact fixture benchmark, run `34895056906`:
 
-## Source reconciliation / blockers
+- 4 people
+- 63 visible evaluated joints
+- 0 failed samples
+- mean normalized error `0.014758`
+- median normalized error `0.010237`
+- mean pixel error `5.809 px`
+- PCK@0.05 `0.968254` (96.8%)
+- PCK@0.10 `1.000000` (100%).
 
-- Canonical graphical `app.py` is still absent from Git. Historical in-repo recovery candidates are not a clean authoritative replacement. Never synthesize/guess the missing source. Reconcile the external `KROLIK_Collection_Vault_FULL_2026-09-13_2158.zip` when it becomes available in this workspace.
-- Backend/UI therefore remains source-blocked and unverified.
-- A2 real DWPose/RTMPose quality is still incomplete. The existing ONNX backend is real, but no validated model artifact + measured accuracy corpus has yet been committed/verified.
-- Final rendered Windows 200–500-agent performance remains unmeasured.
+This is a compact regression baseline, not a universal fantasy/anime accuracy claim.
+
+### Linux/Godot real product integration
+
+DWPose Model Smoke run `34931833809`: success.
+
+The real import/package/Godot path produced:
+
+- backend `dwpose-onnx`
+- rig score 100
+- runtime-ready true
+- joints 15 / bones 14
+- vertices 480 / triangles 870
+- weight sets 14
+- collision proxies 14
+- production Godot texture `563x855`
+- GPU skin true
+- AI policy true
+- mobile state `wander`
+- measured travel `41.4 px`
+- rendered foreground `198410` pixels
+- rendered pose difference `110381` pixels (gate minimum 1800).
+
+Evidence artifact ID `10381279121`, ZIP SHA-256 `9beb29018ea8e59a3221ea13583bec02e93c8fbf895880a94963b6bd4c123c0e`.
+
+### Windows packaged EXE
+
+Windows Build run `34932156436`: success after fixing only the CI PowerShell assertion found by the previous attempt.
+
+Windows Build run `34932467531`: success again after the explicit AI-fallback review metadata was added.
+
+The built `KROLIK_Character_Import.exe` itself:
+
+- loads the checksum-verified ONNX model through `KROLIK_DWPOSE_MODEL`;
+- imports the upstream pose fixture without `--heuristic-rig`;
+- emits `rig.backend=dwpose-onnx`;
+- emits 15 joints / 14 bones;
+- remains runtime-ready;
+- seals and re-validates the durable package receipt.
+
+### Stylized/anime domain coverage and safe fallback
+
+Domain run `34932762783`: success.
+
+Upstream DWPose anime fixtures through the actual product path:
+
+- 4/4 produce runtime-ready packages;
+- 3/4 use real `dwpose-onnx`;
+- DWPose share 75%;
+- unsafe silent fallbacks 0;
+- explicit review fallbacks 1.
+
+`anime1.png` is the known fallback case. Its cutout itself is high-confidence (`0.9729`), but DWPose has only 7/12 core body joints >=0.18 while production acceptance requires 8. KROLIK therefore uses the deterministic silhouette rig and sets `rig_review_required=true` instead of silently presenting it as a confidently accepted AI rig.
+
+Follow-up domain product/Godot run `34932929973`: success after the product-slice builder was aligned with the exact production acceptance rule. It selects a real accepted DWPose anime case, seals the package and loads it through production Godot `VaultCharacterAgent`.
+
+## Existing runtime foundation retained
+
+Previously verified systems remain part of the baseline:
+
+- A1 rendered real `Skeleton2D/Polygon2D` deformation;
+- A3 rig migration discipline;
+- A4 real 220-agent Godot stress on Linux/headless;
+- A5 animation clip validation;
+- data-driven animations/poses/fixtures;
+- 33-clip motion library;
+- angle-limited IK;
+- layered/additive animation;
+- secondary motion;
+- semantic facial/mood controller;
+- D1 generated Python -> Godot AI policy;
+- D2 personality traits with cached hot-path biases;
+- D3 bounded short-term memory;
+- durable source/import/package integrity checks;
+- real-image import QA matrix;
+- manual rig-joint override contract;
+- rendered imported-character evidence;
+- Windows one-file headless importer.
+
+D4/D5 life-sim expansion remains intentionally paused while the product/performance vertical path is strengthened.
+
+## Source reconciliation / hard blocker
+
+Canonical graphical `app.py` is still absent from Git.
+
+Historical Git recovery candidates are not an authoritative clean replacement. The external `KROLIK_Collection_Vault_FULL_2026-09-13_2158.zip` reportedly contains the valid 13 September backend/UI source and must be reconciled if/when it becomes available in this workspace.
+
+Rules remain:
+
+- never synthesize or guess missing `app.py` bytes;
+- core/runtime green CI does not mean graphical backend/UI is verified;
+- backend/UI job remains intentionally skipped while canonical source is absent;
+- full graphical product EXE publication remains blocked.
+
+## Remaining important limitations
+
+- Final rendered Windows 200–500-agent performance is not yet measured.
+- Current 220-agent stress is useful Linux/headless regression evidence, not a Windows rendered performance promise.
+- LOD/sleep/throttle tiers for 200–500 persistent characters are not yet production-complete.
+- Anime/fantasy A2 QA is currently a small regression corpus, not the eventual 100–200-art Phase-F corpus.
 - Busy-background matting remains conservative/review-required rather than destructive.
-- `KROLIK_MASTER_PLAN.md` is absent; `docs/AUTONOMOUS_RUNBOOK.md` is the authoritative roadmap.
+- Multi-person source-image UX is outside the current single-selected-character import contract.
+- Final graphical manual-rig correction UX remains source-blocked with `app.py`.
+- `KROLIK_MASTER_PLAN.md` is absent; `docs/AUTONOMOUS_RUNBOOK.md` remains the roadmap.
 
-## Next highest-priority task
+## Next highest-priority large pass
 
-Keep D4/D5 paused while the end-to-end product path is still being strengthened.
+Keep D4/D5 paused for now.
 
-Next source-independent priority is A2 enablement plus real-asset QA:
+Next source-independent priority is **Phase F / Windows-scale proof**, not more isolated AI features:
 
-1. add a reproducible, checksum-pinned DWPose model bootstrap for `dw-ll_ucoco_384.onnx` without committing the 134 MB binary to Git;
-2. verify the actual model session/input/output contract against `rig_tools.py` and add a real-model smoke path that can be run explicitly/manual CI without slowing every normal push;
-3. build a small measured pose-quality corpus before claiming A2 complete;
-4. continue expanding import/render evidence from deterministic fixtures toward user-provided real art when an appropriate asset is available without committing user art unintentionally.
+1. Add a real Windows Godot performance workflow that measures a rendered production-like population rather than only Linux/headless simulation. Start at 200–220 agents with deterministic workload and record wall time/FPS/RSS; if CI GPU access is unavailable, explicitly record software-render constraints rather than pretending they are target-hardware numbers.
+2. Use measured profiling to implement the first production LOD/sleep/throttle tiers: full near simulation, reduced visible simulation, and far/asleep semantic simulation. Preserve behavior/snapshot compatibility and prove that sleeping agents can wake without state loss.
+3. Re-run scale gates at 220 and then 300+ agents; target 500 only after the workload is honestly defined and lower tiers are stable. Do not add pooling unless profiling shows it helps.
+4. Expand real-art/domain QA incrementally beyond the four upstream anime fixtures, retaining explicit review flags rather than lowering DWPose acceptance to make the percentage look better.
+5. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests, and build the first complete graphical vertical slice.
+
+## Concurrency / writer discipline
+
+There may be multiple normal chat sessions with GitHub access. Automation cannot revoke another chat's connector permission.
+
+For autonomous/hourly work:
+
+- only one scheduled writer should be enabled;
+- always re-read fresh `main` before every write;
+- never force-push over concurrent work;
+- treat 409/conflict as a signal to refetch and merge logically;
+- prefer one large coherent capability block over many checkpoint-marker/micro commits;
+- create real Git checkpoint branches for rollback instead of temporary marker files in the repository.
