@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-"""Rebuild a pinned gold-character image from UTF-8 base64 source parts.
+"""Rebuild a pinned gold-character CI image from verified UTF-8 base64 parts.
 
-The original user PNG hash is preserved in the gold spec. CI stores a visually
-near-identical full-resolution WebP encoding as text parts so GitHub's contents
-API and ordinary clones can carry the regression fixture without Git LFS.
+The exact user PNG remains canonical through its immutable hash/dimensions in
+`qa/gold/gold_elf_v1.json`. CI uses a deterministic reduced WebP derived from
+that source because the pose model itself works at a reduced resolution. Every
+text chunk is length/hash checked before base64 decoding, then the reconstructed
+image is checked again by byte hash, dimensions and codec.
 """
 
 import argparse
@@ -28,13 +30,50 @@ def _load_spec(path: Path) -> dict:
     return doc
 
 
+def _verified_parts(fixture: dict) -> list[Path]:
+    declared = fixture.get("parts", [])
+    if not isinstance(declared, list) or not declared:
+        raise ValueError("gold fixture must declare non-empty fixture.parts")
+
+    paths: list[Path] = []
+    for index, entry in enumerate(declared):
+        if not isinstance(entry, dict):
+            raise ValueError(f"fixture.parts[{index}] must be an object")
+        rel = str(entry.get("path", "")).strip()
+        if not rel:
+            raise ValueError(f"fixture.parts[{index}] path is empty")
+        path = ROOT / rel
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        text = path.read_text(encoding="utf-8").strip()
+        expected_chars = int(entry.get("chars", -1))
+        expected_sha = str(entry.get("sha256", ""))
+        actual_sha = sha256(text.encode("utf-8")).hexdigest()
+        if len(text) != expected_chars:
+            raise ValueError(
+                f"gold fixture part {rel} char-count mismatch: {len(text)} != {expected_chars}"
+            )
+        if actual_sha != expected_sha:
+            raise ValueError(
+                f"gold fixture part {rel} sha256 mismatch: {actual_sha} != {expected_sha}"
+            )
+        paths.append(path)
+
+    glob_text = str(fixture.get("parts_glob", "")).strip()
+    if glob_text:
+        discovered = sorted(ROOT.glob(glob_text))
+        if discovered != paths:
+            raise ValueError(
+                "gold fixture part set differs from declared ordered fixture.parts: "
+                f"declared={len(paths)} discovered={len(discovered)}"
+            )
+    return paths
+
+
 def materialize(spec_path: Path, output: Path) -> dict:
     spec = _load_spec(spec_path)
     fixture = spec["fixture"]
-    glob_text = str(fixture["parts_glob"])
-    parts = sorted(ROOT.glob(glob_text))
-    if not parts:
-        raise FileNotFoundError(f"no gold fixture parts matched {glob_text}")
+    parts = _verified_parts(fixture)
 
     encoded = "".join(path.read_text(encoding="utf-8").strip() for path in parts)
     try:
@@ -74,6 +113,7 @@ def materialize(spec_path: Path, output: Path) -> dict:
         "format": fmt,
         "parts": len(parts),
         "original_sha256": spec["source"]["original_sha256"],
+        "transform": fixture.get("transform", ""),
     }
 
 
