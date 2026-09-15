@@ -12,14 +12,26 @@
     "original_sha256": "1ff8e45735b9876c55160097fce598c6885f92a046493cc7c393207141fb33d5"
   },
   "fixture": {
-    "encoding": "webp-q95-base64-parts",
-    "width": 1122,
-    "height": 1402,
-    "sha256": "98d6101d02ccc42228ac070d6011f4014e25c9680f2d832430fa750f04c4f543",
-    "bytes": 119228,
-    "psnr_vs_original_rgb_db": 46.85,
-    "mean_abs_rgb_error": 0.819,
-    "parts_glob": "qa/gold/gold_elf_v1.parts/part_*.b64"
+    "purpose": "deterministic CI pose-skin-render regression derived from the immutable user reference",
+    "transform": "RGB -> Lanczos 512x640 -> WebP quality 85 method 6",
+    "encoding": "webp-q85-base64-parts",
+    "width": 512,
+    "height": 640,
+    "sha256": "8abacce328dbb69e05756437e98ac72cb39141cae99dc05065c0f01ce5679164",
+    "bytes": 19142,
+    "parts_glob": "qa/gold/gold_elf_v1_ci.parts/part_*.b64",
+    "parts": [
+      {
+        "path": "qa/gold/gold_elf_v1_ci.parts/part_00.b64",
+        "chars": 13000,
+        "sha256": "5df869280ef856c295a90637b50bd15264d875e5d326ccab20cb09d40146aa0c"
+      },
+      {
+        "path": "qa/gold/gold_elf_v1_ci.parts/part_01.b64",
+        "chars": 12524,
+        "sha256": "9bf98815ea44485dc330c9aa3f357b0c0c604068cc2348e8b85ed93caf3efa4e"
+      }
+    ]
   },
   "role": "mandatory-regression-reference",
   "required_pipeline": [
