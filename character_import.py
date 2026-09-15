@@ -29,6 +29,7 @@ try:
 except Exception:  # pragma: no cover
     cv2 = None  # type: ignore
 
+from cutout_matte import finalize_cutout_matte
 from rig_edit import apply_joint_overrides
 from rig_tools import detect_rig
 from runtime_package import build_manifest, write_package
@@ -36,7 +37,7 @@ from runtime_package import build_manifest, write_package
 
 ASSET_IMPORT_SCHEMA = "krolik.asset-import/1"
 ASSET_IMPORT_FORMAT_VERSION = 1
-CUTOUT_ALGORITHM_VERSION = 2
+CUTOUT_ALGORITHM_VERSION = 3
 MAX_IMAGE_PIXELS = 40_000_000
 SUPPORTED_FORMATS = {"PNG", "JPEG", "WEBP", "BMP"}
 CUTOUT_MODES = {"auto", "alpha-only", "opaque"}
@@ -289,23 +290,25 @@ def _center_grabcut_refine(
 def _prepare_cutout(image: Image.Image, mode: str) -> tuple[Image.Image, dict[str, Any]]:
     normalized_mode = _normalize_cutout_mode(mode)
     if _has_meaningful_alpha(image):
-        return image.copy(), {
+        base = image.copy()
+        info = {
             "method": "embedded-alpha",
             "confidence": 1.0,
             "review_required": False,
             "foreground_share": round(_alpha_coverage(image), 6),
             "warnings": [],
         }
+        return finalize_cutout_matte(base, info)
     if normalized_mode == "auto":
         initial, initial_info = _uniform_border_cutout(image)
-        if not bool(initial_info.get("review_required")):
-            return initial, initial_info
-        refined = _center_grabcut_refine(image, initial)
-        if refined is not None:
-            refined_image, refined_info = refined
-            if float(refined_info.get("confidence", 0.0)) > float(initial_info.get("confidence", 0.0)):
-                return refined_image, refined_info
-        return initial, initial_info
+        selected_image, selected_info = initial, initial_info
+        if bool(initial_info.get("review_required")):
+            refined = _center_grabcut_refine(image, initial)
+            if refined is not None:
+                refined_image, refined_info = refined
+                if float(refined_info.get("confidence", 0.0)) > float(initial_info.get("confidence", 0.0)):
+                    selected_image, selected_info = refined_image, refined_info
+        return finalize_cutout_matte(selected_image, selected_info)
 
     opaque = image.copy()
     opaque.putalpha(255)
@@ -315,8 +318,14 @@ def _prepare_cutout(image: Image.Image, mode: str) -> tuple[Image.Image, dict[st
         "review_required": True,
         "foreground_share": 1.0,
         "warnings": ["source_has_no_embedded_alpha"],
+        "matte_quality_version": 3,
+        "edge_cleanup_applied": False,
+        "edge_pixels": 0,
+        "edge_halo_score_before": 0.0,
+        "edge_halo_score_after": 0.0,
+        "matte_quality": 1.0,
+        "transparent_padding_pixels": 0,
     }
-
 
 def prepare_character_asset(
     project_root: str | Path,
@@ -419,6 +428,19 @@ def prepare_character_asset(
         "review_required": bool(cutout_info["review_required"]),
         "alpha_coverage": round(_alpha_coverage(cutout), 6),
         "warnings": list(cutout_info.get("warnings", [])),
+        "matte_quality_version": int(cutout_info.get("matte_quality_version", 0)),
+        "alpha_boundary_refined": bool(cutout_info.get("alpha_boundary_refined", False)),
+        "alpha_trimmed_pixels": int(cutout_info.get("alpha_trimmed_pixels", 0)),
+        "alpha_coverage_before": float(cutout_info.get("alpha_coverage_before", 0.0)),
+        "alpha_coverage_after": float(cutout_info.get("alpha_coverage_after", 0.0)),
+        "fringe_width_before": dict(cutout_info.get("fringe_width_before", {})) if isinstance(cutout_info.get("fringe_width_before", {}), dict) else {},
+        "fringe_width_after": dict(cutout_info.get("fringe_width_after", {})) if isinstance(cutout_info.get("fringe_width_after", {}), dict) else {},
+        "edge_cleanup_applied": bool(cutout_info.get("edge_cleanup_applied", False)),
+        "edge_pixels": int(cutout_info.get("edge_pixels", 0)),
+        "edge_halo_score_before": float(cutout_info.get("edge_halo_score_before", 0.0)),
+        "edge_halo_score_after": float(cutout_info.get("edge_halo_score_after", 0.0)),
+        "matte_quality": float(cutout_info.get("matte_quality", 0.0)),
+        "transparent_padding_pixels": int(cutout_info.get("transparent_padding_pixels", 0)),
     }
 
 
