@@ -110,10 +110,22 @@ jobs:
               raise SystemExit(
                   f'package cache regression: parses={cache_parses} decodes={cache_decodes} hits={cache_hits}'
               )
-          if save_bytes > 16 * 1024 * 1024:
-              raise SystemExit(f'world save too large: {save_bytes} bytes')
-          if spawn_ms > 60000 or capture_ms > 60000 or save_ms > 60000 or load_ms > 60000 or restore_ms > 120000:
-              raise SystemExit('world-state phase exceeded first-pass performance ceiling')
+          # Measured reference on hosted Ubuntu (2026-09-15):
+          # spawn 1.54s, capture 0.37s, save 0.053s, load 0.023s,
+          # restore 1.63s, file 0.784 MiB. Keep generous multi-x headroom
+          # so the gate catches architectural regressions instead of runner noise.
+          if save_bytes > 2 * 1024 * 1024:
+              raise SystemExit(f'500-character world save too large: {save_bytes} bytes')
+          if spawn_ms > 10000:
+              raise SystemExit(f'500-character spawn regression: {spawn_ms:.2f} ms')
+          if capture_ms > 5000:
+              raise SystemExit(f'500-character capture regression: {capture_ms:.2f} ms')
+          if save_ms > 2000:
+              raise SystemExit(f'500-character save regression: {save_ms:.2f} ms')
+          if load_ms > 2000:
+              raise SystemExit(f'500-character load regression: {load_ms:.2f} ms')
+          if restore_ms > 10000:
+              raise SystemExit(f'500-character restore regression: {restore_ms:.2f} ms')
           PY
       - name: Cleanup generated runtime package
         if: always()
