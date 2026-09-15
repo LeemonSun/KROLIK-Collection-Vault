@@ -132,7 +132,7 @@ jobs:
               $resPaths += ('res://' + $relative)
             }
             $joined = $resPaths -join ';'
-            if ($joined.Length -gt 30000) { throw "manifest environment payload too large at $count: $($joined.Length)" }
+            if ($joined.Length -gt 30000) { throw "manifest environment payload too large at ${count}: $($joined.Length)" }
 
             $env:KROLIK_MULTI_ART_AGENTS = '500'
             $env:KROLIK_MULTI_ART_WARMUP_FRAMES = '15'
