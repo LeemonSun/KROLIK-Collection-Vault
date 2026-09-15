@@ -19,22 +19,12 @@ def build_dwpose_vertical_slice(source: Path, output_root: Path) -> dict[str, ob
     output_root.mkdir(parents=True, exist_ok=True)
     source = source.resolve()
 
-    diagnostics = dwpose_diagnostics(source)
-    if diagnostics.get("status") != "ok" or not bool(diagnostics.get("mapped")):
-        raise RuntimeError(f"DWPose diagnostics did not map the source image: {diagnostics}")
-    core_scores = [float(value) for value in diagnostics.get("core_scores", [])]
-    if len(core_scores) != 12:
-        raise RuntimeError(f"DWPose diagnostics missing core scores: {diagnostics}")
-    confidence = sum(core_scores) / len(core_scores)
-    if confidence < 0.30:
-        raise RuntimeError(f"DWPose confidence is unexpectedly low: {confidence:.6f}")
-
     result = build_character_runtime_package(
         output_root,
         source,
         CHARACTER_ID,
         name="CI DWPose Product Slice",
-        cutout_mode="opaque",
+        cutout_mode="auto",
         prefer_ai_rig=True,
         cell_id="ci-room",
     )
@@ -50,13 +40,24 @@ def build_dwpose_vertical_slice(source: Path, output_root: Path) -> dict[str, ob
     if int(result.get("bone_weights") or 0) != 14 or int(result.get("collision_proxies") or 0) != 14:
         raise RuntimeError(f"DWPose package skin/physics incomplete: {result}")
 
+    diagnostics = dwpose_diagnostics(Path(str(result["cutout"])))
+    if diagnostics.get("status") != "ok" or not bool(diagnostics.get("mapped")):
+        raise RuntimeError(f"DWPose diagnostics no longer map the exact production cutout: {diagnostics}")
+    core_scores = [float(value) for value in diagnostics.get("core_scores", [])]
+    if len(core_scores) != 12:
+        raise RuntimeError(f"DWPose diagnostics missing core scores: {diagnostics}")
+    core_above = int(diagnostics.get("core_above_018") or 0)
+    if core_above < 8:
+        raise RuntimeError(f"DWPose product cutout violates production acceptance: core_above_018={core_above}")
+    confidence = sum(core_scores) / len(core_scores)
+
     validate_built_import(result)
     sealed = seal_built_runtime_package(result)
     receipt = Path(str(sealed["package_receipt"]))
     validate_runtime_package_receipt(receipt)
     result["package_receipt"] = str(receipt)
     result["pose_confidence"] = round(confidence, 6)
-    result["core_above_018"] = int(diagnostics.get("core_above_018") or 0)
+    result["core_above_018"] = core_above
 
     manifest = json.loads(Path(str(result["manifest"])).read_text(encoding="utf-8"))
     if manifest.get("rig", {}).get("backend") != "dwpose-onnx":
