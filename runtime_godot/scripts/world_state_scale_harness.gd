@@ -142,9 +142,11 @@ func _run() -> void:
         _fail("unexpected initial tier distribution: " + str(lod.tier_snapshot()))
         return
 
-    for _frame in range(12):
-        await physics_frame
-    _stage("simulation_ready")
+    # H1 owns semantic sleep/wake continuity. This harness measures persistence
+    # scale only, so do not spend minutes simulating hundreds of runtime agents
+    # before timing capture/save/load/restore.
+    await process_frame
+    _stage("population_ready")
 
     var persistence := VaultWorldState.new()
     var capture_start := Time.get_ticks_usec()
