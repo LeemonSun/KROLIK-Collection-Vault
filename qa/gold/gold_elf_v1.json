@@ -1,0 +1,44 @@
+{
+  "schema": "krolik.gold-character/1",
+  "format_version": 1,
+  "id": "gold-elf-v1",
+  "label": "User gold elf regression character",
+  "source": {
+    "kind": "user-provided-reference",
+    "original_format": "PNG",
+    "original_width": 1122,
+    "original_height": 1402,
+    "original_bytes": 2337182,
+    "original_sha256": "1ff8e45735b9876c55160097fce598c6885f92a046493cc7c393207141fb33d5"
+  },
+  "fixture": {
+    "encoding": "webp-q95-base64-parts",
+    "width": 1122,
+    "height": 1402,
+    "sha256": "98d6101d02ccc42228ac070d6011f4014e25c9680f2d832430fa750f04c4f543",
+    "bytes": 119228,
+    "psnr_vs_original_rgb_db": 46.85,
+    "mean_abs_rgb_error": 0.819,
+    "parts_glob": "qa/gold/gold_elf_v1.parts/part_*.b64"
+  },
+  "role": "mandatory-regression-reference",
+  "required_pipeline": [
+    "decode-fixture",
+    "asset-import",
+    "cutout",
+    "dwpose-auto-rig",
+    "15-joint-14-bone-contract",
+    "gpu-skin-package",
+    "collision-proxies",
+    "godot-load",
+    "godot-render",
+    "rendered-deformation",
+    "animation-runtime",
+    "emotion-runtime",
+    "world-save-reload"
+  ],
+  "baseline": {
+    "status": "probe-required",
+    "note": "Populate only from the first real DWPose + Godot run; never invent expected joint coordinates."
+  }
+}
