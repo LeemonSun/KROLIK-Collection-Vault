@@ -31,6 +31,29 @@ const LONG_TERM_FALLBACK := {
     "favorite_home_return_bonus": 0.16,
 }
 
+const EMOTION_FALLBACK := {
+    "channels": ["fear", "anger", "sadness", "joy", "trust", "shame", "hope", "frustration", "relief", "curiosity"],
+    "response_per_second": 3.2,
+    "max_dt": 10.0,
+    "constraint_profiles": {
+        "none": {"loss_of_control": 0.0, "discomfort": 0.0, "social_exposure": 0.0, "immobility": 0.0},
+        "generic": {"loss_of_control": 0.50, "discomfort": 0.30, "social_exposure": 0.20, "immobility": 0.45},
+        "contained": {"loss_of_control": 0.58, "discomfort": 0.24, "social_exposure": 0.16, "immobility": 0.62},
+        "shackles": {"loss_of_control": 0.68, "discomfort": 0.34, "social_exposure": 0.24, "immobility": 0.60},
+        "ankle_shackles": {"loss_of_control": 0.58, "discomfort": 0.30, "social_exposure": 0.20, "immobility": 0.52},
+        "cuffs": {"loss_of_control": 0.62, "discomfort": 0.30, "social_exposure": 0.24, "immobility": 0.48},
+        "tether": {"loss_of_control": 0.55, "discomfort": 0.22, "social_exposure": 0.24, "immobility": 0.42},
+        "rope": {"loss_of_control": 0.66, "discomfort": 0.38, "social_exposure": 0.28, "immobility": 0.66},
+        "harness": {"loss_of_control": 0.70, "discomfort": 0.35, "social_exposure": 0.30, "immobility": 0.68},
+        "restraint_stool": {"loss_of_control": 0.72, "discomfort": 0.40, "social_exposure": 0.42, "immobility": 0.82},
+        "restraint_chair": {"loss_of_control": 0.82, "discomfort": 0.44, "social_exposure": 0.38, "immobility": 0.90},
+        "stocks": {"loss_of_control": 0.90, "discomfort": 0.48, "social_exposure": 0.62, "immobility": 0.94},
+        "cage": {"loss_of_control": 0.72, "discomfort": 0.28, "social_exposure": 0.34, "immobility": 0.76},
+        "wall_anchor": {"loss_of_control": 0.88, "discomfort": 0.46, "social_exposure": 0.45, "immobility": 0.92},
+    },
+    "facial_moods": ["calm", "tired", "uneasy", "alert", "seeking_company", "terrified", "afraid", "furious", "angry", "sad", "ashamed", "frustrated", "hopeful", "relieved", "happy", "content", "curious", "lonely", "anxious", "determined", "defiant", "resigned"],
+}
+
 static var _default_policy_cache: Dictionary = {}
 static var _default_policy_checked := false
 
@@ -55,6 +78,7 @@ var mood := "calm"
 var last_utility: Dictionary = {}
 var memory: Array = []
 var long_term_memory: Dictionary = {"relationships": [], "places": [], "favorite_place": ""}
+var emotion: Dictionary = {"fear": 0.0, "anger": 0.0, "sadness": 0.0, "joy": 0.0, "trust": 0.0, "shame": 0.0, "hope": 0.0, "frustration": 0.0, "relief": 0.0, "curiosity": 0.0, "mood": "calm", "facial_mood": "calm", "intensity": 0.0, "valence": 0.0, "arousal": 0.0, "dominance": 0.5}
 
 var policy_loaded := false
 var policy_source := "fallback"
@@ -763,6 +787,159 @@ func _long_term_bias(context: Dictionary) -> Dictionary:
     return out
 
 
+func _emotion_config() -> Dictionary:
+    var out := EMOTION_FALLBACK.duplicate(true)
+    var configured := _section("emotion_model")
+    for key in configured.keys():
+        out[key] = configured[key]
+    return out
+
+func _neutral_emotion() -> Dictionary:
+    return {
+        "fear": 0.0, "anger": 0.0, "sadness": 0.0, "joy": 0.0, "trust": 0.0,
+        "shame": 0.0, "hope": 0.0, "frustration": 0.0, "relief": 0.0, "curiosity": 0.0,
+        "mood": "calm", "facial_mood": "calm", "intensity": 0.0,
+        "valence": 0.0, "arousal": 0.0, "dominance": 0.5,
+    }
+
+func _normalize_emotion(raw_value: Variant) -> Dictionary:
+    var out := _neutral_emotion()
+    if typeof(raw_value) != TYPE_DICTIONARY:
+        return out
+    var raw: Dictionary = raw_value
+    var channels = _emotion_config().get("channels", EMOTION_FALLBACK["channels"])
+    if typeof(channels) != TYPE_ARRAY:
+        channels = EMOTION_FALLBACK["channels"]
+    for raw_name in channels:
+        var name := str(raw_name)
+        out[name] = clampf(float(raw.get(name, 0.0)), 0.0, 1.0)
+    var raw_mood := str(raw.get("mood", "calm"))
+    var raw_face := str(raw.get("facial_mood", raw_mood))
+    var allowed = _emotion_config().get("facial_moods", EMOTION_FALLBACK["facial_moods"])
+    out["mood"] = raw_mood
+    out["facial_mood"] = raw_face if typeof(allowed) == TYPE_ARRAY and raw_face in allowed else "calm"
+    out["intensity"] = clampf(float(raw.get("intensity", 0.0)), 0.0, 1.0)
+    out["valence"] = clampf(float(raw.get("valence", 0.0)), -1.0, 1.0)
+    out["arousal"] = clampf(float(raw.get("arousal", 0.0)), 0.0, 1.0)
+    out["dominance"] = clampf(float(raw.get("dominance", 0.5)), 0.0, 1.0)
+    return out
+
+func _constraint_kind(context: Dictionary) -> String:
+    var raw := str(context.get("constraint_kind", context.get("fixture_kind", context.get("interaction_mode", "")))).to_lower()
+    if "ankle" in raw and "shackle" in raw: return "ankle_shackles"
+    if "shackle" in raw: return "shackles"
+    if "cuff" in raw: return "cuffs"
+    if "stool" in raw: return "restraint_stool"
+    if "chair" in raw: return "restraint_chair"
+    if "stock" in raw: return "stocks"
+    if "cage" in raw: return "cage"
+    if "wall" in raw and "anchor" in raw: return "wall_anchor"
+    if "harness" in raw: return "harness"
+    if "rope" in raw: return "rope"
+    if "tether" in raw or "chain" in raw: return "tether"
+    var profiles = _emotion_config().get("constraint_profiles", {})
+    if typeof(profiles) == TYPE_DICTIONARY and profiles.has(raw): return raw
+    if raw in ["bound", "anchored", "restrained", "contained"]: return "contained"
+    return "generic" if not raw.is_empty() else "none"
+
+func _trait_value(name: String) -> float:
+    return clampf(float(traits.get(name, 0.5)), 0.0, 1.0)
+
+func _step_emotion(context: Dictionary, delta: float) -> void:
+    var config := _emotion_config()
+    var current := _normalize_emotion(emotion)
+    var boldness := _trait_value("boldness")
+    var resilience := _trait_value("resilience")
+    var patience := _trait_value("patience")
+    var sociability := _trait_value("sociability")
+    var curiosity_trait := _trait_value("curiosity")
+    var bound := _is_bound(context)
+    var kind := _constraint_kind(context)
+    var profiles = config.get("constraint_profiles", EMOTION_FALLBACK["constraint_profiles"])
+    var raw_profile: Dictionary = EMOTION_FALLBACK["constraint_profiles"]["generic"]
+    if typeof(profiles) == TYPE_DICTIONARY:
+        raw_profile = profiles.get(kind, raw_profile)
+    var severity := clampf(float(context.get("constraint_severity", 1.0 if bound else 0.0)), 0.0, 1.0)
+    var loss := clampf(float(raw_profile.get("loss_of_control", 0.5)) * severity, 0.0, 1.0)
+    var discomfort := clampf(float(raw_profile.get("discomfort", 0.3)) * severity + clampf(float(context.get("discomfort", 0.0)), 0.0, 1.0) * 0.5, 0.0, 1.0)
+    var exposure := clampf(float(raw_profile.get("social_exposure", 0.2)) * severity, 0.0, 1.0)
+    var immobility := clampf(float(raw_profile.get("immobility", 0.45)) * severity, 0.0, 1.0)
+    var threat := clampf(maxf(float(context.get("threat", 0.0)), float(context.get("danger", 0.0))), 0.0, 1.0)
+    var pain := clampf(float(context.get("pain", 0.0)), 0.0, 1.0)
+    var novelty := clampf(float(context.get("constraint_novelty", 0.55 if bound else 0.0)), 0.0, 1.0)
+    var witnesses := clampf(maxf(0.0, float(context.get("witnesses", 0.0))) / 4.0, 0.0, 1.0)
+    var social_outcome := clampf(float(context.get("social_success", 0.0)), -1.0, 1.0)
+    var social_affinity := clampf(float(context.get("social_affinity", 0.0)), -1.0, 1.0)
+    var familiarity := clampf(float(context.get("social_familiarity", 0.0)), 0.0, 1.0)
+    var positive_social := maxf(0.0, social_outcome * 0.75 + social_affinity * 0.25)
+    var negative_social := maxf(0.0, -social_outcome * 0.70 + -minf(0.0, social_affinity) * 0.30)
+    var released := bool(context.get("released", false))
+    var safe := bool(context.get("safe", false))
+    var targets := {
+        "fear": clampf(threat * (0.68 + (1.0 - boldness) * 0.18) + loss * (0.42 - boldness * 0.16) + novelty * 0.14 - resilience * 0.16, 0.0, 1.0),
+        "anger": clampf(loss * (0.18 + boldness * 0.44) + pain * 0.24 + negative_social * 0.35 + threat * boldness * 0.12 - patience * 0.12, 0.0, 1.0),
+        "sadness": clampf(loss * 0.16 + (1.0 - comfort) * 0.24 + negative_social * 0.26 - resilience * 0.18, 0.0, 1.0),
+        "frustration": clampf(loss * (0.30 + (1.0 - patience) * 0.28) + discomfort * 0.34 + immobility * 0.16, 0.0, 1.0),
+        "shame": clampf((exposure + witnesses * 0.35) * (0.34 + (1.0 - boldness) * 0.26) + negative_social * 0.12, 0.0, 1.0),
+        "joy": clampf(positive_social * (0.42 + sociability * 0.30) + (0.16 if safe else 0.0), 0.0, 1.0),
+        "trust": clampf(positive_social * (0.34 + sociability * 0.30) + familiarity * maxf(0.0, social_affinity) * 0.30, 0.0, 1.0),
+        "hope": clampf((0.54 if released else 0.0) + (0.18 if safe else 0.0) + positive_social * 0.20 - threat * 0.12, 0.0, 1.0),
+        "relief": 0.0,
+        "curiosity": clampf(novelty * (0.18 + curiosity_trait * 0.62) * (1.0 - threat * 0.55) + maxf(0.0, curiosity - 0.65) * 0.28, 0.0, 1.0),
+    }
+    var prior_distress := maxf(float(current.get("fear", 0.0)), maxf(float(current.get("frustration", 0.0)), float(current.get("sadness", 0.0))))
+    targets["relief"] = clampf((0.72 if released else 0.0) * maxf(0.35, prior_distress) + (0.14 if safe else 0.0), 0.0, 1.0)
+    if state == "contained": targets["frustration"] = clampf(float(targets["frustration"]) + 0.10 * (1.0 - patience), 0.0, 1.0)
+    if energy < 0.22: targets["sadness"] = clampf(float(targets["sadness"]) + (0.22 - energy) * 0.7, 0.0, 1.0)
+    if social > 0.82 and positive_social <= 0.0: targets["sadness"] = clampf(float(targets["sadness"]) + (social - 0.82) * 0.8, 0.0, 1.0)
+    var safe_delta := clampf(delta, 0.0, float(config.get("max_dt", 10.0)))
+    var alpha := 1.0 if safe_delta <= 0.0 else 1.0 - exp(-float(config.get("response_per_second", 3.2)) * safe_delta)
+    var channels = config.get("channels", EMOTION_FALLBACK["channels"])
+    if typeof(channels) != TYPE_ARRAY: channels = EMOTION_FALLBACK["channels"]
+    var next := _neutral_emotion()
+    var strongest := "fear"
+    var intensity := -1.0
+    for raw_name in channels:
+        var name := str(raw_name)
+        var value := clampf(float(current.get(name, 0.0)) + (float(targets.get(name, 0.0)) - float(current.get(name, 0.0))) * alpha, 0.0, 1.0)
+        next[name] = value
+        if value > intensity:
+            strongest = name
+            intensity = value
+    var next_mood := "calm"
+    if float(next["fear"]) >= 0.72: next_mood = "terrified"
+    elif strongest == "fear" and intensity >= 0.28: next_mood = "afraid"
+    elif float(next["anger"]) >= 0.72: next_mood = "furious"
+    elif strongest == "anger" and intensity >= 0.28: next_mood = "angry"
+    elif strongest == "shame" and intensity >= 0.28: next_mood = "ashamed"
+    elif strongest == "frustration" and intensity >= 0.28: next_mood = "frustrated"
+    elif strongest == "sadness" and intensity >= 0.28: next_mood = "sad"
+    elif strongest == "relief" and intensity >= 0.24: next_mood = "relieved"
+    elif strongest == "joy" and intensity >= 0.25: next_mood = "happy"
+    elif strongest == "hope" and intensity >= 0.24: next_mood = "hopeful"
+    elif strongest == "curiosity" and intensity >= 0.30: next_mood = "curious"
+    elif strongest == "trust" and intensity >= 0.30: next_mood = "content"
+    elif state == "rest" or energy < 0.22: next_mood = "tired"
+    elif comfort < 0.28: next_mood = "uneasy"
+    elif social > 0.82: next_mood = "lonely"
+    elif curiosity > 0.78: next_mood = "alert"
+    var positive := float(next["joy"]) + float(next["trust"]) + float(next["hope"]) + float(next["relief"])
+    var negative := float(next["fear"]) + float(next["anger"]) + float(next["sadness"]) + float(next["shame"]) + float(next["frustration"])
+    next["mood"] = next_mood
+    next["facial_mood"] = next_mood
+    next["intensity"] = clampf(intensity, 0.0, 1.0)
+    next["valence"] = clampf((positive - negative) / 2.5, -1.0, 1.0)
+    next["arousal"] = clampf(maxf(float(next["fear"]), maxf(float(next["anger"]), maxf(float(next["frustration"]), maxf(float(next["joy"]) * 0.7, float(next["curiosity"]) * 0.6)))), 0.0, 1.0)
+    next["dominance"] = clampf(0.25 + autonomy * 0.35 + boldness * 0.28 - loss * 0.48 - float(next["fear"]) * 0.18 + float(next["anger"]) * 0.12, 0.0, 1.0)
+    emotion = next
+
+func affect_snapshot() -> Dictionary:
+    var out := _normalize_emotion(emotion)
+    out["energy"] = energy
+    out["comfort"] = comfort
+    out["focus"] = maxf(curiosity, social)
+    return out
+
 func _apply_policy_defaults() -> void:
     var defaults: Dictionary = _policy.get("defaults", {})
     var p: Dictionary = defaults.get("profile", {})
@@ -809,6 +986,7 @@ func apply_snapshot(data: Dictionary) -> void:
     social = clampf(float(n.get("social", social)), 0.0, 1.0)
     memory = _normalize_memory(data.get("memory", []))
     long_term_memory = _normalize_long_term_memory(data.get("long_term_memory", {}))
+    emotion = _normalize_emotion(data.get("affect", {}))
     _memory_elapsed = 0.0
     _rebuild_memory_cache()
     _update_mood()
@@ -910,7 +1088,8 @@ func step(delta: float, context_value: Variant = {}) -> String:
             _apply_rate(selected, minute)
         _: _apply_rate(_subsection("need_rates_per_minute", "idle"), minute)
     state = choose_state(context)
-    _update_mood()
+    _step_emotion(context, clamped_delta)
+    mood = str(emotion.get("mood", mood))
     return state
 
 func _update_mood() -> void:
@@ -933,6 +1112,6 @@ func snapshot() -> Dictionary:
         "needs": {"energy": energy, "comfort": comfort, "curiosity": curiosity, "social": social},
         "memory": memory_snapshot(),
         "long_term_memory": long_term_snapshot(),
-        "affect": {"mood": mood},
+        "affect": affect_snapshot(),
         "utility": last_utility.duplicate(true),
     }

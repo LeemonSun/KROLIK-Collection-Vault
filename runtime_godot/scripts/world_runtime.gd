@@ -7,6 +7,7 @@ var world_scale := 0.34
 var world_origin := Vector2(90, 80)
 var loaded_world_path := ""
 var navigation_region: NavigationRegion2D
+var social_encounters := VaultSocialEncounterManager.new()
 
 func _ready() -> void:
     var user_args := OS.get_cmdline_user_args()
@@ -141,7 +142,12 @@ func _spawn_snapshot_character(data: Dictionary, runtime_root: String) -> void:
     if FileAccess.file_exists(manifest_path):
         agent.load_runtime_manifest(manifest_path)
     var placement: Dictionary = data.get("placement", {})
-    var runtime_interaction: Dictionary = data.get("runtime_interaction", {})
+    var runtime_interaction: Dictionary = data.get("runtime_interaction", {}).duplicate(true)
+    var placement_interaction: Dictionary = placement.get("interaction", {})
+    if not runtime_interaction.has("interaction_mode"):
+        runtime_interaction["interaction_mode"] = str(placement_interaction.get("mode", ""))
+    if not runtime_interaction.has("constraint_kind"):
+        runtime_interaction["constraint_kind"] = str(placement_interaction.get("fixture_type", current_cell.get("fixture_type", runtime_interaction.get("interaction_mode", ""))))
     agent.apply_runtime_interaction(runtime_interaction)
     if runtime_interaction.is_empty():
         agent.contained = str(placement.get("interaction", {}).get("mode", "")) in ["bound", "contained", "anchored", "restrained"]
@@ -166,7 +172,8 @@ func spawn_from_manifest(manifest_path: String, spawn: Vector2) -> VaultCharacte
     agents.append(agent)
     return agent
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+    social_encounters.step(delta, agents)
     queue_redraw()
 
 func _draw() -> void:

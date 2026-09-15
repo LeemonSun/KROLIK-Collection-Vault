@@ -2,6 +2,7 @@ from life_sim import (
     activity_scores,
     choose_state,
     long_term_utility_bias,
+    normalize_emotion_state,
     memory_utility_bias,
     merged_needs,
     merged_profile,
@@ -11,6 +12,7 @@ from life_sim import (
     remember_event,
     remember_place_visit,
     step_long_term_memory,
+    step_emotion,
     step_memory,
     step_mind,
 )
@@ -237,3 +239,58 @@ def test_step_mind_roundtrips_long_term_memory_without_breaking_legacy_calls():
     assert result["long_term_memory"]["relationships"][0]["hours_since_contact"] > 0.0
     legacy = step_mind(None, None, 1.0)
     assert legacy["long_term_memory"] == {"relationships": [], "places": [], "favorite_place": ""}
+
+
+
+def test_constraint_emotions_depend_on_personality_and_constraint_profile():
+    needs = merged_needs({"energy": .8, "comfort": .7, "curiosity": .4, "social": .4})
+    context = {
+        "bound": True,
+        "interaction_mode": "restrained",
+        "constraint_kind": "shackles",
+        "constraint_severity": .95,
+        "constraint_novelty": .8,
+        "threat": .72,
+        "witnesses": 3,
+    }
+    timid = merged_profile({"traits": {"boldness": .05, "resilience": .1, "patience": .4}})
+    defiant = merged_profile({"traits": {"boldness": .95, "resilience": .95, "patience": .2}})
+    timid_affect = step_emotion(timid, needs, "contained", context, None, 1.0)
+    defiant_affect = step_emotion(defiant, needs, "contained", context, None, 1.0)
+    assert timid_affect["fear"] > defiant_affect["fear"]
+    assert defiant_affect["anger"] > timid_affect["anger"]
+    assert timid_affect["mood"] in {"terrified", "afraid", "frustrated", "ashamed"}
+    assert defiant_affect["mood"] in {"furious", "angry", "frustrated", "afraid"}
+
+
+def test_constraint_profiles_have_distinct_emotional_load_and_release_creates_relief():
+    profile = merged_profile({"traits": {"boldness": .5, "resilience": .5, "patience": .5}})
+    needs = merged_needs(None)
+    stool = step_emotion(profile, needs, "contained", {
+        "bound": True, "constraint_kind": "restraint_stool", "constraint_severity": .7,
+    }, None, 1.0)
+    stocks = step_emotion(profile, needs, "contained", {
+        "bound": True, "constraint_kind": "stocks", "constraint_severity": .9, "witnesses": 4,
+    }, None, 1.0)
+    assert stocks["frustration"] > stool["frustration"]
+    assert stocks["shame"] > stool["shame"]
+    released = step_emotion(profile, needs, "idle", {"released": True, "safe": True}, stocks, 0.5)
+    assert released["relief"] > .3
+    assert released["valence"] > stocks["valence"]
+
+
+def test_social_outcomes_feed_joy_trust_anger_and_persist_through_step_mind_affect():
+    profile = merged_profile({"traits": {"sociability": .9, "boldness": .6}})
+    needs = merged_needs({"social": .8})
+    positive = step_emotion(profile, needs, "social", {
+        "social_success": .9, "social_affinity": .8, "social_familiarity": .8,
+    }, None, 1.0)
+    negative = step_emotion(profile, needs, "social", {
+        "social_success": -.9, "social_affinity": -.7, "social_familiarity": .5,
+    }, None, 1.0)
+    assert positive["joy"] > negative["joy"]
+    assert positive["trust"] > negative["trust"]
+    assert negative["anger"] > positive["anger"]
+    result = step_mind(profile, needs, 1.0, {"social_targets": 1, "social_success": .9}, [], {}, positive)
+    assert set(normalize_emotion_state(result["affect"])) >= {"fear", "anger", "joy", "trust", "mood"}
+    assert result["affect"]["facial_mood"]

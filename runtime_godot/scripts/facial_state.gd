@@ -61,6 +61,36 @@ func _preset(name: String):
             return {"eye_open": 0.74, "brow": -0.48, "mouth_curve": -0.28, "mouth_open": 0.02, "head_x": 0.0, "head_y": -0.004}
         "afraid":
             return {"eye_open": 1.0, "brow": 0.50, "mouth_curve": -0.25, "mouth_open": 0.18, "head_x": 0.0, "head_y": -0.008}
+        "uneasy":
+            return {"eye_open": 0.88, "brow": 0.20, "mouth_curve": -0.18, "mouth_open": 0.03, "head_x": 0.002, "head_y": 0.006}
+        "seeking_company":
+            return {"eye_open": 0.94, "brow": 0.12, "mouth_curve": 0.10, "mouth_open": 0.02, "head_x": 0.0, "head_y": -0.002}
+        "terrified":
+            return {"eye_open": 1.0, "brow": 0.72, "mouth_curve": -0.40, "mouth_open": 0.34, "head_x": 0.0, "head_y": -0.014}
+        "furious":
+            return {"eye_open": 0.70, "brow": -0.72, "mouth_curve": -0.48, "mouth_open": 0.12, "head_x": 0.0, "head_y": -0.008}
+        "ashamed":
+            return {"eye_open": 0.68, "brow": -0.08, "mouth_curve": -0.22, "mouth_open": 0.01, "head_x": -0.008, "head_y": 0.016}
+        "frustrated":
+            return {"eye_open": 0.80, "brow": -0.40, "mouth_curve": -0.24, "mouth_open": 0.05, "head_x": 0.005, "head_y": -0.002}
+        "hopeful":
+            return {"eye_open": 0.96, "brow": 0.20, "mouth_curve": 0.22, "mouth_open": 0.02, "head_x": 0.0, "head_y": -0.006}
+        "relieved":
+            return {"eye_open": 0.72, "brow": 0.05, "mouth_curve": 0.24, "mouth_open": 0.03, "head_x": 0.0, "head_y": 0.008}
+        "content":
+            return {"eye_open": 0.82, "brow": 0.04, "mouth_curve": 0.30, "mouth_open": 0.0, "head_x": 0.0, "head_y": 0.004}
+        "curious":
+            return {"eye_open": 0.98, "brow": 0.28, "mouth_curve": 0.04, "mouth_open": 0.02, "head_x": 0.008, "head_y": -0.006}
+        "lonely":
+            return {"eye_open": 0.76, "brow": -0.16, "mouth_curve": -0.32, "mouth_open": 0.01, "head_x": -0.004, "head_y": 0.012}
+        "anxious":
+            return {"eye_open": 0.98, "brow": 0.38, "mouth_curve": -0.20, "mouth_open": 0.08, "head_x": 0.004, "head_y": -0.006}
+        "determined":
+            return {"eye_open": 0.84, "brow": -0.28, "mouth_curve": -0.04, "mouth_open": 0.0, "head_x": 0.0, "head_y": -0.006}
+        "defiant":
+            return {"eye_open": 0.88, "brow": -0.34, "mouth_curve": 0.10, "mouth_open": 0.0, "head_x": 0.006, "head_y": -0.008}
+        "resigned":
+            return {"eye_open": 0.64, "brow": -0.10, "mouth_curve": -0.18, "mouth_open": 0.01, "head_x": -0.004, "head_y": 0.018}
         "tired":
             return {"eye_open": 0.62, "brow": -0.12, "mouth_curve": -0.08, "mouth_open": 0.02, "head_x": 0.003, "head_y": 0.012}
         _:
