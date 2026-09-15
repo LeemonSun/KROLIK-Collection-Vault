@@ -39,9 +39,14 @@ static func stats_snapshot() -> Dictionary:
 static func _file_stamp(path: String) -> Dictionary:
     if path.is_empty() or not FileAccess.file_exists(path):
         return {}
+    var handle := FileAccess.open(path, FileAccess.READ)
+    if handle == null:
+        return {}
+    var size := handle.get_length()
+    handle.close()
     return {
         "mtime": int(FileAccess.get_modified_time(path)),
-        "size": int(FileAccess.get_size(path)),
+        "size": int(size),
     }
 
 static func _same_stamp(a: Variant, b: Variant) -> bool:
