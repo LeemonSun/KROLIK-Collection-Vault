@@ -1,0 +1,34 @@
+{
+  "schema": "krolik.qa-dwpose-domain-corpus/1",
+  "format_version": 1,
+  "source": {
+    "repository": "IDEA-Research/DWPose",
+    "commit": "3dca5db79d9f9ffdd378753ddf6ec66535aace88"
+  },
+  "fixtures": [
+    {
+      "id": "anime1",
+      "path": "ControlNet-v1-1-nightly/test_imgs/anime1.png",
+      "git_blob_sha1": "da711a197df9f33bdd2cee219e69247304477a6b",
+      "size_bytes": 292452
+    },
+    {
+      "id": "anime2",
+      "path": "ControlNet-v1-1-nightly/test_imgs/anime2.png",
+      "git_blob_sha1": "a8b1adafc6775a241d5914d465b161508bdd55d7",
+      "size_bytes": 239363
+    },
+    {
+      "id": "anime3",
+      "path": "ControlNet-v1-1-nightly/test_imgs/anime3.jpg",
+      "git_blob_sha1": "41f32d9da6b076fef78c5934d753dd1b24174553",
+      "size_bytes": 55410
+    },
+    {
+      "id": "anime4",
+      "path": "ControlNet-v1-1-nightly/test_imgs/anime4.jpg",
+      "git_blob_sha1": "60ddbedfb53c0245d4ea1e6681f7f63f6c85b8f4",
+      "size_bytes": 37662
+    }
+  ]
+}
