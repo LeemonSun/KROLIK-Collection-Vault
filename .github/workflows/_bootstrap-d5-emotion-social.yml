@@ -1,0 +1,70 @@
+name: Bootstrap D5 Emotion Social
+
+on:
+  push:
+    branches:
+      - work/d5-emotion-encounters-20260915
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+      GODOT_VERSION: 4.7.2
+      GODOT_SHA256: cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/d5-emotion-encounters-20260915
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Apply D5 product patch
+        run: |
+          python tools/_bootstrap_d5_emotion_social.py
+          python tools/export_ai_policy.py
+      - name: Python verification
+        run: |
+          python -m pip install pytest
+          python -m py_compile life_sim.py ai_policy.py tools/_bootstrap_d5_emotion_social.py
+          python tools/export_ai_policy.py --check
+          pytest -q tests/test_life_sim.py tests/test_ai_policy.py
+      - name: Download verified Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl --fail --location --retry 4 --output "$archive" "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${archive}"
+          echo "${GODOT_SHA256}  ${archive}" | sha256sum --check --strict
+          unzip -q "$archive" -d godot-bin
+          chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+      - name: Godot parser and D5 vertical harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+          timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/social_encounter_manager.gd
+          output="${RUNNER_TEMP}/d5-bootstrap.txt"
+          timeout 45s "$GODOT" --headless --path runtime_godot --script res://scripts/emotion_social_harness.gd 2>&1 | tee "$output"
+          grep -q 'KROLIK_D5_EMOTION_SOCIAL status=ok' "$output"
+          if grep -Eq 'KROLIK_D5_EMOTION_SOCIAL_FAIL|SCRIPT ERROR|Parse Error|Failed to load script' "$output"; then exit 1; fi
+      - name: Commit verified D5 product block
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add life_sim.py tests/test_life_sim.py content/ai/default_policy_v1.json runtime_godot/data/ai_policy_v1.json runtime_godot/scripts/agent_brain.gd runtime_godot/scripts/facial_state.gd runtime_godot/scripts/constraint_binding.gd runtime_godot/scripts/character_agent.gd runtime_godot/scripts/social_encounter_manager.gd runtime_godot/scripts/emotion_social_harness.gd runtime_godot/scripts/world_runtime.gd .github/workflows/d5-emotion-social.yml
+          if git diff --cached --quiet; then
+            echo 'No D5 product changes to commit.'
+            exit 0
+          fi
+          git commit -m 'life-sim: add emotional reactions and D5 social encounters'
+          git push origin HEAD:work/d5-emotion-encounters-20260915
