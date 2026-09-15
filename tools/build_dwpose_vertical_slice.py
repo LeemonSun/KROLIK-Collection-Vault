@@ -7,6 +7,7 @@ from pathlib import Path
 
 from character_import import build_character_runtime_package
 from import_integrity import validate_built_import
+from rig_tools import dwpose_diagnostics
 from runtime_package_integrity import seal_built_runtime_package, validate_runtime_package_receipt
 
 
@@ -16,10 +17,21 @@ CHARACTER_ID = "ci_dwpose_slice"
 def build_dwpose_vertical_slice(source: Path, output_root: Path) -> dict[str, object]:
     output_root = output_root.resolve()
     output_root.mkdir(parents=True, exist_ok=True)
+    source = source.resolve()
+
+    diagnostics = dwpose_diagnostics(source)
+    if diagnostics.get("status") != "ok" or not bool(diagnostics.get("mapped")):
+        raise RuntimeError(f"DWPose diagnostics did not map the source image: {diagnostics}")
+    core_scores = [float(value) for value in diagnostics.get("core_scores", [])]
+    if len(core_scores) != 12:
+        raise RuntimeError(f"DWPose diagnostics missing core scores: {diagnostics}")
+    confidence = sum(core_scores) / len(core_scores)
+    if confidence < 0.30:
+        raise RuntimeError(f"DWPose confidence is unexpectedly low: {confidence:.6f}")
 
     result = build_character_runtime_package(
         output_root,
-        source.resolve(),
+        source,
         CHARACTER_ID,
         name="CI DWPose Product Slice",
         cutout_mode="opaque",
@@ -31,9 +43,6 @@ def build_dwpose_vertical_slice(source: Path, output_root: Path) -> dict[str, ob
         raise RuntimeError(f"AI product slice did not use DWPose: {result.get('backend')}")
     if bool(result.get("rig_review_required")):
         raise RuntimeError("successful DWPose rig was incorrectly marked for rig review")
-    confidence = float(result.get("pose_confidence") or 0.0)
-    if confidence < 0.30:
-        raise RuntimeError(f"DWPose confidence is unexpectedly low: {confidence}")
     if not bool(result.get("runtime_ready")) or float(result.get("rig_score") or 0.0) < 99.0:
         raise RuntimeError(f"DWPose runtime package is not ready: {result}")
     if int(result.get("joints") or 0) != 15 or int(result.get("bones") or 0) != 14:
@@ -46,13 +55,12 @@ def build_dwpose_vertical_slice(source: Path, output_root: Path) -> dict[str, ob
     receipt = Path(str(sealed["package_receipt"]))
     validate_runtime_package_receipt(receipt)
     result["package_receipt"] = str(receipt)
+    result["pose_confidence"] = round(confidence, 6)
+    result["core_above_018"] = int(diagnostics.get("core_above_018") or 0)
 
     manifest = json.loads(Path(str(result["manifest"])).read_text(encoding="utf-8"))
-    rig = manifest.get("rig", {})
-    if rig.get("backend") != "dwpose-onnx":
+    if manifest.get("rig", {}).get("backend") != "dwpose-onnx":
         raise RuntimeError("DWPose backend provenance did not survive manifest write")
-    if float(rig.get("pose_confidence", confidence) or confidence) < 0.30:
-        raise RuntimeError("DWPose confidence provenance did not survive package build")
 
     return result
 
@@ -71,9 +79,9 @@ def main() -> int:
 
     metrics = build_dwpose_vertical_slice(Path(args.source), Path(args.output_root))
     ordered = [
-        "character_id", "backend", "pose_confidence", "rig_review_required", "rig_score",
-        "runtime_ready", "joints", "bones", "vertices", "triangles", "bone_weights",
-        "collision_proxies", "manifest", "image", "package_receipt",
+        "character_id", "backend", "pose_confidence", "core_above_018", "rig_review_required",
+        "rig_score", "runtime_ready", "joints", "bones", "vertices", "triangles",
+        "bone_weights", "collision_proxies", "manifest", "image", "package_receipt",
     ]
     print("KROLIK_DWPOSE_PRODUCT_SLICE " + " ".join(f"{key}={metrics.get(key)}" for key in ordered))
     return 0
