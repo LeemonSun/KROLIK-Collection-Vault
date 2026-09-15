@@ -1,0 +1,66 @@
+name: DWPose Domain Art Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'rig_tools.py'
+      - 'tools/fetch_dwpose_model.py'
+      - 'tools/smoke_dwpose_corpus.py'
+      - '.github/workflows/dwpose-domain-art-smoke.yml'
+
+jobs:
+  anime-art-corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install production pose dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy onnxruntime Pillow opencv-python-headless
+      - name: Cache pinned DWPose model
+        uses: actions/cache@v4
+        with:
+          path: models/dwpose/dw-ll_ucoco_384.onnx
+          key: dwpose-724f4ff2439ed61afb86fb8a1951ec39c6220682803b4a8bd4f598cd913b1843
+      - name: Fetch and verify exact DWPose model
+        run: |
+          python tools/fetch_dwpose_model.py
+          python tools/fetch_dwpose_model.py --check
+      - name: Download upstream anime domain fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/dwpose-anime"
+          base="https://raw.githubusercontent.com/IDEA-Research/DWPose/onnx/ControlNet-v1-1-nightly/test_imgs"
+          for name in anime1.png anime2.png anime3.jpg anime4.jpg; do
+            curl --fail --location --retry 4 --output "${RUNNER_TEMP}/dwpose-anime/${name}" "${base}/${name}"
+            test -s "${RUNNER_TEMP}/dwpose-anime/${name}"
+          done
+      - name: Production DWPose anime-art corpus smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/smoke_dwpose_corpus.py \
+            "${RUNNER_TEMP}/dwpose-anime/anime1.png" \
+            "${RUNNER_TEMP}/dwpose-anime/anime2.png" \
+            "${RUNNER_TEMP}/dwpose-anime/anime3.jpg" \
+            "${RUNNER_TEMP}/dwpose-anime/anime4.jpg" \
+            --min-confidence 0.12 \
+            --report "${RUNNER_TEMP}/dwpose-anime/domain_report.json"
+      - name: Upload domain smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dwpose-anime-domain-smoke
+          path: ${{ runner.temp }}/dwpose-anime/domain_report.json
+          if-no-files-found: error
+          retention-days: 14
