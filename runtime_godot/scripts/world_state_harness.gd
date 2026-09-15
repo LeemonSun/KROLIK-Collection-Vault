@@ -7,6 +7,9 @@ const SAVE_PATH := "user://krolik-world-state-ci.json"
 func _initialize() -> void:
     call_deferred("_run")
 
+func _stage(name: String) -> void:
+    print("KROLIK_WORLD_STATE_STAGE " + name)
+
 func _fail(message: String) -> void:
     push_error("KROLIK_WORLD_STATE_FAIL " + message)
     quit(1)
@@ -64,12 +67,14 @@ func _spawn_character(parent: Node, character_id: String, position: Vector2, pha
     agent.position = position
     agent.home_position = position
     agent.target_position = position
-    agent.world_targets = []
+    var no_targets: Array[Vector2] = []
+    agent.world_targets = no_targets
     agent.phase = phase
     agent.velocity = Vector2.ZERO
     return agent
 
 func _run() -> void:
+    _stage("start")
     var manifest_abs := ProjectSettings.globalize_path(MANIFEST_PATH)
     var package_root_abs := ProjectSettings.globalize_path(PACKAGE_ROOT)
     if not FileAccess.file_exists(manifest_abs):
@@ -109,12 +114,14 @@ func _run() -> void:
             return
         agents.append(agent)
     lod.force_reassess()
+    _stage("spawned")
 
     if lod.full_count() != 1 or lod.reduced_count() != 1 or lod.sleeping_count() != 1:
         _fail("initial world did not populate all three LOD tiers: " + str(lod.tier_snapshot()))
         return
     for _frame in range(18):
         await physics_frame
+    _stage("sleep_time_accumulated")
     var sleep_agent := _find_agent(agents, "world-sleep")
     if sleep_agent == null or lod.pending_sleep_seconds(sleep_agent) < 0.15:
         _fail("sleeping agent did not accumulate pending semantic time")
@@ -125,16 +132,18 @@ func _run() -> void:
     if doc.is_empty():
         _fail("capture failed: " + persistence.last_error)
         return
+    _stage("captured")
     if str(doc.get("schema")) != VaultWorldState.SCHEMA or int(doc.get("format_version")) != VaultWorldState.FORMAT_VERSION:
         _fail("versioned world-state header missing")
         return
     if not persistence.save_atomic(SAVE_PATH, doc):
         _fail("first save failed: " + persistence.last_error)
         return
-    # Exercise replacement/backup path rather than only first-write behavior.
+    _stage("saved_first")
     if not persistence.save_atomic(SAVE_PATH, doc):
         _fail("overwrite save failed: " + persistence.last_error)
         return
+    _stage("saved_overwrite")
 
     var saved_file := ProjectSettings.globalize_path(SAVE_PATH)
     if not FileAccess.file_exists(saved_file):
@@ -144,14 +153,12 @@ func _run() -> void:
         _fail("successful save left stale backup file")
         return
 
-    # Path traversal is rejected at schema validation time.
     var traversal_doc: Dictionary = doc.duplicate(true)
     traversal_doc["characters"][0]["package_manifest"] = "../escape/manifest.json"
     if persistence.validate(traversal_doc):
         _fail("path traversal world state passed validation")
         return
 
-    # A structurally valid but hash-tampered save must fail before scene mutation.
     var hash_doc: Dictionary = doc.duplicate(true)
     hash_doc["characters"][0]["manifest_sha256"] = "0".repeat(64)
     if not persistence.validate(hash_doc):
@@ -165,6 +172,7 @@ func _run() -> void:
         _fail("hash mismatch mutated scene before rejection")
         return
     tamper_parent.queue_free()
+    _stage("security_guards")
 
     var saved_sleep_record: Dictionary = {}
     for record_value in doc.get("characters", []):
@@ -175,21 +183,27 @@ func _run() -> void:
     if saved_sleep_record.is_empty():
         _fail("sleeping record missing from captured document")
         return
-    var saved_sleep_pending := float(saved_sleep_record.get("lod", {}).get("sleep_elapsed", 0.0))
+    var saved_lod_doc: Dictionary = saved_sleep_record.get("lod", {})
+    var saved_brain: Dictionary = saved_sleep_record.get("brain", {})
+    var saved_memory: Array = saved_brain.get("memory", [])
+    if saved_memory.is_empty():
+        _fail("sleeping record lost its memory snapshot")
+        return
+    var saved_sleep_pending := float(saved_lod_doc.get("sleep_elapsed", 0.0))
     var saved_sleep_phase := float(saved_sleep_record.get("phase", 0.0))
-    var saved_sleep_memory := float(saved_sleep_record.get("brain", {}).get("memory", [])[0].get("age", -1.0))
+    var saved_sleep_memory := float(saved_memory[0].get("age", -1.0))
 
-    # Destroy the original scene completely; reload must not reuse runtime nodes.
     lod.clear(false)
     world.queue_free()
     await process_frame
-    if is_instance_valid(world):
-        await process_frame
+    await process_frame
+    _stage("destroyed_original")
 
     var loaded := persistence.load_file(SAVE_PATH)
     if loaded.is_empty():
         _fail("load_file rejected its own save: " + persistence.last_error)
         return
+    _stage("loaded_file")
     var restored_world := Node2D.new()
     restored_world.name = "WorldAfterReload"
     root.add_child(restored_world)
@@ -197,6 +211,7 @@ func _run() -> void:
     if restored.is_empty():
         _fail("restore failed: " + persistence.last_error)
         return
+    _stage("restored_scene")
     var restored_agents: Array = restored.get("agents", [])
     var restored_lod := restored.get("lod") as VaultPopulationLOD
     if restored_agents.size() != 3 or restored_lod == null:
@@ -222,8 +237,6 @@ func _run() -> void:
         _fail("sleeping character did not restore released residency")
         return
 
-    # Pending sleep time from the old process is materialized exactly once into
-    # the semantic brain/phase before the restored agent starts a new sleep span.
     if restored_sleep.phase < saved_sleep_phase + saved_sleep_pending - 0.01:
         _fail("saved pending sleep time was lost from phase")
         return
@@ -231,8 +244,8 @@ func _run() -> void:
         _fail("saved pending sleep time was lost from short-term memory")
         return
 
-    # Waking after reload must reconstruct full production GPU/collision resources.
     restored_lod.set_focus_position(restored_sleep.global_position, true)
+    _stage("wake_requested")
     if restored_lod.tier_for(restored_sleep) != VaultPopulationLOD.TIER_FULL:
         _fail("restored sleeping character failed to wake into full tier")
         return
