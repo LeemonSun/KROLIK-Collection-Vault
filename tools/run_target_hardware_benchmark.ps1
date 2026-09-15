@@ -293,8 +293,6 @@ function Invoke-GodotMeasuredRun {
             }
         }
         $process.WaitForExit()
-        $process.Refresh()
-        if ($process.WorkingSet64 -gt $peak) { $peak = $process.WorkingSet64 }
         if (-not $timedOut) { $exitCode = $process.ExitCode }
     } finally {
         Restore-ChildEnvironment $previous $Environment
@@ -570,11 +568,11 @@ foreach ($row in $summary) {
 }
 
 if ($null -ne $finalFailure) {
-    Write-Error "Benchmark aborted: $finalFailure"
+    [Console]::Error.WriteLine("Benchmark aborted: $finalFailure")
     exit 1
 }
 if (-not $overallValid) {
-    Write-Error "Benchmark completed but is not a valid target-hardware result. Inspect REPORT.md, runs.json, stdout/stderr and renderer fields in: $ArtifactsRoot"
+    [Console]::Error.WriteLine("Benchmark completed but is not a valid target-hardware result. Inspect REPORT.md, runs.json, stdout/stderr and renderer fields in: $ArtifactsRoot")
     exit 2
 }
 exit 0
