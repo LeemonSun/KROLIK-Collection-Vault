@@ -4,21 +4,21 @@ Last updated: 2026-09-15
 
 ## Current verified engineering baseline
 
-F3 unique-package residency is now promoted to `main`.
+F3 unique-package residency is promoted to `main`, and the next source-independent pass has verified an expanded 12-case DWPose real/stylized import-QA baseline on PR #6.
 
 Current F3 promotion SHA:
 
 `48adbb963a41312ca1984cae4a3f7275f0deef73` (`ci: make world-state scale harness frame-free`).
 
-Stable rollback branch:
+Stable F3 rollback branch:
 
 `checkpoint/stable-f3-unique-package-residency-20260915`
 
-Latest fully verified production-code SHA before cleanup/state/harness-only commits:
+Latest fully verified F3 production-code SHA before cleanup/state/harness-only commits:
 
 `f292ab6082fbae9aa14a54a53a4a81c7bd6ee3b8` (`fix: preserve lazy package cache GDScript nesting`).
 
-All five relevant production regressions are green on this production SHA:
+All five relevant F3 production regressions are green on this production SHA:
 
 - Windows Godot LOD Scale run `34943207027` — success;
 - Godot World State Scale run `34943207122` — success;
@@ -30,7 +30,7 @@ The final F3 PR world-state regression is also green on promoted head `48adbb963
 
 - Godot World State Scale PR run `34944917660` — success.
 
-That last harness change removes expensive SceneTree frame waits from the persistence-only scale regression. The production runtime behavior/schema was not changed by it. The temporary lazy-texture patch workflow used during development was removed before promotion and is not part of the intended product/CI architecture.
+That last harness change removes expensive SceneTree frame waits from the persistence-only scale regression. Production runtime behavior/schema was not changed by it. The temporary lazy-texture patch workflow used during development was removed before promotion and is not part of the intended product/CI architecture.
 
 No rig/skin/animation/runtime-character/AI-policy schema was bumped. The portable KROLIK rig remains the existing 15-joint / 14-bone contract.
 
@@ -61,7 +61,7 @@ Windows also builds and executes a one-file `KROLIK_Character_Import.exe`. The p
 
 ## A2 DWPose / RTMPose — CLOSED
 
-Detailed evidence remains in `docs/A2_DWPOSE_VALIDATION.md`.
+Detailed evidence is in `docs/A2_DWPOSE_VALIDATION.md`.
 
 Exact production model:
 
@@ -79,13 +79,46 @@ Measured compact human ground-truth baseline:
 - PCK@0.05 `96.8%`;
 - PCK@0.10 `100%`.
 
-Stylized/anime regression corpus:
+Expanded pinned real/stylized regression corpus, run `34946008811`:
 
-- 4/4 runtime-ready packages;
-- 3/4 accepted by real `dwpose-onnx`;
-- known `anime1.png` fallback remains explicitly `rig_review_required=true` rather than silently accepted.
+- 12/12 runtime-ready packages;
+- 10/12 accepted by real `dwpose-onnx`;
+- DWPose share `83.3%` against unchanged `75%` CI minimum;
+- unsafe silent fallbacks: 0;
+- explicit `rig_review_required=true` fallbacks: 2 (`anime1.png`, `person-leaves.png`);
+- mean/median runtime rig score: `100.0`;
+- selected accepted case also builds a sealed runtime package and passes production Godot `VaultCharacterAgent`.
 
-This is a compact regression baseline, not a universal anime/fantasy accuracy claim.
+Evidence artifact:
+
+- `dwpose-domain-art-product-slice`;
+- artifact ID `10387626378`;
+- ZIP SHA-256 `cc2561ab3e4762e433196f00dfafc1da9771b7c802f101b9e7bba93536051d7a`.
+
+The corpus remains a regression baseline, not a universal anime/fantasy accuracy claim. Its binaries are fetched from the exact pinned `IDEA-Research/DWPose` commit and verified by Git blob SHA-1 and byte size; they are not committed to KROLIK Git history.
+
+## Import QA expansion — VERIFIED REGRESSION BASELINE
+
+PR #6 branch `work/import-qa-expansion-20260915` expands the old four-anime gate to 12 provenance-pinned single-character real/stylized cases while retaining difficult examples rather than selecting only easy successes.
+
+The final measured set is:
+
+- `anime1.png` — explicit rig-review fallback;
+- `anime2.png` — DWPose;
+- `anime3.jpg` — DWPose;
+- `anime4.jpg` — DWPose;
+- `boy.png` — DWPose;
+- `human.png` — DWPose;
+- `m2.jpg` — DWPose;
+- `man2.jpg` — DWPose;
+- `person-leaves.png` — explicit rig-review fallback;
+- `pose1.png` — DWPose;
+- `pose2.png` — DWPose;
+- `violet.jpg` — DWPose.
+
+The workflow now reads fixture membership dynamically from `qa/corpora/dwpose_domain_art_corpus_v1.json`; there is no separate hardcoded `anime1..4` list to drift from the provenance manifest.
+
+The acceptance contract was not weakened to make the larger corpus pass. DWPose still needs at least 8 of the 12 mapped core COCO joints at confidence >=0.18, and CI still requires at least 75% accepted DWPose coverage. Every non-DWPose fallback must remain explicit review-required behavior.
 
 ## A4 Windows rendered scale — CLOSED as measured baseline
 
@@ -174,7 +207,7 @@ Stable H2 checkpoint:
 
 `checkpoint/stable-h2-world-state-scale-20260915-1010`
 
-The final F3 PR exposed an old harness-only timing problem: the regression printed `status=ok` but could then be killed by the 180-second external watchdog while spending time on irrelevant SceneTree frames/cleanup. Commit `48adbb963a41312ca1984cae4a3f7275f0deef73` makes the persistence harness frame-free and the PR run `34944917660` completes successfully without changing production persistence semantics.
+The final F3 PR exposed an old harness-only timing problem: the regression printed `status=ok` but could then be killed by the 180-second external watchdog while spending time on irrelevant SceneTree frames/cleanup. Commit `48adbb963a41312ca1984cae4a3f7275f0deef73` makes the persistence harness frame-free and PR run `34944917660` completes successfully without changing production persistence semantics.
 
 ## F2 multi-art runtime + persistence — CLOSED
 
@@ -280,7 +313,7 @@ It is intentionally **not** required for the current 500-character target after 
 Previously verified systems remain part of the baseline:
 
 - A1 rendered real `Skeleton2D/Polygon2D` deformation;
-- A2 real DWPose product integration;
+- A2 real DWPose product integration plus 12-case real/stylized regression gate;
 - A3 rig migration discipline;
 - A4 Windows rendered population scaling through 500 agents;
 - A5 animation clip validation;
@@ -322,7 +355,7 @@ Rules remain:
 
 - Hosted Windows performance uses Microsoft Basic Render Driver; target RX 6650 XT performance still requires a real target-hardware run.
 - F3 uses 500 independent sealed package/cache identities built from four checksum-pinned source artworks; it validates package uniqueness and residency scaling, not 500 genuinely different artistic source images.
-- Anime/fantasy A2 QA is still a small regression corpus rather than the eventual 100–200-art Phase-F corpus.
+- The DWPose real/stylized gate is now 12 provenance-pinned cases rather than four, but it is still far smaller than the eventual 100–200-art Phase-F corpus and is not a universal domain claim.
 - Busy-background matting remains conservative/review-required rather than destructive.
 - Multi-person source-image UX is outside the current single-selected-character import contract.
 - Final graphical manual-rig correction UX remains source-blocked with `app.py`.
@@ -333,10 +366,10 @@ Rules remain:
 
 Keep D4/D5 paused unless the product/performance path stops yielding useful work.
 
-F3 promotion is complete. Next source-independent priorities are now:
+F3 promotion and the first import-QA expansion are complete. Next source-independent priorities are now:
 
-1. Expand real/stylized import QA beyond the current four-art regression corpus using only accessible, provenance-known fixtures; keep explicit review-required semantics rather than lowering DWPose acceptance thresholds.
-2. Add target-hardware benchmark instructions/collector so the same 220/300/500 workloads can be run on the user's RX 6650 XT and compared honestly with hosted software-render metrics.
+1. Add a target-hardware benchmark instructions/collector so the same 220/300/500 production workloads can be run on the user's RX 6650 XT and compared honestly with hosted software-render metrics.
+2. Continue expanding provenance-known real/stylized/anime QA toward the eventual 100–200-art corpus as suitable single-character fixtures become available; do not weaken DWPose confidence or review semantics to inflate coverage.
 3. Add further pooling/offline-room/streaming complexity only if >500 exploratory or real target-hardware profiling identifies a concrete bottleneck.
 4. If the authoritative FULL ZIP becomes available, interrupt lower-priority work to reconcile `app.py` safely, enable backend/UI tests and build the first complete graphical vertical slice.
 
