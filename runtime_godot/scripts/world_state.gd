@@ -287,7 +287,7 @@ func save_atomic(path: String, doc: Dictionary) -> bool:
     file.flush()
     file.close()
 
-    var parsed := JSON.parse_string(FileAccess.get_file_as_string(temp_path))
+    var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(temp_path))
     if not validate(parsed):
         DirAccess.remove_absolute(temp_path)
         return _fail("temporary world-state file failed read-back validation")
@@ -316,7 +316,7 @@ func load_file(path: String) -> Dictionary:
     if global_path.is_empty() or not FileAccess.file_exists(global_path):
         _fail("world-state file does not exist")
         return {}
-    var parsed := JSON.parse_string(FileAccess.get_file_as_string(global_path))
+    var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(global_path))
     if not validate(parsed):
         return {}
     return parsed
