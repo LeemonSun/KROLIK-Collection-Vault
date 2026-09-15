@@ -10,10 +10,13 @@ on:
       - 'runtime_package.py'
       - 'import_integrity.py'
       - 'runtime_package_integrity.py'
+      - 'content/qa/dwpose_domain_art_corpus_v1.json'
       - 'tools/fetch_dwpose_model.py'
+      - 'tools/fetch_pinned_qa_corpus.py'
       - 'tools/smoke_dwpose_corpus.py'
       - 'tools/build_dwpose_vertical_slice.py'
       - 'tests/test_auto_rig_review.py'
+      - 'tests/test_qa_corpus.py'
       - 'runtime_godot/scripts/core_vertical_slice_harness.gd'
       - '.github/workflows/dwpose-domain-art-smoke.yml'
 
@@ -26,6 +29,7 @@ jobs:
       KROLIK_DWPOSE_MODEL: models/dwpose/dw-ll_ucoco_384.onnx
       GODOT_VERSION: '4.7.2'
       GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
+      QA_CORPUS_MANIFEST: content/qa/dwpose_domain_art_corpus_v1.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,10 +40,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest numpy onnxruntime Pillow opencv-python-headless
-      - name: Auto-rig review regression
-        run: pytest -q tests/test_auto_rig_review.py
-      - name: Product-slice syntax
-        run: python -m py_compile tools/build_dwpose_vertical_slice.py tools/smoke_dwpose_corpus.py
+      - name: Auto-rig and corpus integrity regressions
+        run: pytest -q tests/test_auto_rig_review.py tests/test_qa_corpus.py
+      - name: Product-slice syntax and manifest contract
+        run: |
+          python -m py_compile tools/fetch_pinned_qa_corpus.py tools/build_dwpose_vertical_slice.py tools/smoke_dwpose_corpus.py
+          python tools/fetch_pinned_qa_corpus.py --manifest "$QA_CORPUS_MANIFEST" --output-dir "${RUNNER_TEMP}/dwpose-anime" --validate-only
       - name: Cache pinned DWPose model
         uses: actions/cache@v4
         with:
@@ -49,16 +55,18 @@ jobs:
         run: |
           python tools/fetch_dwpose_model.py
           python tools/fetch_dwpose_model.py --check
-      - name: Download upstream anime domain fixtures
+      - name: Fetch exact upstream anime domain fixtures
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "${RUNNER_TEMP}/dwpose-anime"
-          base="https://raw.githubusercontent.com/IDEA-Research/DWPose/onnx/ControlNet-v1-1-nightly/test_imgs"
-          for name in anime1.png anime2.png anime3.jpg anime4.jpg; do
-            curl --fail --location --retry 4 --output "${RUNNER_TEMP}/dwpose-anime/${name}" "$base/$name"
-            test -s "${RUNNER_TEMP}/dwpose-anime/${name}"
-          done
+          rm -rf "${RUNNER_TEMP}/dwpose-anime"
+          python tools/fetch_pinned_qa_corpus.py \
+            --manifest "$QA_CORPUS_MANIFEST" \
+            --output-dir "${RUNNER_TEMP}/dwpose-anime"
+          test -s "${RUNNER_TEMP}/dwpose-anime/anime1.png"
+          test -s "${RUNNER_TEMP}/dwpose-anime/anime2.png"
+          test -s "${RUNNER_TEMP}/dwpose-anime/anime3.jpg"
+          test -s "${RUNNER_TEMP}/dwpose-anime/anime4.jpg"
       - name: Production import and DWPose anime-art corpus gate
         shell: bash
         run: |
