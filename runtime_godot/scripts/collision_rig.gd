@@ -15,6 +15,7 @@ var proxies: Array = []
 var shapes: Array = []
 var runtime_scale := 1.0
 var facing := 1.0
+var enabled := true
 
 func setup(body: CollisionObject2D, size: Vector2, proxy_docs: Array, display_scale: float = 1.0) -> void:
     clear()
@@ -22,6 +23,7 @@ func setup(body: CollisionObject2D, size: Vector2, proxy_docs: Array, display_sc
     texture_size = size
     runtime_scale = maxf(.001, display_scale)
     proxies = proxy_docs.duplicate(true)
+    enabled = true
     if owner_body == null:
         return
     for raw in proxies:
@@ -47,13 +49,15 @@ func setup(body: CollisionObject2D, size: Vector2, proxy_docs: Array, display_sc
         shape_node.position = (p0 + p1) * .5
         # CapsuleShape2D's long axis is local Y.
         shape_node.rotation = delta.angle() - PI * .5
-        shape_node.disabled = bool(raw.get("sensor", false))
+        var base_disabled := bool(raw.get("sensor", false))
+        shape_node.disabled = base_disabled
         owner_body.add_child(shape_node)
         shapes.append({
             "a": str(raw.get("a", "")),
             "b": str(raw.get("b", "")),
             "node": shape_node,
             "radius_norm": radius_norm,
+            "base_disabled": base_disabled,
         })
 
 func clear() -> void:
@@ -64,11 +68,22 @@ func clear() -> void:
     shapes.clear()
     proxies.clear()
     owner_body = null
+    enabled = true
+
+func set_enabled(value: bool) -> void:
+    enabled = value
+    for entry in shapes:
+        var node = entry.get("node")
+        if node == null or not is_instance_valid(node):
+            continue
+        node.set_deferred("disabled", (not value) or bool(entry.get("base_disabled", false)))
 
 func _rig_to_local(p: Vector2) -> Vector2:
     return Vector2((p.x - .5) * texture_size.x * runtime_scale * facing, (p.y - 1.0) * texture_size.y * runtime_scale)
 
 func apply_joint_pose(joints: Dictionary, display_scale: float = -1.0, facing_value: float = 0.0) -> void:
+    if not enabled:
+        return
     if display_scale > 0.0:
         runtime_scale = display_scale
     if absf(facing_value) > .001:
@@ -96,4 +111,4 @@ func apply_joint_pose(joints: Dictionary, display_scale: float = -1.0, facing_va
         node.rotation = delta.angle() - PI * .5
 
 func stats() -> Dictionary:
-    return {"capsules": shapes.size(), "backend": "godot_physics2d_capsules_v2_direct"}
+    return {"capsules": shapes.size(), "backend": "godot_physics2d_capsules_v2_direct", "enabled": enabled}
