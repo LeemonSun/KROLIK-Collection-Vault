@@ -69,14 +69,28 @@ jobs:
       - name: Save destroy reload production world
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-          output="$(timeout 60s "$GODOT" --headless --path runtime_godot --audio-driver Dummy --script res://scripts/world_state_harness.gd 2>&1)"
-          printf '%s\n' "$output"
-          grep -q 'KROLIK_WORLD_STATE status=ok' <<< "$output"
-          grep -q 'hash_guard=true traversal_guard=true atomic_replace=true gpu_wake=true' <<< "$output"
-          if grep -Eq 'KROLIK_WORLD_STATE_FAIL|SCRIPT ERROR|Parse Error|Failed to load script' <<< "$output"; then
+          output="${RUNNER_TEMP}/krolik-world-state-output.txt"
+          status=0
+          timeout --signal=TERM --kill-after=5s 60s \
+            "$GODOT" --headless --path runtime_godot --audio-driver Dummy \
+            --script res://scripts/world_state_harness.gd 2>&1 | tee "$output" || status=${PIPESTATUS[0]}
+          echo "KROLIK_WORLD_STATE_PROCESS_STATUS=${status}"
+          if ! grep -q 'KROLIK_WORLD_STATE status=ok' "$output"; then
+            echo 'world-state success marker missing' >&2
+            tail -n 120 "$output" >&2 || true
             exit 1
+          fi
+          if ! grep -q 'hash_guard=true traversal_guard=true atomic_replace=true gpu_wake=true' "$output"; then
+            echo 'world-state integrity marker missing' >&2
+            exit 1
+          fi
+          if grep -Eq 'KROLIK_WORLD_STATE_FAIL|SCRIPT ERROR|Parse Error|Failed to load script' "$output"; then
+            exit 1
+          fi
+          if (( status != 0 )); then
+            exit "$status"
           fi
       - name: Cleanup generated runtime package
         if: always()
