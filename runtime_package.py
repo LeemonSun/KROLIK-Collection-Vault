@@ -260,6 +260,11 @@ def build_manifest(
                 "preserve_volume": float(settings.get("preserve_volume", 0.62)),
             },
             "health": health,
+            "confidence": {
+                "pose": float(settings.get("pose_confidence", 0.0)),
+                "joints": dict(settings.get("joint_confidence", {})) if isinstance(settings.get("joint_confidence", {}), dict) else {},
+                "low_confidence_joints": list(settings.get("low_confidence_joints", [])) if isinstance(settings.get("low_confidence_joints", []), list) else [],
+            },
             "skinning": skin,
         },
         "physics": {

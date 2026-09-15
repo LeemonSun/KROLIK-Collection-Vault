@@ -130,6 +130,15 @@ def run_probe(spec_path: Path, output_root: Path, require_dwpose: bool) -> tuple
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     joints = _joint_map(manifest)
     failures.extend(_geometry_checks(joints))
+    rig_confidence = manifest.get("rig", {}).get("confidence", {})
+    if not isinstance(rig_confidence, dict):
+        rig_confidence = {}
+    joint_confidence = rig_confidence.get("joints", {})
+    if not isinstance(joint_confidence, dict):
+        joint_confidence = {}
+    low_confidence_joints = rig_confidence.get("low_confidence_joints", [])
+    if not isinstance(low_confidence_joints, list):
+        low_confidence_joints = []
 
     backend = str(result.get("backend") or "none")
     if require_dwpose and backend != "dwpose-onnx":
@@ -144,6 +153,15 @@ def run_probe(spec_path: Path, output_root: Path, require_dwpose: bool) -> tuple
         failures.append(f"bone_weights={result.get('bone_weights')} expected=14")
     if int(result.get("collision_proxies", 0)) != 14:
         failures.append(f"collision_proxies={result.get('collision_proxies')} expected=14")
+    if bool(result.get("review_required")):
+        failures.append("gold cutout still requires manual review")
+    if float(result.get("cutout_confidence", 0.0)) < 0.75:
+        failures.append(f"gold cutout confidence too low: {result.get('cutout_confidence')}")
+    alpha_coverage = float(result.get("alpha_coverage", 0.0))
+    if not 0.12 <= alpha_coverage <= 0.50:
+        failures.append(f"gold alpha coverage out of expected subject range: {alpha_coverage:.6f}")
+    if backend == "dwpose-onnx" and len(joint_confidence) != len(JOINT_ORDER):
+        failures.append(f"per-joint confidence missing/incomplete: {len(joint_confidence)} != {len(JOINT_ORDER)}")
 
     overlay = output_root / "gold_elf_v1_skeleton_overlay.png"
     _draw_overlay(source, joints, overlay)
@@ -175,6 +193,9 @@ def run_probe(spec_path: Path, output_root: Path, require_dwpose: bool) -> tuple
             "collision_proxies": int(result.get("collision_proxies", 0)),
         },
         "joints": joints,
+        "joint_confidence": joint_confidence,
+        "low_confidence_joints": low_confidence_joints,
+        "pose_confidence": float(rig_confidence.get("pose", 0.0) or 0.0),
         "bones": DEFAULT_BONES,
         "integrity": {
             "import": import_integrity,
@@ -213,7 +234,8 @@ def main(argv: list[str] | None = None) -> int:
         f"status={report['status']} backend={pipeline['backend']} runtime_ready={str(pipeline['runtime_ready']).lower()} "
         f"rig_score={pipeline['rig_score']:.3f} joints={pipeline['joints']} bones={pipeline['bones']} "
         f"weights={pipeline['bone_weights']} collisions={pipeline['collision_proxies']} "
-        f"vertices={pipeline['vertices']} triangles={pipeline['triangles']} failures={len(failures)}"
+        f"vertices={pipeline['vertices']} triangles={pipeline['triangles']} failures={len(failures)} "
+        f"low_confidence={','.join(report.get('low_confidence_joints', [])) or 'none'}"
     )
     for failure in failures:
         print(f"KROLIK_GOLD_PROBE_FAIL {failure}", file=sys.stderr)
