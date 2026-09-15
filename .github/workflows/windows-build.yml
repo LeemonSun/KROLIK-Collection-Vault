@@ -120,12 +120,13 @@ jobs:
           if (-not (Test-Path $packageReceipt)) { throw 'DWPose packaged CLI did not emit package receipt' }
           $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
           if ($manifest.rig.backend -ne 'dwpose-onnx') { throw "Packaged EXE fell back from DWPose backend: $($manifest.rig.backend)" }
-          if ($manifest.rig.joints.PSObject.Properties.Count -ne 15) { throw 'Packaged DWPose EXE did not emit 15 KROLIK joints' }
+          $jointCount = @($manifest.rig.joints.PSObject.Properties).Count
+          if ($jointCount -ne 15) { throw "Packaged DWPose EXE did not emit 15 KROLIK joints; actual=$jointCount" }
           if ($manifest.rig.bones.Count -ne 14) { throw 'Packaged DWPose EXE did not emit 14 KROLIK bones' }
           if (-not [bool]$manifest.quality.runtime_ready) { throw 'Packaged DWPose EXE produced runtime_ready=false' }
           python tools/validate_runtime_package.py $packageReceipt
           if ($LASTEXITCODE -ne 0) { throw "DWPose durable package validator exited $LASTEXITCODE" }
-          Write-Host "KROLIK_WINDOWS_DWPOSE_EXE status=ok backend=$($manifest.rig.backend) joints=15 bones=14 runtime_ready=true"
+          Write-Host "KROLIK_WINDOWS_DWPOSE_EXE status=ok backend=$($manifest.rig.backend) joints=$jointCount bones=14 runtime_ready=true"
       - name: Upload verified Windows import CLI
         uses: actions/upload-artifact@v4
         with:
