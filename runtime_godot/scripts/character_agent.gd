@@ -40,6 +40,17 @@ var collision_rig: VaultCollisionRig
 var navigation_agent: NavigationAgent2D
 var _navigation_target_valid := false
 var _navigation_target := Vector2.ZERO
+var interaction_context: Dictionary = {}
+var social_target_id := ""
+var social_target_position := Vector2.ZERO
+var social_target_valid := false
+var social_candidate_count := 0
+var social_affinity := 0.0
+var social_familiarity := 0.0
+var social_event_outcome := 0.0
+var social_event_timer := 0.0
+var nearby_witnesses := 0
+var _last_face_mood := ""
 
 func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     character_id = id_value
@@ -143,7 +154,71 @@ func set_mood(name: String, intensity: float = 1.0, transition: float = 0.20) ->
 func facial_snapshot() -> Dictionary:
     return facial_channels.duplicate(true)
 
+func _normalized_constraint_kind(value: String) -> String:
+    var raw := value.to_lower()
+    if "ankle" in raw and "shackle" in raw: return "ankle_shackles"
+    if "shackle" in raw: return "shackles"
+    if "cuff" in raw: return "cuffs"
+    if "stool" in raw: return "restraint_stool"
+    if "chair" in raw: return "restraint_chair"
+    if "stock" in raw: return "stocks"
+    if "cage" in raw: return "cage"
+    if "wall" in raw and "anchor" in raw: return "wall_anchor"
+    if "harness" in raw: return "harness"
+    if "rope" in raw: return "rope"
+    if "tether" in raw or "chain" in raw: return "tether"
+    if raw in ["bound", "anchored", "restrained", "contained"]: return "contained"
+    return raw if not raw.is_empty() else "generic"
+
+func _interaction_semantics(data: Dictionary) -> Dictionary:
+    var count := runtime_constraints.size()
+    var constrained := count > 0 or bool(data.get("contained", false))
+    var raw_kind := str(data.get("constraint_kind", data.get("fixture_kind", data.get("kind", data.get("interaction_mode", "")))))
+    var severity_default := clampf(0.18 + float(count) * 0.18 + (0.18 if bool(data.get("contained", false)) else 0.0), 0.0, 1.0) if constrained else 0.0
+    return {
+        "constraint_kind": _normalized_constraint_kind(raw_kind),
+        "constraint_severity": clampf(float(data.get("constraint_severity", severity_default)), 0.0, 1.0),
+        "constraint_novelty": clampf(float(data.get("constraint_novelty", 0.55 if constrained else 0.0)), 0.0, 1.0),
+        "discomfort": clampf(float(data.get("discomfort", 0.0)), 0.0, 1.0),
+        "threat": clampf(float(data.get("threat", 0.0)), 0.0, 1.0),
+        "pain": clampf(float(data.get("pain", 0.0)), 0.0, 1.0),
+        "witnesses": maxi(0, int(data.get("witnesses", 0))),
+        "safe": bool(data.get("safe", false)),
+        "released": bool(data.get("released", false)),
+    }
+
+func set_social_runtime_context(target_id: String, target_pos: Vector2, candidate_count: int, affinity: float, familiarity: float) -> void:
+    social_target_id = target_id
+    social_target_position = target_pos
+    social_target_valid = not target_id.is_empty()
+    social_candidate_count = maxi(0, candidate_count)
+    social_affinity = clampf(affinity, -1.0, 1.0)
+    social_familiarity = clampf(familiarity, 0.0, 1.0)
+
+func set_nearby_witnesses(value: int) -> void:
+    nearby_witnesses = maxi(0, value)
+
+func relationship_to(subject: String) -> Dictionary:
+    for raw in brain.long_term_snapshot().get("relationships", []):
+        if typeof(raw) != TYPE_DICTIONARY:
+            continue
+        var entry: Dictionary = raw
+        if str(entry.get("subject", "")) == subject:
+            return entry.duplicate(true)
+    return {}
+
+func register_social_encounter(partner_id: String, outcome: float) -> void:
+    var resolved := clampf(outcome, -1.0, 1.0)
+    brain.remember_event("social", partner_id, resolved, 0.78, 240.0)
+    brain.reinforce_relationship(partner_id, resolved, 0.72)
+    social_event_outcome = resolved
+    social_event_timer = 6.0
+    var relation := relationship_to(partner_id)
+    social_affinity = float(relation.get("affinity", social_affinity))
+    social_familiarity = float(relation.get("familiarity", social_familiarity))
+
 func apply_runtime_interaction(data: Dictionary) -> void:
+    var was_contained := contained
     runtime_constraints.clear()
     for raw in data.get("constraints", []):
         if typeof(raw) != TYPE_DICTIONARY:
@@ -153,6 +228,8 @@ func apply_runtime_interaction(data: Dictionary) -> void:
         item["target_v"] = Vector2(float(t.get("x", 0.5)), float(t.get("y", 0.5)))
         runtime_constraints.append(item)
     contained = bool(data.get("contained", contained)) or not runtime_constraints.is_empty()
+    interaction_context = _interaction_semantics(data)
+    interaction_context["released"] = bool(data.get("released", false)) or (was_contained and not contained)
     _solve_runtime_constraints(animated_joints if not animated_joints.is_empty() else rig_joints)
     _apply_visual_transform()
     queue_redraw()
@@ -377,21 +454,34 @@ func _apply_visual_transform() -> void:
 
 func _physics_process(delta: float) -> void:
     phase += delta
+    social_event_timer = maxf(0.0, social_event_timer - delta)
     var mind_context := {
         "bound": contained,
         "interaction_mode": "contained" if contained else "",
         "away_from_home": global_position.distance_to(home_position) > 36.0,
         "interesting_targets": float(world_targets.size()),
-        "social_targets": 0.0,
+        "social_targets": float(social_candidate_count),
+        "social_subject": social_target_id,
+        "social_affinity": social_affinity,
+        "social_familiarity": social_familiarity,
+        "social_success": social_event_outcome if social_event_timer > 0.0 else 0.0,
     }
+    for key in interaction_context.keys():
+        mind_context[key] = interaction_context[key]
+    mind_context["witnesses"] = maxf(float(mind_context.get("witnesses", 0.0)), float(nearby_witnesses))
     brain.state = brain.step(delta, mind_context)
     walk_speed = 80.0 * brain.walk_speed
     match brain.state:
         "wander", "inspect", "social", "return_home":
-            if global_position.distance_to(target_position) < 8.0:
+            if brain.state == "social" and social_target_valid:
+                target_position = social_target_position
+                _navigation_target_valid = false
+            elif global_position.distance_to(target_position) < 8.0:
                 _choose_target()
             var waypoint := _movement_waypoint()
             var desired := global_position.direction_to(waypoint) * walk_speed
+            if brain.state == "social" and social_target_valid and global_position.distance_to(social_target_position) < 34.0:
+                desired = Vector2.ZERO
             velocity = velocity.move_toward(desired, acceleration * delta)
             move_and_slide()
             if absf(velocity.x) > 0.5:
@@ -400,6 +490,11 @@ func _physics_process(delta: float) -> void:
             velocity = velocity.move_toward(Vector2.ZERO, acceleration * delta)
             if velocity.length_squared() > .01:
                 move_and_slide()
+    var affect := brain.affect_snapshot()
+    var face_mood := str(affect.get("facial_mood", affect.get("mood", "calm")))
+    if face_mood != _last_face_mood:
+        if facial_state.set_mood(face_mood, maxf(0.18, float(affect.get("intensity", 0.0))), 0.28):
+            _last_face_mood = face_mood
     animation_driver.set_state(brain.state)
     var sample := animation_driver.step(delta)
     _visual_offset = sample.get("offset", Vector2.ZERO)
@@ -422,6 +517,11 @@ func _animation_for_state(state_name: String) -> String:
 func _choose_target() -> void:
     if brain.state == "return_home":
         target_position = home_position
+        _navigation_target_valid = false
+        _sync_navigation_target()
+        return
+    if brain.state == "social" and social_target_valid:
+        target_position = social_target_position
         _navigation_target_valid = false
         _sync_navigation_target()
         return

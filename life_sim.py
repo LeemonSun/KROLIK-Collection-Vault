@@ -99,6 +99,31 @@ AI_POLICY: dict[str, Any] = {
         "target_place_effects": {"wander": 0.18, "inspect": 0.10},
         "favorite_home_return_bonus": 0.16,
     },
+    # D5 emotion model is a compact semantic state, not a cosmetic label.
+    # It reacts to personality, social encounters and physical constraints while
+    # remaining bounded and cheap enough for hundreds of agents.
+    "emotion_model": {
+        "channels": ["fear", "anger", "sadness", "joy", "trust", "shame", "hope", "frustration", "relief", "curiosity"],
+        "response_per_second": 3.2,
+        "max_dt": 10.0,
+        "constraint_profiles": {
+            "none": {"loss_of_control": 0.0, "discomfort": 0.0, "social_exposure": 0.0, "immobility": 0.0},
+            "generic": {"loss_of_control": 0.50, "discomfort": 0.30, "social_exposure": 0.20, "immobility": 0.45},
+            "contained": {"loss_of_control": 0.58, "discomfort": 0.24, "social_exposure": 0.16, "immobility": 0.62},
+            "shackles": {"loss_of_control": 0.68, "discomfort": 0.34, "social_exposure": 0.24, "immobility": 0.60},
+            "ankle_shackles": {"loss_of_control": 0.58, "discomfort": 0.30, "social_exposure": 0.20, "immobility": 0.52},
+            "cuffs": {"loss_of_control": 0.62, "discomfort": 0.30, "social_exposure": 0.24, "immobility": 0.48},
+            "tether": {"loss_of_control": 0.55, "discomfort": 0.22, "social_exposure": 0.24, "immobility": 0.42},
+            "rope": {"loss_of_control": 0.66, "discomfort": 0.38, "social_exposure": 0.28, "immobility": 0.66},
+            "harness": {"loss_of_control": 0.70, "discomfort": 0.35, "social_exposure": 0.30, "immobility": 0.68},
+            "restraint_stool": {"loss_of_control": 0.72, "discomfort": 0.40, "social_exposure": 0.42, "immobility": 0.82},
+            "restraint_chair": {"loss_of_control": 0.82, "discomfort": 0.44, "social_exposure": 0.38, "immobility": 0.90},
+            "stocks": {"loss_of_control": 0.90, "discomfort": 0.48, "social_exposure": 0.62, "immobility": 0.94},
+            "cage": {"loss_of_control": 0.72, "discomfort": 0.28, "social_exposure": 0.34, "immobility": 0.76},
+            "wall_anchor": {"loss_of_control": 0.88, "discomfort": 0.46, "social_exposure": 0.45, "immobility": 0.92}
+        },
+        "facial_moods": ["calm", "tired", "uneasy", "alert", "seeking_company", "terrified", "afraid", "furious", "angry", "sad", "ashamed", "frustrated", "hopeful", "relieved", "happy", "content", "curious", "lonely", "anxious", "determined", "defiant", "resigned"]
+    },
     "need_rates_per_minute": {
         "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
         "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.020, "social": 0.010},
@@ -556,29 +581,197 @@ def long_term_utility_bias(memory_value: Any, context: dict[str, Any] | None = N
     return bias
 
 
-def derive_affect(needs: dict[str, float], state: str) -> dict[str, Any]:
-    energy = clamp01(needs.get("energy", 0.5))
-    comfort = clamp01(needs.get("comfort", 0.5))
-    curiosity = clamp01(needs.get("curiosity", 0.5))
-    social = clamp01(needs.get("social", 0.5))
-    thresholds = AI_POLICY["affect_thresholds"]
-    if state == "rest" or energy < float(thresholds["tired_energy"]):
+
+def _emotion_policy() -> dict[str, Any]:
+    return AI_POLICY["emotion_model"]
+
+
+def neutral_emotion_state() -> dict[str, Any]:
+    out: dict[str, Any] = {name: 0.0 for name in _emotion_policy()["channels"]}
+    out.update({
+        "mood": "calm",
+        "facial_mood": "calm",
+        "intensity": 0.0,
+        "valence": 0.0,
+        "arousal": 0.0,
+        "dominance": 0.5,
+    })
+    return out
+
+
+def normalize_emotion_state(value: Any) -> dict[str, Any]:
+    out = neutral_emotion_state()
+    if not isinstance(value, dict):
+        return out
+    for name in _emotion_policy()["channels"]:
+        out[name] = clamp01(_finite_float(value.get(name), 0.0))
+    mood = str(value.get("mood") or out["mood"])
+    facial = str(value.get("facial_mood") or mood)
+    allowed = set(_emotion_policy()["facial_moods"])
+    out["mood"] = mood
+    out["facial_mood"] = facial if facial in allowed else "calm"
+    out["intensity"] = clamp01(_finite_float(value.get("intensity"), max(float(out[name]) for name in _emotion_policy()["channels"])))
+    out["valence"] = max(-1.0, min(1.0, _finite_float(value.get("valence"), 0.0)))
+    out["arousal"] = clamp01(_finite_float(value.get("arousal"), 0.0))
+    out["dominance"] = clamp01(_finite_float(value.get("dominance"), 0.5))
+    return out
+
+
+def _constraint_kind(context: dict[str, Any]) -> str:
+    raw = str(context.get("constraint_kind") or context.get("fixture_kind") or context.get("interaction_mode") or "").lower()
+    aliases = (
+        (("ankle", "shackle"), "ankle_shackles"),
+        (("shackle",), "shackles"),
+        (("cuff",), "cuffs"),
+        (("stool",), "restraint_stool"),
+        (("chair",), "restraint_chair"),
+        (("stock",), "stocks"),
+        (("cage",), "cage"),
+        (("wall", "anchor"), "wall_anchor"),
+        (("harness",), "harness"),
+        (("rope",), "rope"),
+        (("tether",), "tether"),
+        (("chain",), "tether"),
+    )
+    for needles, resolved in aliases:
+        if all(needle in raw for needle in needles):
+            return resolved
+    if raw in _emotion_policy()["constraint_profiles"]:
+        return raw
+    if raw in {"bound", "anchored", "restrained", "contained"}:
+        return "contained"
+    return "generic" if raw else "none"
+
+
+def step_emotion(
+    profile_value: dict[str, Any] | None,
+    needs_value: dict[str, Any] | None,
+    state: str,
+    context: dict[str, Any] | None = None,
+    previous_value: Any = None,
+    dt: float = 0.0,
+) -> dict[str, Any]:
+    context = context or {}
+    profile = merged_profile(profile_value)
+    needs = merged_needs(needs_value)
+    previous = normalize_emotion_state(previous_value)
+    config = _emotion_policy()
+    traits = profile["traits"]
+    boldness = float(traits["boldness"])
+    resilience = float(traits["resilience"])
+    patience = float(traits["patience"])
+    sociability = float(traits["sociability"])
+    curiosity_trait = float(traits["curiosity"])
+
+    bound = bool(context.get("locked") or context.get("bound")) or str(context.get("interaction_mode") or "").lower() in set(AI_POLICY["valid"]["bound_modes"])
+    kind = _constraint_kind(context)
+    raw_profile = config["constraint_profiles"].get(kind, config["constraint_profiles"]["generic"])
+    severity_default = 1.0 if bound else 0.0
+    severity = clamp01(_finite_float(context.get("constraint_severity"), severity_default))
+    loss = clamp01(float(raw_profile["loss_of_control"]) * severity)
+    discomfort = clamp01(float(raw_profile["discomfort"]) * severity + clamp01(_finite_float(context.get("discomfort"), 0.0)) * 0.5)
+    exposure = clamp01(float(raw_profile["social_exposure"]) * severity)
+    immobility = clamp01(float(raw_profile["immobility"]) * severity)
+    threat = clamp01(max(_finite_float(context.get("threat"), 0.0), _finite_float(context.get("danger"), 0.0)))
+    pain = clamp01(_finite_float(context.get("pain"), 0.0))
+    novelty = clamp01(_finite_float(context.get("constraint_novelty"), 0.55 if bound else 0.0))
+    witnesses = clamp01(max(0.0, _finite_float(context.get("witnesses"), 0.0)) / 4.0)
+    social_outcome = max(-1.0, min(1.0, _finite_float(context.get("social_success"), 0.0)))
+    social_affinity = max(-1.0, min(1.0, _finite_float(context.get("social_affinity"), 0.0)))
+    familiarity = clamp01(_finite_float(context.get("social_familiarity"), 0.0))
+    positive_social = max(0.0, social_outcome * 0.75 + social_affinity * 0.25)
+    negative_social = max(0.0, -social_outcome * 0.70 + -min(0.0, social_affinity) * 0.30)
+    released = bool(context.get("released", False))
+    safe = bool(context.get("safe", False))
+
+    targets = {name: 0.0 for name in config["channels"]}
+    targets["fear"] = clamp01(threat * (0.68 + (1.0 - boldness) * 0.18) + loss * (0.42 - boldness * 0.16) + novelty * 0.14 - resilience * 0.16)
+    targets["anger"] = clamp01(loss * (0.18 + boldness * 0.44) + pain * 0.24 + negative_social * 0.35 + threat * boldness * 0.12 - patience * 0.12)
+    targets["sadness"] = clamp01(loss * 0.16 + (1.0 - needs["comfort"]) * 0.24 + negative_social * 0.26 - resilience * 0.18)
+    targets["frustration"] = clamp01(loss * (0.30 + (1.0 - patience) * 0.28) + discomfort * 0.34 + immobility * 0.16)
+    targets["shame"] = clamp01((exposure + witnesses * 0.35) * (0.34 + (1.0 - boldness) * 0.26) + negative_social * 0.12)
+    targets["joy"] = clamp01(positive_social * (0.42 + sociability * 0.30) + (0.16 if safe else 0.0))
+    targets["trust"] = clamp01(positive_social * (0.34 + sociability * 0.30) + familiarity * max(0.0, social_affinity) * 0.30)
+    targets["hope"] = clamp01((0.54 if released else 0.0) + (0.18 if safe else 0.0) + positive_social * 0.20 - threat * 0.12)
+    prior_distress = max(float(previous["fear"]), float(previous["frustration"]), float(previous["sadness"]))
+    targets["relief"] = clamp01((0.72 if released else 0.0) * max(0.35, prior_distress) + (0.14 if safe else 0.0))
+    targets["curiosity"] = clamp01(novelty * (0.18 + curiosity_trait * 0.62) * (1.0 - threat * 0.55) + max(0.0, needs["curiosity"] - 0.65) * 0.28)
+
+    if state == "contained":
+        targets["frustration"] = clamp01(targets["frustration"] + 0.10 * (1.0 - patience))
+    if needs["energy"] < 0.22:
+        targets["sadness"] = clamp01(targets["sadness"] + (0.22 - needs["energy"]) * 0.7)
+    if needs["social"] > 0.82 and not positive_social:
+        targets["sadness"] = clamp01(targets["sadness"] + (needs["social"] - 0.82) * 0.8)
+
+    safe_dt = max(0.0, min(_finite_float(dt, 0.0), float(config["max_dt"])))
+    alpha = 1.0 if safe_dt <= 0.0 else 1.0 - math.exp(-float(config["response_per_second"]) * safe_dt)
+    out = neutral_emotion_state()
+    for name in config["channels"]:
+        out[name] = clamp01(float(previous[name]) + (float(targets[name]) - float(previous[name])) * alpha)
+
+    strongest = max(config["channels"], key=lambda name: float(out[name]))
+    intensity = float(out[strongest])
+    if out["fear"] >= 0.72:
+        mood = "terrified"
+    elif strongest == "fear" and intensity >= 0.28:
+        mood = "afraid"
+    elif out["anger"] >= 0.72:
+        mood = "furious"
+    elif strongest == "anger" and intensity >= 0.28:
+        mood = "angry"
+    elif strongest == "shame" and intensity >= 0.28:
+        mood = "ashamed"
+    elif strongest == "frustration" and intensity >= 0.28:
+        mood = "frustrated"
+    elif strongest == "sadness" and intensity >= 0.28:
+        mood = "sad"
+    elif strongest == "relief" and intensity >= 0.24:
+        mood = "relieved"
+    elif strongest == "joy" and intensity >= 0.25:
+        mood = "happy"
+    elif strongest == "hope" and intensity >= 0.24:
+        mood = "hopeful"
+    elif strongest == "curiosity" and intensity >= 0.30:
+        mood = "curious"
+    elif strongest == "trust" and intensity >= 0.30:
+        mood = "content"
+    elif state == "rest" or needs["energy"] < 0.22:
         mood = "tired"
-    elif comfort < float(thresholds["uneasy_comfort"]):
+    elif needs["comfort"] < 0.28:
         mood = "uneasy"
-    elif curiosity > float(thresholds["alert_curiosity"]):
+    elif needs["social"] > 0.82:
+        mood = "lonely"
+    elif needs["curiosity"] > 0.78:
         mood = "alert"
-    elif social > float(thresholds["seeking_social"]):
-        mood = "seeking_company"
     else:
         mood = "calm"
-    return {
-        "mood": mood,
-        "energy": energy,
-        "comfort": comfort,
-        "focus": max(curiosity, social),
-        "animation": ANIMATION_BY_STATE.get(state, "idle_breathe"),
-    }
+
+    positive = float(out["joy"]) + float(out["trust"]) + float(out["hope"]) + float(out["relief"])
+    negative = float(out["fear"]) + float(out["anger"]) + float(out["sadness"]) + float(out["shame"]) + float(out["frustration"])
+    out["mood"] = mood
+    out["facial_mood"] = mood if mood in set(config["facial_moods"]) else "calm"
+    out["intensity"] = clamp01(intensity)
+    out["valence"] = max(-1.0, min(1.0, (positive - negative) / 2.5))
+    out["arousal"] = clamp01(max(float(out["fear"]), float(out["anger"]), float(out["frustration"]), float(out["joy"]) * 0.7, float(out["curiosity"]) * 0.6))
+    out["dominance"] = clamp01(0.25 + profile["autonomy"] * 0.35 + boldness * 0.28 - loss * 0.48 - float(out["fear"]) * 0.18 + float(out["anger"]) * 0.12)
+    return out
+
+
+def derive_affect(
+    needs: dict[str, float],
+    state: str,
+    profile: dict[str, Any] | None = None,
+    context: dict[str, Any] | None = None,
+    emotion_value: Any = None,
+    dt: float = 0.0,
+) -> dict[str, Any]:
+    out = step_emotion(profile, needs, state, context, emotion_value, dt)
+    out["energy"] = clamp01(needs.get("energy", 0.5))
+    out["comfort"] = clamp01(needs.get("comfort", 0.5))
+    out["focus"] = max(clamp01(needs.get("curiosity", 0.5)), clamp01(needs.get("social", 0.5)))
+    out["animation"] = ANIMATION_BY_STATE.get(state, "idle_breathe")
+    return out
 
 
 def merged_profile(value: dict[str, Any] | None) -> dict[str, Any]:
@@ -719,6 +912,7 @@ def step_mind(
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
     long_term_memory_value: Any = None,
+    emotion_value: Any = None,
 ) -> dict[str, Any]:
     profile = merged_profile(profile_value)
     needs = merged_needs(needs_value)
@@ -729,6 +923,7 @@ def step_mind(
     memory = step_memory(memory, dt)
     long_term_memory = step_long_term_memory(long_term_memory, dt)
     next_state = choose_state(profile, needs, context, memory, long_term_memory)
+    affect = derive_affect(needs, next_state, profile, context, emotion_value, dt)
     return {
         "state": next_state,
         "needs": needs,
@@ -738,6 +933,6 @@ def step_mind(
         "mobile": next_state in MOBILE_STATES,
         "contained": next_state == "contained",
         "animation": ANIMATION_BY_STATE.get(next_state, "idle_breathe"),
-        "affect": derive_affect(needs, next_state),
+        "affect": affect,
         "utility": activity_scores(profile, needs, context, memory, long_term_memory),
     }

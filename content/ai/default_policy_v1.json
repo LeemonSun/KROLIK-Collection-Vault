@@ -41,6 +41,132 @@
       "wander": 0.65
     }
   },
+  "emotion_model": {
+    "channels": [
+      "fear",
+      "anger",
+      "sadness",
+      "joy",
+      "trust",
+      "shame",
+      "hope",
+      "frustration",
+      "relief",
+      "curiosity"
+    ],
+    "constraint_profiles": {
+      "ankle_shackles": {
+        "discomfort": 0.3,
+        "immobility": 0.52,
+        "loss_of_control": 0.58,
+        "social_exposure": 0.2
+      },
+      "cage": {
+        "discomfort": 0.28,
+        "immobility": 0.76,
+        "loss_of_control": 0.72,
+        "social_exposure": 0.34
+      },
+      "contained": {
+        "discomfort": 0.24,
+        "immobility": 0.62,
+        "loss_of_control": 0.58,
+        "social_exposure": 0.16
+      },
+      "cuffs": {
+        "discomfort": 0.3,
+        "immobility": 0.48,
+        "loss_of_control": 0.62,
+        "social_exposure": 0.24
+      },
+      "generic": {
+        "discomfort": 0.3,
+        "immobility": 0.45,
+        "loss_of_control": 0.5,
+        "social_exposure": 0.2
+      },
+      "harness": {
+        "discomfort": 0.35,
+        "immobility": 0.68,
+        "loss_of_control": 0.7,
+        "social_exposure": 0.3
+      },
+      "none": {
+        "discomfort": 0.0,
+        "immobility": 0.0,
+        "loss_of_control": 0.0,
+        "social_exposure": 0.0
+      },
+      "restraint_chair": {
+        "discomfort": 0.44,
+        "immobility": 0.9,
+        "loss_of_control": 0.82,
+        "social_exposure": 0.38
+      },
+      "restraint_stool": {
+        "discomfort": 0.4,
+        "immobility": 0.82,
+        "loss_of_control": 0.72,
+        "social_exposure": 0.42
+      },
+      "rope": {
+        "discomfort": 0.38,
+        "immobility": 0.66,
+        "loss_of_control": 0.66,
+        "social_exposure": 0.28
+      },
+      "shackles": {
+        "discomfort": 0.34,
+        "immobility": 0.6,
+        "loss_of_control": 0.68,
+        "social_exposure": 0.24
+      },
+      "stocks": {
+        "discomfort": 0.48,
+        "immobility": 0.94,
+        "loss_of_control": 0.9,
+        "social_exposure": 0.62
+      },
+      "tether": {
+        "discomfort": 0.22,
+        "immobility": 0.42,
+        "loss_of_control": 0.55,
+        "social_exposure": 0.24
+      },
+      "wall_anchor": {
+        "discomfort": 0.46,
+        "immobility": 0.92,
+        "loss_of_control": 0.88,
+        "social_exposure": 0.45
+      }
+    },
+    "facial_moods": [
+      "calm",
+      "tired",
+      "uneasy",
+      "alert",
+      "seeking_company",
+      "terrified",
+      "afraid",
+      "furious",
+      "angry",
+      "sad",
+      "ashamed",
+      "frustrated",
+      "hopeful",
+      "relieved",
+      "happy",
+      "content",
+      "curious",
+      "lonely",
+      "anxious",
+      "determined",
+      "defiant",
+      "resigned"
+    ],
+    "max_dt": 10.0,
+    "response_per_second": 3.2
+  },
   "format_version": 1,
   "hard_gates": {
     "autonomy_lock": 0.2,
