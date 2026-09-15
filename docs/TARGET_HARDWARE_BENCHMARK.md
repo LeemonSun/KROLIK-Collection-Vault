@@ -164,7 +164,8 @@ A valid result closes the current gap between hosted software-render evidence an
 
 Until that local run exists, KROLIK should continue describing RX-class performance as **unmeasured target hardware**, even though the runtime and collector are production-verified in CI.
 
-
 ## CI contract and orchestration smoke
 
 The Windows benchmark workflow uses two deliberately different checks. The contract job is the cheap syntax/configuration check and does not render. The orchestration smoke executes the real collector end-to-end with a 5-agent production stress point on GitHub-hosted Windows, verifies FPS/screenshot/log evidence, and requires the collector to reject GitHub's software renderer as target-hardware evidence with exit code 2. This proves the orchestration and rejection path without pretending hosted software rendering represents the target PC.
+
+The smoke starts from a clean Windows runner without relying on repository-specific `PYTHONPATH` configuration, so it also verifies that the collector can build the production Python vertical slice from its own repository-root discovery logic.
