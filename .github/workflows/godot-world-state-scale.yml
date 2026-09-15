@@ -9,6 +9,7 @@ on:
     paths:
       - 'runtime_godot/scripts/world_state.gd'
       - 'runtime_godot/scripts/world_state_scale_harness.gd'
+      - 'runtime_godot/scripts/runtime_package_cache.gd'
       - 'runtime_godot/scripts/population_lod.gd'
       - 'runtime_godot/scripts/character_agent.gd'
       - 'runtime_godot/scripts/agent_brain.gd'
@@ -20,6 +21,7 @@ on:
     paths:
       - 'runtime_godot/scripts/world_state.gd'
       - 'runtime_godot/scripts/world_state_scale_harness.gd'
+      - 'runtime_godot/scripts/runtime_package_cache.gd'
       - 'runtime_godot/scripts/population_lod.gd'
       - 'runtime_godot/scripts/character_agent.gd'
       - 'runtime_godot/scripts/agent_brain.gd'
@@ -66,6 +68,7 @@ jobs:
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+          timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/runtime_package_cache.gd
           timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/world_state_scale_harness.gd
       - name: Save destroy reload 500 production characters
         shell: bash
@@ -88,15 +91,28 @@ jobs:
           python - "$output" <<'PY'
           import re, sys
           text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
-          m = re.search(r'KROLIK_WORLD_STATE_SCALE status=ok agents=500 full=80 reduced=160 sleeping=260 spawn_ms=([0-9.]+) capture_ms=([0-9.]+) save_ms=([0-9.]+) load_ms=([0-9.]+) restore_ms=([0-9.]+) save_bytes=([0-9]+)', text)
+          m = re.search(
+              r'KROLIK_WORLD_STATE_SCALE status=ok agents=500 full=80 reduced=160 sleeping=260 '
+              r'spawn_ms=([0-9.]+) capture_ms=([0-9.]+) save_ms=([0-9.]+) load_ms=([0-9.]+) '
+              r'restore_ms=([0-9.]+) save_bytes=([0-9]+) cache_parses=([0-9]+) cache_decodes=([0-9]+) cache_hits=([0-9]+)',
+              text,
+          )
           if not m:
               raise SystemExit('scale metrics marker missing or malformed')
           spawn_ms, capture_ms, save_ms, load_ms, restore_ms = map(float, m.groups()[:5])
-          save_bytes = int(m.group(6))
-          print(f'KROLIK_WORLD_STATE_SCALE_GATE save_mib={save_bytes/1048576:.3f} capture_ms={capture_ms:.2f} save_ms={save_ms:.2f} load_ms={load_ms:.2f} restore_ms={restore_ms:.2f}')
+          save_bytes, cache_parses, cache_decodes, cache_hits = map(int, m.groups()[5:])
+          print(
+              f'KROLIK_WORLD_STATE_SCALE_GATE save_mib={save_bytes/1048576:.3f} '
+              f'spawn_ms={spawn_ms:.2f} capture_ms={capture_ms:.2f} save_ms={save_ms:.2f} '
+              f'load_ms={load_ms:.2f} restore_ms={restore_ms:.2f} cache_hits={cache_hits}'
+          )
+          if cache_parses != 1 or cache_decodes != 1 or cache_hits < 999:
+              raise SystemExit(
+                  f'package cache regression: parses={cache_parses} decodes={cache_decodes} hits={cache_hits}'
+              )
           if save_bytes > 16 * 1024 * 1024:
               raise SystemExit(f'world save too large: {save_bytes} bytes')
-          if capture_ms > 60000 or save_ms > 60000 or load_ms > 60000 or restore_ms > 120000:
+          if spawn_ms > 60000 or capture_ms > 60000 or save_ms > 60000 or load_ms > 60000 or restore_ms > 120000:
               raise SystemExit('world-state phase exceeded first-pass performance ceiling')
           PY
       - name: Cleanup generated runtime package
