@@ -1,0 +1,27 @@
+name: D4 Parser Diagnostic
+
+on:
+  push:
+    branches:
+      - work/d4-long-term-memory-20260915
+
+jobs:
+  parse-agent-brain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive='Godot_v4.7.2-stable_linux.x86_64.zip'
+          curl --fail --location --retry 4 --output "$archive" "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/$archive"
+          echo 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  Godot_v4.7.2-stable_linux.x86_64.zip' | sha256sum --check --strict
+          unzip -q "$archive" -d godot-bin
+          chmod +x godot-bin/Godot_v4.7.2-stable_linux.x86_64
+      - name: Parse agent brain directly
+        shell: bash
+        run: |
+          set -o pipefail
+          godot-bin/Godot_v4.7.2-stable_linux.x86_64 --headless --path runtime_godot --check-only --script res://scripts/agent_brain.gd 2>&1 | tee /tmp/parse.log
