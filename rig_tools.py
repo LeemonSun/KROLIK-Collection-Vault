@@ -50,6 +50,91 @@ JOINT_ORDER = [
     "right_hip", "right_knee", "right_ankle",
 ]
 
+JOINT_CONFIDENCE_THRESHOLDS = {
+    "head": 0.35,
+    "neck": 0.40,
+    "left_shoulder": 0.45,
+    "right_shoulder": 0.45,
+    "left_elbow": 0.45,
+    "right_elbow": 0.45,
+    "left_wrist": 0.45,
+    "right_wrist": 0.45,
+    "pelvis": 0.45,
+    "left_hip": 0.45,
+    "right_hip": 0.45,
+    "left_knee": 0.40,
+    "right_knee": 0.40,
+    "left_ankle": 0.40,
+    "right_ankle": 0.40,
+}
+
+EXACT_ANCHOR_THRESHOLDS = {
+    "head": 0.50,
+    "left_wrist": 0.60,
+    "right_wrist": 0.60,
+    "left_ankle": 0.55,
+    "right_ankle": 0.55,
+}
+
+
+def classify_joint_confidence(
+    joint_confidence: dict[str, float],
+    fallback: float = 0.18,
+) -> dict[str, Any]:
+    """Turn raw detector scores into conservative runtime confidence policy.
+
+    DWPose's low detection floor answers "did the model find enough of a body?".
+    It is intentionally not the same as "is this joint precise enough for IK or
+    an exact interaction anchor?". Distal joints need stricter thresholds.
+    """
+    thresholds: dict[str, float] = {}
+    status: dict[str, str] = {}
+    low: list[str] = []
+    guarded: list[str] = []
+    exact_anchors: list[str] = []
+
+    for name in JOINT_ORDER:
+        raw = joint_confidence.get(name, 0.0)
+        try:
+            value = max(0.0, min(1.0, float(raw)))
+        except (TypeError, ValueError):
+            value = 0.0
+        threshold = max(float(fallback), float(JOINT_CONFIDENCE_THRESHOLDS.get(name, fallback)))
+        thresholds[name] = round(threshold, 6)
+        if value < threshold:
+            status[name] = "uncertain"
+            low.append(name)
+        elif value < min(1.0, threshold + 0.15):
+            status[name] = "guarded"
+            guarded.append(name)
+        else:
+            status[name] = "reliable"
+
+        anchor_threshold = EXACT_ANCHOR_THRESHOLDS.get(name)
+        if anchor_threshold is not None and value >= max(threshold, float(anchor_threshold)):
+            exact_anchors.append(name)
+
+    uncertain_limbs: list[str] = []
+    chains = {
+        "left_arm": ("left_elbow", "left_wrist"),
+        "right_arm": ("right_elbow", "right_wrist"),
+        "left_leg": ("left_knee", "left_ankle"),
+        "right_leg": ("right_knee", "right_ankle"),
+    }
+    for limb, names in chains.items():
+        if any(status.get(name) == "uncertain" for name in names):
+            uncertain_limbs.append(limb)
+
+    return {
+        "thresholds": thresholds,
+        "status": status,
+        "low_confidence_joints": sorted(low),
+        "guarded_joints": sorted(guarded),
+        "uncertain_limbs": sorted(uncertain_limbs),
+        "exact_anchor_joints": sorted(exact_anchors),
+    }
+
+
 
 @dataclass
 class RigDetection:
@@ -303,6 +388,32 @@ def _dwpose_keypoints_to_rig(points, scores, width: int, height: int, min_conf: 
     }
     used_scores = [float(conf[i]) for i in required if float(conf[i]) >= 0.0]
     quality = sum(used_scores) / max(1, len(used_scores))
+
+    def conf_value(index: int) -> float:
+        return round(max(0.0, min(1.0, float(conf[index]))), 6)
+
+    face_score = (
+        sum(float(conf[index]) for index in face_candidates) / len(face_candidates)
+        if face_candidates else min(float(conf[5]), float(conf[6])) * 0.5
+    )
+    joint_confidence = {
+        "head": round(max(0.0, min(1.0, face_score)), 6),
+        "neck": round(max(0.0, min(1.0, min(float(conf[5]), float(conf[6])))), 6),
+        "left_shoulder": conf_value(5),
+        "left_elbow": conf_value(7),
+        "left_wrist": conf_value(9),
+        "right_shoulder": conf_value(6),
+        "right_elbow": conf_value(8),
+        "right_wrist": conf_value(10),
+        "pelvis": round(max(0.0, min(1.0, min(float(conf[11]), float(conf[12])))), 6),
+        "left_hip": conf_value(11),
+        "left_knee": conf_value(13),
+        "left_ankle": conf_value(15),
+        "right_hip": conf_value(12),
+        "right_knee": conf_value(14),
+        "right_ankle": conf_value(16),
+    }
+    confidence_policy = classify_joint_confidence(joint_confidence, fallback=min_conf)
     return RigDetection(joints=joints, settings={
         "backend": "dwpose-onnx",
         "rig_format_version": RIG_FORMAT_VERSION,
@@ -312,6 +423,13 @@ def _dwpose_keypoints_to_rig(points, scores, width: int, height: int, min_conf: 
         "influence_radius": .155,
         "preserve_volume": .68,
         "pose_confidence": round(float(quality), 5),
+        "joint_confidence": joint_confidence,
+        "joint_confidence_thresholds": confidence_policy["thresholds"],
+        "joint_confidence_status": confidence_policy["status"],
+        "low_confidence_joints": confidence_policy["low_confidence_joints"],
+        "guarded_joints": confidence_policy["guarded_joints"],
+        "uncertain_limbs": confidence_policy["uncertain_limbs"],
+        "exact_anchor_joints": confidence_policy["exact_anchor_joints"],
     })
 
 
@@ -391,6 +509,17 @@ def _dwpose_infer_points(path: str | Path):
 
     required = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     core_scores = [float(score[index]) for index in required if index < score.shape[0]]
+    coco_names = {
+        0: "nose", 1: "left_eye", 2: "right_eye", 3: "left_ear", 4: "right_ear",
+        5: "left_shoulder", 6: "right_shoulder", 7: "left_elbow", 8: "right_elbow",
+        9: "left_wrist", 10: "right_wrist", 11: "left_hip", 12: "right_hip",
+        13: "left_knee", 14: "right_knee", 15: "left_ankle", 16: "right_ankle",
+    }
+    named_scores = {
+        name: round(float(score[index]), 6)
+        for index, name in coco_names.items()
+        if index < score.shape[0]
+    }
     diagnostics = {
         "model": str(model),
         "source_size": [int(src_w), int(src_h)],
@@ -405,6 +534,7 @@ def _dwpose_infer_points(path: str | Path):
         "score_mean": round(float(np.mean(score)), 6),
         "core_scores": [round(value, 6) for value in core_scores],
         "core_above_018": sum(value >= .18 for value in core_scores),
+        "named_scores": named_scores,
         "providers": list(session.get_providers()),
     }
     return points, score, diagnostics

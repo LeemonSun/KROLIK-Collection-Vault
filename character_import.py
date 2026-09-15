@@ -24,6 +24,11 @@ import tempfile
 import numpy as np
 from PIL import Image, ImageOps
 
+try:
+    import cv2  # type: ignore
+except Exception:  # pragma: no cover
+    cv2 = None  # type: ignore
+
 from rig_edit import apply_joint_overrides
 from rig_tools import detect_rig
 from runtime_package import build_manifest, write_package
@@ -31,7 +36,7 @@ from runtime_package import build_manifest, write_package
 
 ASSET_IMPORT_SCHEMA = "krolik.asset-import/1"
 ASSET_IMPORT_FORMAT_VERSION = 1
-CUTOUT_ALGORITHM_VERSION = 1
+CUTOUT_ALGORITHM_VERSION = 2
 MAX_IMAGE_PIXELS = 40_000_000
 SUPPORTED_FORMATS = {"PNG", "JPEG", "WEBP", "BMP"}
 CUTOUT_MODES = {"auto", "alpha-only", "opaque"}
@@ -151,6 +156,136 @@ def _uniform_border_cutout(image: Image.Image) -> tuple[Image.Image, dict[str, A
     }
 
 
+
+def _largest_component(mask: np.ndarray) -> tuple[np.ndarray, float]:
+    """Keep the dominant connected foreground component and report its dominance."""
+    if cv2 is None:
+        return mask, 1.0
+    binary = (mask > 0).astype(np.uint8)
+    count, labels, stats, _centroids = cv2.connectedComponentsWithStats(binary, 8)
+    if count <= 1:
+        return mask, 1.0
+    areas = [int(stats[index, cv2.CC_STAT_AREA]) for index in range(1, count)]
+    if not areas:
+        return np.zeros_like(mask), 0.0
+    best_offset = int(np.argmax(np.asarray(areas)))
+    best_index = best_offset + 1
+    total = max(1, sum(areas))
+    kept = np.where(labels == best_index, 255, 0).astype(np.uint8)
+    return kept, float(areas[best_offset]) / float(total)
+
+
+def _center_grabcut_refine(
+    image: Image.Image,
+    prior: Image.Image,
+) -> tuple[Image.Image, dict[str, Any]] | None:
+    """Refine a weak border cutout for centered single-character artwork.
+
+    This is deliberately a fallback, not the first choice. GrabCut gets a
+    conservative central rectangle, then the dominant component is retained.
+    A narrow band of the previous alpha is allowed back around that component
+    so fine hair/cloth edges survive without re-introducing a studio floor.
+    """
+    if cv2 is None:
+        return None
+    rgb = np.asarray(image.convert("RGB"), dtype=np.uint8)
+    height, width = rgb.shape[:2]
+    if width < 48 or height < 64:
+        return None
+
+    margin_x = max(2, int(round(width * 0.04)))
+    margin_top = max(2, int(round(height * 0.015)))
+    margin_bottom = max(2, int(round(height * 0.018)))
+    rect_width = width - margin_x * 2
+    rect_height = height - margin_top - margin_bottom
+    if rect_width < 16 or rect_height < 24:
+        return None
+
+    bgr = rgb[:, :, ::-1].copy()
+    labels = np.zeros((height, width), dtype=np.uint8)
+    bg_model = np.zeros((1, 65), dtype=np.float64)
+    fg_model = np.zeros((1, 65), dtype=np.float64)
+    try:
+        cv2.grabCut(
+            bgr,
+            labels,
+            (margin_x, margin_top, rect_width, rect_height),
+            bg_model,
+            fg_model,
+            5,
+            cv2.GC_INIT_WITH_RECT,
+        )
+    except Exception:
+        return None
+
+    foreground = np.where(
+        (labels == cv2.GC_FGD) | (labels == cv2.GC_PR_FGD),
+        255,
+        0,
+    ).astype(np.uint8)
+    foreground, component_dominance = _largest_component(foreground)
+    core_share = float(np.mean(foreground > 16))
+    if not (0.025 <= core_share <= 0.88) or component_dominance < 0.72:
+        return None
+
+    ys, xs = np.where(foreground > 16)
+    if not len(xs):
+        return None
+    bbox_height_share = float(ys.max() - ys.min() + 1) / float(height)
+    bbox_width_share = float(xs.max() - xs.min() + 1) / float(width)
+    if bbox_height_share < 0.35 or bbox_width_share < 0.08:
+        return None
+
+    prior_alpha = np.asarray(prior.getchannel("A"), dtype=np.uint8)
+    rescue_radius = max(2, int(round(min(width, height) * 0.012)))
+    kernel = cv2.getStructuringElement(
+        cv2.MORPH_ELLIPSE,
+        (rescue_radius * 2 + 1, rescue_radius * 2 + 1),
+    )
+    near_subject = cv2.dilate((foreground > 0).astype(np.uint8), kernel) > 0
+    alpha = np.where(
+        foreground > 0,
+        np.maximum(foreground, prior_alpha),
+        np.where(near_subject, prior_alpha, 0),
+    ).astype(np.uint8)
+
+    edge_band = np.zeros((height, width), dtype=bool)
+    edge = max(1, int(round(min(width, height) * 0.008)))
+    edge_band[:edge, :] = True
+    edge_band[-edge:, :] = True
+    edge_band[:, :edge] = True
+    edge_band[:, -edge:] = True
+    border_foreground_share = float(np.mean((alpha > 16)[edge_band]))
+    foreground_share = float(np.mean(alpha > 16))
+    if border_foreground_share > 0.20 or not (0.025 <= foreground_share <= 0.90):
+        return None
+
+    rgba = np.asarray(image.convert("RGBA"), dtype=np.uint8).copy()
+    rgba[:, :, 3] = alpha
+    result = Image.fromarray(rgba, mode="RGBA")
+    shape_quality = min(1.0, bbox_height_share / 0.72)
+    confidence = round(
+        max(0.0, min(0.96,
+            0.68
+            + 0.16 * component_dominance
+            + 0.10 * shape_quality
+            + 0.08 * (1.0 - min(1.0, border_foreground_share / 0.20))
+        )),
+        4,
+    )
+    return result, {
+        "method": "center-grabcut-v2",
+        "confidence": confidence,
+        "review_required": bool(confidence < 0.76),
+        "foreground_share": round(foreground_share, 6),
+        "component_dominance": round(component_dominance, 6),
+        "bbox_width_share": round(bbox_width_share, 6),
+        "bbox_height_share": round(bbox_height_share, 6),
+        "border_foreground_share": round(border_foreground_share, 6),
+        "warnings": ["grabcut_centered_single_character_fallback"],
+    }
+
+
 def _prepare_cutout(image: Image.Image, mode: str) -> tuple[Image.Image, dict[str, Any]]:
     normalized_mode = _normalize_cutout_mode(mode)
     if _has_meaningful_alpha(image):
@@ -162,7 +297,15 @@ def _prepare_cutout(image: Image.Image, mode: str) -> tuple[Image.Image, dict[st
             "warnings": [],
         }
     if normalized_mode == "auto":
-        return _uniform_border_cutout(image)
+        initial, initial_info = _uniform_border_cutout(image)
+        if not bool(initial_info.get("review_required")):
+            return initial, initial_info
+        refined = _center_grabcut_refine(image, initial)
+        if refined is not None:
+            refined_image, refined_info = refined
+            if float(refined_info.get("confidence", 0.0)) > float(initial_info.get("confidence", 0.0)):
+                return refined_image, refined_info
+        return initial, initial_info
 
     opaque = image.copy()
     opaque.putalpha(255)

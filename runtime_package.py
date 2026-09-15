@@ -260,6 +260,16 @@ def build_manifest(
                 "preserve_volume": float(settings.get("preserve_volume", 0.62)),
             },
             "health": health,
+            "confidence": {
+                "pose": float(settings.get("pose_confidence", 0.0)),
+                "joints": dict(settings.get("joint_confidence", {})) if isinstance(settings.get("joint_confidence", {}), dict) else {},
+                "thresholds": dict(settings.get("joint_confidence_thresholds", {})) if isinstance(settings.get("joint_confidence_thresholds", {}), dict) else {},
+                "status": dict(settings.get("joint_confidence_status", {})) if isinstance(settings.get("joint_confidence_status", {}), dict) else {},
+                "low_confidence_joints": list(settings.get("low_confidence_joints", [])) if isinstance(settings.get("low_confidence_joints", []), list) else [],
+                "guarded_joints": list(settings.get("guarded_joints", [])) if isinstance(settings.get("guarded_joints", []), list) else [],
+                "uncertain_limbs": list(settings.get("uncertain_limbs", [])) if isinstance(settings.get("uncertain_limbs", []), list) else [],
+                "exact_anchor_joints": list(settings.get("exact_anchor_joints", [])) if isinstance(settings.get("exact_anchor_joints", []), list) else [],
+            },
             "skinning": skin,
         },
         "physics": {
