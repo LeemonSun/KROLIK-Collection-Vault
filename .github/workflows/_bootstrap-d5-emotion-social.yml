@@ -61,7 +61,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add life_sim.py tests/test_life_sim.py content/ai/default_policy_v1.json runtime_godot/data/ai_policy_v1.json runtime_godot/scripts/agent_brain.gd runtime_godot/scripts/facial_state.gd runtime_godot/scripts/constraint_binding.gd runtime_godot/scripts/character_agent.gd runtime_godot/scripts/social_encounter_manager.gd runtime_godot/scripts/emotion_social_harness.gd runtime_godot/scripts/world_runtime.gd .github/workflows/d5-emotion-social.yml
+          git add life_sim.py tests/test_life_sim.py content/ai/default_policy_v1.json runtime_godot/data/ai_policy_v1.json runtime_godot/scripts/agent_brain.gd runtime_godot/scripts/facial_state.gd runtime_godot/scripts/constraint_binding.gd runtime_godot/scripts/character_agent.gd runtime_godot/scripts/social_encounter_manager.gd runtime_godot/scripts/emotion_social_harness.gd runtime_godot/scripts/world_runtime.gd
           if git diff --cached --quiet; then
             echo 'No D5 product changes to commit.'
             exit 0
