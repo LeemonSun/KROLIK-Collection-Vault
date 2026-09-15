@@ -8,17 +8,24 @@ on:
       - 'rig_tools.py'
       - 'character_import.py'
       - 'runtime_package.py'
+      - 'import_integrity.py'
+      - 'runtime_package_integrity.py'
       - 'tools/fetch_dwpose_model.py'
       - 'tools/smoke_dwpose_corpus.py'
+      - 'tools/build_dwpose_vertical_slice.py'
       - 'tests/test_auto_rig_review.py'
+      - 'runtime_godot/scripts/core_vertical_slice_harness.gd'
       - '.github/workflows/dwpose-domain-art-smoke.yml'
 
 jobs:
   anime-art-corpus:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       PYTHONPATH: .
+      KROLIK_DWPOSE_MODEL: models/dwpose/dw-ll_ucoco_384.onnx
+      GODOT_VERSION: '4.7.2'
+      GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,6 +38,8 @@ jobs:
           pip install pytest numpy onnxruntime Pillow opencv-python-headless
       - name: Auto-rig review regression
         run: pytest -q tests/test_auto_rig_review.py
+      - name: Product-slice syntax
+        run: python -m py_compile tools/build_dwpose_vertical_slice.py tools/smoke_dwpose_corpus.py
       - name: Cache pinned DWPose model
         uses: actions/cache@v4
         with:
@@ -47,7 +56,7 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/dwpose-anime"
           base="https://raw.githubusercontent.com/IDEA-Research/DWPose/onnx/ControlNet-v1-1-nightly/test_imgs"
           for name in anime1.png anime2.png anime3.jpg anime4.jpg; do
-            curl --fail --location --retry 4 --output "${RUNNER_TEMP}/dwpose-anime/${name}" "${base}/${name}"
+            curl --fail --location --retry 4 --output "${RUNNER_TEMP}/dwpose-anime/${name}" "$base/$name"
             test -s "${RUNNER_TEMP}/dwpose-anime/${name}"
           done
       - name: Production import and DWPose anime-art corpus gate
@@ -61,11 +70,78 @@ jobs:
             "${RUNNER_TEMP}/dwpose-anime/anime4.jpg" \
             --min-dwpose-share 0.75 \
             --report "${RUNNER_TEMP}/dwpose-anime/domain_report.json"
-      - name: Upload domain smoke report
+      - id: select_product_case
+        name: Select a proven DWPose anime case for runtime packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'dwpose-anime' / 'domain_report.json').read_text())
+          case = next((row for row in report.get('cases', []) if row.get('backend') == 'dwpose-onnx' and row.get('runtime_ready')), None)
+          if case is None:
+              raise SystemExit('no successful DWPose anime case available for product slice')
+          image = str(case['image'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f'image={image}\n')
+          print(f'KROLIK_DWPOSE_PRODUCT_CASE image={image}')
+          PY
+      - name: Build sealed DWPose runtime package from anime art
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf runtime_godot/.ci_dwpose_slice
+          python tools/build_dwpose_vertical_slice.py \
+            "${RUNNER_TEMP}/dwpose-anime/${{ steps.select_product_case.outputs.image }}" \
+            --output-root runtime_godot/.ci_dwpose_slice
+          test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
+          test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
+      - name: Download verified Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${archive}"
+          curl --fail --location --retry 4 --output "$archive" "$url"
+          echo "${GODOT_SHA256}  ${archive}" | sha256sum --check --strict
+          unzip -q "$archive" -d godot-bin
+          chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --version
+      - name: Import Godot project
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+      - name: Production DWPose package to Godot runtime gate
+        shell: bash
+        env:
+          KROLIK_TEST_MANIFEST_PATH: res://.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
+          KROLIK_TEST_CHARACTER_ID: ci_dwpose_slice
+          KROLIK_TEST_EXPECT_WIDTH: '0'
+          KROLIK_TEST_EXPECT_HEIGHT: '0'
+          KROLIK_TEST_RIG_BACKEND: dwpose-onnx
+          KROLIK_TEST_MIN_RIG_SCORE: '99.0'
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 60s "$GODOT" --headless --path runtime_godot --script res://scripts/core_vertical_slice_harness.gd
+      - name: Upload domain and product-slice evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dwpose-anime-domain-smoke
-          path: ${{ runner.temp }}/dwpose-anime/domain_report.json
+          name: dwpose-anime-domain-product-slice
+          path: |
+            ${{ runner.temp }}/dwpose-anime/domain_report.json
+            runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
+            runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
+            runtime_godot/.ci_dwpose_slice/imports/ci_dwpose_slice/receipts/**
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 14
+      - name: Cleanup product slice
+        if: always()
+        shell: bash
+        run: rm -rf runtime_godot/.ci_dwpose_slice
