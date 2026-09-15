@@ -19,17 +19,34 @@ on:
       - 'tests/test_qa_corpus.py'
       - 'runtime_godot/scripts/core_vertical_slice_harness.gd'
       - '.github/workflows/dwpose-domain-art-smoke.yml'
+  pull_request:
+    paths:
+      - 'rig_tools.py'
+      - 'character_import.py'
+      - 'runtime_package.py'
+      - 'import_integrity.py'
+      - 'runtime_package_integrity.py'
+      - 'qa/corpora/dwpose_domain_art_corpus_v1.json'
+      - 'tools/fetch_dwpose_model.py'
+      - 'tools/fetch_pinned_qa_corpus.py'
+      - 'tools/smoke_dwpose_corpus.py'
+      - 'tools/build_dwpose_vertical_slice.py'
+      - 'tests/test_auto_rig_review.py'
+      - 'tests/test_qa_corpus.py'
+      - 'runtime_godot/scripts/core_vertical_slice_harness.gd'
+      - '.github/workflows/dwpose-domain-art-smoke.yml'
 
 jobs:
-  anime-art-corpus:
+  domain-art-corpus:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHONPATH: .
       KROLIK_DWPOSE_MODEL: models/dwpose/dw-ll_ucoco_384.onnx
       GODOT_VERSION: '4.7.2'
       GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
       QA_CORPUS_MANIFEST: qa/corpora/dwpose_domain_art_corpus_v1.json
+      QA_CORPUS_DIR: ${{ runner.temp }}/dwpose-domain
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -45,7 +62,7 @@ jobs:
       - name: Product-slice syntax and manifest contract
         run: |
           python -m py_compile tools/fetch_pinned_qa_corpus.py tools/build_dwpose_vertical_slice.py tools/smoke_dwpose_corpus.py
-          python tools/fetch_pinned_qa_corpus.py --manifest "$QA_CORPUS_MANIFEST" --output-dir "${RUNNER_TEMP}/dwpose-anime" --validate-only
+          python tools/fetch_pinned_qa_corpus.py --manifest "$QA_CORPUS_MANIFEST" --output-dir "$QA_CORPUS_DIR" --validate-only
       - name: Cache pinned DWPose model
         uses: actions/cache@v4
         with:
@@ -55,31 +72,55 @@ jobs:
         run: |
           python tools/fetch_dwpose_model.py
           python tools/fetch_dwpose_model.py --check
-      - name: Fetch exact upstream anime domain fixtures
+      - name: Fetch exact upstream domain fixtures
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf "${RUNNER_TEMP}/dwpose-anime"
+          rm -rf "$QA_CORPUS_DIR"
           python tools/fetch_pinned_qa_corpus.py \
             --manifest "$QA_CORPUS_MANIFEST" \
-            --output-dir "${RUNNER_TEMP}/dwpose-anime"
-          test -s "${RUNNER_TEMP}/dwpose-anime/anime1.png"
-          test -s "${RUNNER_TEMP}/dwpose-anime/anime2.png"
-          test -s "${RUNNER_TEMP}/dwpose-anime/anime3.jpg"
-          test -s "${RUNNER_TEMP}/dwpose-anime/anime4.jpg"
-      - name: Production import and DWPose anime-art corpus gate
+            --output-dir "$QA_CORPUS_DIR"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+
+          manifest = json.loads(Path(os.environ['QA_CORPUS_MANIFEST']).read_text(encoding='utf-8'))
+          root = Path(os.environ['QA_CORPUS_DIR'])
+          fixtures = manifest['fixtures']
+          if len(fixtures) < 12:
+              raise SystemExit(f'expanded corpus unexpectedly small: {len(fixtures)}')
+          missing = [
+              PurePosixPath(case['path']).name
+              for case in fixtures
+              if not (root / PurePosixPath(case['path']).name).is_file()
+          ]
+          if missing:
+              raise SystemExit(f'missing fetched fixtures: {missing}')
+          print(f'KROLIK_DWPOSE_DOMAIN_FETCH status=ok fixtures={len(fixtures)}')
+          PY
+      - name: Production import and DWPose domain-art corpus gate
         shell: bash
         run: |
           set -euo pipefail
+          mapfile -t IMAGES < <(python - <<'PY'
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+
+          manifest = json.loads(Path(os.environ['QA_CORPUS_MANIFEST']).read_text(encoding='utf-8'))
+          root = Path(os.environ['QA_CORPUS_DIR'])
+          for case in manifest['fixtures']:
+              print(root / PurePosixPath(case['path']).name)
+          PY
+          )
+          test "${#IMAGES[@]}" -ge 12
           python tools/smoke_dwpose_corpus.py \
-            "${RUNNER_TEMP}/dwpose-anime/anime1.png" \
-            "${RUNNER_TEMP}/dwpose-anime/anime2.png" \
-            "${RUNNER_TEMP}/dwpose-anime/anime3.jpg" \
-            "${RUNNER_TEMP}/dwpose-anime/anime4.jpg" \
+            "${IMAGES[@]}" \
             --min-dwpose-share 0.75 \
-            --report "${RUNNER_TEMP}/dwpose-anime/domain_report.json"
+            --report "$QA_CORPUS_DIR/domain_report.json"
       - id: select_product_case
-        name: Select a proven DWPose anime case for runtime packaging
+        name: Select a proven DWPose domain case for runtime packaging
         shell: bash
         run: |
           set -euo pipefail
@@ -87,22 +128,22 @@ jobs:
           import json, os
           from pathlib import Path
 
-          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'dwpose-anime' / 'domain_report.json').read_text())
+          report = json.loads((Path(os.environ['QA_CORPUS_DIR']) / 'domain_report.json').read_text())
           case = next((row for row in report.get('cases', []) if row.get('backend') == 'dwpose-onnx' and row.get('runtime_ready')), None)
           if case is None:
-              raise SystemExit('no successful DWPose anime case available for product slice')
+              raise SystemExit('no successful DWPose domain case available for product slice')
           image = str(case['image'])
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
               handle.write(f'image={image}\n')
           print(f'KROLIK_DWPOSE_PRODUCT_CASE image={image}')
           PY
-      - name: Build sealed DWPose runtime package from anime art
+      - name: Build sealed DWPose runtime package from domain art
         shell: bash
         run: |
           set -euo pipefail
           rm -rf runtime_godot/.ci_dwpose_slice
           python tools/build_dwpose_vertical_slice.py \
-            "${RUNNER_TEMP}/dwpose-anime/${{ steps.select_product_case.outputs.image }}" \
+            "$QA_CORPUS_DIR/${{ steps.select_product_case.outputs.image }}" \
             --output-root runtime_godot/.ci_dwpose_slice
           test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
           test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
@@ -140,9 +181,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dwpose-anime-domain-product-slice
+          name: dwpose-domain-art-product-slice
           path: |
-            ${{ runner.temp }}/dwpose-anime/domain_report.json
+            ${{ runner.temp }}/dwpose-domain/domain_report.json
             runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
             runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
             runtime_godot/.ci_dwpose_slice/imports/ci_dwpose_slice/receipts/**
