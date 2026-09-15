@@ -475,7 +475,15 @@ try {
 
     Write-Section 'Build production package'
     if (Test-Path -LiteralPath $GeneratedPackageRoot) { Remove-Item -LiteralPath $GeneratedPackageRoot -Recurse -Force }
-    Invoke-NativeChecked 'Build core vertical slice' { python tools/build_core_vertical_slice.py --output-root $GeneratedPackageRoot }
+    $previousPythonPath = [Environment]::GetEnvironmentVariable('PYTHONPATH', 'Process')
+    $pathSeparator = [IO.Path]::PathSeparator
+    $benchmarkPythonPath = if ([string]::IsNullOrWhiteSpace($previousPythonPath)) { $RepoRoot } else { "$RepoRoot$pathSeparator$previousPythonPath" }
+    [Environment]::SetEnvironmentVariable('PYTHONPATH', $benchmarkPythonPath, 'Process')
+    try {
+        Invoke-NativeChecked 'Build core vertical slice' { python (Join-Path $RepoRoot 'tools/build_core_vertical_slice.py') --output-root $GeneratedPackageRoot }
+    } finally {
+        [Environment]::SetEnvironmentVariable('PYTHONPATH', $previousPythonPath, 'Process')
+    }
     Assert-File $ManifestDiskPath 'Generated production manifest'
 
     Write-Section 'Import Godot project'
@@ -532,7 +540,7 @@ try {
     }
 }
 
-$runArray = @($runs)
+$runArray = @($runs | ForEach-Object { $_ })
 Write-JsonFile (Join-Path $ArtifactsRoot 'runs.json') $runArray 8
 $summary = Build-Summary $runArray
 Write-JsonFile (Join-Path $ArtifactsRoot 'summary.json') $summary 8
