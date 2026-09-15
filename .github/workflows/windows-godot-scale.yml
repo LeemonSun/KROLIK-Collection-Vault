@@ -13,14 +13,20 @@ on:
       - '.github/workflows/windows-godot-scale.yml'
 
 jobs:
-  rendered-220-production-agents:
+  rendered-production-agents:
+    name: rendered-production-agents-${{ matrix.agents }}
     runs-on: windows-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        agents: [220, 300, 500]
     env:
       PYTHONPATH: .
       GODOT_VERSION: '4.7.2'
       GODOT_WIN_SHA256: '731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953'
       STRESS_MAX_WORKING_SET_BYTES: '2147483648'
+      KROLIK_SCALE_AGENTS: '${{ matrix.agents }}'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -60,10 +66,6 @@ jobs:
           if ($versionOutput -notmatch [regex]::Escape($env:GODOT_VERSION)) {
             throw "Godot version output did not contain expected version $env:GODOT_VERSION"
           }
-          # Godot's Windows console process can return a non-zero code for simple
-          # editor probes while still printing the correct version. Binary identity
-          # is enforced by the pinned SHA; downstream project/stress evidence is
-          # validated by explicit log markers instead of this probe code.
           $global:LASTEXITCODE = 0
 
       - name: Parse and import Godot project on Windows
@@ -72,13 +74,7 @@ jobs:
           $godot = (Resolve-Path "godot-bin/Godot_v$env:GODOT_VERSION-stable_win64.exe").Path
           $importOutput = (& $godot --headless --path runtime_godot --editor --quit 2>&1 | Out-String)
           Write-Host $importOutput
-          $fatalPatterns = @(
-            'SCRIPT ERROR',
-            'Parse Error',
-            'Failed to load script',
-            'Cannot get class',
-            'Could not resolve class'
-          )
+          $fatalPatterns = @('SCRIPT ERROR', 'Parse Error', 'Failed to load script', 'Cannot get class', 'Could not resolve class')
           foreach ($pattern in $fatalPatterns) {
             if ($importOutput -match [regex]::Escape($pattern)) {
               throw "Godot Windows project import contained fatal marker: $pattern"
@@ -87,28 +83,29 @@ jobs:
           if ($importOutput -notmatch 'Godot Engine v4\.7\.2') {
             throw 'Godot Windows project import did not start the expected engine'
           }
-          # Do not propagate the hosted-runner-specific editor probe code.
           $global:LASTEXITCODE = 0
 
-      - name: Render and measure 220 production-skinned agents on Windows
+      - name: Render and measure production-skinned population on Windows
         shell: pwsh
         run: |
           $godot = (Resolve-Path "godot-bin/Godot_v$env:GODOT_VERSION-stable_win64.exe").Path
-          New-Item -ItemType Directory -Force -Path runtime_godot/windows_scale_artifacts | Out-Null
-          $stdout = (Resolve-Path runtime_godot/windows_scale_artifacts).Path + '\stress_stdout.txt'
-          $stderr = (Resolve-Path runtime_godot/windows_scale_artifacts).Path + '\stress_stderr.txt'
-          $metrics = (Resolve-Path runtime_godot/windows_scale_artifacts).Path + '\process_metrics.json'
+          $artifactDir = "runtime_godot/windows_scale_artifacts_$env:KROLIK_SCALE_AGENTS"
+          New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+          $resolvedArtifactDir = (Resolve-Path $artifactDir).Path
+          $stdout = $resolvedArtifactDir + '\stress_stdout.txt'
+          $stderr = $resolvedArtifactDir + '\stress_stderr.txt'
+          $metrics = $resolvedArtifactDir + '\process_metrics.json'
 
-          $env:KROLIK_STRESS_AGENTS = '220'
+          $env:KROLIK_STRESS_AGENTS = $env:KROLIK_SCALE_AGENTS
           $env:KROLIK_STRESS_WARMUP_FRAMES = '30'
           $env:KROLIK_STRESS_SAMPLE_FRAMES = '120'
-          $env:KROLIK_STRESS_MAX_SECONDS = '45'
+          $env:KROLIK_STRESS_MAX_SECONDS = '60'
           $env:KROLIK_STRESS_MIN_MOVED_SHARE = '0.80'
           $env:KROLIK_STRESS_MIN_TRAVEL_PX = '8'
           $env:KROLIK_STRESS_MIN_PHASE_SECONDS = '2.0'
           $env:KROLIK_STRESS_MANIFEST_PATH = 'res://.ci_windows_scale/exports/runtime/ci_core_slice/manifest.json'
           $env:KROLIK_STRESS_REQUIRE_VISUALS = '1'
-          $env:KROLIK_STRESS_SCREENSHOT_PATH = 'res://windows_scale_artifacts/stress_220.png'
+          $env:KROLIK_STRESS_SCREENSHOT_PATH = "res://windows_scale_artifacts_$env:KROLIK_SCALE_AGENTS/stress_$env:KROLIK_SCALE_AGENTS.png"
 
           $arguments = @(
             '--path', 'runtime_godot',
@@ -117,7 +114,7 @@ jobs:
             '--script', 'res://scripts/stress_harness.gd'
           )
           $process = Start-Process -FilePath $godot -ArgumentList $arguments -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
-          $deadline = (Get-Date).AddSeconds(150)
+          $deadline = (Get-Date).AddSeconds(180)
           [long]$peak = 0
           while (-not $process.HasExited) {
             Start-Sleep -Milliseconds 100
@@ -125,7 +122,7 @@ jobs:
             if ($process.WorkingSet64 -gt $peak) { $peak = $process.WorkingSet64 }
             if ((Get-Date) -gt $deadline) {
               Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-              throw 'Windows rendered stress exceeded 150 second watchdog'
+              throw "Windows rendered stress exceeded 180 second watchdog for $env:KROLIK_SCALE_AGENTS agents"
             }
           }
           $process.WaitForExit()
@@ -140,24 +137,20 @@ jobs:
           $record = [ordered]@{
             platform = 'windows-latest'
             godot = $env:GODOT_VERSION
-            agents = 220
+            agents = [int]$env:KROLIK_SCALE_AGENTS
             sample_frames = 120
             peak_working_set_bytes = $peak
             peak_working_set_mib = [math]::Round($peak / 1MB, 2)
             process_exit_code = $exitCode
             stress_metric = $metricLine
             render_metric = $renderLine
-            note = 'GitHub-hosted Windows runner; renderer/adapter reported by Godot. This is not target RX 6650 XT hardware.'
+            note = 'GitHub-hosted Windows runner using Microsoft Basic Render Driver via ANGLE; this is a software-render worst-case baseline, not target RX 6650 XT hardware.'
           }
           $record | ConvertTo-Json -Depth 4 | Set-Content -Path $metrics -Encoding utf8
-          Write-Host "KROLIK_WINDOWS_SCALE peak_working_set_mib=$($record.peak_working_set_mib) process_exit_code=$exitCode"
+          Write-Host "KROLIK_WINDOWS_SCALE agents=$env:KROLIK_SCALE_AGENTS peak_working_set_mib=$($record.peak_working_set_mib) process_exit_code=$exitCode"
           Write-Host $metricLine
           Write-Host $renderLine
 
-          # On hosted Windows the Godot console wrapper can expose a non-zero
-          # process code even for successful probes, so the benchmark is gated by
-          # KROLIK's own success evidence plus a rendered screenshot. Any harness
-          # assertion exits before KROLIK_RENDER_STRESS is emitted.
           if (-not $metricLine) { throw 'KROLIK_STRESS_METRIC missing from Windows run' }
           if (-not $renderLine) { throw 'KROLIK_RENDER_STRESS missing from Windows run' }
           if ($out -match 'KROLIK stress:' -or $err -match 'SCRIPT ERROR|Parse Error|Failed to load script') {
@@ -166,8 +159,9 @@ jobs:
           if ($peak -gt [long]$env:STRESS_MAX_WORKING_SET_BYTES) {
             throw "Windows stress exceeded working-set budget: $peak > $env:STRESS_MAX_WORKING_SET_BYTES"
           }
-          if (-not (Test-Path runtime_godot/windows_scale_artifacts/stress_220.png)) {
-            throw 'rendered Windows screenshot evidence missing'
+          $screenshot = "$artifactDir/stress_$env:KROLIK_SCALE_AGENTS.png"
+          if (-not (Test-Path $screenshot)) {
+            throw "rendered Windows screenshot evidence missing: $screenshot"
           }
           $global:LASTEXITCODE = 0
 
@@ -175,8 +169,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: windows-godot-rendered-scale-220
-          path: runtime_godot/windows_scale_artifacts/**
+          name: windows-godot-rendered-scale-${{ matrix.agents }}
+          path: runtime_godot/windows_scale_artifacts_${{ matrix.agents }}/**
           if-no-files-found: warn
           retention-days: 14
 
