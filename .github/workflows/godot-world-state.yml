@@ -22,7 +22,6 @@ on:
       - 'runtime_godot/scripts/world_state_harness.gd'
       - 'runtime_godot/scripts/population_lod.gd'
       - 'runtime_godot/scripts/character_agent.gd'
-      - 'runtime_godot/scripts/agent_brain.gd'
       - 'runtime_package.py'
       - 'character_import.py'
       - 'tools/build_core_vertical_slice.py'
@@ -60,12 +59,19 @@ jobs:
           echo "${GODOT_SHA256}  ${archive}" | sha256sum --check --strict
           unzip -q "$archive" -d godot-bin
           chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-      - name: Parse project and world-state classes
+      - name: Parse project
         shell: bash
         run: |
           set -euo pipefail
           GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+      - name: World-state compile check
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/world_state.gd
+          timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/world_state_harness.gd
       - name: Save destroy reload production world
         shell: bash
         run: |
