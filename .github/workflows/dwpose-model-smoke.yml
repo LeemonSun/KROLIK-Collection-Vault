@@ -6,9 +6,15 @@ on:
     branches: [main]
     paths:
       - 'rig_tools.py'
+      - 'character_import.py'
+      - 'runtime_package.py'
+      - 'runtime_package_integrity.py'
+      - 'tools/import_character_package.py'
       - 'tools/fetch_dwpose_model.py'
       - 'tools/inspect_dwpose_model.py'
       - 'tools/smoke_dwpose_backend.py'
+      - 'runtime_godot/scripts/core_vertical_slice_harness.gd'
+      - 'runtime_godot/scripts/imported_character_render_harness.gd'
       - 'tests/test_dwpose_backend.py'
       - 'tests/test_dwpose_model_bootstrap.py'
       - 'tests/test_dwpose_model_contract.py'
@@ -21,6 +27,8 @@ jobs:
     timeout-minutes: 15
     env:
       PYTHONPATH: .
+      GODOT_VERSION: '4.7.2'
+      GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -33,7 +41,7 @@ jobs:
           pip install numpy onnxruntime Pillow opencv-python-headless
       - name: Syntax and lightweight contract regressions
         run: |
-          python -m py_compile tools/fetch_dwpose_model.py tools/inspect_dwpose_model.py tools/smoke_dwpose_backend.py rig_tools.py
+          python -m py_compile tools/fetch_dwpose_model.py tools/inspect_dwpose_model.py tools/smoke_dwpose_backend.py tools/import_character_package.py rig_tools.py character_import.py runtime_package.py
           pip install pytest
           pytest -q tests/test_dwpose_backend.py tests/test_dwpose_model_bootstrap.py tests/test_dwpose_model_contract.py
       - name: Cache pinned DWPose model
@@ -57,3 +65,100 @@ jobs:
           test -s "${RUNNER_TEMP}/dwpose-pose1.png"
       - name: Production rig_tools DWPose backend smoke
         run: python tools/smoke_dwpose_backend.py "${RUNNER_TEMP}/dwpose-pose1.png" --min-confidence 0.18
+      - name: Build sealed production DWPose runtime package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf runtime_godot/.ci_dwpose_slice
+          output="$(python tools/import_character_package.py \
+            "${RUNNER_TEMP}/dwpose-pose1.png" \
+            --project-root runtime_godot/.ci_dwpose_slice \
+            --character-id ci_dwpose_slice \
+            --name 'CI DWPose Vertical Slice')"
+          printf '%s\n' "$output"
+          printf '%s\n' "$output" | grep -q 'KROLIK_CHARACTER_IMPORT .*backend=dwpose-onnx'
+          printf '%s\n' "$output" | grep -q 'KROLIK_RUNTIME_PACKAGE_INTEGRITY status=ok'
+          test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
+          test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json')
+          doc = json.loads(p.read_text(encoding='utf-8'))
+          assert doc['schema'] == 'krolik.runtime-character/1'
+          assert doc['rig']['backend'] == 'dwpose-onnx'
+          assert len(doc['rig']['joints']) == 15
+          assert len(doc['rig']['bones']) == 14
+          assert len(doc['physics']['collision']) == 14
+          assert doc['quality']['runtime_ready'] is True
+          assert float(doc['quality']['rig_score']) >= 99.0
+          print('KROLIK_DWPOSE_PACKAGE status=ok backend=dwpose-onnx joints=15 bones=14 collisions=14 runtime_ready=true')
+          PY
+      - name: Download verified Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${archive}"
+          curl --fail --location --retry 4 --output "$archive" "$url"
+          echo "${GODOT_SHA256}  ${archive}" | sha256sum --check --strict
+          unzip -q "$archive" -d godot-bin
+          chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --version
+      - name: Parse Godot project with DWPose package present
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+      - name: Production DWPose package to VaultCharacterAgent regression
+        shell: bash
+        env:
+          KROLIK_TEST_MANIFEST_PATH: 'res://.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json'
+          KROLIK_TEST_CHARACTER_ID: 'ci_dwpose_slice'
+          KROLIK_TEST_EXPECT_WIDTH: '0'
+          KROLIK_TEST_EXPECT_HEIGHT: '0'
+          KROLIK_TEST_RIG_BACKEND: 'dwpose-onnx'
+          KROLIK_TEST_MIN_RIG_SCORE: '99.0'
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 60s "$GODOT" --headless --path runtime_godot --script res://scripts/core_vertical_slice_harness.gd
+      - name: Render production DWPose-rigged character evidence
+        shell: bash
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          KROLIK_RENDER_MANIFEST_PATH: 'res://.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json'
+          KROLIK_RENDER_CHARACTER_ID: 'ci_dwpose_slice'
+          KROLIK_RENDER_RIG_BACKEND: 'dwpose-onnx'
+          KROLIK_RENDER_ARTIFACT_DIR: 'res://dwpose_imported_character_artifacts'
+          KROLIK_RENDER_MIN_FOREGROUND: '8000'
+          KROLIK_RENDER_MIN_CHANGED: '1800'
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          command -v xvfb-run >/dev/null || { echo 'xvfb-run is required for DWPose render regression' >&2; exit 1; }
+          rm -rf runtime_godot/dwpose_imported_character_artifacts
+          timeout 90s xvfb-run -a -s '-screen 0 1280x900x24' \
+            "$GODOT" --path runtime_godot --rendering-method gl_compatibility --audio-driver Dummy \
+            --script res://scripts/imported_character_render_harness.gd
+          test -s runtime_godot/dwpose_imported_character_artifacts/imported_baseline.png
+          test -s runtime_godot/dwpose_imported_character_artifacts/imported_posed.png
+      - name: Upload DWPose end-to-end evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dwpose-production-vertical-slice-evidence
+          path: |
+            runtime_godot/.ci_dwpose_slice/imports/**
+            runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/**
+            runtime_godot/dwpose_imported_character_artifacts/*.png
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+      - name: Cleanup DWPose vertical slice
+        if: always()
+        shell: bash
+        run: |
+          rm -rf runtime_godot/.ci_dwpose_slice
+          rm -rf runtime_godot/dwpose_imported_character_artifacts
