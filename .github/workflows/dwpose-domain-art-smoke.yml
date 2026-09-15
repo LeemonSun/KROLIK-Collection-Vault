@@ -77,24 +77,17 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$QA_CORPUS_DIR"
-          python tools/fetch_pinned_qa_corpus.py \
-            --manifest "$QA_CORPUS_MANIFEST" \
-            --output-dir "$QA_CORPUS_DIR"
+          python tools/fetch_pinned_qa_corpus.py --manifest "$QA_CORPUS_MANIFEST" --output-dir "$QA_CORPUS_DIR"
           python - <<'PY'
           import json
           import os
           from pathlib import Path, PurePosixPath
-
           manifest = json.loads(Path(os.environ['QA_CORPUS_MANIFEST']).read_text(encoding='utf-8'))
           root = Path(os.environ['QA_CORPUS_DIR'])
           fixtures = manifest['fixtures']
-          if len(fixtures) < 12:
+          if len(fixtures) < 15:
               raise SystemExit(f'expanded corpus unexpectedly small: {len(fixtures)}')
-          missing = [
-              PurePosixPath(case['path']).name
-              for case in fixtures
-              if not (root / PurePosixPath(case['path']).name).is_file()
-          ]
+          missing = [PurePosixPath(case['path']).name for case in fixtures if not (root / PurePosixPath(case['path']).name).is_file()]
           if missing:
               raise SystemExit(f'missing fetched fixtures: {missing}')
           print(f'KROLIK_DWPOSE_DOMAIN_FETCH status=ok fixtures={len(fixtures)}')
@@ -107,18 +100,14 @@ jobs:
           import json
           import os
           from pathlib import Path, PurePosixPath
-
           manifest = json.loads(Path(os.environ['QA_CORPUS_MANIFEST']).read_text(encoding='utf-8'))
           root = Path(os.environ['QA_CORPUS_DIR'])
           for case in manifest['fixtures']:
               print(root / PurePosixPath(case['path']).name)
           PY
           )
-          test "${#IMAGES[@]}" -ge 12
-          python tools/smoke_dwpose_corpus.py \
-            "${IMAGES[@]}" \
-            --min-dwpose-share 0.75 \
-            --report "$QA_CORPUS_DIR/domain_report.json"
+          test "${#IMAGES[@]}" -ge 15
+          python tools/smoke_dwpose_corpus.py "${IMAGES[@]}" --min-dwpose-share 0.75 --report "$QA_CORPUS_DIR/domain_report.json"
       - id: select_product_case
         name: Select a proven DWPose domain case for runtime packaging
         shell: bash
@@ -127,7 +116,6 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-
           report = json.loads((Path(os.environ['QA_CORPUS_DIR']) / 'domain_report.json').read_text())
           case = next((row for row in report.get('cases', []) if row.get('backend') == 'dwpose-onnx' and row.get('runtime_ready')), None)
           if case is None:
@@ -142,9 +130,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf runtime_godot/.ci_dwpose_slice
-          python tools/build_dwpose_vertical_slice.py \
-            "$QA_CORPUS_DIR/${{ steps.select_product_case.outputs.image }}" \
-            --output-root runtime_godot/.ci_dwpose_slice
+          python tools/build_dwpose_vertical_slice.py "$QA_CORPUS_DIR/${{ steps.select_product_case.outputs.image }}" --output-root runtime_godot/.ci_dwpose_slice
           test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
           test -s runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
       - name: Download verified Godot
