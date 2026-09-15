@@ -61,7 +61,7 @@ def main() -> int:
 
     ordered = [
         "character_id", "source_sha256", "cutout_method", "cutout_confidence",
-        "review_required", "alpha_coverage", "backend", "rig_score", "runtime_ready",
+        "review_required", "alpha_coverage", "backend", "rig_review_required", "rig_score", "runtime_ready",
         "joints", "bones", "vertices", "triangles", "bone_weights", "collision_proxies",
         "joint_override_count", "joint_changed_count", "joint_changed", "joint_max_delta",
         "original", "cutout", "receipt", "rig_edit", "manifest", "image", "package_receipt",
