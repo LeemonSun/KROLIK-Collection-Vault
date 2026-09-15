@@ -385,3 +385,27 @@ For manual development:
 - treat 409/conflict as a signal to refetch and merge logically;
 - prefer one large coherent capability block over checkpoint-marker/micro commits;
 - create real Git checkpoint branches for rollback instead of temporary marker files.
+## 2026-09-15 — target-hardware benchmark collector promoted
+
+- PR #7 merged to `main` at `b01f45961ef2ca249469a07baf15e14616769cb0`.
+- Stable rollback checkpoint: `checkpoint/stable-target-hardware-benchmark-collector-20260915` at `fa7abe6679907bb3c8cd72773eaafe6e8f7afbfb`.
+- Added `tools/run_target_hardware_benchmark.ps1` and `docs/TARGET_HARDWARE_BENCHMARK.md` for a reproducible native-Windows target-PC measurement.
+- Canonical comparable workload remains no-LOD 220/300/500 + production LOD 500, `Repeat=3`, Godot 4.7.2, `gl_compatibility`, 30 warmup frames, 120 sample frames and a 180-second external watchdog.
+- Collector records exact Git SHA, Windows/CPU/RAM/GPU/driver/power-plan/Python/Godot identity, FPS, peak working set, raw stdout/stderr and rendered screenshots. Software renderers are retained as diagnostic evidence but rejected as target-hardware measurements.
+- Full clean-Windows orchestration smoke is now part of `.github/workflows/target-hardware-benchmark-contract.yml`; PR validation run `34949207323` passed both `windows-contract` and `windows-orchestration-smoke`.
+- The end-to-end hosted smoke built the production core package, launched checksum-pinned Godot, ran the real 5-agent production stress harness, measured `59.62 FPS` / `173.65 MiB`, produced screenshot/log/report evidence and correctly rejected `ANGLE (Microsoft, Microsoft Basic Render Driver ...)` with collector exit code 2. These are hosted software-render smoke numbers, **not** target-GPU performance.
+- The smoke exposed and fixed a real clean-Windows import-path defect in the collector: repository root is now supplied to `PYTHONPATH` while building the production vertical slice and restored afterward.
+- The full-run path also no longer reads `WorkingSet64` after process termination and no longer lets `Write-Error` override the intended explicit result exit codes.
+- Branch Vault CI run `34949079599`: canonical-source-readiness green, core-python green, backend/UI skipped as expected because authoritative `app.py` is still absent.
+- Post-merge `main` Vault CI run `34949325310`: canonical-source-readiness green and core-python green; backend/UI skipped for the same known source blocker.
+- Post-merge `main` benchmark run `34949325337`: both Windows contract and full orchestration smoke green.
+- Target RX 6650 XT / real target-PC performance remains **UNMEASURED** until the collector is executed locally: `pwsh -ExecutionPolicy Bypass -File tools/run_target_hardware_benchmark.ps1`.
+- This block does not change production runtime/schema semantics.
+
+Next highest-priority work while canonical graphical source is unavailable:
+1. Analyze and record the true target-PC benchmark whenever the local result is supplied.
+2. Expand provenance-known DWPose/import QA toward 100–200 diverse character arts without weakening the existing 75% DWPose share gate or explicit review-required fallback rules.
+3. Resume D4 long-term affinity/favorite-place memory, then D5 actual character-to-character encounters and paired behaviors.
+4. Expand data-driven Vault props/fixtures toward the 60+ target, including occupancy/reservation and parameterized variants.
+5. Add pooling/offline-room/streaming only if real profiling, >500/1000 exploratory load, or the target machine demonstrates a concrete bottleneck.
+6. If the authoritative FULL ZIP / canonical `app.py` appears, interrupt lower-priority work and reconcile it immediately; do not fabricate missing graphical source.
