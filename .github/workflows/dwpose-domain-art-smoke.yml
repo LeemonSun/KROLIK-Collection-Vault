@@ -46,7 +46,7 @@ jobs:
       GODOT_VERSION: '4.7.2'
       GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
       QA_CORPUS_MANIFEST: qa/corpora/dwpose_domain_art_corpus_v1.json
-      QA_CORPUS_DIR: ${{ runner.temp }}/dwpose-domain
+      QA_CORPUS_DIR: .qa_dwpose_domain
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -183,14 +183,14 @@ jobs:
         with:
           name: dwpose-domain-art-product-slice
           path: |
-            ${{ runner.temp }}/dwpose-domain/domain_report.json
+            .qa_dwpose_domain/domain_report.json
             runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/manifest.json
             runtime_godot/.ci_dwpose_slice/exports/runtime/ci_dwpose_slice/package_receipt.json
             runtime_godot/.ci_dwpose_slice/imports/ci_dwpose_slice/receipts/**
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 14
-      - name: Cleanup product slice
+      - name: Cleanup QA and product slice
         if: always()
         shell: bash
-        run: rm -rf runtime_godot/.ci_dwpose_slice
+        run: rm -rf "$QA_CORPUS_DIR" runtime_godot/.ci_dwpose_slice
