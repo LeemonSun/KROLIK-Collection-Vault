@@ -19,7 +19,7 @@ jobs:
           ref: work/f3-unique-package-scale-20260915
           fetch-depth: 0
 
-      - name: Patch lazy texture residency and scale gates
+      - name: Patch lazy texture residency runtime
         shell: python
         run: |
           from pathlib import Path
@@ -121,7 +121,6 @@ jobs:
                   _trim_texture_cache(clean_path)
               return _cached_result(entry, include_texture)
           '''
-          # Strip the workflow-script indentation from the embedded GDScript.
           new_tail = '\n'.join(line[10:] if line.startswith('          ') else line for line in new_tail.splitlines()) + '\n'
           cache.write_text(text[:start] + new_tail, encoding='utf-8')
 
@@ -149,19 +148,6 @@ jobs:
               '''    var cache_entries := int(cache.get("entries", 0))\n    var cache_texture_entries := int(cache.get("texture_entries", 0))\n    var cache_texture_limit := int(cache.get("texture_limit", 0))\n    var cache_decodes := int(cache.get("texture_decodes", 0))\n    if cache_entries != _manifest_paths.size() or int(cache.get("manifest_parses", 0)) != _manifest_paths.size():\n        push_error("KROLIK MULTI ART scale: manifest cache shape mismatch: " + str(cache)); quit(8); return\n    if cache_texture_limit <= 0 or cache_texture_entries > cache_texture_limit:\n        push_error("KROLIK MULTI ART scale: decoded texture cache exceeded its bound: " + str(cache)); quit(13); return\n    if cache_decodes > awake:\n        push_error("KROLIK MULTI ART scale: full texture decodes exceeded awake population: " + str(cache)); quit(14); return\n    if _manifest_paths.size() > cache_texture_limit and cache_decodes >= _manifest_paths.size():\n        push_error("KROLIK MULTI ART scale: lazy texture decode did not reduce unique-package residency: " + str(cache)); quit(15); return\n'''
           )
 
-          workflow = Path('.github/workflows/windows-unique-package-scale.yml')
-          wf = workflow.read_text(encoding='utf-8')
-          wf = wf.replace(
-              '''            [int]$entries = 0\n            [int]$parses = 0\n            [int]$decodes = 0\n''',
-              '''            [int]$entries = 0\n            [int]$textureEntries = 0\n            [int]$textureLimit = 0\n            [int]$parses = 0\n            [int]$decodes = 0\n            [int]$evictions = 0\n''', 1)
-          wf = wf.replace(
-              '''            if ($metric -match 'cache_entries=([0-9]+)') { $entries = [int]$Matches[1] }\n            if ($metric -match 'cache_parses=([0-9]+)') { $parses = [int]$Matches[1] }\n            if ($metric -match 'cache_decodes=([0-9]+)') { $decodes = [int]$Matches[1] }\n            if ($reportedUnique -ne $count -or $entries -ne $count -or $parses -ne $count -or $decodes -ne $count) {\n              throw "unique-package cache shape mismatch count=$count reported=$reportedUnique entries=$entries parses=$parses decodes=$decodes"\n            }\n''',
-              '''            if ($metric -match 'cache_entries=([0-9]+)') { $entries = [int]$Matches[1] }\n            if ($metric -match 'cache_texture_entries=([0-9]+)') { $textureEntries = [int]$Matches[1] }\n            if ($metric -match 'cache_limit=([0-9]+)') { $textureLimit = [int]$Matches[1] }\n            if ($metric -match 'cache_parses=([0-9]+)') { $parses = [int]$Matches[1] }\n            if ($metric -match 'cache_decodes=([0-9]+)') { $decodes = [int]$Matches[1] }\n            if ($metric -match 'cache_evictions=([0-9]+)') { $evictions = [int]$Matches[1] }\n            if ($reportedUnique -ne $count -or $entries -ne $count -or $parses -ne $count) {\n              throw "unique-package manifest cache mismatch count=$count reported=$reportedUnique entries=$entries parses=$parses"\n            }\n            if ($textureLimit -le 0 -or $textureEntries -gt $textureLimit) {\n              throw "unique-package texture cache bound failed count=$count textureEntries=$textureEntries textureLimit=$textureLimit"\n            }\n            if ($count -gt $textureLimit -and $decodes -ge $count) {\n              throw "lazy full-texture decode failed count=$count decodes=$decodes limit=$textureLimit"\n            }\n''', 1)
-          wf = wf.replace(
-              '''              cache_entries = $entries\n              cache_parses = $parses\n              cache_decodes = $decodes\n''',
-              '''              cache_entries = $entries\n              cache_texture_entries = $textureEntries\n              cache_limit = $textureLimit\n              cache_parses = $parses\n              cache_decodes = $decodes\n              cache_evictions = $evictions\n''', 1)
-          workflow.write_text(wf, encoding='utf-8')
-
       - name: Verify patch shape
         shell: bash
         run: |
@@ -169,14 +155,13 @@ jobs:
           grep -q 'load_package(manifest_path, build_runtime_resources)' runtime_godot/scripts/character_agent.gd
           grep -q 'include_texture: bool = true' runtime_godot/scripts/runtime_package_cache.gd
           grep -q 'cache_texture_entries=' runtime_godot/scripts/multi_art_lod_scale_harness.gd
-          grep -q 'lazy full-texture decode failed' .github/workflows/windows-unique-package-scale.yml
 
-      - name: Commit patch to work branch
+      - name: Commit runtime patch to work branch
         shell: bash
         run: |
           git config user.name 'LeemonSun'
           git config user.email 'wordolleemon@gmail.com'
-          git add runtime_godot/scripts/runtime_package_cache.gd runtime_godot/scripts/character_agent.gd runtime_godot/scripts/multi_art_lod_scale_harness.gd .github/workflows/windows-unique-package-scale.yml
+          git add runtime_godot/scripts/runtime_package_cache.gd runtime_godot/scripts/character_agent.gd runtime_godot/scripts/multi_art_lod_scale_harness.gd
           if git diff --cached --quiet; then
             echo 'No patch changes to commit'
             exit 0
