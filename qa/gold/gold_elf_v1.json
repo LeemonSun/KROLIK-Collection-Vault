@@ -50,7 +50,20 @@
     "world-save-reload"
   ],
   "baseline": {
-    "status": "probe-required",
-    "note": "Populate only from the first real DWPose + Godot run; never invent expected joint coordinates."
+    "status": "verified-2026-09-15",
+    "verified_head": "53511d0d2a3cb20f82438cf076d1dec27cc6fea5",
+    "cutout_method": "center-grabcut-v2",
+    "cutout_confidence_min": 0.95,
+    "alpha_coverage_range": [0.20, 0.32],
+    "pose_confidence_min": 0.60,
+    "expected_uncertain_joints": [
+      "left_wrist",
+      "right_wrist"
+    ],
+    "expected_uncertain_limbs": [
+      "left_arm",
+      "right_arm"
+    ],
+    "note": "Visually verified against the real Godot baseline/posed evidence. Background leakage is no longer accepted. The wrists are partially occluded in the source and must be represented as uncertain rather than silently trusted as exact anchors."
   }
 }
