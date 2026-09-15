@@ -174,15 +174,27 @@ jobs:
             [double]$fps = 0
             [int]$reportedUnique = 0
             [int]$entries = 0
+            [int]$textureEntries = 0
+            [int]$textureLimit = 0
             [int]$parses = 0
             [int]$decodes = 0
+            [int]$evictions = 0
             if ($metric -match 'sim_fps=([0-9]+(?:\.[0-9]+)?)') { $fps = [double]$Matches[1] }
             if ($metric -match 'unique_packages=([0-9]+)') { $reportedUnique = [int]$Matches[1] }
             if ($metric -match 'cache_entries=([0-9]+)') { $entries = [int]$Matches[1] }
+            if ($metric -match 'cache_texture_entries=([0-9]+)') { $textureEntries = [int]$Matches[1] }
+            if ($metric -match 'cache_limit=([0-9]+)') { $textureLimit = [int]$Matches[1] }
             if ($metric -match 'cache_parses=([0-9]+)') { $parses = [int]$Matches[1] }
             if ($metric -match 'cache_decodes=([0-9]+)') { $decodes = [int]$Matches[1] }
-            if ($reportedUnique -ne $count -or $entries -ne $count -or $parses -ne $count -or $decodes -ne $count) {
-              throw "unique-package cache shape mismatch count=$count reported=$reportedUnique entries=$entries parses=$parses decodes=$decodes"
+            if ($metric -match 'cache_evictions=([0-9]+)') { $evictions = [int]$Matches[1] }
+            if ($reportedUnique -ne $count -or $entries -ne $count -or $parses -ne $count) {
+              throw "unique-package manifest cache mismatch count=$count reported=$reportedUnique entries=$entries parses=$parses"
+            }
+            if ($textureLimit -le 0 -or $textureEntries -gt $textureLimit) {
+              throw "unique-package texture cache bound failed count=$count textureEntries=$textureEntries textureLimit=$textureLimit"
+            }
+            if ($count -gt $textureLimit -and $decodes -ge $count) {
+              throw "lazy full-texture decode failed count=$count decodes=$decodes limit=$textureLimit"
             }
             if ($fps -le 0.0) { throw "invalid FPS at $count unique packages" }
             $row = [ordered]@{
@@ -192,20 +204,23 @@ jobs:
               peak_working_set_bytes = $peak
               peak_working_set_mib = [math]::Round($peak / 1MB, 2)
               cache_entries = $entries
+              cache_texture_entries = $textureEntries
+              cache_limit = $textureLimit
               cache_parses = $parses
               cache_decodes = $decodes
+              cache_evictions = $evictions
               metric = $metric
               render = $render
             }
             $allRows += [pscustomobject]$row
-            Write-Host "KROLIK_UNIQUE_PACKAGE_POINT unique=$count fps=$fps peak_mib=$($row.peak_working_set_mib)"
+            Write-Host "KROLIK_UNIQUE_PACKAGE_POINT unique=$count fps=$fps peak_mib=$($row.peak_working_set_mib) texture_entries=$textureEntries decodes=$decodes evictions=$evictions"
           }
 
           $allRows | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $artifactDir 'unique_package_curve.json') -Encoding utf8
           $p32 = $allRows | Where-Object unique_packages -eq 32 | Select-Object -First 1
           $p128 = $allRows | Where-Object unique_packages -eq 128 | Select-Object -First 1
           $p500 = $allRows | Where-Object unique_packages -eq 500 | Select-Object -First 1
-          Write-Host "KROLIK_UNIQUE_PACKAGE_CURVE p32_fps=$($p32.fps) p32_mib=$($p32.peak_working_set_mib) p128_fps=$($p128.fps) p128_mib=$($p128.peak_working_set_mib) p500_fps=$($p500.fps) p500_mib=$($p500.peak_working_set_mib)"
+          Write-Host "KROLIK_UNIQUE_PACKAGE_CURVE p32_fps=$($p32.fps) p32_mib=$($p32.peak_working_set_mib) p128_fps=$($p128.fps) p128_mib=$($p128.peak_working_set_mib) p500_fps=$($p500.fps) p500_mib=$($p500.peak_working_set_mib) p500_texture_entries=$($p500.cache_texture_entries) p500_decodes=$($p500.cache_decodes)"
           if ([long]$p500.peak_working_set_bytes -gt 3221225472) { throw '500-unique package run exceeded 3 GiB exploratory memory ceiling' }
 
       - name: Upload unique-package curve evidence
