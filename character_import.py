@@ -354,12 +354,22 @@ def build_character_runtime_package(
     asset = prepare_character_asset(root, source_image, character_id, cutout_mode=cutout_mode)
     detection = detect_rig(asset["cutout"], prefer_ai=prefer_ai_rig)
     settings = dict(detection.settings)
+    detector_backend = str(settings.get("backend") or "none")
+    rig_review_required = bool(prefer_ai_rig and detector_backend == "heuristic-silhouette")
+    if rig_review_required:
+        # Do not let an AI-requested fallback look indistinguishable from a
+        # confidently accepted auto-rig.  The existing settings JSON is
+        # extensible, so this adds authoring provenance without a schema bump.
+        settings["auto_rig_review_required"] = True
+        settings["auto_rig_fallback"] = "heuristic-silhouette"
+        settings["auto_rig_fallback_reason"] = "ai_pose_backend_rejected_or_unavailable"
+
     joints, edit_report = apply_joint_overrides(detection.joints, joint_overrides)
     rig_edit_path = _persist_rig_edit(
         root,
         asset,
         str(character_id),
-        str(settings.get("backend") or "none"),
+        detector_backend,
         edit_report,
     )
 
@@ -397,6 +407,7 @@ def build_character_runtime_package(
     return {
         **asset,
         "backend": str(written.get("rig", {}).get("backend") or "none"),
+        "rig_review_required": rig_review_required,
         "rig_score": float(written.get("quality", {}).get("rig_score", 0.0)),
         "runtime_ready": bool(written.get("quality", {}).get("runtime_ready")),
         "joints": len(written.get("rig", {}).get("joints", {})),
