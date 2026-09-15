@@ -1,0 +1,42 @@
+name: Hourly Mode State Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/state-hourly-mode-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update autonomous writer mode
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('docs/AUTONOMOUS_STATE.md')
+          s = p.read_text(encoding='utf-8')
+          old = "Current user instruction: scheduled/hourly writer remains disabled. Do **not** re-enable it unless the user explicitly asks later.\n\nFor manual development:"
+          new = "Current user instruction (2026-09-15): the dedicated KROLIK hourly autonomous continuation is **enabled for 24 hourly runs**. Each run must follow this state + `docs/AUTONOMOUS_RUNBOOK.md`, fresh-read `main`, fix prior failures first, and commit only verified coherent blocks. The current manual pass is finished; do not start extra manual development between scheduled runs unless the user explicitly asks.\n\nFor manual development:"
+          if old not in s:
+              raise SystemExit('expected previous hourly-mode marker not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8', newline='\n')
+
+      - name: Commit state sync
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/AUTONOMOUS_STATE.md
+          git diff --cached --check
+          git commit -m 'docs: sync active hourly development mode'
+          git push origin HEAD:main
