@@ -73,3 +73,64 @@ jobs:
           path: target_benchmark_contract/validation.json
           if-no-files-found: error
           retention-days: 14
+
+  windows-orchestration-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install collector runtime dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow numpy
+
+      - name: Run real collector orchestration on hosted software renderer
+        shell: pwsh
+        run: |
+          if (Test-Path target_benchmark_smoke) { Remove-Item target_benchmark_smoke -Recurse -Force }
+          & ./tools/run_target_hardware_benchmark.ps1 -Agents 5 -Repeat 1 -SkipLod -SkipDependencyInstall -OutputRoot target_benchmark_smoke
+          $collectorExit = $LASTEXITCODE
+          Write-Host "KROLIK_TARGET_SMOKE_EXIT code=$collectorExit"
+          if ($collectorExit -ne 2) { throw "Expected collector to reject hosted software renderer with exit 2; actual=$collectorExit" }
+
+      - name: Verify full-run evidence and software-render rejection
+        shell: pwsh
+        run: |
+          $resultPath = 'target_benchmark_smoke/result.json'
+          if (-not (Test-Path $resultPath)) { throw 'full smoke result.json missing' }
+          $r = Get-Content $resultPath -Raw | ConvertFrom-Json
+          if ([bool]$r.valid) { throw 'hosted software-render smoke was incorrectly marked target-hardware valid' }
+          if ([int]$r.expected_runs -ne 1 -or [int]$r.completed_runs -ne 1) { throw "unexpected run counts: $($r.completed_runs)/$($r.expected_runs)" }
+          if ([int]$r.successful_runs -ne 1) { throw "production harness did not complete successfully: $($r.successful_runs)" }
+          if ([int]$r.hardware_valid_runs -ne 0) { throw "hosted software renderer unexpectedly counted as hardware-valid: $($r.hardware_valid_runs)" }
+          if (@($r.summary).Count -ne 1) { throw 'expected exactly one summary point' }
+          $point = @($r.summary)[0]
+          if ([double]$point.median_fps -le 0) { throw "invalid measured FPS: $($point.median_fps)" }
+          if (-not $point.renderer) { throw 'renderer evidence missing' }
+          foreach ($path in @(
+            'target_benchmark_smoke/no_lod_5_r1.stdout.txt',
+            'target_benchmark_smoke/no_lod_5_r1.stderr.txt',
+            'target_benchmark_smoke/no_lod_5_r1.png',
+            'target_benchmark_smoke/REPORT.md',
+            'target_benchmark_smoke/runs.json',
+            'target_benchmark_smoke/summary.json'
+          )) {
+            if (-not (Test-Path $path)) { throw "full smoke evidence missing: $path" }
+          }
+          Write-Host "KROLIK_TARGET_ORCHESTRATION_SMOKE status=ok fps=$($point.median_fps) renderer=$($point.renderer) rejected_as_target_hardware=true"
+
+      - name: Upload orchestration smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: target-hardware-benchmark-orchestration-smoke
+          path: target_benchmark_smoke/**
+          if-no-files-found: error
+          retention-days: 14
