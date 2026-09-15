@@ -1,20 +1,10 @@
 from __future__ import annotations
 
-"""Run the production KROLIK import/auto-rig path over a small art corpus.
+"""Run the production KROLIK import/auto-rig path over the pinned art corpus.
 
-This is a domain smoke, not an accuracy benchmark.  Each source image goes
-through immutable import, derived cutout, auto-rig, skin/collision generation
-and runtime-package creation.  A stylized art sample may legitimately fall back
-to the deterministic heuristic, but that fallback must be explicitly marked for
-manual rig review; it must never silently masquerade as an accepted AI rig.
-
-The corpus therefore gates two different product properties:
-1. every sample must produce a runtime-ready package;
-2. DWPose must cover at least the configured share of the corpus, while all
-   remaining fallback samples are explicitly reviewable.
-
-When DWPose rejects a sample, raw pose diagnostics are retained in the report so
-the limitation is measurable rather than hidden behind the heuristic fallback.
+The gate requires every sample to produce a runtime-ready package, preserves the
+aggregate DWPose coverage floor, requires explicit review for every fallback,
+and also rejects per-fixture regressions that aggregate coverage could hide.
 """
 
 import argparse
@@ -25,6 +15,9 @@ import tempfile
 
 from character_import import build_character_runtime_package
 from rig_tools import capabilities, dwpose_diagnostics
+from tools.validate_dwpose_domain_report import evaluate_report, load_json, validate_expectations
+
+DEFAULT_EXPECTATIONS = Path("qa/corpora/dwpose_domain_art_expectations_v1.json")
 
 
 def main() -> int:
@@ -32,9 +25,11 @@ def main() -> int:
     parser.add_argument("images", nargs="+")
     parser.add_argument("--min-dwpose-share", type=float, default=0.75)
     parser.add_argument("--report", default="")
+    parser.add_argument("--expectations", type=Path, default=DEFAULT_EXPECTATIONS)
     args = parser.parse_args()
 
     min_share = max(0.0, min(1.0, float(args.min_dwpose_share)))
+    expectations = validate_expectations(load_json(args.expectations))
     caps = capabilities()
     if not caps.get("dwpose"):
         print(f"KROLIK_DWPOSE_CORPUS status=failed error=dwpose_capability_unavailable caps={caps}")
@@ -50,7 +45,7 @@ def main() -> int:
         for index, raw in enumerate(args.images):
             image = Path(raw).resolve()
             if not image.is_file():
-                rows.append({"image": str(image), "status": "missing"})
+                rows.append({"image": image.name, "status": "missing", "runtime_ready": False})
                 failed_runtime += 1
                 continue
 
@@ -106,9 +101,10 @@ def main() -> int:
     dwpose_share = dwpose_count / max(1, sample_count)
     scores = [float(row.get("rig_score", 0.0)) for row in rows if row.get("status") != "missing"]
     coverage_ok = dwpose_share + 1e-12 >= min_share
-    passed = failed_runtime == 0 and unsafe_fallbacks == 0 and coverage_ok
+    per_case_errors = evaluate_report({"cases": rows}, expectations)
+    passed = failed_runtime == 0 and unsafe_fallbacks == 0 and coverage_ok and not per_case_errors
     report = {
-        "schema": "krolik.dwpose-domain-smoke/2",
+        "schema": "krolik.dwpose-domain-smoke/3",
         "samples": sample_count,
         "runtime_ready": sample_count - failed_runtime,
         "failed_runtime": failed_runtime,
@@ -117,6 +113,8 @@ def main() -> int:
         "min_dwpose_share": min_share,
         "unsafe_fallbacks": unsafe_fallbacks,
         "review_fallbacks": sum(1 for row in rows if bool(row.get("rig_review_required"))),
+        "per_case_regressions": len(per_case_errors),
+        "per_case_errors": per_case_errors,
         "mean_rig_score": round(mean(scores), 6) if scores else 0.0,
         "median_rig_score": round(median(scores), 6) if scores else 0.0,
         "passed": passed,
@@ -126,7 +124,9 @@ def main() -> int:
         report_path = Path(args.report).resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
-    print("KROLIK_DWPOSE_CORPUS " + " ".join(f"{key}={value}" for key, value in report.items() if key != "cases"))
+    for error in per_case_errors:
+        print(f"KROLIK_DWPOSE_EXPECTATION_FAIL {error}")
+    print("KROLIK_DWPOSE_CORPUS " + " ".join(f"{key}={value}" for key, value in report.items() if key not in {"cases", "per_case_errors"}))
     return 0 if passed else 3
 
 
