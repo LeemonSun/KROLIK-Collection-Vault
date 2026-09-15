@@ -1,0 +1,134 @@
+name: Target Benchmark Finalize Patch
+
+on:
+  push:
+    branches:
+      - 'work/target-hardware-benchmark-20260915'
+    paths:
+      - '.github/workflows/target-benchmark-finalize-patch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/target-hardware-benchmark-20260915
+          fetch-depth: 0
+
+      - name: Apply reviewed collector hardening and full smoke
+        shell: python
+        run: |
+          from pathlib import Path
+
+          collector = Path('tools/run_target_hardware_benchmark.ps1')
+          text = collector.read_text(encoding='utf-8')
+
+          old_peak = """        $process.WaitForExit()\n        $process.Refresh()\n        if ($process.WorkingSet64 -gt $peak) { $peak = $process.WorkingSet64 }\n        if (-not $timedOut) { $exitCode = $process.ExitCode }"""
+          new_peak = """        $process.WaitForExit()\n        if (-not $timedOut) { $exitCode = $process.ExitCode }"""
+          if old_peak not in text:
+              raise SystemExit('post-exit WorkingSet64 block not found')
+          text = text.replace(old_peak, new_peak, 1)
+
+          old_failure = """if ($null -ne $finalFailure) {\n    Write-Error \"Benchmark aborted: $finalFailure\"\n    exit 1\n}\nif (-not $overallValid) {\n    Write-Error \"Benchmark completed but is not a valid target-hardware result. Inspect REPORT.md, runs.json, stdout/stderr and renderer fields in: $ArtifactsRoot\"\n    exit 2\n}"""
+          new_failure = """if ($null -ne $finalFailure) {\n    [Console]::Error.WriteLine(\"Benchmark aborted: $finalFailure\")\n    exit 1\n}\nif (-not $overallValid) {\n    [Console]::Error.WriteLine(\"Benchmark completed but is not a valid target-hardware result. Inspect REPORT.md, runs.json, stdout/stderr and renderer fields in: $ArtifactsRoot\")\n    exit 2\n}"""
+          if old_failure not in text:
+              raise SystemExit('final exit block not found')
+          text = text.replace(old_failure, new_failure, 1)
+          collector.write_text(text, encoding='utf-8', newline='\n')
+
+          workflow = Path('.github/workflows/target-hardware-benchmark-contract.yml')
+          w = workflow.read_text(encoding='utf-8')
+          if 'windows-orchestration-smoke:' not in w:
+              w += r'''
+
+  windows-orchestration-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install collector runtime dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow numpy
+
+      - name: Run real collector orchestration on hosted software renderer
+        shell: pwsh
+        run: |
+          if (Test-Path target_benchmark_smoke) { Remove-Item target_benchmark_smoke -Recurse -Force }
+          & ./tools/run_target_hardware_benchmark.ps1 -Agents 5 -Repeat 1 -SkipLod -SkipDependencyInstall -OutputRoot target_benchmark_smoke
+          $collectorExit = $LASTEXITCODE
+          Write-Host "KROLIK_TARGET_SMOKE_EXIT code=$collectorExit"
+          if ($collectorExit -ne 2) { throw "Expected collector to reject hosted software renderer with exit 2; actual=$collectorExit" }
+
+      - name: Verify full-run evidence and software-render rejection
+        shell: pwsh
+        run: |
+          $resultPath = 'target_benchmark_smoke/result.json'
+          if (-not (Test-Path $resultPath)) { throw 'full smoke result.json missing' }
+          $r = Get-Content $resultPath -Raw | ConvertFrom-Json
+          if ([bool]$r.valid) { throw 'hosted software-render smoke was incorrectly marked target-hardware valid' }
+          if ([int]$r.expected_runs -ne 1 -or [int]$r.completed_runs -ne 1) { throw "unexpected run counts: $($r.completed_runs)/$($r.expected_runs)" }
+          if ([int]$r.successful_runs -ne 1) { throw "production harness did not complete successfully: $($r.successful_runs)" }
+          if ([int]$r.hardware_valid_runs -ne 0) { throw "hosted software renderer unexpectedly counted as hardware-valid: $($r.hardware_valid_runs)" }
+          if (@($r.summary).Count -ne 1) { throw 'expected exactly one summary point' }
+          $point = @($r.summary)[0]
+          if ([double]$point.median_fps -le 0) { throw "invalid measured FPS: $($point.median_fps)" }
+          if (-not $point.renderer) { throw 'renderer evidence missing' }
+          foreach ($path in @(
+            'target_benchmark_smoke/no_lod_5_r1.stdout.txt',
+            'target_benchmark_smoke/no_lod_5_r1.stderr.txt',
+            'target_benchmark_smoke/no_lod_5_r1.png',
+            'target_benchmark_smoke/REPORT.md',
+            'target_benchmark_smoke/runs.json',
+            'target_benchmark_smoke/summary.json'
+          )) {
+            if (-not (Test-Path $path)) { throw "full smoke evidence missing: $path" }
+          }
+          Write-Host "KROLIK_TARGET_ORCHESTRATION_SMOKE status=ok fps=$($point.median_fps) renderer=$($point.renderer) rejected_as_target_hardware=true"
+
+      - name: Upload orchestration smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: target-hardware-benchmark-orchestration-smoke
+          path: target_benchmark_smoke/**
+          if-no-files-found: error
+          retention-days: 14
+'''
+              workflow.write_text(w, encoding='utf-8', newline='\n')
+
+          docs = Path('docs/TARGET_HARDWARE_BENCHMARK.md')
+          d = docs.read_text(encoding='utf-8')
+          marker = '## CI contract and orchestration smoke'
+          if marker not in d:
+              d += r'''
+
+## CI contract and orchestration smoke
+
+The Windows workflow has two deliberately different checks. `windows-contract` is the cheap syntax/configuration contract and does not render. `windows-orchestration-smoke` executes the real collector end-to-end with a 5-agent production stress point on GitHub-hosted Windows, verifies that the production harness produces FPS/screenshot/log evidence, and then requires the collector to reject GitHub's software renderer as target-hardware evidence with exit code 2. This proves the orchestration and rejection path without pretending hosted software rendering represents the target PC.
+'''
+              docs.write_text(d, encoding='utf-8', newline='\n')
+
+          Path('.github/workflows/target-benchmark-finalize-patch.yml').unlink()
+
+      - name: Commit finalized benchmark block
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'perf: harden target benchmark full-run validation'
+          git push origin HEAD:work/target-hardware-benchmark-20260915
