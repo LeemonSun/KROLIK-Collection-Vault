@@ -1,0 +1,75 @@
+name: Target Hardware Benchmark Contract
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'work/**'
+    paths:
+      - 'tools/run_target_hardware_benchmark.ps1'
+      - 'docs/TARGET_HARDWARE_BENCHMARK.md'
+      - '.github/workflows/target-hardware-benchmark-contract.yml'
+  pull_request:
+    paths:
+      - 'tools/run_target_hardware_benchmark.ps1'
+      - 'docs/TARGET_HARDWARE_BENCHMARK.md'
+      - '.github/workflows/target-hardware-benchmark-contract.yml'
+
+jobs:
+  windows-contract:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse PowerShell collector
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'tools/run_target_hardware_benchmark.ps1'),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Host $_.Message }
+            throw "target-hardware collector has $($errors.Count) PowerShell parse error(s)"
+          }
+          Write-Host 'KROLIK_TARGET_POWERSHELL_PARSE status=ok'
+
+      - name: Emit benchmark contract without rendering
+        shell: pwsh
+        run: |
+          if (Test-Path target_benchmark_contract) { Remove-Item target_benchmark_contract -Recurse -Force }
+          & ./tools/run_target_hardware_benchmark.ps1 -ValidateOnly -OutputRoot target_benchmark_contract
+          if ($LASTEXITCODE -ne 0) { throw "collector validation mode failed: $LASTEXITCODE" }
+
+      - name: Verify pinned comparable workload
+        shell: pwsh
+        run: |
+          $path = 'target_benchmark_contract/validation.json'
+          if (-not (Test-Path $path)) { throw 'validation.json missing' }
+          $v = Get-Content $path -Raw | ConvertFrom-Json
+          if ($v.schema -ne 'krolik.target-hardware-benchmark-contract/1') { throw "unexpected schema: $($v.schema)" }
+          if ($v.godot_version -ne '4.7.2') { throw "unexpected Godot version: $($v.godot_version)" }
+          if ($v.godot_archive_sha256 -ne '731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953') { throw 'Godot archive checksum pin changed' }
+          if ($v.rendering_method -ne 'gl_compatibility') { throw "unexpected rendering method: $($v.rendering_method)" }
+          $agents = @($v.no_lod_agents | ForEach-Object { [int]$_ })
+          if (($agents -join ',') -ne '220,300,500') { throw "canonical no-LOD population changed: $($agents -join ',')" }
+          if ([int]$v.repeat -ne 3) { throw "canonical repeat count changed: $($v.repeat)" }
+          if (-not [bool]$v.lod_enabled -or [int]$v.lod_agents -ne 500) { throw 'canonical 500-agent LOD point changed' }
+          if ([int]$v.warmup_frames -ne 30 -or [int]$v.sample_frames -ne 120) { throw 'canonical frame counts changed' }
+          if ([int]$v.watchdog_seconds -ne 180) { throw 'canonical watchdog changed' }
+          if (@($v.hosted_baselines).Count -ne 4) { throw 'hosted reference baseline count changed' }
+          Write-Host 'KROLIK_TARGET_BENCHMARK_CONTRACT_ASSERT status=ok agents=220,300,500 repeat=3 lod=500'
+
+      - name: Upload contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: target-hardware-benchmark-contract
+          path: target_benchmark_contract/validation.json
+          if-no-files-found: error
+          retention-days: 14
