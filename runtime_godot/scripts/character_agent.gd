@@ -11,7 +11,7 @@ var animation_driver := VaultAnimationDriver.new()
 var facial_state := VaultFacialState.new()
 var facial_channels: Dictionary = {}
 var secondary_motion := VaultSecondaryMotion.new()
-var secondary_motion_enabled := false
+var secondary_motion_enabled = false
 var contained := false
 var home_position := Vector2.ZERO
 var target_position := Vector2.ZERO
@@ -57,7 +57,7 @@ func setup(id_value: String, spawn: Vector2, mind: Dictionary = {}) -> void:
     collision_mask = 1
     queue_redraw()
 
-func load_runtime_manifest(manifest_path: String) -> bool:
+func load_runtime_manifest(manifest_path: String, build_runtime_resources: bool = true) -> bool:
     var package: Dictionary = RuntimePackageCacheScript.load_package(manifest_path)
     if package.is_empty():
         return false
@@ -99,8 +99,14 @@ func load_runtime_manifest(manifest_path: String) -> bool:
     animated_joints = rig_joints.duplicate(true)
     solved_joints = animated_joints.duplicate(true)
     _solve_runtime_constraints(animated_joints)
-    _rebuild_character_visual()
-    _rebuild_collision_rig()
+    if build_runtime_resources:
+        _rebuild_character_visual()
+        _rebuild_collision_rig()
+    else:
+        _clear_character_visual()
+        if collision_rig != null:
+            collision_rig.clear()
+            collision_rig = null
     queue_redraw()
     return true
 
