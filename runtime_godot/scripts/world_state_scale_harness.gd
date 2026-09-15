@@ -16,6 +16,9 @@ func _fail(message: String) -> void:
     push_error("KROLIK_WORLD_STATE_SCALE_FAIL " + message)
     quit(1)
 
+func _stage(name: String) -> void:
+    print("KROLIK_WORLD_STATE_SCALE_STAGE ", name)
+
 func _mind(subject: String, memory_age: float) -> Dictionary:
     return {
         "enabled": true,
@@ -68,7 +71,8 @@ func _spawn_character(parent: Node, manifest_abs: String, index: int) -> VaultCh
     var agent := VaultCharacterAgent.new()
     parent.add_child(agent)
     agent.setup(character_id, position, {})
-    if not agent.load_runtime_manifest(manifest_abs):
+    var needs_full_resources := index < EXPECTED_FULL
+    if not agent.load_runtime_manifest(manifest_abs, needs_full_resources):
         agent.queue_free()
         return null
     agent.character_id = character_id
@@ -86,6 +90,8 @@ func _elapsed_ms(start_usec: int) -> float:
     return float(Time.get_ticks_usec() - start_usec) / 1000.0
 
 func _run() -> void:
+    _stage("start")
+    VaultRuntimePackageCache.reset_cache()
     var manifest_abs := ProjectSettings.globalize_path(MANIFEST_PATH)
     var package_root_abs := ProjectSettings.globalize_path(PACKAGE_ROOT)
     if not FileAccess.file_exists(manifest_abs):
@@ -119,8 +125,18 @@ func _run() -> void:
             _fail("failed to register LOD at index %d" % index)
             return
         agents.append(agent)
+        if (index + 1) % 100 == 0:
+            _stage("spawned_%d" % (index + 1))
     lod.force_reassess()
     var spawn_ms := _elapsed_ms(spawn_start)
+    var cache_after_spawn := VaultRuntimePackageCache.stats_snapshot()
+    if int(cache_after_spawn.get("manifest_parses", -1)) != 1 or int(cache_after_spawn.get("texture_decodes", -1)) != 1:
+        _fail("runtime package cache did not collapse repeated package IO: " + str(cache_after_spawn))
+        return
+    if int(cache_after_spawn.get("hits", 0)) < AGENT_COUNT - 1:
+        _fail("runtime package cache hit count too low: " + str(cache_after_spawn))
+        return
+    _stage("spawn_complete")
 
     if lod.full_count() != EXPECTED_FULL or lod.reduced_count() != EXPECTED_REDUCED or lod.sleeping_count() != EXPECTED_SLEEP:
         _fail("unexpected initial tier distribution: " + str(lod.tier_snapshot()))
@@ -128,6 +144,7 @@ func _run() -> void:
 
     for _frame in range(12):
         await physics_frame
+    _stage("simulation_ready")
 
     var persistence := VaultWorldState.new()
     var capture_start := Time.get_ticks_usec()
@@ -136,6 +153,7 @@ func _run() -> void:
     if doc.is_empty() or int(doc.get("characters", []).size()) != AGENT_COUNT:
         _fail("capture failed or lost characters: " + persistence.last_error)
         return
+    _stage("captured")
 
     var save_start := Time.get_ticks_usec()
     if not persistence.save_atomic(SAVE_PATH, doc):
@@ -148,11 +166,13 @@ func _run() -> void:
     if save_bytes <= 0:
         _fail("save file is empty")
         return
+    _stage("saved")
 
     lod.clear(false)
     world.queue_free()
     await process_frame
     await process_frame
+    _stage("destroyed")
 
     var load_start := Time.get_ticks_usec()
     var loaded := persistence.load_file(SAVE_PATH)
@@ -160,6 +180,7 @@ func _run() -> void:
     if loaded.is_empty() or int(loaded.get("characters", []).size()) != AGENT_COUNT:
         _fail("load failed or lost characters: " + persistence.last_error)
         return
+    _stage("loaded")
 
     var restored_world := Node2D.new()
     restored_world.name = "ScaleWorldAfterReload"
@@ -170,6 +191,7 @@ func _run() -> void:
     if restored.is_empty():
         _fail("restore failed: " + persistence.last_error)
         return
+    _stage("restored")
 
     var restored_agents: Array = restored.get("agents", [])
     var restored_lod := restored.get("lod") as VaultPopulationLOD
@@ -195,6 +217,7 @@ func _run() -> void:
         _fail("sleep-tier resources were not released after scale restore")
         return
 
+    var cache_final := VaultRuntimePackageCache.stats_snapshot()
     print(
         "KROLIK_WORLD_STATE_SCALE status=ok agents=", AGENT_COUNT,
         " full=", EXPECTED_FULL,
@@ -205,7 +228,10 @@ func _run() -> void:
         " save_ms=", snappedf(save_ms, 0.01),
         " load_ms=", snappedf(load_ms, 0.01),
         " restore_ms=", snappedf(restore_ms, 0.01),
-        " save_bytes=", save_bytes
+        " save_bytes=", save_bytes,
+        " cache_parses=", int(cache_final.get("manifest_parses", -1)),
+        " cache_decodes=", int(cache_final.get("texture_decodes", -1)),
+        " cache_hits=", int(cache_final.get("hits", -1))
     )
 
     restored_lod.clear(false)
