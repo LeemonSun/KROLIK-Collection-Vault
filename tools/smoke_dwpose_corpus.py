@@ -12,6 +12,9 @@ The corpus therefore gates two different product properties:
 1. every sample must produce a runtime-ready package;
 2. DWPose must cover at least the configured share of the corpus, while all
    remaining fallback samples are explicitly reviewable.
+
+When DWPose rejects a sample, raw pose diagnostics are retained in the report so
+the limitation is measurable rather than hidden behind the heuristic fallback.
 """
 
 import argparse
@@ -21,7 +24,7 @@ from statistics import mean, median
 import tempfile
 
 from character_import import build_character_runtime_package
-from rig_tools import capabilities
+from rig_tools import capabilities, dwpose_diagnostics
 
 
 def main() -> int:
@@ -70,6 +73,16 @@ def main() -> int:
             if not fallback_safe:
                 unsafe_fallbacks += 1
 
+            fallback_diag: dict[str, object] = {}
+            if backend != "dwpose-onnx":
+                diag = dwpose_diagnostics(package["cutout"])
+                fallback_diag = {
+                    "dwpose_status": str(diag.get("status") or "unknown"),
+                    "dwpose_core_above_018": int(diag.get("core_above_018") or 0),
+                    "dwpose_core_scores": list(diag.get("core_scores") or []),
+                    "dwpose_score_mean": float(diag.get("score_mean") or 0.0),
+                }
+
             row = {
                 "image": image.name,
                 "status": "ok" if runtime_ready and fallback_safe else "failed",
@@ -84,6 +97,7 @@ def main() -> int:
                 "cutout_confidence": round(float(package.get("cutout_confidence", 0.0)), 6),
                 "cutout_review_required": bool(package.get("review_required")),
                 "alpha_coverage": round(float(package.get("alpha_coverage", 0.0)), 6),
+                **fallback_diag,
             }
             rows.append(row)
             print("KROLIK_DWPOSE_CORPUS_CASE " + json.dumps(row, separators=(",", ":"), sort_keys=True))
