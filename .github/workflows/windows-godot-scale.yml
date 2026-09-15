@@ -55,8 +55,16 @@ jobs:
           }
           Expand-Archive -Path $archive -DestinationPath godot-bin -Force
           $godot = Resolve-Path "godot-bin/Godot_v$env:GODOT_VERSION-stable_win64.exe"
-          & $godot --version
-          if ($LASTEXITCODE -ne 0) { throw "Godot version probe failed" }
+          $versionOutput = (& $godot --version 2>&1 | Out-String).Trim()
+          Write-Host $versionOutput
+          if ($versionOutput -notmatch [regex]::Escape($env:GODOT_VERSION)) {
+            throw "Godot version output did not contain expected version $env:GODOT_VERSION"
+          }
+          # Godot's Windows editor may return a non-zero process code for the
+          # standalone --version probe despite printing the correct version.
+          # Binary integrity is enforced by the pinned SHA above; use output as
+          # the version assertion rather than treating that probe code as runtime failure.
+          $global:LASTEXITCODE = 0
 
       - name: Parse and import Godot project on Windows
         shell: pwsh
