@@ -20,7 +20,8 @@ jobs:
       PYTHONPATH: .
       GODOT_VERSION: '4.7.2'
       GODOT_WIN_SHA256: '731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953'
-      STRESS_MAX_WORKING_SET_BYTES: '2147483648'
+      LOD_MIN_FPS: '8.0'
+      LOD_MAX_WORKING_SET_BYTES: '1610612736'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -127,6 +128,10 @@ jobs:
 
           $metricLine = ($out -split "`r?`n" | Where-Object { $_ -like 'KROLIK_LOD_SCALE_METRIC *' } | Select-Object -Last 1)
           $renderLine = ($out -split "`r?`n" | Where-Object { $_ -like 'KROLIK_LOD_RENDER_STRESS *' } | Select-Object -Last 1)
+          [double]$lodFps = 0.0
+          if ($metricLine -match 'sim_fps=([0-9]+(?:\.[0-9]+)?)') {
+            $lodFps = [double]$Matches[1]
+          }
           $record = [ordered]@{
             platform = 'windows-latest'
             godot = $env:GODOT_VERSION
@@ -134,20 +139,25 @@ jobs:
             peak_working_set_bytes = $peak
             peak_working_set_mib = [math]::Round($peak / 1MB, 2)
             process_exit_code = $exitCode
+            measured_fps = $lodFps
+            minimum_fps = [double]$env:LOD_MIN_FPS
+            speedup_vs_no_lod_baseline = [math]::Round($lodFps / 3.42, 2)
             lod_metric = $metricLine
             render_metric = $renderLine
             baseline_without_lod = '3.42 FPS / 1172.12 MiB on Microsoft Basic Render Driver, workflow run 34933824299'
             note = 'GitHub-hosted Windows runner using Microsoft Basic Render Driver via ANGLE; not target RX 6650 XT hardware.'
           }
           $record | ConvertTo-Json -Depth 4 | Set-Content -Path $metrics -Encoding utf8
-          Write-Host "KROLIK_WINDOWS_LOD peak_working_set_mib=$($record.peak_working_set_mib) process_exit_code=$exitCode"
+          Write-Host "KROLIK_WINDOWS_LOD fps=$lodFps min_fps=$env:LOD_MIN_FPS speedup=$($record.speedup_vs_no_lod_baseline)x peak_working_set_mib=$($record.peak_working_set_mib) process_exit_code=$exitCode"
           Write-Host $metricLine
           Write-Host $renderLine
 
           if (-not $metricLine) { throw 'KROLIK_LOD_SCALE_METRIC missing from Windows run' }
           if (-not $renderLine) { throw 'KROLIK_LOD_RENDER_STRESS missing from Windows run' }
+          if ($lodFps -le 0.0) { throw 'unable to parse LOD sim_fps metric' }
+          if ($lodFps -lt [double]$env:LOD_MIN_FPS) { throw "LOD performance regression: $lodFps FPS < $env:LOD_MIN_FPS FPS floor" }
           if ($out -match 'KROLIK LOD scale:' -or $err -match 'SCRIPT ERROR|Parse Error|Failed to load script') { throw 'Windows LOD stress contains failure marker' }
-          if ($peak -gt [long]$env:STRESS_MAX_WORKING_SET_BYTES) { throw "Windows LOD stress exceeded working-set budget: $peak" }
+          if ($peak -gt [long]$env:LOD_MAX_WORKING_SET_BYTES) { throw "Windows LOD stress exceeded working-set budget: $peak > $env:LOD_MAX_WORKING_SET_BYTES" }
           if (-not (Test-Path runtime_godot/windows_lod_artifacts/stress_lod_500.png)) { throw 'LOD screenshot evidence missing' }
           $global:LASTEXITCODE = 0
 
