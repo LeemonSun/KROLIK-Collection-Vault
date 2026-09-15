@@ -1,0 +1,56 @@
+name: Bootstrap Occluded Limb Policy
+
+on:
+  push:
+    branches:
+      - work/gold-elf-regression-20260915
+    paths:
+      - 'tools/apply_occluded_limb_policy_patch.py'
+      - '.github/workflows/bootstrap-occluded-limb-policy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    if: github.event.head_commit.message != 'qa: harden occluded limb confidence policy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gold-elf-regression-20260915
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install focused test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest numpy Pillow opencv-python-headless
+      - name: Apply deterministic patch
+        run: python tools/apply_occluded_limb_policy_patch.py
+      - name: Compile and test confidence/cutout/runtime contracts
+        run: |
+          python -m py_compile rig_tools.py runtime_package.py tools/probe_gold_character.py
+          pytest -q \
+            tests/test_dwpose_joint_confidence.py \
+            tests/test_joint_confidence_policy.py \
+            tests/test_runtime_joint_confidence.py \
+            tests/test_cutout_grabcut_v2.py \
+            tests/test_auto_rig_review.py
+      - name: Commit verified product patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'KROLIK CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add rig_tools.py runtime_package.py tools/probe_gold_character.py
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'No product changes to commit.'
+            exit 0
+          fi
+          git commit -m 'qa: harden occluded limb confidence policy'
+          git push origin HEAD:work/gold-elf-regression-20260915
