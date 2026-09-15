@@ -1,6 +1,6 @@
 extends SceneTree
 
-const MANIFEST_PATH := "res://.ci_vertical_slice/exports/runtime/ci_core_slice/manifest.json"
+const DEFAULT_MANIFEST_PATH := "res://.ci_vertical_slice/exports/runtime/ci_core_slice/manifest.json"
 
 func _init() -> void:
     call_deferred("_run")
@@ -9,8 +9,19 @@ func _fail(message: String) -> void:
     push_error("KROLIK_CORE_VERTICAL_SLICE_FAIL " + message)
     quit(1)
 
+func _env_or(name: String, fallback: String) -> String:
+    var value := OS.get_environment(name)
+    return fallback if value.is_empty() else value
+
 func _run() -> void:
-    var manifest_abs := ProjectSettings.globalize_path(MANIFEST_PATH)
+    var manifest_path := _env_or("KROLIK_TEST_MANIFEST_PATH", DEFAULT_MANIFEST_PATH)
+    var expected_character_id := _env_or("KROLIK_TEST_CHARACTER_ID", "ci_core_slice")
+    var expected_width := int(_env_or("KROLIK_TEST_EXPECT_WIDTH", "256"))
+    var expected_height := int(_env_or("KROLIK_TEST_EXPECT_HEIGHT", "512"))
+    var expected_rig_backend := OS.get_environment("KROLIK_TEST_RIG_BACKEND")
+    var min_rig_score := float(_env_or("KROLIK_TEST_MIN_RIG_SCORE", "99.0"))
+
+    var manifest_abs := ProjectSettings.globalize_path(manifest_path)
     var manifest_file := FileAccess.open(manifest_abs, FileAccess.READ)
     if manifest_file == null:
         _fail("generated manifest is missing: " + manifest_abs)
@@ -24,8 +35,12 @@ func _run() -> void:
         _fail("runtime manifest schema mismatch")
         return
     var quality: Dictionary = manifest.get("quality", {})
-    if not bool(quality.get("runtime_ready", false)) or float(quality.get("rig_score", 0.0)) < 99.0:
-        _fail("generated package is not runtime-ready")
+    if not bool(quality.get("runtime_ready", false)) or float(quality.get("rig_score", 0.0)) < min_rig_score:
+        _fail("generated package is not runtime-ready score=%s min=%s" % [str(quality.get("rig_score", 0.0)), str(min_rig_score)])
+        return
+    var rig_doc: Dictionary = manifest.get("rig", {})
+    if not expected_rig_backend.is_empty() and str(rig_doc.get("backend", "")) != expected_rig_backend:
+        _fail("rig backend mismatch expected=%s actual=%s" % [expected_rig_backend, str(rig_doc.get("backend", ""))])
         return
 
     var agent := VaultCharacterAgent.new()
@@ -39,12 +54,20 @@ func _run() -> void:
         _fail("production VaultCharacterAgent rejected generated manifest/image")
         agent.queue_free()
         return
-    if agent.character_id != "ci_core_slice":
-        _fail("character id did not load from manifest: " + agent.character_id)
+    if agent.character_id != expected_character_id:
+        _fail("character id did not load from manifest expected=%s actual=%s" % [expected_character_id, agent.character_id])
         agent.queue_free()
         return
-    if agent.character_texture == null or agent.character_texture.get_width() != 256 or agent.character_texture.get_height() != 512:
-        _fail("packaged character image did not load with expected dimensions")
+    if agent.character_texture == null:
+        _fail("packaged character image did not load")
+        agent.queue_free()
+        return
+    if expected_width > 0 and agent.character_texture.get_width() != expected_width:
+        _fail("packaged character image width mismatch expected=%d actual=%d" % [expected_width, agent.character_texture.get_width()])
+        agent.queue_free()
+        return
+    if expected_height > 0 and agent.character_texture.get_height() != expected_height:
+        _fail("packaged character image height mismatch expected=%d actual=%d" % [expected_height, agent.character_texture.get_height()])
         agent.queue_free()
         return
     if agent.rig_joints.size() != 15 or agent.rig_bones.size() != 14:
@@ -110,6 +133,8 @@ func _run() -> void:
 
     print(
         "KROLIK_CORE_VERTICAL_SLICE_GODOT character=", agent.character_id,
+        " rig_backend=", str(rig_doc.get("backend", "")),
+        " texture=", agent.character_texture.get_width(), "x", agent.character_texture.get_height(),
         " joints=", agent.rig_joints.size(),
         " bones=", agent.rig_bones.size(),
         " weights=", weights.size(),
