@@ -1,11 +1,13 @@
 # KROLIK Autonomous Development Runbook
 
 This file is the continuity anchor for automated hourly development passes.
-Every future autonomous run MUST read this file first, then read `docs/AUTONOMOUS_STATE.md`, inspect `main`, and continue from the latest verified state instead of guessing from chat memory.
+Every future autonomous run MUST read `docs/PRODUCT_CONTRACT_RU.md` first, then this file, then `docs/AUTONOMOUS_STATE.md`, inspect `main`, and continue from the latest verified state instead of guessing from chat memory.
 
 ## Mission
 
-Build KROLIK Collection Vault into a professional Windows-first local 2D/2.5D character studio + interactive Vault/runtime. Core target: drop a fictional adult character image, automatically prepare cutout/rig/skin, run it as a deformable Godot entity, allow data-driven animation, navigation, physical interaction/anchors/constraints with scene objects, autonomous life-sim behavior, and scale to hundreds of characters without destroying responsiveness.
+Build KROLIK Collection Vault into a professional Windows-first local 2D/2.5D character studio + interactive dark-fantasy bestiary/Vault. The product goal is a huge visual base made of many distinct rooms where the user imports their own fictional adult character collection, places characters, assigns fixtures/constraints, leaves them there, and returns later to the same persistent world. The final user experience must install from a normal Windows installer and launch without Python/Godot/console setup.
+
+Technical core target: drop a fictional adult character image, automatically prepare cutout/rig/skin, run it as a deformable Godot entity, allow data-driven animation, navigation, physical interaction/anchors/constraints with scene objects, autonomous life-sim behavior, and scale to hundreds of characters without destroying responsiveness. These systems are infrastructure for the Vault product, not a replacement for it.
 
 ## Non-negotiable invariants
 
@@ -21,6 +23,8 @@ Build KROLIK Collection Vault into a professional Windows-first local 2D/2.5D ch
 10. Before risky changes, create a checkpoint. After a verified substantial block, create another checkpoint/commit.
 11. Never delete user collection data. Update software separately from collection/project data.
 12. Keep performance in scope: target 200–500 characters through LOD, sleeping/throttled offscreen agents, efficient payloads and caching.
+13. Do not let backend/AI work displace the actual Vault UX once the relevant foundation is adequate. Rooms, fixtures, persistence, graphical interaction and distribution are product-critical work.
+14. Final distribution means a clean-machine Windows installer, not source files, batch files, a Python environment, or a diagnostic/importer-only executable.
 
 ## Core contracts to preserve
 
@@ -36,15 +40,21 @@ Clips are data: duration, loop, keyframes, joint offsets, root transforms. `anim
 ### Props / fixtures
 Props expose transforms, render layers, collision/occlusion profile, named anchors/sockets. Fixture constraints map body joints to named anchors. Avoid one-off hardcoded scene logic.
 
+### Rooms / Vault
+Rooms need stable IDs, types/themes, dimensions, navigation bounds, visual layers, fixture/placement slots, occupancy, adjacency and persistent state. Prefer versioned room/content-pack data so large Vault expansion does not require hardcoded runtime branches.
+
 ### Physics
 Current body collision uses capsule-segment proxies. Add new collision types by extending the contract, not replacing capsules.
 
 ### AI
-`life_sim.py` is the semantic source of truth. Godot brain must mirror it until an automated generation/sync path is implemented.
+`life_sim.py` is the semantic source of truth. Godot brain must mirror it until an automated generation/sync path is implemented. Emotions, social outcomes and reactions to constraints should remain semantic/data-driven so personality and memory can alter the same physical situation differently.
+
+### Distribution
+Program files and user collection data are separate. App updates must preserve project data. The final installer must support a straightforward install → launch → import → use → save → reopen loop without development tools.
 
 ## Priority roadmap (Claude master-plan aligned)
 
-Work strictly from foundation toward content. Do not jump to cosmetic breadth while core runtime remains weak.
+Work strictly from foundation toward product. Do not jump to cosmetic breadth while core runtime remains weak, but once the core is verified do not keep polishing infrastructure while Vault-facing systems remain red.
 
 ### Phase A — Finish foundation
 - A1 real Godot runtime verification on multiple character arts; visual deformation screenshots/tests, not string asserts only.
@@ -71,12 +81,16 @@ Work strictly from foundation toward content. Do not jump to cosmetic breadth wh
 - personality traits;
 - short-term memory;
 - long-term affinity/favorite places;
-- actual character-to-character encounters and paired behaviors.
+- actual character-to-character encounters and paired behaviors;
+- multi-channel emotional state connected to personality, memory, social outcomes and physical constraint context.
 
 ### Phase E — Vault ecosystem
+- versioned room/template library and large multi-room bestiary structure;
 - 60+ categorized data-driven props/fixtures;
 - occupancy/reservation;
-- parameterized visual variants.
+- persistent room/fixture/character assignment;
+- parameterized visual variants;
+- real fixture semantics passed into runtime AI/pose/constraint systems.
 
 ### Phase F — Performance/QA
 - LOD/sleeping tiers for hundreds of agents;
@@ -85,27 +99,34 @@ Work strictly from foundation toward content. Do not jump to cosmetic breadth wh
 - concurrent backend/load tests.
 
 ### Phase G — visual/UX polish
-- professional editor UI polish;
+- professional non-template editor/Vault UI polish;
+- room/sector navigation and bestiary browsing;
 - runtime ambience/light/fog/particles;
-- smooth camera and selection transitions.
+- smooth camera and selection transitions;
+- base/view mode that hides technical authoring controls.
 
 ### Phase H — saves/distribution
 - independent world save/checkpoint format;
 - content-pack upgrades with migrations;
-- clean-machine Windows EXE verification.
+- persistent rooms/fixtures/constraints in saves;
+- restore or finish the canonical graphical entrypoint;
+- clean-machine Windows graphical EXE verification;
+- produce and validate a normal Windows installer with user data outside program files.
 
 ## Current technical direction already established
 
 The project already has meaningful work toward: cutout ensemble, DWPose backend, runtime package export, GPU Polygon2D/Skeleton2D skinning, IK, capsule collisions, navigation, keyframe pose sampling, utility brain, alpha-aware mesh experiments, checkpoint tooling, runtime prop/anchor work, secondary/floor-contact/LOD work. Inspect the actual current `main` before assuming any item is complete.
 
+The canonical graphical `app.py` is currently absent from Git. Never fabricate its bytes or claim the historical graphical Vault is currently buildable from `main` until authoritative source is restored/reconciled. This blocker does not justify ignoring source-independent room/content/runtime/distribution work that can be built and verified honestly.
+
 ## Hourly autonomous run procedure
 
 Every run:
 
-1. Read this runbook and `docs/AUTONOMOUS_STATE.md`.
+1. Read `docs/PRODUCT_CONTRACT_RU.md`, this runbook, and `docs/AUTONOMOUS_STATE.md`.
 2. Inspect latest `main` commit and recent CI status.
 3. Check whether prior run left failing CI or an incomplete risky change. Fix that first.
-4. Select ONE highest-priority unblocked substantive task from the earliest unfinished phase.
+4. Select ONE highest-priority unblocked substantive task from the earliest unfinished phase, while respecting the product-critical shift toward Vault rooms/fixtures/graphical UX/distribution once foundations are adequate.
 5. Before a risky block, create or preserve a rollback checkpoint/branch if none exists for that block.
 6. Implement the task as real code, not placeholder files or string-only tests.
 7. Add/update tests that prove the task's Definition of Done as far as the available environment allows.
@@ -136,3 +157,5 @@ Do not optimize for number of commits. Optimize for verified capability. A run w
 A feature is not "done" because a file exists. It is done when the runtime path uses it and the relevant test/CI or actual execution verifies it.
 
 When there is a choice between adding breadth and making one vertical path truly game-quality, choose the vertical path.
+
+When there is a choice between more invisible infrastructure and a verified user-facing Vault capability after the required foundation already exists, prefer the Vault capability.
