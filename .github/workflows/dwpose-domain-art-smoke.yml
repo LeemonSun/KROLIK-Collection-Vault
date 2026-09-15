@@ -6,8 +6,11 @@ on:
     branches: [main]
     paths:
       - 'rig_tools.py'
+      - 'character_import.py'
+      - 'runtime_package.py'
       - 'tools/fetch_dwpose_model.py'
       - 'tools/smoke_dwpose_corpus.py'
+      - 'tests/test_auto_rig_review.py'
       - '.github/workflows/dwpose-domain-art-smoke.yml'
 
 jobs:
@@ -25,7 +28,9 @@ jobs:
       - name: Install production pose dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install numpy onnxruntime Pillow opencv-python-headless
+          pip install pytest numpy onnxruntime Pillow opencv-python-headless
+      - name: Auto-rig review regression
+        run: pytest -q tests/test_auto_rig_review.py
       - name: Cache pinned DWPose model
         uses: actions/cache@v4
         with:
@@ -45,7 +50,7 @@ jobs:
             curl --fail --location --retry 4 --output "${RUNNER_TEMP}/dwpose-anime/${name}" "${base}/${name}"
             test -s "${RUNNER_TEMP}/dwpose-anime/${name}"
           done
-      - name: Production DWPose anime-art corpus smoke
+      - name: Production import and DWPose anime-art corpus gate
         shell: bash
         run: |
           set -euo pipefail
@@ -54,7 +59,7 @@ jobs:
             "${RUNNER_TEMP}/dwpose-anime/anime2.png" \
             "${RUNNER_TEMP}/dwpose-anime/anime3.jpg" \
             "${RUNNER_TEMP}/dwpose-anime/anime4.jpg" \
-            --min-confidence 0.12 \
+            --min-dwpose-share 0.75 \
             --report "${RUNNER_TEMP}/dwpose-anime/domain_report.json"
       - name: Upload domain smoke report
         if: always()
