@@ -8,8 +8,11 @@ var world_origin := Vector2(90, 80)
 var loaded_world_path := ""
 var navigation_region: NavigationRegion2D
 var social_encounters := VaultSocialEncounterManager.new()
+var room_catalog := VaultRoomCatalog.new()
 
 func _ready() -> void:
+    if not room_catalog.load_default():
+        push_error("KROLIK runtime: room catalog unavailable; room rendering will use fallback colors")
     var user_args := OS.get_cmdline_user_args()
     var requested := ""
     for arg in user_args:
@@ -20,19 +23,43 @@ func _ready() -> void:
     _spawn_diagnostic_world()
 
 func _spawn_diagnostic_world() -> void:
-    _build_navigation_from_rect(Rect2(80, 120, 1120, 500))
+    world_cells.clear()
+    var room_types := ["stone_cell", "chain_hall", "cage_gallery", "frame_gallery", "quarantine_lab"]
+    var fixtures := ["wall_cuffs", "hanging_chains", "standing_cage", "x_frame", "display_frame"]
+    for i in range(room_types.size()):
+        var cell_id := "demo_room_%02d" % i
+        world_cells[cell_id] = {
+            "id": cell_id,
+            "room_type": room_types[i],
+            "fixture_type": fixtures[i],
+            "rect": {"x": float(i * 610), "y": 110.0, "w": 570.0, "h": 920.0},
+        }
+    _rebuild_navigation()
     for i in range(4):
         var a := VaultCharacterAgent.new()
         add_child(a)
-        a.setup("demo_%02d" % i, Vector2(260 + i * 180, 360), {
+        var cell: Dictionary = world_cells["demo_room_%02d" % i]
+        var spawn := _cell_center(cell)
+        a.setup("demo_%02d" % i, spawn, {
             "enabled": true,
             "state": "idle",
             "profile": {"mobility":"free", "autonomy":0.8, "wander":0.75},
             "needs": {"energy":0.8, "comfort":0.7, "curiosity":0.85 - i * 0.1, "social":0.4}
         })
+        a.home_position = spawn
+        a.target_position = spawn
         agents.append(a)
+    var targets := _world_target_points()
+    for agent in agents:
+        agent.world_targets = targets
     if agents.size() > 2:
         agents[2].contained = true
+        agents[2].apply_runtime_interaction({
+            "contained": true,
+            "interaction_mode": "contained",
+            "constraint_kind": "cage",
+            "constraint_severity": 0.72,
+        })
 
 func _cell_center(cell: Dictionary) -> Vector2:
     var r: Dictionary = cell.get("rect", {})
@@ -113,9 +140,6 @@ func _rebuild_navigation() -> void:
             first = false
         else:
             bounds = bounds.merge(rect)
-    # The exported editor currently has cell rectangles but not full corridor
-    # polygons.  A padded bounds navmesh is a real NavigationServer2D path now;
-    # later exports can replace this with exact room/corridor outlines unchanged.
     bounds = bounds.grow(18.0)
     _build_navigation_from_rect(bounds)
 
@@ -129,8 +153,6 @@ func _spawn_snapshot_character(data: Dictionary, runtime_root: String) -> void:
     var package: Dictionary = data.get("runtime_package", {})
     var manifest_path := str(package.get("manifest", ""))
     if manifest_path.is_empty():
-        # The Python exporter returns an absolute path. If a future portable
-        # export switches to relative paths, resolve it from world.json here.
         var safe := cid.replace("·", "_")
         manifest_path = runtime_root.path_join(safe).path_join("manifest.json")
     var agent := VaultCharacterAgent.new()
@@ -176,22 +198,64 @@ func _process(delta: float) -> void:
     social_encounters.step(delta, agents)
     queue_redraw()
 
+func _room_rect(cell: Dictionary) -> Rect2:
+    var r: Dictionary = cell.get("rect", {})
+    return Rect2(
+        world_origin + Vector2(float(r.get("x", 0.0)), float(r.get("y", 0.0))) * world_scale,
+        Vector2(float(r.get("w", 0.0)), float(r.get("h", 0.0))) * world_scale
+    )
+
+func _draw_room_slots(rect: Rect2, room_kind: String, accent: Color) -> void:
+    if room_catalog.rooms.is_empty():
+        return
+    for raw_slot in room_catalog.placement_slots(room_kind):
+        if typeof(raw_slot) != TYPE_DICTIONARY:
+            continue
+        var slot: Dictionary = raw_slot
+        var point := rect.position + Vector2(
+            rect.size.x * clampf(float(slot.get("x", 0.5)), 0.0, 1.0),
+            rect.size.y * clampf(float(slot.get("y", 0.5)), 0.0, 1.0)
+        )
+        var role := str(slot.get("role", "character"))
+        var radius := 2.6 if role == "fixture" else 2.0
+        var marker := Color(accent.r, accent.g, accent.b, 0.28 if role == "fixture" else 0.18)
+        draw_circle(point, radius, marker)
+
 func _draw() -> void:
     if world_cells.is_empty():
         draw_rect(Rect2(80, 120, 1120, 500), Color(0.05, 0.055, 0.07, 1.0), true)
         draw_rect(Rect2(80, 120, 1120, 500), Color(0.32, 0.28, 0.25, 1.0), false, 4.0)
-        for x in range(5):
-            draw_line(Vector2(170 + x * 220, 140), Vector2(170 + x * 220, 600), Color(0.16,0.15,0.17,1), 2.0)
         return
     for cell in world_cells.values():
-        var r: Dictionary = cell.get("rect", {})
-        var rect := Rect2(
-            world_origin + Vector2(float(r.get("x", 0.0)), float(r.get("y", 0.0))) * world_scale,
-            Vector2(float(r.get("w", 0.0)), float(r.get("h", 0.0))) * world_scale
-        )
-        var fill := Color(0.045, 0.05, 0.065, 0.94)
+        var rect := _room_rect(cell)
+        var room_kind := room_catalog.room_kind_for_cell(cell) if not room_catalog.rooms.is_empty() else "storage_cell"
+        var fill := room_catalog.theme_color(room_kind, "floor_rgb", Color(0.045, 0.05, 0.065, 0.94))
+        fill.a = 0.96
+        var border := room_catalog.theme_color(room_kind, "border_rgb", Color(0.22, 0.19, 0.17, 0.95))
+        border.a = 0.96
+        var accent := room_catalog.theme_color(room_kind, "accent_rgb", Color(0.58, 0.54, 0.47, 0.72))
+        accent.a = 0.72
         draw_rect(rect, fill, true)
-        draw_rect(rect, Color(0.22, 0.19, 0.17, 0.95), false, 2.0)
+        draw_rect(rect, border, false, 2.0)
+        draw_rect(Rect2(rect.position, Vector2(rect.size.x, 3.0)), Color(accent.r, accent.g, accent.b, 0.42), true)
+        _draw_room_slots(rect, room_kind, accent)
+        draw_string(
+            ThemeDB.fallback_font,
+            rect.position + Vector2(8, 18),
+            room_kind.replace("_", " ").to_upper(),
+            HORIZONTAL_ALIGNMENT_LEFT,
+            -1,
+            10,
+            Color(accent.r, accent.g, accent.b, 0.80)
+        )
         var fixture := str(cell.get("fixture_type", ""))
         if fixture != "":
-            draw_string(ThemeDB.fallback_font, rect.position + Vector2(8, 18), fixture, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.58,0.54,0.47,0.72))
+            draw_string(
+                ThemeDB.fallback_font,
+                rect.position + Vector2(8, 34),
+                fixture.replace("_", " "),
+                HORIZONTAL_ALIGNMENT_LEFT,
+                -1,
+                9,
+                Color(border.r, border.g, border.b, 0.72)
+            )

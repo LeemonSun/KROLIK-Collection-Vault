@@ -15,6 +15,7 @@ from ai_policy import AI_POLICY_SCHEMA, validate_ai_policy_document
 from animation_content import ANIMATION_SCHEMA, validate_animation_document
 from pose_content import POSE_SCHEMA, validate_pose_document
 from prop_content import FIXTURE_SCHEMA, validate_fixture_document
+from room_content import ROOM_SCHEMA, validate_room_fixture_references
 
 
 def validate_file(path: Path) -> list[str]:
@@ -31,6 +32,8 @@ def validate_file(path: Path) -> list[str]:
         return validate_pose_document(document)
     if schema == AI_POLICY_SCHEMA:
         return validate_ai_policy_document(document)
+    if schema == ROOM_SCHEMA:
+        return validate_room_fixture_references(document)
     # Path hints keep diagnostics useful for malformed files whose schema field
     # itself is missing/wrong, while the validator still reports the schema.
     if "animations" in path.parts:
@@ -41,6 +44,8 @@ def validate_file(path: Path) -> list[str]:
         return validate_pose_document(document)
     if "ai" in path.parts:
         return validate_ai_policy_document(document)
+    if "rooms" in path.parts:
+        return validate_room_fixture_references(document)
     return [f"unsupported content schema {schema!r}"]
 
 

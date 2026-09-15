@@ -1,0 +1,263 @@
+{
+  "schema": "krolik.room-library/1",
+  "format_version": 1,
+  "rooms": {
+    "storage_cell": {
+      "category": "storage",
+      "tags": ["neutral", "compact", "utility"],
+      "dimensions": {"w": 8.0, "h": 6.0},
+      "theme": {"floor_rgb": [0.055, 0.058, 0.068], "border_rgb": [0.26, 0.24, 0.22], "accent_rgb": [0.50, 0.44, 0.34], "ambient": 0.28, "fog": 0.04},
+      "navigation": {"padding": 0.45, "doorway_width": 1.2},
+      "capacity": 2,
+      "fixture_compatibility": {"allowed_fixture_tags": ["anchor", "container", "post"], "preferred_fixture_kinds": ["iron_post", "chain_anchor", "rope_anchor"]},
+      "placement_slots": [
+        {"id": "character_a", "x": 0.35, "y": 0.62, "role": "character", "accepts": ["character"]},
+        {"id": "character_b", "x": 0.68, "y": 0.62, "role": "character", "accepts": ["character"]},
+        {"id": "rear_fixture", "x": 0.50, "y": 0.34, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": []
+    },
+    "stone_cell": {
+      "category": "cell",
+      "tags": ["stone", "compact", "dark"],
+      "dimensions": {"w": 7.0, "h": 6.0},
+      "theme": {"floor_rgb": [0.045, 0.047, 0.052], "border_rgb": [0.30, 0.28, 0.25], "accent_rgb": [0.42, 0.38, 0.30], "ambient": 0.19, "fog": 0.10},
+      "navigation": {"padding": 0.50, "doorway_width": 1.0},
+      "capacity": 1,
+      "fixture_compatibility": {"allowed_fixture_tags": ["wall", "floor", "anchor", "post", "chain"], "preferred_fixture_kinds": ["wall_cuffs", "floor_shackles", "iron_post"]},
+      "placement_slots": [
+        {"id": "center", "x": 0.50, "y": 0.62, "role": "character", "accepts": ["character"]},
+        {"id": "back_wall", "x": 0.50, "y": 0.28, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "floor_center", "x": 0.50, "y": 0.72, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [{"fixture": "chain_anchor", "slot": "back_wall"}]
+    },
+    "observation_room": {
+      "category": "observation",
+      "tags": ["clean", "wide", "display"],
+      "dimensions": {"w": 12.0, "h": 7.0},
+      "theme": {"floor_rgb": [0.060, 0.070, 0.082], "border_rgb": [0.30, 0.35, 0.39], "accent_rgb": [0.42, 0.58, 0.66], "ambient": 0.42, "fog": 0.02},
+      "navigation": {"padding": 0.55, "doorway_width": 1.6},
+      "capacity": 4,
+      "fixture_compatibility": {"allowed_fixture_tags": ["display", "frame", "container"], "preferred_fixture_kinds": ["display_frame", "standing_cage"]},
+      "placement_slots": [
+        {"id": "display_left", "x": 0.24, "y": 0.58, "role": "character", "accepts": ["character"]},
+        {"id": "display_center", "x": 0.50, "y": 0.58, "role": "character", "accepts": ["character"]},
+        {"id": "display_right", "x": 0.76, "y": 0.58, "role": "character", "accepts": ["character"]},
+        {"id": "rear_display", "x": 0.50, "y": 0.30, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [{"fixture": "display_frame", "slot": "rear_display"}]
+    },
+    "chain_hall": {
+      "category": "constraint_hall",
+      "tags": ["chain", "overhead", "long"],
+      "dimensions": {"w": 15.0, "h": 7.0},
+      "theme": {"floor_rgb": [0.040, 0.042, 0.048], "border_rgb": [0.32, 0.27, 0.22], "accent_rgb": [0.62, 0.42, 0.22], "ambient": 0.22, "fog": 0.08},
+      "navigation": {"padding": 0.60, "doorway_width": 1.6},
+      "capacity": 6,
+      "fixture_compatibility": {"allowed_fixture_tags": ["chain", "overhead", "anchor", "paired"], "preferred_fixture_kinds": ["hanging_chains", "suspension_ring", "chain_anchor"]},
+      "placement_slots": [
+        {"id": "left", "x": 0.20, "y": 0.60, "role": "character", "accepts": ["character"]},
+        {"id": "center", "x": 0.50, "y": 0.60, "role": "character", "accepts": ["character"]},
+        {"id": "right", "x": 0.80, "y": 0.60, "role": "character", "accepts": ["character"]},
+        {"id": "overhead_left", "x": 0.28, "y": 0.24, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "overhead_center", "x": 0.50, "y": 0.24, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "overhead_right", "x": 0.72, "y": 0.24, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [
+        {"fixture": "hanging_chains", "slot": "overhead_left"},
+        {"fixture": "suspension_ring", "slot": "overhead_center"},
+        {"fixture": "hanging_chains", "slot": "overhead_right"}
+      ]
+    },
+    "shackle_room": {
+      "category": "constraint_room",
+      "tags": ["floor", "iron", "compact"],
+      "dimensions": {"w": 9.0, "h": 7.0},
+      "theme": {"floor_rgb": [0.050, 0.046, 0.045], "border_rgb": [0.34, 0.25, 0.23], "accent_rgb": [0.66, 0.30, 0.24], "ambient": 0.23, "fog": 0.06},
+      "navigation": {"padding": 0.55, "doorway_width": 1.2},
+      "capacity": 2,
+      "fixture_compatibility": {"allowed_fixture_tags": ["floor", "ankle", "paired", "anchor"], "preferred_fixture_kinds": ["floor_shackles", "chain_anchor"]},
+      "placement_slots": [
+        {"id": "subject", "x": 0.50, "y": 0.58, "role": "character", "accepts": ["character"]},
+        {"id": "floor_left", "x": 0.37, "y": 0.73, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "floor_right", "x": 0.63, "y": 0.73, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [{"fixture": "floor_shackles", "slot": "floor_left"}]
+    },
+    "restraint_room": {
+      "category": "constraint_room",
+      "tags": ["central", "anchor", "mixed"],
+      "dimensions": {"w": 10.0, "h": 8.0},
+      "theme": {"floor_rgb": [0.052, 0.044, 0.050], "border_rgb": [0.34, 0.24, 0.30], "accent_rgb": [0.58, 0.28, 0.46], "ambient": 0.24, "fog": 0.07},
+      "navigation": {"padding": 0.60, "doorway_width": 1.3},
+      "capacity": 3,
+      "fixture_compatibility": {"allowed_fixture_tags": ["post", "wall", "floor", "anchor", "paired"], "preferred_fixture_kinds": ["iron_post", "wall_cuffs", "floor_shackles"]},
+      "placement_slots": [
+        {"id": "center_subject", "x": 0.50, "y": 0.60, "role": "character", "accepts": ["character"]},
+        {"id": "center_fixture", "x": 0.50, "y": 0.50, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "wall_fixture", "x": 0.50, "y": 0.24, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "floor_fixture", "x": 0.50, "y": 0.76, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [{"fixture": "iron_post", "slot": "center_fixture"}]
+    },
+    "cage_gallery": {
+      "category": "gallery",
+      "tags": ["cage", "container", "display"],
+      "dimensions": {"w": 14.0, "h": 8.0},
+      "theme": {"floor_rgb": [0.046, 0.052, 0.050], "border_rgb": [0.23, 0.34, 0.30], "accent_rgb": [0.30, 0.62, 0.48], "ambient": 0.30, "fog": 0.05},
+      "navigation": {"padding": 0.70, "doorway_width": 1.7},
+      "capacity": 6,
+      "fixture_compatibility": {"allowed_fixture_tags": ["cage", "container", "door", "display"], "preferred_fixture_kinds": ["standing_cage", "barrel", "display_frame"]},
+      "placement_slots": [
+        {"id": "cage_left", "x": 0.22, "y": 0.54, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "cage_center", "x": 0.50, "y": 0.54, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "cage_right", "x": 0.78, "y": 0.54, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "walk_left", "x": 0.34, "y": 0.76, "role": "character", "accepts": ["character"]},
+        {"id": "walk_right", "x": 0.66, "y": 0.76, "role": "character", "accepts": ["character"]}
+      ],
+      "builtins": [
+        {"fixture": "standing_cage", "slot": "cage_left"},
+        {"fixture": "standing_cage", "slot": "cage_center"},
+        {"fixture": "standing_cage", "slot": "cage_right"}
+      ]
+    },
+    "frame_gallery": {
+      "category": "gallery",
+      "tags": ["frame", "display", "wide"],
+      "dimensions": {"w": 14.0, "h": 8.0},
+      "theme": {"floor_rgb": [0.052, 0.048, 0.062], "border_rgb": [0.31, 0.27, 0.39], "accent_rgb": [0.55, 0.40, 0.72], "ambient": 0.29, "fog": 0.05},
+      "navigation": {"padding": 0.65, "doorway_width": 1.7},
+      "capacity": 5,
+      "fixture_compatibility": {"allowed_fixture_tags": ["frame", "display", "four_point"], "preferred_fixture_kinds": ["x_frame", "display_frame", "stocks"]},
+      "placement_slots": [
+        {"id": "frame_left", "x": 0.25, "y": 0.48, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "frame_center", "x": 0.50, "y": 0.48, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "frame_right", "x": 0.75, "y": 0.48, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "floor_left", "x": 0.38, "y": 0.78, "role": "character", "accepts": ["character"]},
+        {"id": "floor_right", "x": 0.62, "y": 0.78, "role": "character", "accepts": ["character"]}
+      ],
+      "builtins": [
+        {"fixture": "x_frame", "slot": "frame_left"},
+        {"fixture": "display_frame", "slot": "frame_center"},
+        {"fixture": "x_frame", "slot": "frame_right"}
+      ]
+    },
+    "iron_post_chamber": {
+      "category": "chamber",
+      "tags": ["post", "central", "ritual"],
+      "dimensions": {"w": 11.0, "h": 9.0},
+      "theme": {"floor_rgb": [0.048, 0.042, 0.038], "border_rgb": [0.40, 0.28, 0.18], "accent_rgb": [0.76, 0.46, 0.18], "ambient": 0.20, "fog": 0.12},
+      "navigation": {"padding": 0.70, "doorway_width": 1.4},
+      "capacity": 4,
+      "fixture_compatibility": {"allowed_fixture_tags": ["post", "central", "anchor", "chain", "rope"], "preferred_fixture_kinds": ["iron_post", "chain_anchor", "rope_anchor"]},
+      "placement_slots": [
+        {"id": "center_post", "x": 0.50, "y": 0.48, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "subject", "x": 0.50, "y": 0.60, "role": "character", "accepts": ["character"]},
+        {"id": "left_anchor", "x": 0.24, "y": 0.56, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "right_anchor", "x": 0.76, "y": 0.56, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [
+        {"fixture": "iron_post", "slot": "center_post"},
+        {"fixture": "chain_anchor", "slot": "left_anchor"},
+        {"fixture": "rope_anchor", "slot": "right_anchor"}
+      ]
+    },
+    "archive_gallery": {
+      "category": "archive",
+      "tags": ["display", "quiet", "collection"],
+      "dimensions": {"w": 13.0, "h": 8.0},
+      "theme": {"floor_rgb": [0.058, 0.054, 0.046], "border_rgb": [0.38, 0.33, 0.24], "accent_rgb": [0.70, 0.58, 0.32], "ambient": 0.36, "fog": 0.02},
+      "navigation": {"padding": 0.65, "doorway_width": 1.5},
+      "capacity": 6,
+      "fixture_compatibility": {"allowed_fixture_tags": ["display", "frame", "container"], "preferred_fixture_kinds": ["display_frame", "standing_cage"]},
+      "placement_slots": [
+        {"id": "display_1", "x": 0.18, "y": 0.42, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "display_2", "x": 0.39, "y": 0.42, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "display_3", "x": 0.61, "y": 0.42, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "display_4", "x": 0.82, "y": 0.42, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "aisle_left", "x": 0.36, "y": 0.74, "role": "character", "accepts": ["character"]},
+        {"id": "aisle_right", "x": 0.64, "y": 0.74, "role": "character", "accepts": ["character"]}
+      ],
+      "builtins": []
+    },
+    "quarantine_lab": {
+      "category": "laboratory",
+      "tags": ["clean", "quarantine", "observation"],
+      "dimensions": {"w": 12.0, "h": 8.0},
+      "theme": {"floor_rgb": [0.050, 0.064, 0.066], "border_rgb": [0.25, 0.41, 0.42], "accent_rgb": [0.28, 0.72, 0.72], "ambient": 0.45, "fog": 0.01},
+      "navigation": {"padding": 0.70, "doorway_width": 1.5},
+      "capacity": 4,
+      "fixture_compatibility": {"allowed_fixture_tags": ["cage", "container", "display", "wall", "paired"], "preferred_fixture_kinds": ["standing_cage", "wall_cuffs", "display_frame"]},
+      "placement_slots": [
+        {"id": "containment", "x": 0.28, "y": 0.50, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "observation", "x": 0.70, "y": 0.50, "role": "character", "accepts": ["character"]},
+        {"id": "rear_mount", "x": 0.50, "y": 0.24, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": [{"fixture": "standing_cage", "slot": "containment"}]
+    },
+    "deep_vault": {
+      "category": "vault",
+      "tags": ["deep", "heavy", "secure"],
+      "dimensions": {"w": 13.0, "h": 9.0},
+      "theme": {"floor_rgb": [0.030, 0.034, 0.042], "border_rgb": [0.22, 0.24, 0.32], "accent_rgb": [0.34, 0.42, 0.68], "ambient": 0.16, "fog": 0.14},
+      "navigation": {"padding": 0.75, "doorway_width": 1.4},
+      "capacity": 4,
+      "fixture_compatibility": {"allowed_fixture_tags": ["anchor", "wall", "floor", "container", "frame", "post"], "preferred_fixture_kinds": ["wall_cuffs", "floor_shackles", "standing_cage", "iron_post"]},
+      "placement_slots": [
+        {"id": "center", "x": 0.50, "y": 0.60, "role": "character", "accepts": ["character"]},
+        {"id": "left_wall", "x": 0.22, "y": 0.44, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "right_wall", "x": 0.78, "y": 0.44, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "rear", "x": 0.50, "y": 0.27, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": []
+    },
+    "quiet_room": {
+      "category": "habitation",
+      "tags": ["quiet", "neutral", "rest"],
+      "dimensions": {"w": 9.0, "h": 7.0},
+      "theme": {"floor_rgb": [0.064, 0.060, 0.070], "border_rgb": [0.34, 0.31, 0.38], "accent_rgb": [0.56, 0.50, 0.62], "ambient": 0.38, "fog": 0.01},
+      "navigation": {"padding": 0.55, "doorway_width": 1.3},
+      "capacity": 3,
+      "fixture_compatibility": {"allowed_fixture_tags": ["display", "container", "anchor"], "preferred_fixture_kinds": ["display_frame", "rope_anchor"]},
+      "placement_slots": [
+        {"id": "left", "x": 0.32, "y": 0.62, "role": "character", "accepts": ["character"]},
+        {"id": "right", "x": 0.68, "y": 0.62, "role": "character", "accepts": ["character"]},
+        {"id": "rear", "x": 0.50, "y": 0.32, "role": "fixture", "accepts": ["fixture"]}
+      ],
+      "builtins": []
+    },
+    "stocks_chamber": {
+      "category": "constraint_room",
+      "tags": ["stocks", "wood", "display"],
+      "dimensions": {"w": 10.0, "h": 7.0},
+      "theme": {"floor_rgb": [0.058, 0.045, 0.036], "border_rgb": [0.42, 0.28, 0.16], "accent_rgb": [0.70, 0.38, 0.16], "ambient": 0.25, "fog": 0.05},
+      "navigation": {"padding": 0.55, "doorway_width": 1.3},
+      "capacity": 3,
+      "fixture_compatibility": {"allowed_fixture_tags": ["frame", "paired", "display"], "preferred_fixture_kinds": ["stocks", "display_frame"]},
+      "placement_slots": [
+        {"id": "stocks", "x": 0.50, "y": 0.46, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "subject", "x": 0.50, "y": 0.62, "role": "character", "accepts": ["character"]},
+        {"id": "viewer_left", "x": 0.28, "y": 0.76, "role": "character", "accepts": ["character"]},
+        {"id": "viewer_right", "x": 0.72, "y": 0.76, "role": "character", "accepts": ["character"]}
+      ],
+      "builtins": [{"fixture": "stocks", "slot": "stocks"}]
+    },
+    "suspension_chamber": {
+      "category": "constraint_room",
+      "tags": ["overhead", "ring", "chain"],
+      "dimensions": {"w": 10.0, "h": 9.0},
+      "theme": {"floor_rgb": [0.040, 0.044, 0.052], "border_rgb": [0.24, 0.30, 0.39], "accent_rgb": [0.36, 0.52, 0.76], "ambient": 0.21, "fog": 0.09},
+      "navigation": {"padding": 0.65, "doorway_width": 1.3},
+      "capacity": 3,
+      "fixture_compatibility": {"allowed_fixture_tags": ["overhead", "ring", "chain", "paired"], "preferred_fixture_kinds": ["suspension_ring", "hanging_chains"]},
+      "placement_slots": [
+        {"id": "overhead", "x": 0.50, "y": 0.22, "role": "fixture", "accepts": ["fixture"]},
+        {"id": "subject", "x": 0.50, "y": 0.58, "role": "character", "accepts": ["character"]},
+        {"id": "left", "x": 0.28, "y": 0.72, "role": "character", "accepts": ["character"]},
+        {"id": "right", "x": 0.72, "y": 0.72, "role": "character", "accepts": ["character"]}
+      ],
+      "builtins": [{"fixture": "suspension_ring", "slot": "overhead"}]
+    }
+  }
+}
