@@ -1,6 +1,6 @@
 # A2 DWPose / RTMPose production validation
 
-Status: **VERIFIED production baseline** on Python/ONNXRuntime, Linux/Godot runtime/rendering, compact human ground-truth accuracy, packaged Windows one-file importer, and a small upstream anime-art domain gate.
+Status: **VERIFIED production baseline** on Python/ONNXRuntime, Linux/Godot runtime/rendering, compact human ground-truth accuracy, packaged Windows one-file importer, and a 12-case pinned real/stylized-art domain gate.
 
 This document records measured evidence for the A2 auto-rig milestone. It deliberately separates model integrity, backend execution, measured accuracy, product/runtime integration, Windows packaging, and remaining domain limitations.
 
@@ -122,40 +122,82 @@ The Windows gate:
 
 This proves the optional DWPose runtime is present and usable inside the packaged Windows importer rather than only in developer Python.
 
-## Anime / stylized-art domain gate
+## Real / stylized-art domain gate
 
-The upstream DWPose repository supplies four anime/stylized fixtures (`anime1.png`, `anime2.png`, `anime3.jpg`, `anime4.jpg`). KROLIK runs them through the actual product path:
+The original domain gate used four anime/stylized fixtures (`anime1.png`, `anime2.png`, `anime3.jpg`, `anime4.jpg`) from a checksum-pinned DWPose repository commit. That historical gate remains useful evidence:
 
-`source art -> immutable import -> derived auto cutout -> AI-rig attempt -> skin/collision package`.
+- workflow run `34932762783`;
+- samples: 4;
+- runtime-ready: 4/4;
+- real DWPose: 3/4 (75%);
+- unsafe silent fallbacks: 0;
+- explicit review fallbacks: 1 (`anime1.png`).
 
-Verified domain run `34932762783`:
+The current regression expands that same provenance-pinned corpus to 12 single-character real/stylized cases without changing the production DWPose acceptance rule or lowering the CI coverage threshold.
 
-- samples: 4
-- runtime-ready packages: 4/4
-- real DWPose: 3/4
-- DWPose coverage: 75%
-- unsafe silent fallbacks: 0
-- explicit review fallbacks: 1
-- mean/median runtime rig score: 100
-- gate result: PASS
+Pinned source:
 
-Per-sample outcome:
+- repository: `IDEA-Research/DWPose`;
+- commit: `3dca5db79d9f9ffdd378753ddf6ec66535aace88`;
+- each fixture is fetched on demand and checked against its exact Git blob SHA-1 and byte size;
+- fixture binaries are not committed to KROLIK Git history.
 
-- `anime1.png`: DWPose did not satisfy the production body-joint acceptance rule; 7/12 core joints were >=0.18, so KROLIK used deterministic `heuristic-silhouette` and set `rig_review_required=true`. Cutout confidence was 0.9729 and did not require cutout review, so this limitation is specifically pose-domain coverage rather than failed matting.
-- `anime2.png`: `dwpose-onnx`, runtime-ready.
-- `anime3.jpg`: `dwpose-onnx`, runtime-ready.
-- `anime4.jpg`: `dwpose-onnx`, runtime-ready; cutout itself remains review-required because its conservative matting confidence was 0.6273.
+Current verified domain run: `34946008811`.
 
-The fallback behavior is intentional product behavior: requesting AI auto-rig and receiving the heuristic fallback is never silently treated as a confidently accepted AI rig. The runtime package remains usable, but authoring/UI can require manual joint review.
+Aggregate result:
 
-The follow-up anime product-slice CI at run `34932929973` also succeeds after aligning the product-slice builder with the same production acceptance rule. It selects a proven DWPose anime case, builds/seals a runtime package and loads that package through production Godot `VaultCharacterAgent`.
+- samples: 12;
+- runtime-ready packages: 12/12;
+- failed runtime packages: 0;
+- real `dwpose-onnx`: 10/12;
+- DWPose coverage: `0.833333` (83.3%);
+- required CI minimum: `0.75` (75%);
+- unsafe silent fallbacks: 0;
+- explicit rig-review fallbacks: 2;
+- mean runtime rig score: `100.0`;
+- median runtime rig score: `100.0`;
+- gate result: PASS.
 
-Domain report artifact from the measured 4-art gate:
+Per-sample rig outcome:
 
-- workflow run: `34932762783`
-- artifact name: `dwpose-anime-domain-smoke`
-- artifact ID: `10382133116`
-- artifact ZIP SHA-256: `be5f8acf6dcc85637bccb92bed5690f3e18ba17d603ab4ae9ed4c10c42c94aa5`
+- `anime1.png`: `heuristic-silhouette`, `rig_review_required=true`; DWPose had 7/12 core joints >=0.18 and therefore correctly failed the production acceptance rule;
+- `anime2.png`: `dwpose-onnx`, runtime-ready;
+- `anime3.jpg`: `dwpose-onnx`, runtime-ready;
+- `anime4.jpg`: `dwpose-onnx`, runtime-ready; conservative cutout remains review-required independently of the accepted rig;
+- `boy.png`: `dwpose-onnx`, runtime-ready;
+- `human.png`: `dwpose-onnx`, runtime-ready;
+- `m2.jpg`: `dwpose-onnx`, runtime-ready;
+- `man2.jpg`: `dwpose-onnx`, runtime-ready;
+- `person-leaves.png`: `heuristic-silhouette`, `rig_review_required=true`; occlusion/background complexity leaves only 4/12 core joints >=0.18;
+- `pose1.png`: `dwpose-onnx`, runtime-ready;
+- `pose2.png`: `dwpose-onnx`, runtime-ready;
+- `violet.jpg`: `dwpose-onnx`, runtime-ready.
+
+The two difficult fallback cases remain in the corpus deliberately. They prove that failed AI confidence is surfaced as an explicit authoring review requirement instead of being silently accepted or removed merely to improve the headline percentage.
+
+The same workflow also selects an accepted DWPose case (`anime2.png` in run `34946008811`), builds and seals the real runtime package, and loads it through production Godot `VaultCharacterAgent`.
+
+Measured Godot product-slice evidence in the expanded run:
+
+- backend: `dwpose-onnx`;
+- texture: `512 x 704`;
+- joints: 15;
+- bones: 14;
+- weight sets: 14;
+- collision proxies: 14;
+- GPU skin: true;
+- AI policy: true;
+- post-physics state: `wander`;
+- measured travel: `41.4 px`.
+
+Evidence artifact:
+
+- workflow run: `34946008811`;
+- artifact name: `dwpose-domain-art-product-slice`;
+- artifact ID: `10387626378`;
+- artifact ZIP SHA-256: `cc2561ab3e4762e433196f00dfafc1da9771b7c802f101b9e7bba93536051d7a`.
+
+The workflow now reads the fixture list directly from `qa/corpora/dwpose_domain_art_corpus_v1.json`; it no longer carries a separate hardcoded `anime1..4` image list. This keeps provenance, corpus membership and CI execution under one versioned contract.
 
 ## A2 conclusion
 
@@ -168,11 +210,11 @@ A2 is closed as a **verified production baseline**:
 - compact human ground-truth accuracy is measured;
 - the real import/package/Godot/render path is verified;
 - the packaged Windows importer executes DWPose successfully;
-- a small stylized/anime domain corpus is covered with explicit safe-review fallback when DWPose cannot meet its production acceptance rule.
+- a pinned 12-case real/stylized domain corpus is 12/12 runtime-ready with 10/12 accepted DWPose rigs and explicit safe-review fallback for the two cases that do not satisfy the production confidence rule.
 
 A2 closure does **not** eliminate later Phase-F QA requirements:
 
-- expand anime/fantasy QA to 100–200 diverse source arts with unusual proportions, clothing and occlusion;
+- expand anime/fantasy QA toward 100–200 genuinely diverse source arts with unusual proportions, clothing and occlusion when provenance-known fixtures are available;
 - measure actual GPU execution providers on target Windows hardware (CI currently proves functional packaged execution, not the user's RX 6650 XT performance);
 - multi-person source-image UX remains outside the current single-selected-character import contract;
 - final graphical manual-correction UX remains blocked by/requires reconciliation with canonical `app.py`;
