@@ -1,0 +1,104 @@
+name: Godot World State Scale
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'work/**'
+    paths:
+      - 'runtime_godot/scripts/world_state.gd'
+      - 'runtime_godot/scripts/world_state_scale_harness.gd'
+      - 'runtime_godot/scripts/population_lod.gd'
+      - 'runtime_godot/scripts/character_agent.gd'
+      - 'runtime_godot/scripts/agent_brain.gd'
+      - 'runtime_package.py'
+      - 'character_import.py'
+      - 'tools/build_core_vertical_slice.py'
+      - '.github/workflows/godot-world-state-scale.yml'
+  pull_request:
+    paths:
+      - 'runtime_godot/scripts/world_state.gd'
+      - 'runtime_godot/scripts/world_state_scale_harness.gd'
+      - 'runtime_godot/scripts/population_lod.gd'
+      - 'runtime_godot/scripts/character_agent.gd'
+      - 'runtime_godot/scripts/agent_brain.gd'
+      - 'runtime_package.py'
+      - 'character_import.py'
+      - 'tools/build_core_vertical_slice.py'
+      - '.github/workflows/godot-world-state-scale.yml'
+
+jobs:
+  save-reload-500:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: '.'
+      GODOT_VERSION: '4.7.2'
+      GODOT_SHA256: 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install package builder dependencies
+        run: pip install Pillow numpy
+      - name: Build production runtime package
+        run: |
+          rm -rf runtime_godot/.ci_vertical_slice
+          python tools/build_core_vertical_slice.py --output-root runtime_godot/.ci_vertical_slice
+          test -s runtime_godot/.ci_vertical_slice/exports/runtime/ci_core_slice/manifest.json
+      - name: Download checksum-pinned Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl --fail --location --retry 4 \
+            --output "$archive" \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${archive}"
+          echo "${GODOT_SHA256}  ${archive}" | sha256sum --check --strict
+          unzip -q "$archive" -d godot-bin
+          chmod +x "godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+      - name: Import and compile scale harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          timeout 90s "$GODOT" --headless --path runtime_godot --editor --quit
+          timeout 30s "$GODOT" --headless --path runtime_godot --check-only --script res://scripts/world_state_scale_harness.gd
+      - name: Save destroy reload 500 production characters
+        shell: bash
+        run: |
+          set -uo pipefail
+          GODOT="${GITHUB_WORKSPACE}/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          output="${RUNNER_TEMP}/krolik-world-state-scale.txt"
+          status=0
+          timeout --signal=TERM --kill-after=10s 180s \
+            "$GODOT" --headless --path runtime_godot --audio-driver Dummy \
+            --script res://scripts/world_state_scale_harness.gd 2>&1 | tee "$output" || status=${PIPESTATUS[0]}
+          echo "KROLIK_WORLD_STATE_SCALE_PROCESS_STATUS=${status}"
+          grep -q 'KROLIK_WORLD_STATE_SCALE status=ok agents=500' "$output"
+          if grep -Eq 'KROLIK_WORLD_STATE_SCALE_FAIL|SCRIPT ERROR|Parse Error|Failed to load script' "$output"; then
+            exit 1
+          fi
+          if (( status != 0 )); then
+            exit "$status"
+          fi
+          python - "$output" <<'PY'
+          import re, sys
+          text = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+          m = re.search(r'KROLIK_WORLD_STATE_SCALE status=ok agents=500 full=80 reduced=160 sleeping=260 spawn_ms=([0-9.]+) capture_ms=([0-9.]+) save_ms=([0-9.]+) load_ms=([0-9.]+) restore_ms=([0-9.]+) save_bytes=([0-9]+)', text)
+          if not m:
+              raise SystemExit('scale metrics marker missing or malformed')
+          spawn_ms, capture_ms, save_ms, load_ms, restore_ms = map(float, m.groups()[:5])
+          save_bytes = int(m.group(6))
+          print(f'KROLIK_WORLD_STATE_SCALE_GATE save_mib={save_bytes/1048576:.3f} capture_ms={capture_ms:.2f} save_ms={save_ms:.2f} load_ms={load_ms:.2f} restore_ms={restore_ms:.2f}')
+          if save_bytes > 16 * 1024 * 1024:
+              raise SystemExit(f'world save too large: {save_bytes} bytes')
+          if capture_ms > 60000 or save_ms > 60000 or load_ms > 60000 or restore_ms > 120000:
+              raise SystemExit('world-state phase exceeded first-pass performance ceiling')
+          PY
+      - name: Cleanup generated runtime package
+        if: always()
+        run: rm -rf runtime_godot/.ci_vertical_slice
