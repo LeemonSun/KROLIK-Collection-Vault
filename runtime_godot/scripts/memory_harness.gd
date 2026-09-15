@@ -93,6 +93,44 @@ func _run() -> void:
         _fail("memory overrode exhaustion hard gate: " + exhausted)
         return
 
+    brain.apply_snapshot(snapshot)
+    for _index in range(6):
+        if not brain.reinforce_relationship("alice", 1.0, 1.0):
+            _fail("valid long-term relationship update was rejected")
+            return
+    var durable := brain.long_term_snapshot()
+    var relationships: Array = durable.get("relationships", [])
+    if relationships.size() != 1 or float(relationships[0].get("affinity", 0.0)) < 0.9 or int(relationships[0].get("interactions", 0)) != 6:
+        _fail("long-term relationship did not learn/deduplicate")
+        return
+    var long_context := context.duplicate(true)
+    long_context["social_subject"] = "alice"
+    var long_social_state := brain.choose_state(long_context)
+    if long_social_state != "social":
+        _fail("positive long-term affinity did not bias social choice: " + long_social_state)
+        return
+
+    for _index in range(6):
+        if not brain.remember_place_visit("library", 1.0, 1.0):
+            _fail("valid place visit was rejected")
+            return
+    durable = brain.long_term_snapshot()
+    var places: Array = durable.get("places", [])
+    if places.size() != 1 or str(durable.get("favorite_place", "")) != "library" or int(places[0].get("visits", 0)) != 6:
+        _fail("favorite-place learning failed")
+        return
+    var place_state := brain.choose_state({"interesting_targets": 1.0, "target_place": "library"})
+    if place_state != "wander":
+        _fail("favorite target place did not bias movement: " + place_state)
+        return
+    brain.step(60.0, {})
+    durable = brain.long_term_snapshot()
+    relationships = durable.get("relationships", [])
+    places = durable.get("places", [])
+    if relationships.is_empty() or places.is_empty() or float(relationships[0].get("hours_since_contact", 0.0)) <= 0.0 or float(places[0].get("hours_since_visit", 0.0)) <= 0.0:
+        _fail("long-term memory did not age")
+        return
+
     var agent := VaultCharacterAgent.new()
     root.add_child(agent)
     var production := _borderline_snapshot()
@@ -100,6 +138,7 @@ func _run() -> void:
         "kind": "social", "subject": "alice", "valence": 1.0,
         "importance": 1.0, "age": 0.0, "ttl": 180.0,
     }]
+    production["long_term_memory"] = durable.duplicate(true)
     agent.setup("MEMORY-CI", Vector2.ZERO, production)
     var production_memory := agent.brain.memory_snapshot()
     var production_state := agent.brain.choose_state(focused_context)
@@ -112,6 +151,11 @@ func _run() -> void:
         _fail("memory did not round-trip through brain snapshot")
         agent.queue_free()
         return
+    var roundtrip_long = roundtrip.get("long_term_memory", null)
+    if typeof(roundtrip_long) != TYPE_DICTIONARY or roundtrip_long.get("relationships", []).size() != 1 or str(roundtrip_long.get("favorite_place", "")) != "library":
+        _fail("long-term memory did not round-trip through production CharacterAgent")
+        agent.queue_free()
+        return
 
     print(
         "KROLIK_MEMORY capacity=", bounded.size(),
@@ -120,7 +164,9 @@ func _run() -> void:
         " focused=", focused_state,
         " hard_gate=", hard_gate,
         " production_entries=", production_memory.size(),
-        " production_state=", production_state
+        " production_state=", production_state,
+        " long_social=", long_social_state,
+        " favorite_place=", str(roundtrip_long.get("favorite_place", ""))
     )
     agent.queue_free()
     await process_frame

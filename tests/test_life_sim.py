@@ -1,11 +1,16 @@
 from life_sim import (
     activity_scores,
     choose_state,
+    long_term_utility_bias,
     memory_utility_bias,
     merged_needs,
     merged_profile,
+    normalize_long_term_memory,
     normalize_short_term_memory,
+    reinforce_relationship,
     remember_event,
+    remember_place_visit,
+    step_long_term_memory,
     step_memory,
     step_mind,
 )
@@ -142,3 +147,93 @@ def test_step_mind_exposes_traits_memory_and_utility_without_breaking_existing_f
     assert len(result["memory"]) == 1
     assert result["memory"][0]["age"] == 1.0
     assert set(result["utility"]) == {"idle", "wander", "inspect", "social", "return_home", "rest"}
+
+def test_long_term_relationship_learning_is_bounded_deduplicated_and_contextual():
+    memory = {}
+    for _ in range(6):
+        memory = reinforce_relationship(memory, "alice", valence=1.0, importance=1.0)
+    assert len(memory["relationships"]) == 1
+    alice = memory["relationships"][0]
+    assert alice["subject"] == "alice"
+    assert .9 < alice["affinity"] <= 1.0
+    assert .6 < alice["familiarity"] <= 1.0
+    assert alice["interactions"] == 6
+
+    profile = merged_profile({"autonomy": .2, "wander": .2, "social": .2, "routine": "balanced"})
+    needs = merged_needs({"energy": .8, "comfort": .7, "curiosity": .25, "social": .25})
+    context = {"interesting_targets": 1, "social_targets": 1}
+    assert choose_state(profile, needs, context, None, memory) == "idle"
+    focused = {**context, "social_subject": "alice"}
+    assert choose_state(profile, needs, focused, None, memory) == "social"
+    assert long_term_utility_bias(memory, focused)["social"] > 0.0
+
+
+def test_long_term_memory_caps_relationships_and_places_deterministically():
+    memory = {}
+    for index in range(40):
+        importance = .05 if index == 0 else .8
+        memory = reinforce_relationship(memory, f"person-{index:02d}", valence=1.0, importance=importance)
+    assert len(memory["relationships"]) == 32
+    assert all(entry["subject"] != "person-00" for entry in memory["relationships"])
+
+    for index in range(24):
+        importance = .05 if index == 0 else .8
+        memory = remember_place_visit(memory, f"place-{index:02d}", preference=1.0, importance=importance)
+    assert len(memory["places"]) == 16
+    assert all(entry["place"] != "place-00" for entry in memory["places"])
+    assert memory["favorite_place"] in {entry["place"] for entry in memory["places"]}
+
+
+def test_favorite_place_and_decay_survive_as_compact_semantic_memory():
+    memory = {}
+    for _ in range(6):
+        memory = remember_place_visit(memory, "library", preference=1.0, importance=1.0)
+    memory = remember_place_visit(memory, "cellar", preference=-1.0, importance=1.0)
+    assert memory["favorite_place"] == "library"
+
+    before = next(entry for entry in memory["places"] if entry["place"] == "library")
+    aged = step_long_term_memory(memory, 3600.0)
+    after = next(entry for entry in aged["places"] if entry["place"] == "library")
+    assert after["hours_since_visit"] == 1.0
+    assert 0.0 < after["preference"] < before["preference"]
+    assert 0.0 < after["familiarity"] < before["familiarity"]
+    assert aged["favorite_place"] == "library"
+
+    normalized = normalize_long_term_memory({
+        "relationships": [{"subject": "alice", "affinity": 9, "familiarity": -2}],
+        "places": [{"place": "library", "preference": 9, "familiarity": 4}],
+    })
+    assert normalized["relationships"][0]["affinity"] == 1.0
+    assert normalized["relationships"][0]["familiarity"] == 0.0
+    assert normalized["places"][0]["preference"] == 1.0
+    assert normalized["places"][0]["familiarity"] == 1.0
+
+
+def test_long_term_place_preference_biases_target_and_favorite_home_return():
+    memory = {}
+    for _ in range(6):
+        memory = remember_place_visit(memory, "library", preference=1.0, importance=1.0)
+    profile = merged_profile({"autonomy": .2, "wander": .2, "social": .2})
+    needs = merged_needs({"energy": .8, "comfort": .7, "curiosity": .25, "social": .25})
+    target_context = {"interesting_targets": 1, "target_place": "library"}
+    assert choose_state(profile, needs, target_context, None, memory) == "wander"
+    bias = long_term_utility_bias(memory, {"away_from_home": True, "home_place": "library"})
+    assert bias["return_home"] > 0.0
+
+
+def test_step_mind_roundtrips_long_term_memory_without_breaking_legacy_calls():
+    long_term = reinforce_relationship({}, "alice", valence=.8, importance=.9)
+    long_term = remember_place_visit(long_term, "library", preference=.7, importance=.8)
+    result = step_mind(
+        {"autonomy": .2, "wander": .2, "social": .2},
+        {"energy": .8, "comfort": .7, "curiosity": .25, "social": .25},
+        60.0,
+        {"interesting_targets": 1, "social_targets": 1, "social_subject": "alice", "current_place": "library"},
+        [],
+        long_term,
+    )
+    assert result["long_term_memory"]["relationships"][0]["subject"] == "alice"
+    assert result["long_term_memory"]["places"][0]["place"] == "library"
+    assert result["long_term_memory"]["relationships"][0]["hours_since_contact"] > 0.0
+    legacy = step_mind(None, None, 1.0)
+    assert legacy["long_term_memory"] == {"relationships": [], "places": [], "favorite_place": ""}

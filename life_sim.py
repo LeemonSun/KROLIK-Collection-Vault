@@ -81,6 +81,24 @@ AI_POLICY: dict[str, Any] = {
             "rest": {"rest": 0.25},
         },
     },
+    # D4 long-term memory keeps compact durable preferences instead of raw event logs.
+    # It is intentionally bounded so hundreds of agents remain cheap to save and score.
+    "long_term_memory": {
+        "relationship_capacity": 32,
+        "place_capacity": 16,
+        "max_id_length": 64,
+        "relationship_learning_rate": 0.35,
+        "place_learning_rate": 0.30,
+        "familiarity_gain": 0.18,
+        "affinity_decay_per_hour": 0.0025,
+        "preference_decay_per_hour": 0.0015,
+        "familiarity_decay_per_hour": 0.0005,
+        "max_abs_state_bias": 0.30,
+        "relationship_effects": {"social": 0.42, "return_home": -0.16},
+        "current_place_effects": {"idle": 0.14, "rest": 0.12},
+        "target_place_effects": {"wander": 0.18, "inspect": 0.10},
+        "favorite_home_return_bonus": 0.16,
+    },
     "need_rates_per_minute": {
         "rest": {"energy": 0.055, "comfort": 0.018, "curiosity": 0.012, "social": 0.0},
         "contained": {"energy": -0.004, "comfort": -0.006, "curiosity": 0.020, "social": 0.010},
@@ -293,6 +311,251 @@ def memory_utility_bias(memory_value: Any, context: dict[str, Any] | None = None
     return bias
 
 
+def _long_term_policy() -> dict[str, Any]:
+    return AI_POLICY["long_term_memory"]
+
+
+def _bounded_identifier(value: Any) -> str:
+    limit = int(_long_term_policy()["max_id_length"])
+    return str(value or "")[:limit]
+
+
+def _sanitize_relationship(raw: Any) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    subject = _bounded_identifier(raw.get("subject"))
+    if not subject:
+        return None
+    return {
+        "subject": subject,
+        "affinity": max(-1.0, min(1.0, _finite_float(raw.get("affinity"), 0.0))),
+        "familiarity": clamp01(_finite_float(raw.get("familiarity"), 0.0)),
+        "interactions": max(0, min(1_000_000, int(_finite_float(raw.get("interactions"), 0.0)))),
+        "hours_since_contact": max(0.0, min(1_000_000.0, _finite_float(raw.get("hours_since_contact"), 0.0))),
+    }
+
+
+def _sanitize_place(raw: Any) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    place = _bounded_identifier(raw.get("place"))
+    if not place:
+        return None
+    return {
+        "place": place,
+        "preference": max(-1.0, min(1.0, _finite_float(raw.get("preference"), 0.0))),
+        "familiarity": clamp01(_finite_float(raw.get("familiarity"), 0.0)),
+        "visits": max(0, min(1_000_000, int(_finite_float(raw.get("visits"), 0.0)))),
+        "hours_since_visit": max(0.0, min(1_000_000.0, _finite_float(raw.get("hours_since_visit"), 0.0))),
+    }
+
+
+def _relationship_strength(entry: dict[str, Any]) -> float:
+    return abs(float(entry["affinity"])) * 0.7 + float(entry["familiarity"]) * 0.3
+
+
+def _place_strength(entry: dict[str, Any]) -> float:
+    return abs(float(entry["preference"])) * 0.6 + float(entry["familiarity"]) * 0.4
+
+
+def _favorite_place(places: list[dict[str, Any]]) -> str:
+    if not places:
+        return ""
+    best = max(
+        places,
+        key=lambda entry: (
+            float(entry["preference"]) * 0.7 + float(entry["familiarity"]) * 0.3,
+            float(entry["familiarity"]),
+            -float(entry["hours_since_visit"]),
+            str(entry["place"]),
+        ),
+    )
+    return str(best["place"])
+
+
+def normalize_long_term_memory(value: Any) -> dict[str, Any]:
+    source = value if isinstance(value, dict) else {}
+    relationships: list[dict[str, Any]] = []
+    by_subject: dict[str, int] = {}
+    for raw in source.get("relationships", []) if isinstance(source.get("relationships", []), list) else []:
+        entry = _sanitize_relationship(raw)
+        if entry is None:
+            continue
+        subject = str(entry["subject"])
+        if subject in by_subject:
+            index = by_subject[subject]
+            existing = relationships[index]
+            if (entry["hours_since_contact"], -entry["familiarity"]) < (existing["hours_since_contact"], -existing["familiarity"]):
+                relationships[index] = entry
+        else:
+            by_subject[subject] = len(relationships)
+            relationships.append(entry)
+    capacity = int(_long_term_policy()["relationship_capacity"])
+    relationships.sort(key=lambda entry: (-_relationship_strength(entry), float(entry["hours_since_contact"]), str(entry["subject"])))
+    relationships = relationships[:capacity]
+    relationships.sort(key=lambda entry: str(entry["subject"]))
+
+    places: list[dict[str, Any]] = []
+    by_place: dict[str, int] = {}
+    for raw in source.get("places", []) if isinstance(source.get("places", []), list) else []:
+        entry = _sanitize_place(raw)
+        if entry is None:
+            continue
+        place = str(entry["place"])
+        if place in by_place:
+            index = by_place[place]
+            existing = places[index]
+            if (entry["hours_since_visit"], -entry["familiarity"]) < (existing["hours_since_visit"], -existing["familiarity"]):
+                places[index] = entry
+        else:
+            by_place[place] = len(places)
+            places.append(entry)
+    place_capacity = int(_long_term_policy()["place_capacity"])
+    places.sort(key=lambda entry: (-_place_strength(entry), float(entry["hours_since_visit"]), str(entry["place"])))
+    places = places[:place_capacity]
+    places.sort(key=lambda entry: str(entry["place"]))
+    return {"relationships": relationships, "places": places, "favorite_place": _favorite_place(places)}
+
+
+def reinforce_relationship(
+    memory_value: Any,
+    subject: str,
+    *,
+    valence: float,
+    importance: float = 0.5,
+) -> dict[str, Any]:
+    memory = normalize_long_term_memory(memory_value)
+    subject = _bounded_identifier(subject)
+    if not subject:
+        return memory
+    config = _long_term_policy()
+    signal = max(-1.0, min(1.0, _finite_float(valence, 0.0)))
+    importance = clamp01(_finite_float(importance, 0.5))
+    alpha = clamp01(float(config["relationship_learning_rate"]) * importance)
+    familiarity_gain = float(config["familiarity_gain"]) * importance
+    relationships = [dict(entry) for entry in memory["relationships"]]
+    for entry in relationships:
+        if entry["subject"] == subject:
+            entry["affinity"] = max(-1.0, min(1.0, float(entry["affinity"]) * (1.0 - alpha) + signal * alpha))
+            entry["familiarity"] = clamp01(float(entry["familiarity"]) + familiarity_gain * (1.0 - float(entry["familiarity"])))
+            entry["interactions"] = min(1_000_000, int(entry["interactions"]) + 1)
+            entry["hours_since_contact"] = 0.0
+            return normalize_long_term_memory({"relationships": relationships, "places": memory["places"]})
+    relationships.append({
+        "subject": subject,
+        "affinity": signal * alpha,
+        "familiarity": clamp01(familiarity_gain),
+        "interactions": 1,
+        "hours_since_contact": 0.0,
+    })
+    return normalize_long_term_memory({"relationships": relationships, "places": memory["places"]})
+
+
+def remember_place_visit(
+    memory_value: Any,
+    place: str,
+    *,
+    preference: float = 0.0,
+    importance: float = 0.5,
+) -> dict[str, Any]:
+    memory = normalize_long_term_memory(memory_value)
+    place = _bounded_identifier(place)
+    if not place:
+        return memory
+    config = _long_term_policy()
+    signal = max(-1.0, min(1.0, _finite_float(preference, 0.0)))
+    importance = clamp01(_finite_float(importance, 0.5))
+    alpha = clamp01(float(config["place_learning_rate"]) * importance)
+    familiarity_gain = float(config["familiarity_gain"]) * importance
+    places = [dict(entry) for entry in memory["places"]]
+    for entry in places:
+        if entry["place"] == place:
+            entry["preference"] = max(-1.0, min(1.0, float(entry["preference"]) * (1.0 - alpha) + signal * alpha))
+            entry["familiarity"] = clamp01(float(entry["familiarity"]) + familiarity_gain * (1.0 - float(entry["familiarity"])))
+            entry["visits"] = min(1_000_000, int(entry["visits"]) + 1)
+            entry["hours_since_visit"] = 0.0
+            return normalize_long_term_memory({"relationships": memory["relationships"], "places": places})
+    places.append({
+        "place": place,
+        "preference": signal * alpha,
+        "familiarity": clamp01(familiarity_gain),
+        "visits": 1,
+        "hours_since_visit": 0.0,
+    })
+    return normalize_long_term_memory({"relationships": memory["relationships"], "places": places})
+
+
+def step_long_term_memory(memory_value: Any, dt: float) -> dict[str, Any]:
+    memory = normalize_long_term_memory(memory_value)
+    hours = max(0.0, min(_finite_float(dt, 0.0), 604800.0)) / 3600.0
+    if hours <= 0.0:
+        return memory
+    config = _long_term_policy()
+    affinity_decay = float(config["affinity_decay_per_hour"]) * hours
+    preference_decay = float(config["preference_decay_per_hour"]) * hours
+    familiarity_decay = float(config["familiarity_decay_per_hour"]) * hours
+    relationships = []
+    for raw in memory["relationships"]:
+        entry = dict(raw)
+        affinity = float(entry["affinity"])
+        entry["affinity"] = math.copysign(max(0.0, abs(affinity) - affinity_decay), affinity) if affinity else 0.0
+        entry["familiarity"] = max(0.0, float(entry["familiarity"]) - familiarity_decay)
+        entry["hours_since_contact"] = min(1_000_000.0, float(entry["hours_since_contact"]) + hours)
+        relationships.append(entry)
+    places = []
+    for raw in memory["places"]:
+        entry = dict(raw)
+        preference = float(entry["preference"])
+        entry["preference"] = math.copysign(max(0.0, abs(preference) - preference_decay), preference) if preference else 0.0
+        entry["familiarity"] = max(0.0, float(entry["familiarity"]) - familiarity_decay)
+        entry["hours_since_visit"] = min(1_000_000.0, float(entry["hours_since_visit"]) + hours)
+        places.append(entry)
+    return normalize_long_term_memory({"relationships": relationships, "places": places})
+
+
+def long_term_utility_bias(memory_value: Any, context: dict[str, Any] | None = None) -> dict[str, float]:
+    memory = normalize_long_term_memory(memory_value)
+    context = context or {}
+    config = _long_term_policy()
+    cap = float(config["max_abs_state_bias"])
+    bias = {state: 0.0 for state in AI_POLICY["state_order"]}
+
+    subjects = _focused_memory_subjects(context)
+    social_single = context.get("social_subject")
+    if social_single is not None and str(social_single):
+        subjects.add(str(social_single))
+    social_many = context.get("social_subjects")
+    if isinstance(social_many, (list, tuple, set)):
+        subjects.update(str(item) for item in social_many if str(item))
+    relationship_effects = config["relationship_effects"]
+    for entry in memory["relationships"]:
+        if entry["subject"] not in subjects:
+            continue
+        strength = float(entry["affinity"]) * float(entry["familiarity"])
+        for state_name, coefficient in relationship_effects.items():
+            bias[state_name] += strength * float(coefficient)
+
+    current_place = _bounded_identifier(context.get("current_place"))
+    target_place = _bounded_identifier(context.get("target_place"))
+    home_place = _bounded_identifier(context.get("home_place"))
+    favorite = str(memory["favorite_place"])
+    for entry in memory["places"]:
+        place = str(entry["place"])
+        strength = float(entry["preference"]) * float(entry["familiarity"])
+        if current_place and place == current_place:
+            for state_name, coefficient in config["current_place_effects"].items():
+                bias[state_name] += strength * float(coefficient)
+        if target_place and place == target_place:
+            for state_name, coefficient in config["target_place_effects"].items():
+                bias[state_name] += strength * float(coefficient)
+    if bool(context.get("away_from_home", False)) and favorite and home_place == favorite:
+        bias["return_home"] += float(config["favorite_home_return_bonus"])
+
+    for state_name in bias:
+        bias[state_name] = max(-cap, min(cap, bias[state_name]))
+    return bias
+
+
 def derive_affect(needs: dict[str, float], state: str) -> dict[str, Any]:
     energy = clamp01(needs.get("energy", 0.5))
     comfort = clamp01(needs.get("comfort", 0.5))
@@ -358,6 +621,7 @@ def activity_scores(
     needs: dict[str, float],
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
+    long_term_memory_value: Any = None,
 ) -> dict[str, float]:
     context = context or {}
     away = bool(context.get("away_from_home", False))
@@ -390,9 +654,9 @@ def activity_scores(
             if state_name in scores:
                 scores[state_name] += delta * float(coefficient)
     memory_bias = memory_utility_bias(memory_value, context)
-    for state_name, amount in memory_bias.items():
-        if state_name in scores:
-            scores[state_name] += amount
+    long_term_bias = long_term_utility_bias(long_term_memory_value, context)
+    for state_name in scores:
+        scores[state_name] += memory_bias.get(state_name, 0.0) + long_term_bias.get(state_name, 0.0)
     return scores
 
 
@@ -401,6 +665,7 @@ def choose_state(
     needs: dict[str, float],
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
+    long_term_memory_value: Any = None,
 ) -> str:
     context = context or {}
     if profile["mobility"] == "disabled":
@@ -413,7 +678,7 @@ def choose_state(
         return "return_home" if away else "rest"
     if away and needs["comfort"] < float(gates["away_comfort_return"]):
         return "return_home"
-    scores = activity_scores(profile, needs, context, memory_value)
+    scores = activity_scores(profile, needs, context, memory_value, long_term_memory_value)
     if float(context.get("social_targets", 0.0)) <= 0.0:
         scores["social"] = -1.0
     if float(context.get("interesting_targets", 0.0)) <= 0.0:
@@ -453,22 +718,26 @@ def step_mind(
     dt: float,
     context: dict[str, Any] | None = None,
     memory_value: Any = None,
+    long_term_memory_value: Any = None,
 ) -> dict[str, Any]:
     profile = merged_profile(profile_value)
     needs = merged_needs(needs_value)
     memory = normalize_short_term_memory(memory_value)
-    state = choose_state(profile, needs, context, memory)
+    long_term_memory = normalize_long_term_memory(long_term_memory_value)
+    state = choose_state(profile, needs, context, memory, long_term_memory)
     needs = step_needs(needs, state, dt)
     memory = step_memory(memory, dt)
-    next_state = choose_state(profile, needs, context, memory)
+    long_term_memory = step_long_term_memory(long_term_memory, dt)
+    next_state = choose_state(profile, needs, context, memory, long_term_memory)
     return {
         "state": next_state,
         "needs": needs,
         "profile": profile,
         "memory": memory,
+        "long_term_memory": long_term_memory,
         "mobile": next_state in MOBILE_STATES,
         "contained": next_state == "contained",
         "animation": ANIMATION_BY_STATE.get(next_state, "idle_breathe"),
         "affect": derive_affect(needs, next_state),
-        "utility": activity_scores(profile, needs, context, memory),
+        "utility": activity_scores(profile, needs, context, memory, long_term_memory),
     }
