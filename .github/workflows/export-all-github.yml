@@ -1,0 +1,53 @@
+name: Export entire KROLIK GitHub repository
+
+on:
+  push:
+    branches:
+      - export/all-in-one-20260916
+    paths-ignore:
+      - 'export/**'
+
+permissions:
+  contents: write
+
+jobs:
+  export-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch every branch and tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*' --force --prune
+          git for-each-ref --format='%(refname) %(objectname)' refs/heads refs/remotes refs/tags | sort > /tmp/refs.txt
+
+      - name: Build complete Git bundle and transport chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf export
+          mkdir -p export
+          git bundle create /tmp/KROLIK_GITHUB_COMPLETE.bundle --all
+          git bundle verify /tmp/KROLIK_GITHUB_COMPLETE.bundle
+          sha256sum /tmp/KROLIK_GITHUB_COMPLETE.bundle | tee export/BUNDLE_SHA256.txt
+          wc -c /tmp/KROLIK_GITHUB_COMPLETE.bundle | tee export/BUNDLE_BYTES.txt
+          cp /tmp/refs.txt export/REFS.txt
+          base64 -w0 /tmp/KROLIK_GITHUB_COMPLETE.bundle > /tmp/bundle.b64
+          split -b 50000 -d -a 3 /tmp/bundle.b64 export/bundle.part.
+          printf '%s\n' 'KROLIK complete GitHub Git bundle, base64 transport chunks.' > export/README.txt
+
+      - name: Commit export chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'KROLIK Export Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add export
+          git commit -m 'export: complete repository bundle' || exit 0
+          git push origin HEAD:export/all-in-one-20260916
