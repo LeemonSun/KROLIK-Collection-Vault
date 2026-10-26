@@ -1,0 +1,13 @@
+{
+  "release_ready": false,
+  "blockers": [
+    "ai_disclosure_completed",
+    "content_guardrails_reviewed",
+    "final_asset_rights_reviewed",
+    "third_party_audit_completed",
+    "offline_install_tested_on_windows",
+    "cjk_font_bundled",
+    "minimum_hardware_benchmarked",
+    "no_approved_bundled_model"
+  ]
+}

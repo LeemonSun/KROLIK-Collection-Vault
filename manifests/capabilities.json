@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "capabilities": [
+    {
+      "id": "notes",
+      "status": "implemented",
+      "network": "none"
+    },
+    {
+      "id": "timers",
+      "status": "implemented",
+      "network": "none"
+    },
+    {
+      "id": "local_llm",
+      "status": "adapter_only",
+      "network": "loopback_only"
+    },
+    {
+      "id": "asr",
+      "status": "planned",
+      "network": "none"
+    },
+    {
+      "id": "tts",
+      "status": "planned",
+      "network": "none"
+    },
+    {
+      "id": "screen_context",
+      "status": "contract_only",
+      "network": "none"
+    },
+    {
+      "id": "ocr",
+      "status": "planned",
+      "network": "none"
+    },
+    {
+      "id": "automation",
+      "status": "planned",
+      "network": "none"
+    },
+    {
+      "id": "steam",
+      "status": "planned",
+      "network": "optional_store_services"
+    },
+    {
+      "id": "universal_scene_reasoning",
+      "status": "contract_only",
+      "network": "none"
+    },
+    {
+      "id": "task_planning",
+      "status": "contract_only",
+      "network": "none"
+    }
+  ]
+}

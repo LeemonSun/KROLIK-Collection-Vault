@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "components": [
+    {
+      "id": "godot",
+      "name": "Godot Engine",
+      "version": "4.7.2-stable",
+      "source": "https://github.com/godotengine/godot",
+      "license": "MIT",
+      "license_file": "legal/upstream/Godot-LICENSE.txt",
+      "bundled_in_source_archive": false,
+      "role": "development_runtime",
+      "status": "reviewed_declared_license"
+    },
+    {
+      "id": "llama.cpp",
+      "source": "https://github.com/ggml-org/llama.cpp",
+      "license": "MIT",
+      "bundled_in_source_archive": false,
+      "status": "candidate"
+    },
+    {
+      "id": "whisper.cpp",
+      "source": "https://github.com/ggml-org/whisper.cpp",
+      "license": "MIT",
+      "bundled_in_source_archive": false,
+      "status": "candidate"
+    },
+    {
+      "id": "sherpa-onnx",
+      "source": "https://github.com/k2-fsa/sherpa-onnx",
+      "license": "Apache-2.0",
+      "bundled_in_source_archive": false,
+      "status": "candidate_dependencies_unreviewed"
+    }
+  ]
+}
+

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "event": "chess.position.detected",
+  "status": "illustration_only",
+  "capture_id": "sample-not-a-real-capture",
+  "board_rect_px": [
+    200,
+    100,
+    640,
+    640
+  ],
+  "orientation": "white_bottom",
+  "fen": null,
+  "side_to_move": "unknown",
+  "confidence": 0,
+  "uncertain_squares": [],
+  "must_request_clarification": true
+}
+

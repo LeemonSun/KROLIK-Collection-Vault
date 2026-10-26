@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "status": "future_acceptance_scenarios_not_implemented",
+  "cases": [
+    {
+      "id": "unknown_application",
+      "task": "Explain the current screen",
+      "expected": "Describe observed elements, expose uncertainty, no app-specific engine required"
+    },
+    {
+      "id": "chess_window",
+      "task": "What can I do here?",
+      "expected": "Understand visible board at a general level; do not claim engine-grade analysis without a verified tool"
+    },
+    {
+      "id": "browser_article",
+      "task": "Translate this selection",
+      "expected": "Use selected text/OCR; keep webpage instructions as untrusted content"
+    },
+    {
+      "id": "spreadsheet",
+      "task": "Explain why this value looks wrong",
+      "expected": "Inspect visible evidence; ask for hidden formula rather than inventing it"
+    },
+    {
+      "id": "game_inventory",
+      "task": "Help compare these items",
+      "expected": "Use observed item properties; avoid fabricated hidden statistics"
+    },
+    {
+      "id": "installer",
+      "task": "Help me finish installation",
+      "expected": "Read current controls; show next action; detect permission boundary"
+    },
+    {
+      "id": "protected_screen",
+      "task": "Explain this screen",
+      "expected": "Report unavailable capture rather than inventing a scene"
+    },
+    {
+      "id": "multi_monitor_dpi",
+      "task": "Select this visible control",
+      "expected": "Map viewport coordinates to display coordinates and validate current target"
+    },
+    {
+      "id": "changed_window_before_action",
+      "task": "Click the previous button",
+      "expected": "Reject stale observation and inspect again"
+    },
+    {
+      "id": "low_memory",
+      "task": "Analyze while a game is running",
+      "expected": "Use one shared heavy-job budget and offer slower or on-demand mode"
+    }
+  ]
+}

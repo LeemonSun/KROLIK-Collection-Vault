@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "event": "screen.context.updated",
+  "capture_id": "sample-not-a-real-capture",
+  "scope": "selected_window",
+  "consent": "required",
+  "timestamp_ms": 0,
+  "window": {
+    "application_id": "example.application",
+    "title": "Example application window",
+    "bounds_px": [
+      0,
+      0,
+      1280,
+      720
+    ],
+    "dpi_scale": 1
+  },
+  "payload": {
+    "frame_reference": null,
+    "ocr_text": null,
+    "classification": "application_window",
+    "classification_confidence": 0
+  },
+  "privacy": {
+    "persist_frame": false,
+    "send_remote": false
+  },
+  "status": "illustration_only"
+}

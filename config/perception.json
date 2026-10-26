@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "capture_enabled": false,
+  "scope": "none",
+  "persist_frames": false,
+  "remote_inference": false,
+  "event_driven": true,
+  "watch_active_window_changes": true,
+  "watch_content_changes": true,
+  "analyze_on_user_question": true,
+  "max_retained_observations": 1,
+  "max_context_age_ms": 10000,
+  "max_frame_edge_px": 1024,
+  "universal_reasoner": "not_integrated",
+  "application_specific_engine_required": false
+}

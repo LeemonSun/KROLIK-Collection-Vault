@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "ai_disclosure_completed": false,
+  "content_guardrails_reviewed": false,
+  "final_asset_rights_reviewed": false,
+  "third_party_audit_completed": false,
+  "offline_install_tested_on_windows": false,
+  "windows_signed": false,
+  "cjk_font_bundled": false,
+  "minimum_hardware_benchmarked": false,
+  "automated_model_downloads": false
+}
+

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "default": "auto",
+  "profiles": {
+    "lite": {
+      "animation_fps": 24,
+      "model_class": "1-2B",
+      "max_tokens": 96,
+      "context_tokens": 2048,
+      "cpu_threads": 2,
+      "max_parallel_heavy_jobs": 1,
+      "idle_unload_seconds": 120,
+      "screen_min_interval_ms": 3000,
+      "model_memory_budget_mib": 2048
+    },
+    "balanced": {
+      "animation_fps": 30,
+      "model_class": "4B",
+      "max_tokens": 160,
+      "context_tokens": 4096,
+      "cpu_threads": 4,
+      "max_parallel_heavy_jobs": 1,
+      "idle_unload_seconds": 300,
+      "screen_min_interval_ms": 1500,
+      "model_memory_budget_mib": 5120
+    },
+    "quality": {
+      "animation_fps": 30,
+      "model_class": "7-8B",
+      "max_tokens": 256,
+      "context_tokens": 4096,
+      "cpu_threads": 4,
+      "max_parallel_heavy_jobs": 1,
+      "idle_unload_seconds": 300,
+      "screen_min_interval_ms": 1000,
+      "model_memory_budget_mib": 8192
+    }
+  }
+}
+
