@@ -1,0 +1,773 @@
+{
+  ".gitattributes": [
+    "ee099d6e7d58d24a0939776d46927d4121b4b25f",
+    "833e642dc8658a73924c568df4b16c135e765882"
+  ],
+  ".gitignore": [
+    "2dace3f698e5d4029be15a16576d7ce6aa0f203f",
+    "2dace3f698e5d4029be15a16576d7ce6aa0f203f"
+  ],
+  "AGENTS.md": [
+    "d99bbdc8fe459d3c02aa9f7d4047ff97dc1e74ac",
+    "2adec3e5cc4c5b2ee261366142c763e9e03c453f"
+  ],
+  "CHANGELOG.md": [
+    "842587a16d8c84724f9150cbb47ef4fc34e7c73e",
+    "e6f21d577e0fe5cd71768c3a9babe79dd5235ef9"
+  ],
+  "LICENSE": [
+    "6aafc1f09eaa638d437251f09a1985a0252535d1",
+    "6aafc1f09eaa638d437251f09a1985a0252535d1"
+  ],
+  "PROJECT_STATE.md": [
+    "3e2ce622312b39eb41899c29d6ca4d7c96591f7b",
+    "f9e02220255713b3d1e58a9fa0aa7777fb828bdd"
+  ],
+  "README.md": [
+    "0afe44f7844438ba32014928827684b997725e44",
+    "0db8e769dfc44072e249a705a558e9b5cc963513"
+  ],
+  "assets/README.md": [
+    "01c7a78b8f06f1998e30d36ab1d605aa61af89f8",
+    "01c7a78b8f06f1998e30d36ab1d605aa61af89f8"
+  ],
+  "assets/audio/README.md": [
+    "3e6c372154031116f0265694513a3b93cbb02afe",
+    "3e6c372154031116f0265694513a3b93cbb02afe"
+  ],
+  "assets/characters/README.md": [
+    "b17ef29da2b03e49d4197247e01645f6215e8a2e",
+    "b17ef29da2b03e49d4197247e01645f6215e8a2e"
+  ],
+  "assets/fonts/README.md": [
+    "729ae972d6087961feff789a6ca3a579016df417",
+    "729ae972d6087961feff789a6ca3a579016df417"
+  ],
+  "assets/foundation.svg": [
+    "9bc39e88052373c8f1d3293321d9a10f66780f11",
+    "9bc39e88052373c8f1d3293321d9a10f66780f11"
+  ],
+  "assets/foundation.svg.import": [
+    "6fe8c7401db6bc9a20cb831506796699e44df76d",
+    "6fe8c7401db6bc9a20cb831506796699e44df76d"
+  ],
+  "config/perception.json": [
+    "00e6a7b60634787ffbfb886ca67f5b578f183f1f",
+    "00e6a7b60634787ffbfb886ca67f5b578f183f1f"
+  ],
+  "config/product.json": [
+    "b69de1c73e6a253ca84307bc59a3ce803354f8a7",
+    "59fb33a3d0e02615f8bd72a393dc3a08c19bd070"
+  ],
+  "config/profiles.json": [
+    "8762676ba8b49e0321e8587d9e9f37028026ca6f",
+    "8762676ba8b49e0321e8587d9e9f37028026ca6f"
+  ],
+  "config/release.json": [
+    "27f9515a1e808f1bcb0f95b699e6bf76e090af28",
+    "fa9b442fc0b62bfe604a0fef4d42116aa3aed1db"
+  ],
+  "contracts/README.md": [
+    "728420837b1317bc50c5fae56354f6eb00b90286",
+    "728420837b1317bc50c5fae56354f6eb00b90286"
+  ],
+  "contracts/action_plan.schema.json": [
+    "5bdb02450c54778dd50fc7d132bbe8d0f0b26c29",
+    "5bdb02450c54778dd50fc7d132bbe8d0f0b26c29"
+  ],
+  "contracts/model_pack.schema.json": [
+    "4bb5474e980fd60d599485238ea59f5aa08ff0a2",
+    "4bb5474e980fd60d599485238ea59f5aa08ff0a2"
+  ],
+  "contracts/observation.schema.json": [
+    "fc5e9f09bc530fd7c87915b79a3044dc35678b55",
+    "fc5e9f09bc530fd7c87915b79a3044dc35678b55"
+  ],
+  "contracts/screen_context.example.json": [
+    "8c9fa3fe693e21ccffb944939e0a4043e6411228",
+    "8c9fa3fe693e21ccffb944939e0a4043e6411228"
+  ],
+  "contracts/tool_call.schema.json": [
+    "893918d916e428eabb8ae4bea3d89fd49cfc7e61",
+    "893918d916e428eabb8ae4bea3d89fd49cfc7e61"
+  ],
+  "docs/ARCHITECTURE.md": [
+    "3de771d93fa0e4ab5750d27275ca6325b32addf2",
+    "3de771d93fa0e4ab5750d27275ca6325b32addf2"
+  ],
+  "docs/DECISIONS.md": [
+    "7e41e0c87b3b922e9e21fbf57c685589831e858a",
+    "730997cc150f9f7fa850c7ad21ecd45e57357600"
+  ],
+  "docs/HANDOFF.md": [
+    "b7dd608853c9b1185c2a2d2739de0b048b7bb4df",
+    "84931170f7934b4a89fe460ab1cd6d4eb5828b96"
+  ],
+  "docs/INITIAL_RESEARCH.md": [
+    "04fc325fb826f8ffdd1567f69266be52bab3bc4f",
+    "04fc325fb826f8ffdd1567f69266be52bab3bc4f"
+  ],
+  "docs/OPTIMIZATION.md": [
+    "0468dcfb952d5f36ac2eb4ddd67b455ec61e90bb",
+    "64f2de731f56fa06aebdb8bf85b98e06d92365ca"
+  ],
+  "docs/OWNER_INPUT.md": [
+    "429a8a57b99c91df21b3a00307a7b17a69292894",
+    "cf5a585060e15baa1269cbaec7965d7c53ce6e83"
+  ],
+  "docs/REQUIREMENTS.md": [
+    "4c89bff717323e0b9657c09aca973ffcc5666631",
+    "4c89bff717323e0b9657c09aca973ffcc5666631"
+  ],
+  "docs/RESEARCH_SOURCES.md": [
+    "fda76cc66138add81458fcb7894243fca704b509",
+    "fda76cc66138add81458fcb7894243fca704b509"
+  ],
+  "docs/ROADMAP.md": [
+    "8bc598495dd5dc39a7da7be6cf33d7a7c180266e",
+    "d57699dc064a39d4171b00a8e3f4b9bc6f65df84"
+  ],
+  "docs/SCREEN_UNDERSTANDING.md": [
+    "c56341b9d0c4b63c7ce033e0de2911504ebd8ea4",
+    "c56341b9d0c4b63c7ce033e0de2911504ebd8ea4"
+  ],
+  "docs/STEAM_AND_RIGHTS.md": [
+    "91ebfbe519a8778e04849a76ef40a5e4d9438997",
+    "a3fded1c02e2de2ca73e9d60505f04a869c76615"
+  ],
+  "docs/TESTING.md": [
+    "0cbbd6fbcb43be420aa03be65665e9d0b6a8df08",
+    "e95ae41fabd0cd2271820b1aea126dcd4e9dc225"
+  ],
+  "export_presets.cfg": [
+    "b8ccbcebb47f7a8e12bc9c47f5567546328cc75c",
+    "dce10d1b0f0e14f645cdab912287990910b50890"
+  ],
+  "legal/README.md": [
+    "3104fb65b2096ad813bbc7f5d6dc665c6d76742f",
+    "26e786ea6fb1ee683cb1244937d39348a903608f"
+  ],
+  "legal/upstream/Godot-LICENSE.txt": [
+    "b0f00debb295556b82b507f4c3b1d51ef44ed351",
+    "b0f00debb295556b82b507f4c3b1d51ef44ed351"
+  ],
+  "locales/en.json": [
+    "9a0c819693f6bcc2763e693fc91c36035405f8c2",
+    "0eb0f1861b7ae9080b6af1caebca967ffaea6583"
+  ],
+  "locales/ru.json": [
+    "fdb9b9cef5a3deeb50f7533e33688e8e1b3457dc",
+    "7ede3f14746280fbcb5eb8c4af0ab123757fc99d"
+  ],
+  "locales/zh-Hans.json": [
+    "1f04eb0aeb1a10beba92b4453f23eac311ffd69c",
+    "1831fb81b341dbe5c30f90a8ec5589d6e1287444"
+  ],
+  "manifests/capabilities.json": [
+    "12e2c260d25b5bc05ef92820644723941c7d3ab6",
+    "30837b67165db54e3f9bac36cc2dbf44e5b8d8f8"
+  ],
+  "manifests/characters.json": [
+    "7bcd708b5bd0b603b1475075b14111bf208e2bbe",
+    "facdc5545a8ad74d098b87f32c785bf01a64ecaa"
+  ],
+  "manifests/components.json": [
+    "d142a1408c129bf573554160f4e9dcca09f2497f",
+    "63dae4e7c8183311bb539b7341ceb6775f75a334"
+  ],
+  "manifests/models.json": [
+    "fffc3e31b9f95745df167bc5e801c7e24c2f62be",
+    "426209b98a9c0a13738e97c8aac07a1278c73988"
+  ],
+  "models/README.md": [
+    "fd34b0d4dd01974ddada0cb3171899e8ed7761ed",
+    "fd34b0d4dd01974ddada0cb3171899e8ed7761ed"
+  ],
+  "packaging/README.md": [
+    "7a25906f1803cb88b81c3ba4ac9e3fa948234fa7",
+    "7a25906f1803cb88b81c3ba4ac9e3fa948234fa7"
+  ],
+  "project.godot": [
+    "7382809172888a61a922ccf6f3f3dec4149d1b61",
+    "4e31f3ed645a88b9cf25de5df1f39711437b0ff3"
+  ],
+  "reports/VALIDATION.md": [
+    "ebc99ebc3ef1235b02cf2607308c1e83b77cd8ed",
+    "434a7dd223941312fcffc41c5551a946c5bba1bc"
+  ],
+  "reports/core.txt": [
+    "fbaa0bc591a16308457be19aba84578bf501033a",
+    "cfa09b431221e18d075db8e31c97ef63bfae833f"
+  ],
+  "reports/http.txt": [
+    "f75e1f1f7970f00010668073608e0b8bf1489d4d",
+    "f75e1f1f7970f00010668073608e0b8bf1489d4d"
+  ],
+  "reports/release_gate_expected_block.txt": [
+    "52cb6b5741df5e5cf9350dba5d2dfc4f99c23b3a",
+    "69eae2b1de603dc36799e5533aefee705033a3c4"
+  ],
+  "reports/structure.txt": [
+    "ce06d5979564e10ee9b186aeff07970fe511ba9c",
+    "046d41fb11a116df9496eafec25c9c95498ca1eb"
+  ],
+  "reports/ui.txt": [
+    "26f540c1bddb50cbd46cab5233f495101bb8e509",
+    "fdc6e0c857bf83efe9e39a1f5b18e7c0b8e5e883"
+  ],
+  "runtime/README.md": [
+    "2143ab497cf253e9ed45154efbb1787f810e2e38",
+    "04767189f56dbba26dd18313b28871645701f876"
+  ],
+  "scenes/main.tscn": [
+    "a0f1e3769c70ba6a839220f8a130c3f19f2f6b85",
+    "a0f1e3769c70ba6a839220f8a130c3f19f2f6b85"
+  ],
+  "src/app.gd": [
+    "d55067449dd302e59bdd85ccd5724aa589661140",
+    "77595d8cbdc3d4ac7ef87f65bc0bb091b3401f58"
+  ],
+  "src/app.gd.uid": [
+    "93543dd414469577630ac92344bb1facde85ca03",
+    "93543dd414469577630ac92344bb1facde85ca03"
+  ],
+  "src/core/localization.gd": [
+    "46031238ed8d88775fe7d7c30bc9dbb56b99f53c",
+    "46031238ed8d88775fe7d7c30bc9dbb56b99f53c"
+  ],
+  "src/core/localization.gd.uid": [
+    "201219466f0e2dfaa48c57c737ec11c564589772",
+    "201219466f0e2dfaa48c57c737ec11c564589772"
+  ],
+  "src/core/profile.gd": [
+    "78299a82427e722b876d0657ead057fc23ff63c3",
+    "78299a82427e722b876d0657ead057fc23ff63c3"
+  ],
+  "src/core/profile.gd.uid": [
+    "9357d0cf0c57e5276ffb7ed0cc2d769f2cca68df",
+    "9357d0cf0c57e5276ffb7ed0cc2d769f2cca68df"
+  ],
+  "src/core/resource_gate.gd": [
+    "98207957a1232a0cd463db81f9116ede6eb785a9",
+    "98207957a1232a0cd463db81f9116ede6eb785a9"
+  ],
+  "src/core/resource_gate.gd.uid": [
+    "5b1f2603d5d1621fd7db25bab30558cd6c4e8e08",
+    "5b1f2603d5d1621fd7db25bab30558cd6c4e8e08"
+  ],
+  "src/core/router.gd": [
+    "8e9dbd71c10aade109f369aa58099c26a6ed02e2",
+    "2a99c2a2b0f6a34febb82dee4d80d18a3597f490"
+  ],
+  "src/core/router.gd.uid": [
+    "167bcf9dee90f4bcc4bd591a7227f1491d32ea2e",
+    "167bcf9dee90f4bcc4bd591a7227f1491d32ea2e"
+  ],
+  "src/core/state_machine.gd": [
+    "71b2569be26c1f42d32d7cf3958846023858017a",
+    "71b2569be26c1f42d32d7cf3958846023858017a"
+  ],
+  "src/core/state_machine.gd.uid": [
+    "3d72cc52e80a064c5775f96486b581c47639547b",
+    "3d72cc52e80a064c5775f96486b581c47639547b"
+  ],
+  "src/core/store.gd": [
+    "7f03ce7ee4ec81c0c7ef3a74d7dbacfd9f7c3c0a",
+    "7f03ce7ee4ec81c0c7ef3a74d7dbacfd9f7c3c0a"
+  ],
+  "src/core/store.gd.uid": [
+    "6b5496cf2765aeb958d7b13ce9044d86ee62ca3c",
+    "6b5496cf2765aeb958d7b13ce9044d86ee62ca3c"
+  ],
+  "src/core/tool_policy.gd": [
+    "4f1632e6cd0592a096451416a875484d9036e978",
+    "ba404067e113d3a5b02495c429c118f073e811ad"
+  ],
+  "src/core/tool_policy.gd.uid": [
+    "49d0fdaaeadd01f521fd8b485949d9a3ae36c326",
+    "49d0fdaaeadd01f521fd8b485949d9a3ae36c326"
+  ],
+  "src/modules/module_port.gd": [
+    "cf57d2b5b870a81bf6590a620b126e0a09a22e2a",
+    "cf57d2b5b870a81bf6590a620b126e0a09a22e2a"
+  ],
+  "src/modules/module_port.gd.uid": [
+    "4bfef6e37b1e2415a357b3150af4cec2a8b34bc6",
+    "4bfef6e37b1e2415a357b3150af4cec2a8b34bc6"
+  ],
+  "src/perception/observation_buffer.gd": [
+    "95afd9377cb235218284b8c82dddc4c4f460f90e",
+    "95afd9377cb235218284b8c82dddc4c4f460f90e"
+  ],
+  "src/perception/observation_buffer.gd.uid": [
+    "c372ba8c6c074c965ffc2a30f4426291cb91221d",
+    "c372ba8c6c074c965ffc2a30f4426291cb91221d"
+  ],
+  "src/providers/llama_http_provider.gd": [
+    "9cafb84c266810ffb258becc4a14d92bc748118f",
+    "bb4385d6588ecfa85b78425b5ab8d380247a672c"
+  ],
+  "src/providers/llama_http_provider.gd.uid": [
+    "e295dae47a2a3ef7a6ee6b9e18ac2aef602c95a8",
+    "e295dae47a2a3ef7a6ee6b9e18ac2aef602c95a8"
+  ],
+  "src/providers/provider_base.gd": [
+    "e1282c3ca60756ac9fad43093cc93be64795234b",
+    "e1282c3ca60756ac9fad43093cc93be64795234b"
+  ],
+  "src/providers/provider_base.gd.uid": [
+    "d9921cb16e72bbca7757ad409922f3ecba4c6f97",
+    "d9921cb16e72bbca7757ad409922f3ecba4c6f97"
+  ],
+  "src/providers/unconfigured_provider.gd": [
+    "d5f5d82d362d42da074e3839f5e73764d18da193",
+    "d5f5d82d362d42da074e3839f5e73764d18da193"
+  ],
+  "src/providers/unconfigured_provider.gd.uid": [
+    "73be2fd6d4ffd4dacba501fad3414cb4e0c5e753",
+    "73be2fd6d4ffd4dacba501fad3414cb4e0c5e753"
+  ],
+  "src/ui/companion.gd": [
+    "5e06485764b2109e1fd4d36c7dd0ed88adbc66cf",
+    "d2626d6e1a4f8af1c6a808dac2d326d92b1d2071"
+  ],
+  "src/ui/companion.gd.uid": [
+    "39154c4c1ebfa0bdf8c2f06fc5b49747ebf985c3",
+    "39154c4c1ebfa0bdf8c2f06fc5b49747ebf985c3"
+  ],
+  "src/ui/main.gd": [
+    "8e0423a369db48003d30c5d49b98adeafed2acb3",
+    "74c5bbf6651af744d4ddf86cf4dae6cac6a6d122"
+  ],
+  "src/ui/main.gd.uid": [
+    "d5359f707633d417b53a13fa6df9580325db3118",
+    "d5359f707633d417b53a13fa6df9580325db3118"
+  ],
+  "tests/scenarios/chess_position.example.json": [
+    "bcd234be616ba12f6c680d7d8c13758a5c77fef0",
+    "bcd234be616ba12f6c680d7d8c13758a5c77fef0"
+  ],
+  "tests/scenarios/universal_screen_cases.json": [
+    "3554209f090f684f5e89d0ef32a2b2ae65e7c1f9",
+    "3554209f090f684f5e89d0ef32a2b2ae65e7c1f9"
+  ],
+  "tests/test_core.gd": [
+    "e6386f071563d234a8cea57f51355a48e4ac69ae",
+    "9476a86540d782c3d2fa0ba0b83d883380e4cffd"
+  ],
+  "tests/test_http.gd": [
+    "20aec2a40d8823efdfe9ab9483a848fc25b571f9",
+    "20aec2a40d8823efdfe9ab9483a848fc25b571f9"
+  ],
+  "tools/README.md": [
+    "4fbc9ea7973627972cfce6b84f4372cae35c7c16",
+    "4fbc9ea7973627972cfce6b84f4372cae35c7c16"
+  ],
+  "tools/package_source.py": [
+    "7d8d9ebce7000abac584ac1c1bdd363ce8564902",
+    "282e959bbf692c4859079c4187e0ed6753ee802e"
+  ],
+  "tools/release_gate.py": [
+    "e5de9a3fb862a687795a941675e94fdbaafc84b8",
+    "e376d044f2ac66563ac7db3e049df6f3fb3e2b65"
+  ],
+  "tools/run_checks.py": [
+    "770b3e45cc558c0762bdc7a5e2f518b29f063156",
+    "db366e5247922a66fae1d415dd6577df3076d3ff"
+  ],
+  "tools/test_http.py": [
+    "210ec007677bb0b047082ad35ec482ad62ba3c77",
+    "210ec007677bb0b047082ad35ec482ad62ba3c77"
+  ],
+  "tools/verify_project.py": [
+    "65f80321bf2ecaa48495734c456f97a239dcccf3",
+    "2c8a51ea16ccfc51cdf5c4060a3478d7fbb2228d"
+  ],
+  "OPEN_PREVIEW.html": [
+    "afc534c853806a271d2ef88ec2f476e0f5cbd139"
+  ],
+  "START_WINDOWS.cmd": [
+    "e61fb0615ce4e73881aa4f6bf566f335cae7e534"
+  ],
+  "assets/characters/signal_01/body_v1.png": [
+    "9f972b6b2ddbcd061da5fb32be1cbd9bbe6e58f0"
+  ],
+  "assets/characters/signal_01/body_v1.png.import": [
+    "1db40ce435b1c052ebbf0d42401638f2ecb28922"
+  ],
+  "assets/fonts/NotoSansCJKsc-Regular.otf.import": [
+    "bf15d566f3d272e094c0c77e43e2423c85be6157"
+  ],
+  "assets/fonts/provenance.json": [
+    "324c7f7c6bea79b8f6b205915d1c079cb74f1209"
+  ],
+  "characters/signal_01/.gdignore": [
+    "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+  ],
+  "characters/signal_01/README.md": [
+    "3cbc0fce8cc7aa7953669d2ed1e16724582b64dd"
+  ],
+  "characters/signal_01/art/expressions_draft_v1.png": [
+    "ac71185e348ee22ae38496179266367d309e4253"
+  ],
+  "characters/signal_01/art/master_v1.png": [
+    "55fd77d1bc5e36e40a6270808bc7f0825930bbf6"
+  ],
+  "characters/signal_01/art/red_dash_storyboard_v1.png": [
+    "bc45e8081eef4f62217bcbed53ef6ee8fb7b4f4a"
+  ],
+  "characters/signal_01/art/style_study_v1.png": [
+    "85e92b33f1bf7f30b1094a47b867312e63adcdda"
+  ],
+  "characters/signal_01/art/turnaround_draft_v1.png": [
+    "44aa56bd980eaa4a03bdad60abcca9f38ea234ef"
+  ],
+  "characters/signal_01/design.json": [
+    "c1905ce92d4147561175950a7f4a1284404b0f6e"
+  ],
+  "characters/signal_01/production/ANIMATION_BRIEF.md": [
+    "06f3e0710cffa39f3e26723cd91b9a1bd5ef3fa7"
+  ],
+  "characters/signal_01/production/ART_DIRECTION.md": [
+    "c43204ca414fa3cdc5fc74f0724ed978ac3e3ee9"
+  ],
+  "characters/signal_01/production/red_dash_sequence.json": [
+    "010fe590967715f35dc11e090682aa27ef379820"
+  ],
+  "characters/signal_01/prompts/GENERATION_RECORD.md": [
+    "109ed0401cc2476eb43754e510401329b7afb86c"
+  ],
+  "characters/signal_01/prompts/body_v1.txt": [
+    "cdaf102d21945079c6564f78fcc2354439050f7e"
+  ],
+  "characters/signal_01/prompts/style_study_v1.txt": [
+    "fd5c02532082d8f0f65ca32812b18ddb7ea77d4b"
+  ],
+  "characters/signal_01/provenance.json": [
+    "955b76a9b3ce07eb15dbff0d3c7ee2cbc416fcd9"
+  ],
+  "characters/signal_01/reference/concept_v0.png": [
+    "a69d6f8b59e2358edb202fd6667cbc8528221b6b"
+  ],
+  "config/local_worker.json": [
+    "e134346d478ac5191b260fa82f2b52788694ade4"
+  ],
+  "docs/LOCAL_AI.md": [
+    "a7b2896f96cc30c80572825cc00b863380c67147"
+  ],
+  "docs/PRODUCT_DIRECTION.md": [
+    "dd307e6773d112b7b124bc832ac30f6714ffd560"
+  ],
+  "docs/SEARCH_AND_INTELLIGENCE.md": [
+    "f00ee2d5e879a0bab92ce35b5958d1cfbc9ca330"
+  ],
+  "downloads/README.md": [
+    "df5b2b0a318d8efb22cab92cac9a5b2d0b9d7793"
+  ],
+  "downloads/preview-manifest.json": [
+    "4342a3e5d32a041bb048d6de231a1dfaf037a98b"
+  ],
+  "downloads/v0.3-font/000.chunk": [
+    "96b0b5cea0300c54b1424dfab67c7e0f0f5ad33d"
+  ],
+  "downloads/v0.3-font/001.chunk": [
+    "e0b24a2e4f89a9f35ac88b1d351746dffb57d754"
+  ],
+  "downloads/v0.3-font/002.chunk": [
+    "b12e2fa09c97914ddbc1017a0d6cb4036f4d024f"
+  ],
+  "downloads/v0.3-font/003.chunk": [
+    "027fd8124a7cce643442c54a060949cab713e98d"
+  ],
+  "downloads/v0.3-font/004.chunk": [
+    "d2bd676c80a6e56e9d1fbc0325f601cbe942ce68"
+  ],
+  "downloads/v0.3-font/005.chunk": [
+    "83e476422ae3b73dcf6d58816078c3b2fa439ffc"
+  ],
+  "downloads/v0.3-font/006.chunk": [
+    "d7496ba98b49c61516b6855f782285e7b35316cc"
+  ],
+  "downloads/v0.3-font/007.chunk": [
+    "0eaef8f5192fee673d8a07202f36eba894ef9406"
+  ],
+  "downloads/v0.3-windows/000.chunk": [
+    "24c5c97a3460042a44f61541308fc0d6ab2d6dbd"
+  ],
+  "downloads/v0.3-windows/001.chunk": [
+    "5d1f338d4a364ecd24cd42f2b5bfc9001598a0f1"
+  ],
+  "downloads/v0.3-windows/002.chunk": [
+    "52bd64698d7bc75fb9e474a2e34c0972e2aab8a5"
+  ],
+  "downloads/v0.3-windows/003.chunk": [
+    "5083f04ea7788d2f9606300ab1df59fa16c2d127"
+  ],
+  "downloads/v0.3-windows/004.chunk": [
+    "efe5f54e17df996ec6d1a0c43d7d332b3b1f460e"
+  ],
+  "downloads/v0.3-windows/005.chunk": [
+    "2391287eb5826700c68f2052dab07a756d016c32"
+  ],
+  "downloads/v0.3-windows/006.chunk": [
+    "792f7e57b1c092b4c47e0c6bb7cca1d040129e5c"
+  ],
+  "downloads/v0.3-windows/007.chunk": [
+    "0173d143e7b1fb9f3bce93ef0c77394081644f5a"
+  ],
+  "downloads/v0.3-windows/008.chunk": [
+    "539836871701de5c3805b7426a37725ce6d868e6"
+  ],
+  "downloads/v0.3-windows/009.chunk": [
+    "351505fa6f427cfe0e37777cf05d3ceead359c6c"
+  ],
+  "downloads/v0.3-windows/010.chunk": [
+    "904850e9fafa93c87f54674ff2797b067ad1448c"
+  ],
+  "downloads/v0.3-windows/011.chunk": [
+    "07442428fd3bbd8f6478ff17f022855ff032dfe7"
+  ],
+  "downloads/v0.3-windows/012.chunk": [
+    "d5bb21cfdde724d6139d8c4ed5c2506d28ccc74d"
+  ],
+  "downloads/v0.3-windows/013.chunk": [
+    "6da0be2a9e907b0c5bc3dbad20ee1e393ba855b8"
+  ],
+  "downloads/v0.3-windows/014.chunk": [
+    "74283a3aeef54b8a1da28325e233a4ecdcf1d4b6"
+  ],
+  "downloads/v0.3-windows/015.chunk": [
+    "16f39c427029e28b1e0df1c281ab0b909d9908e0"
+  ],
+  "downloads/v0.3-windows/016.chunk": [
+    "b9d989099663f81fe4a3b92046b4c07607998da0"
+  ],
+  "downloads/v0.3-windows/017.chunk": [
+    "eafb6cba786c0cf968e592f08d0233a438a52e24"
+  ],
+  "downloads/v0.3-windows/018.chunk": [
+    "566c719c3230ae0064e85941ae500b29f4ad9ab9"
+  ],
+  "downloads/v0.3-windows/019.chunk": [
+    "d74bf994747058537d686519e1f0f12942baf99f"
+  ],
+  "downloads/v0.3-windows/020.chunk": [
+    "5d48183f6ff74d49feff919207dcf6de52caa229"
+  ],
+  "downloads/v0.3-windows/021.chunk": [
+    "b3639bb602b0df923734a213b154c35270f0dc85"
+  ],
+  "downloads/v0.3-windows/022.chunk": [
+    "d738be3a2cba106d19a41a4a599d853445e83b61"
+  ],
+  "downloads/v0.3-windows/023.chunk": [
+    "55db66472eab1b56753014aa597b9409ab57cc53"
+  ],
+  "downloads/v0.3-windows/024.chunk": [
+    "a6b54e43e8a8fdbf2fd22d5db3e888d7d6d70379"
+  ],
+  "downloads/v0.3-windows/025.chunk": [
+    "94530df8ad80101d5023a9a3aa314d4635fb81ef"
+  ],
+  "downloads/v0.3.1-fix/000.chunk": [
+    "79e935bcea1228b1e1ff5503eb91875f9a0b69d3"
+  ],
+  "downloads/v0.3.1-fix/001.chunk": [
+    "7ca80c33c1cac7d5ad0e47cd19d2103568197ce6"
+  ],
+  "downloads/v0.3.1-fix/002.chunk": [
+    "2f9adf68649fd3cc067a9c97d5b9765e5350e20b"
+  ],
+  "downloads/v0.3.1-fix/003.chunk": [
+    "5a9f994d8a64c68020ed42f2c6941415a52d0708"
+  ],
+  "downloads/v0.3.1-fix/004.chunk": [
+    "df59c9c221885e6720738d489d3c282737f5965d"
+  ],
+  "downloads/v0.3.1-fix/005.chunk": [
+    "1dc2d3faf42a9737a18c7910d8c925a034990ac8"
+  ],
+  "downloads/v0.3.1-fix/006.chunk": [
+    "fbaf83e21cee8ca4e0c3f486261654878dc045c4"
+  ],
+  "downloads/v0.3.1-fix/007.chunk": [
+    "8042aad98eb56dc0eba9eb2bebf9761836c9c945"
+  ],
+  "legal/ASSET_POLICY.md": [
+    "0079ac95e50e15fa02bea46d8ca8c0ec1e09ff7d"
+  ],
+  "legal/CHARACTER_REVIEW_2026-10-27.md": [
+    "660cb53592e97a9390565d377006256f54f97456"
+  ],
+  "legal/upstream/Godot-COPYRIGHT.txt": [
+    "758917ae4c861384e9596e2271534a4534859d87"
+  ],
+  "legal/upstream/LLVM-OpenMP-LICENSE.txt": [
+    "9907566382922012bef0c339f7b2b757c0f43e92"
+  ],
+  "legal/upstream/NotoCJK-LICENSE.txt": [
+    "d952d62c065f3f35fb83a173496e90b21525aef3"
+  ],
+  "legal/upstream/Qwen3-1.7B-LICENSE.txt": [
+    "6f9739bb281a3d2ade8fb5f6dd6dde597a739c80"
+  ],
+  "legal/upstream/llama-b11901-LICENSE.txt": [
+    "e7dca554bcb802f98408383a864404e3aa4eacca"
+  ],
+  "manifests/animation_catalog.json": [
+    "f7d06ac58e2b45445e51172c8721fc873259ca60"
+  ],
+  "manifests/animation_pack.json": [
+    "267b8d5f2f1ce9d58dfb47377e5963d929246638"
+  ],
+  "reports/WINDOWS_PREVIEW.md": [
+    "7c9c61e1f8a3fdcca54cdc94dade5347e7f23a2c"
+  ],
+  "reports/animation.txt": [
+    "45f02ba282130b944b5bfd3d044a50562ae52ce1"
+  ],
+  "reports/chat_layout.txt": [
+    "8421ca65870908cd5614395a20d8c143a5f90567"
+  ],
+  "reports/exported_pack.txt": [
+    "fdc6e0c857bf83efe9e39a1f5b18e7c0b8e5e883"
+  ],
+  "reports/local_runtime.txt": [
+    "1b2f48613bb0b093a318658471a41aebe8001fc2"
+  ],
+  "reports/local_worker_real.txt": [
+    "1230d3b1ef563eb20151c821e7333d711413e044"
+  ],
+  "reports/native_ui.txt": [
+    "e56c493fd1ea594ecfddff611464c079dd610744"
+  ],
+  "reports/patch_application.txt": [
+    "41186a3c7ef7b3d9cf7755ad8f29956adf805f74"
+  ],
+  "reports/preview.txt": [
+    "a3f09d670a88ec730983c834a7efde13889ee594"
+  ],
+  "reports/root_bootstrap.txt": [
+    "d9b30c7db5f9b4dcdb71c06a8714ce3f20deb4d6"
+  ],
+  "reports/search.txt": [
+    "92aa8822313a4a02454f1fdf5dbc7a3a74db3222"
+  ],
+  "reports/transport.txt": [
+    "6ff7192fafe85d62cf3966b152675bc2e6e8e1b8"
+  ],
+  "reports/transport_031.txt": [
+    "68f99941a2541d1ddf1676bb9f4bf625cbe0e8b0"
+  ],
+  "reports/windows_export.txt": [
+    "c6e75a71d1864b7b129c7d05235de0730d910dc6"
+  ],
+  "scenes/bootstrap.tscn": [
+    "8a3b8a5fc7db0143cdc189518103fc33aabfe05e"
+  ],
+  "src/animation/director.gd": [
+    "6b2c9a3d8a9a8bd902c7e8721a325577e2e74ac5"
+  ],
+  "src/animation/director.gd.uid": [
+    "0ef1689e626a2bc1d036eeb3a50f2d0ea7d9fafa"
+  ],
+  "src/core/context_budget.gd": [
+    "702d200f579f8493f884bee755cccd18c8a28e0a"
+  ],
+  "src/core/context_budget.gd.uid": [
+    "26215058aafc2192b1755d035cbecee51a80e99a"
+  ],
+  "src/desktop/chat_window.gd": [
+    "69edbfc1c4f6557c328cdab3d33d951b2d4bb2fa"
+  ],
+  "src/desktop/chat_window.gd.uid": [
+    "170e4d7648ec6bf16de7a8f00bbd5613b7cb7e26"
+  ],
+  "src/desktop/companion_window.gd": [
+    "40f16f6fa6727e5d8822725457c9f615143239d9"
+  ],
+  "src/desktop/companion_window.gd.uid": [
+    "d8180c93ab05396d6364b9bd0ec23257d89db00c"
+  ],
+  "src/runtime/local_runtime.gd": [
+    "7208048e372c10d6fa10e09c668a1794f30ed30c"
+  ],
+  "src/runtime/local_runtime.gd.uid": [
+    "5af7d97d6d9090fa861e8bb4c9e16dae5cb85f2b"
+  ],
+  "src/tools/browser_search.gd": [
+    "d65adc73925dd6f31eb8580a3d3157512b1ed597"
+  ],
+  "src/tools/browser_search.gd.uid": [
+    "50b38d201954b1ae664703f9db69b1f437f549ef"
+  ],
+  "src/tools/system_voice.gd": [
+    "19b624da30d4bfef7f15cf24dd1f62f9e5012baa"
+  ],
+  "src/tools/system_voice.gd.uid": [
+    "01f02239b732a7ebfe72b54bab326a197cca8139"
+  ],
+  "src/ui/bootstrap.gd": [
+    "1aced646172ae4ee9cf7a2ede8cee93a3c80e63b"
+  ],
+  "src/ui/bootstrap.gd.uid": [
+    "302f3ddfa4f017d0e63bbc1d8f786ea5089973ff"
+  ],
+  "src/ui/chat_view.gd": [
+    "50026759be702a6928c9fcb506c6131997112631"
+  ],
+  "src/ui/chat_view.gd.uid": [
+    "9222fb3bebd33ecf1d768224551eb29efa27be11"
+  ],
+  "src/ui/visual_theme.gd": [
+    "0eac32556299ae276ba7ab4b3df2c7e6343c8f4a"
+  ],
+  "src/ui/visual_theme.gd.uid": [
+    "5b7ec47bcbec56d760e91f926e51a63730d45b15"
+  ],
+  "tests/test_animation.gd": [
+    "031dbff093e4f6892b595b67deaa61f2ba7e553b"
+  ],
+  "tests/test_animation.gd.uid": [
+    "606e9a3d30074bd386d9d1da685025d9685d1a8d"
+  ],
+  "tests/test_chat_layout.gd": [
+    "d302b3a48ba476d206e3d8cd6bb53806a3640382"
+  ],
+  "tests/test_chat_layout.gd.uid": [
+    "4df1e475bb82b44a7d152f08c80190bf4a49d12a"
+  ],
+  "tests/test_core.gd.uid": [
+    "00cbfe1e303590fbbeda0836b2b756b095267494"
+  ],
+  "tests/test_desktop_visual.gd": [
+    "98ecba648d335b2f6ba8ec97e832c245d5c94ab2"
+  ],
+  "tests/test_desktop_visual.gd.uid": [
+    "9c023d3458d12db234cd38b8b40e1e122fa0a170"
+  ],
+  "tests/test_http.gd.uid": [
+    "dc59eff585dcb15b707a079d1e80d9c64e18dc2d"
+  ],
+  "tests/test_local_runtime.gd": [
+    "6deccf5d5485258e2d549dcffbfe9060f0bea60d"
+  ],
+  "tests/test_local_runtime.gd.uid": [
+    "7fca7a580b7fc3802d34cd9a85d952e9d9177c07"
+  ],
+  "tests/test_search.gd": [
+    "3a8053077e0c6a5fea9f745b710edf911b8f8573"
+  ],
+  "tests/test_search.gd.uid": [
+    "9dd6e8134100446454d6932f03c4a1645acd01e4"
+  ],
+  "tools/build_preview.py": [
+    "323e8ee18cabdf93dfdcfb6515061ea3e43b9305"
+  ],
+  "tools/make_patch.py": [
+    "9972917cd3885a8f91395f08a71e3c51e498b43b"
+  ],
+  "tools/restore_packages.py": [
+    "a80b3abfe3e77c40b0ee426577abdc1358aa991a"
+  ]
+}

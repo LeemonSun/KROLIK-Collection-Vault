@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "app_version": "0.3.1-desktop-fix",
+  "last_app_commit": "677423a497c8e19ef0a5375cdd3be99f18a1d65b",
+  "checkpoint_status": "ready",
+  "current_task": "Быстрый вход в проект настроен и проверен; изменений приложения на этом этапе нет.",
+  "next_action": "Начать с текущего запроса пользователя. Для проверки предыдущего исправления нужен результат запуска 0.3.1 на Windows.",
+  "read_next": [
+    "RESUME.md"
+  ],
+  "known_limits": [
+    "Windows run not verified",
+    "0 finished body clips",
+    "No ASR / autonomous web research / semantic memory / Cloud"
+  ],
+  "validation": [
+    "0.3.1 application checks passed before workflow-only changes",
+    "X11 rendered exported pack passed",
+    "0.3 -> 0.3.1 patch application tested on PowerShell 7/Linux",
+    "Recovery: 11 offline tests and local bridge cold/warm/conflict/checkpoint/lease integration passed"
+  ],
+  "artifact": {
+    "patch": "Companion_Fix_0.3.1.zip",
+    "sha256": "ec1659794af92d64243816ef5b6cdbcf902bb3d468c2eead0545154ec093ca95"
+  }
+}

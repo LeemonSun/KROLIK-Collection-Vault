@@ -16,4 +16,6 @@ userdata/
 captures/
 secrets/
 export_credentials.cfg
+.resume-local.json
+.resume-remote.json
 

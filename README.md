@@ -1,3 +1,4 @@
+<!-- Agent entry: read RESUME.md and run python3 tools/resume.py status; full history is optional. -->
 # Companion Preview · 0.3.1
 
 Локальный ИИ-компаньон для ПК, частная тестовая версия будущего продукта для Steam. Пиксельное направление отложено; продолжаем текущую героиню Signal 01, имя рабочее.

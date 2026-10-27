@@ -7,5 +7,9 @@ release_gate.py — намеренный запрет неподготовлен
 package_source.py — воспроизводимый архив исходников и SHA-256.
 run_checks.py — локальная последовательность проверок и отчёт.
 
-Эти инструменты не скачивают зависимости и не отправляют исходники наружу. GitHub Actions не использовать.
+Проверки и упаковка работают локально. GitHub Actions не использовать.
+
+`resume.py status` — короткая сводка; `snapshot` — компактная капсула исходников; `plan --group code` — без ресурсов.
+`resume_bridge.js` — явно вызываемое восстановление/сохранение через GitHub connector. Только `assets` скачивает выбранные ресурсы; веса моделей не входят в recovery. Читать RESUME.md.
+Проверки recovery: `python3 -m unittest discover -s tests -p test_resume.py` и `node tests/test_resume_bridge.cjs` после snapshot.
 

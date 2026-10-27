@@ -1,0 +1,356 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "characters/signal_01/art/expressions_draft_v1.png",
+      "group": "reference",
+      "bytes": 2620631,
+      "sha256": "c6edfb431a11e3c8d2812841943bf852dbda633f448a1252b2748a7149911ddd",
+      "source": "github"
+    },
+    {
+      "path": "characters/signal_01/art/master_v1.png",
+      "group": "reference",
+      "bytes": 2086234,
+      "sha256": "6d86c3fc204eeb786268d9d853d5b8bf082bcd033729f276974afcae19220b66",
+      "source": "github"
+    },
+    {
+      "path": "characters/signal_01/art/red_dash_storyboard_v1.png",
+      "group": "reference",
+      "bytes": 1965345,
+      "sha256": "aac4a22e7b5452540857ee8e42f14cde7dfdad35bb5d5aa61a553dd2fb782da9",
+      "source": "github"
+    },
+    {
+      "path": "characters/signal_01/art/style_study_v1.png",
+      "group": "reference",
+      "bytes": 1958145,
+      "sha256": "4500f76e4ad1fdf411d589636fbb3ac02da7adfdb38028c4e1e81557996d3dd5",
+      "source": "github"
+    },
+    {
+      "path": "characters/signal_01/art/turnaround_draft_v1.png",
+      "group": "reference",
+      "bytes": 2172151,
+      "sha256": "919cf6cd89fd1067ad8b9555634a337a94b9ffaef556eedc1a7432c8f54c6bf8",
+      "source": "github"
+    },
+    {
+      "path": "characters/signal_01/reference/concept_v0.png",
+      "group": "reference",
+      "bytes": 1997095,
+      "sha256": "51bf87cab7fb7b8fcad767f9b92380c0249b74dc450f5ee8c99128be82a374c3",
+      "source": "github"
+    },
+    {
+      "path": "assets/characters/signal_01/body_v1.png",
+      "group": "runtime",
+      "bytes": 1749493,
+      "sha256": "8bbc31dfad9b3a51898377b0352462d383d3a46635eff2d06a24d0e01d5541b4",
+      "source": "github"
+    },
+    {
+      "path": "assets/fonts/NotoSansCJKsc-Regular.otf",
+      "group": "runtime",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "source": "public",
+      "url": "https://raw.githubusercontent.com/notofonts/noto-cjk/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf"
+    },
+    {
+      "path": "downloads/v0.3-font/000.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "c5650e5fd7b598992e545b63bd2a6165b3a3919058464316ac7f6d851c86a321",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/001.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "55d2c05bd966b44a72180c39e2fb447480001beb4fafeefbfa73785c8fa5b375",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/002.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "0788be000b3c0280438143fe65eb53fdb8351a5cf3a55c12e39606f6aaf1ddc4",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/003.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "09ffd9c96f62aede5827a6d2ead378741289bd9642c005276d609ba7782bd390",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/004.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "da20dfbc594c09ea5e57404bb077346927e798cbb1b396645f0004ea6ec884b0",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/005.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "a46f0ef1739889dce2c3085c9f26c122fc7e256b18f58e149f5876193ebfeb2b",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/006.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "7d98cef4c4716071aaa32fb4cf547f21e12baf138fd164baee3adbb77b132b2f",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-font/007.chunk",
+      "group": "distribution",
+      "bytes": 1757300,
+      "sha256": "33a5718e10d35fd4fb3801708225e82ab25c97a466938492b4fb6df17d6e7133",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/000.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "299c83cb94ca37a82f9158d1b9806249ad76655424e5751c0ee5badc7bdd8577",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/001.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "28ceeb7d6d363643ff5e28015271ded50bc99a2c3f5875eedeb4ddf8951cb129",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/002.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "07ca1de90847ee755fdb385c84223b121a513cfa481ea4382f9f9a7cc4028479",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/003.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "10c4393bd01c21d3cea750c88342eeca28aae4d1a94d9b6b4b75c9ac65614506",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/004.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "c2a4af90dc5d659f4d9f6c0bf6afa37df198a891f4c7ee5118a7aa7cd4b7b31f",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/005.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "083977d9be89e231ae7a4771a062e7ba9a62a5f43ca17dd36a46532bd42fab9e",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/006.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "caec88bfff1c924805882162d5314e7fcbf57d964a067261287ea57d2fe929e1",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/007.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "af7609eff47d619ec7f82f19fe25bbe9123b6c97bdde533e1ab789f454b4a65f",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/008.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "b2ea989cc773d3b5ab58e3c07219c696ee25fd8af350fad7a0fb8b263c4fdecd",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/009.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "c733be9a9d897456f25d5fd3d6b56cad91fb0ee1db2226c00ae613bc40aeffa7",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/010.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "681d156e48d294f0159a1d8295668361b0f59ec7ae6dde42d7a3b23784bd15ab",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/011.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "40f29fe5203ebf6f70c5b19b5052f0c62837ec8323560ed5d42cf963d53519c5",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/012.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "cf55bdfa017ce4d6917533411fd39797134be051e6679c4604150aaf29f1e370",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/013.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "fd0dea95f78abd595002daeef0bbc97ecd6f5e212376e598e34f75b4a1e4183c",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/014.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "6935790bf86c395de4338148e91c8a2a1b4c3e660a82cfc9d7cd3336445007b8",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/015.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "a03fecee188ab823c0993e88f1b8b0f11527bfb63b99586d519b4ff29a05756c",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/016.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "e49c1b2e81533e374dd8dc578307c08bc87a8453cf5f7ae911424dade1a4f596",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/017.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "02f3cde5e1c1a63d59624901143f110933a69cfdbd251827606ea1f7e7a53069",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/018.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "b107aacff8885e7299b0cac5ccf6fe07bb0d2c57ce6c6e936826a20008f1c844",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/019.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "185c28bf117b0950089915efb14181301cda768af145153fa7bd106f26c1f1db",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/020.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "886e0f72b0319c662b6b120c38928c743c00647c4541b72edb3952966c46d115",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/021.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "b1b5c43c8d12249aa53172a37769cc3afea83672b864cd30756e9c10f0ce8542",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/022.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "a9c5443238bc9b299b0dff9d11ab93d6d3185c451ac0a31b8474d6b2bf3dab45",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/023.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "49fba061b22b0ec20f4d11e08f593577bbb60062f06deef3e4fceb2b6cdfe2ec",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/024.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "d4ef13cffcfa6f608eda94050248e7b893f0a2ac21e90694f153f2b91cb5b1a9",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3-windows/025.chunk",
+      "group": "distribution",
+      "bytes": 1296243,
+      "sha256": "ee28288b085b6b3614a265f257253b1d53238231d18a371cf7853c20f8c353aa",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/000.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "6bfa7aff7fb60cbe0bca761765ae4d5bac986bd98f0a1cb048af37e4e06b3d90",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/001.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "bd6db7b7f529c3e3c7c650fe0d1cc11b20e8a28dc9c7271a189f8f28cf8fa3c8",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/002.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "4ab4d075edacbf84caa7b4d3f43fbecf56a496a97effc59f25af6bee88a0e09c",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/003.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "c4286acac30af2b253aa6b0315b41eaa976a925c924800e64c4e9a6de2f605c8",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/004.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "330f12298b3dc8d40bc30b8949642e80ea0b13d0af1b5dd57febff0ba963b2f8",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/005.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "76810185ddd7e27b91e06697724485b4f18c99286e08ef6f41ed93198b73751f",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/006.chunk",
+      "group": "distribution",
+      "bytes": 2097152,
+      "sha256": "ee83cafef4ed5861f48d4aec2e0c40cb6c9f4f113c77fade828b0480b9b1448d",
+      "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.1-fix/007.chunk",
+      "group": "distribution",
+      "bytes": 1752682,
+      "sha256": "37c7b8e76beb347d8762312bc5f4515072f5fa14d9c87d1503d8a4fb7eb99f83",
+      "source": "github"
+    }
+  ]
+}

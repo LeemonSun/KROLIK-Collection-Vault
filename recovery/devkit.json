@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "tools": {
+    "godot": {
+      "present_paths": [
+        "devtools/Godot_v4.7.2-stable_linux.x86_64"
+      ],
+      "sha256": {
+        "devtools/Godot_v4.7.2-stable_linux.x86_64": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e"
+      },
+      "archive_url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
+    },
+    "export": {
+      "present_paths": [
+        "devtools/templates/4.7.2.stable/windows_release_x86_64.exe"
+      ],
+      "sha256": {
+        "devtools/templates/4.7.2.stable/windows_release_x86_64.exe": "d34d36f3be1a6c49c56525ae86469b92e4f417ddf0b43cf00dd80c385c4b0562"
+      },
+      "archive_url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz",
+      "zip_member": "templates/windows_release_x86_64.exe"
+    },
+    "pwsh": {
+      "present_paths": [
+        "devtools/pwsh/pwsh"
+      ],
+      "sha256": {
+        "devtools/pwsh/pwsh": "c561baa659f1d0a5e9482684fc26e377b6fb8178b74f5e4fbb0ba0ea38f6a126"
+      },
+      "archive_url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.9/powershell-7.6.9-linux-x64.tar.gz"
+    },
+    "visual": {
+      "present_paths": [
+        "devtools/xvfb/usr/bin/Xvfb",
+        "devtools/xvfb/usr/bin/xkbcomp"
+      ],
+      "sha256": {
+        "devtools/xvfb/usr/bin/Xvfb": "c50687113cd5232844b8fa3a49276a48a022fa7fc4275b983ae8f88158efed72",
+        "devtools/xvfb/usr/bin/xkbcomp": "eca6986af7d15277394b8476b8ad85229ee1a1a879d43d2a526f106af3761550"
+      }
+    }
+  }
+}
