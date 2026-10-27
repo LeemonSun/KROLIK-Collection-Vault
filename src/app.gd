@@ -66,9 +66,16 @@ var queued_translation=[]
 var clock=preload("res://src/tools/world_clock.gd").new()
 var self_knowledge=SelfKnowledge.new()
 var idle_fps=24
+var speech_input
+var dictation_target
 var documents=preload("res://src/tools/text_documents.gd").new()
 
 func _ready():
+	speech_input=preload("res://src/tools/speech_input.gd").new()
+	add_child(speech_input)
+	speech_input.changed.connect(func():changed.emit())
+	speech_input.text_ready.connect(_dictation_ready)
+	speech_input.failed.connect(func(key):add_message("assistant",t(key));dictation_target=null)
 	desktop_actions=DesktopActions.new()
 	add_child(desktop_actions)
 	desktop_actions.completed.connect(_desktop_completed)
@@ -120,6 +127,7 @@ func _process(_delta):
 	diagnostics.active=panel_visible and control_panel.page=="diagnostics"
 	var limit=60 if moving else (30 if chat_visible or panel_visible else idle_fps)
 	if not character_visible and not chat_visible and not panel_visible:limit=6
+	if is_instance_valid(speech_input) and speech_input.busy():limit=maxi(limit,30)
 	var interacting=moving or chat_visible or panel_visible
 	if Engine.max_fps!=limit:
 		Engine.max_fps=limit
@@ -188,7 +196,7 @@ func submit(text):
 	if paused:
 		add_message("assistant", t("paused_message"))
 		return
-	if state.current != "idle" or not queued_chat_text.is_empty():
+	if state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()):
 		add_message("assistant", t("busy_message"))
 		return
 	mark_active()
@@ -384,6 +392,8 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	if is_instance_valid(speech_input):speech_input.cancel()
+	dictation_target=null
 	response_retries=0
 	pending_document={}
 	queued_translation=[]
@@ -395,6 +405,7 @@ func cancel():
 		local_runtime.generation_busy = false
 		local_runtime.touch()
 	motion.clear()
+	if is_instance_valid(desktop_companion) and is_instance_valid(desktop_companion.art):desktop_companion.art.play("idle")
 	pending_user_text = ""
 	if provider:
 		provider.cancel()
@@ -621,4 +632,27 @@ func _submit_translation(messages_):
 	local_runtime.touch()
 	request_motion("dialogue.think_loop")
 	provider.submit(messages_,options)
+	changed.emit()
+
+func begin_dictation(editor):
+	if paused:return false
+	if speech_input.state=="recording":speech_input.finish();return true
+	if speech_input.busy() or state.current!="idle" or not queued_chat_text.is_empty():return false
+	if not speech_input.installed():return false
+	# Voice inference and text inference never occupy RAM as two simultaneous workers.
+	if local_runtime.pid>0 or local_runtime.starting:
+		local_runtime.stop();local_runtime.status="ai_sleeping";_set_provider("unconfigured")
+	dictation_target=weakref(editor)
+	var ok=speech_input.start(l10n.locale)
+	if not ok:dictation_target=null
+	request_motion("dialogue.think_loop" if ok else "work.error_recover")
+	return ok
+func _dictation_ready(text):
+	var editor=dictation_target.get_ref() if dictation_target else null
+	dictation_target=null
+	if is_instance_valid(editor):
+		editor.editable=true
+		editor.insert_text_at_caret(text)
+		editor.grab_focus()
+	request_motion("work.note_saved")
 	changed.emit()

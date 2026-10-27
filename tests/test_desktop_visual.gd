@@ -66,6 +66,11 @@ func _run():
 	await frame()
 	check(app.messages.any(func(x):return x.text=="Привет! Хочу поговорить."),"Visible native composer submits")
 	check(not view.history.get_parsed_text().is_empty(),"Native chat displays provider feedback")
+	view._voice();await frame()
+	check(view.install_mode=="voice" and view.setup_button.visible,"Voice setup is inline, no settings detour")
+	check(not app.speech_input.microphone.recording and app.speech_input.microphone.player==null,"Voice setup does not activate microphone")
+	check(Rect2(Vector2.ZERO,Vector2(app.chat_window.size)).encloses(view.voice_button.get_global_rect()),"Mic button fits native chat")
+	view.install_mode="text";view.refresh()
 	for language in ["ru","en","zh-Hans"]:
 		app.set_locale(language)
 		main.open_panel("talk")

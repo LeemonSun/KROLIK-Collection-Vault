@@ -62,6 +62,7 @@ func open_near(anchor):
 	view.editor.grab_focus.call_deferred()
 
 func close_soft():
+	if app.speech_input.busy():app.cancel()
 	if transition:transition.kill()
 	if app.motion.reduced_motion or app.paused:
 		hide()
@@ -73,5 +74,5 @@ func close_soft():
 
 func _fit_view():
 	if not is_instance_valid(view):return
-	if is_instance_valid(view.setup_hint):view.setup_hint.visible=size.y>=380 and not app.local_runtime.installed() and not app.local_runtime.downloading
+	if is_instance_valid(view.setup_hint):view.refresh()
 	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

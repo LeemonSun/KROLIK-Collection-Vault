@@ -17,6 +17,10 @@ var close_button
 var last_locale=''
 var chips=[]
 var footer_hint
+var install_mode="text"
+var install_row
+var voice_button
+var suggestions
 var setup_hint
 var status_dot
 func _ready():
@@ -63,7 +67,11 @@ func _ready():
 	setup_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	setup_hint.add_theme_font_size_override('font_size',12)
 	setup_hint.add_theme_color_override('font_color',VisualTheme.MUTED)
-	layout.add_child(setup_hint)
+	var installer=VBoxContainer.new()
+	layout.add_child(installer)
+	installer.add_child(setup_hint)
+	install_row=HBoxContainer.new()
+	installer.add_child(install_row)
 	history=RichTextLabel.new()
 	history.bbcode_enabled=false
 	history.selection_enabled=true
@@ -74,7 +82,7 @@ func _ready():
 	history.custom_minimum_size.y=24
 	history.add_theme_constant_override('line_separation',5)
 	layout.add_child(history)
-	var suggestions=HBoxContainer.new()
+	suggestions=HBoxContainer.new()
 	suggestions.add_theme_constant_override('separation',6)
 	layout.add_child(suggestions)
 	for spec in [['clock','quick_timer','/timer 300'],['note','quick_note','/note '],['clock','reminders','/remind 300 '],['search','search','/search ']]:
@@ -109,7 +117,14 @@ func _ready():
 	footer_hint.add_theme_color_override('font_color',VisualTheme.MUTED)
 	footer_hint.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	actions.add_child(footer_hint)
-	setup_button=_button('AI',actions,_setup_ai)
+	setup_button=_button('AI',install_row,_setup_ai)
+	setup_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	voice_button=_button('',actions,_voice)
+	voice_button.icon=load('res://assets/ui/mic.svg')
+	voice_button.expand_icon=true
+	voice_button.add_theme_constant_override('icon_max_width',19)
+	voice_button.custom_minimum_size=Vector2(36,34)
+	VisualTheme.quiet(voice_button)
 	setup_button.custom_minimum_size.x=144
 	setup_button.add_theme_font_size_override('font_size',11)
 	setup_button.clip_text=true
@@ -128,6 +143,10 @@ func _ready():
 	_render_history()
 	resized.connect(refresh)
 	refresh()
+	var progress_timer=Timer.new();progress_timer.wait_time=0.25;progress_timer.autostart=true
+	add_child(progress_timer)
+	progress_timer.timeout.connect(func():
+		if is_visible_in_tree() and (app.speech_input.busy() or app.speech_input.installing() or app.local_runtime.downloading):refresh())
 func _button(text,parent,callback):
 	var button=Button.new()
 	button.text=text
@@ -160,7 +179,11 @@ func submit_current():
 	app.submit(text)
 	editor.grab_focus()
 func _setup_ai():
-	if app.local_runtime.installed():app.start_local_ai()
+	var engine=app.speech_input.transcriber if install_mode=="voice" else app.local_runtime
+	if engine.downloading and engine.hash_thread==null:
+		engine.cancel_install();refresh();return
+	if install_mode=="voice":app.speech_input.install()
+	elif app.local_runtime.installed():app.start_local_ai()
 	else:app.install_local_ai()
 	refresh()
 func _on_message(_speaker,_text):
@@ -190,17 +213,39 @@ func refresh():
 		footer_hint.text=app.t('composer_keys')
 		for chip in chips:chip.button.text=app.t(chip.key)
 		_render_history()
-	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty()
+	suggestions.visible=size.y>=350
+	var voice_busy=app.speech_input.busy()
+	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
 	send_button.disabled=app.paused or busy
 	stop_button.disabled=not busy
-	var installed=app.local_runtime.installed()
-	setup_hint.visible=size.y>=380 and not installed and not app.local_runtime.downloading
-	setup_hint.text=app.t('chat_setup_hint')
-	setup_button.visible=not installed and not app.local_runtime.downloading
-	setup_button.text=app.t('chat_install')
-	setup_button.disabled=app.paused or app.local_runtime.downloading or app.local_runtime.hash_thread!=null
+	var installed=app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed()
+	var installing=app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null
+	setup_hint.visible=size.y>=380 and not installed
+	setup_hint.text=app.t('voice_install_hint' if install_mode=='voice' else 'chat_setup_hint')
+	install_row.visible=not installed
+	setup_button.visible=not installed
+	var engine=app.speech_input.transcriber if install_mode=='voice' else app.local_runtime
+	setup_button.text=app.t('cancel_install') if engine.downloading else app.t('voice_install' if install_mode=='voice' else 'chat_install')
+	setup_button.disabled=app.paused or engine.hash_thread!=null
+	editor.editable=not voice_busy
+	voice_button.disabled=app.paused or (busy and app.speech_input.state!='recording')
+	voice_button.tooltip_text=app.t('voice_finish' if app.speech_input.state=='recording' else 'voice_start')
+	voice_button.modulate=VisualTheme.RED if voice_busy else Color.WHITE
+	if voice_busy:
+		status_label.text=app.t('voice_'+app.speech_input.state)
+		if app.speech_input.state=='recording':status_label.text+=' · %d / 20 s' % int(app.speech_input.microphone.elapsed)
+	elif install_mode=='voice' and installing:
+		status_label.text=app.t(app.speech_input.transcriber.status)
+		var progress=app.speech_input.transcriber.progress()
+		if progress>=0:status_label.text+=' · %d%%' % int(progress*100)
 
 func _draw():
 	if not embedded:super._draw()
+
+func _voice():
+	if not app.speech_input.installed():
+		install_mode="voice";refresh();return
+	app.begin_dictation(editor)
+	refresh()

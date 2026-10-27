@@ -199,5 +199,18 @@
   "desktop_document_started": "Created “{name}” and sent it to Notepad. Its window is not confirmed yet.\n{path}",
   "desktop_document_saved": "Saved “{name}”, but couldn’t open it in Notepad.\n{path}",
   "desktop_edit_unavailable": "I can’t edit an existing window yet. Try “create a file in notepad: your text”.",
-  "model_repeated": "I’m repeating myself. That reply didn’t work — please try rephrasing."
+  "model_repeated": "I’m repeating myself. That reply didn’t work — please try rephrasing.",
+  "voice_install": "Install speech · 69 MB",
+  "voice_install_hint": "Local Russian, English and Chinese dictation. The microphone runs only on request; review the text before sending.",
+  "voice_start": "Dictate",
+  "voice_finish": "Finish recording",
+  "voice_recording": "Listening… click the mic again to finish",
+  "voice_preparing": "Preparing recording…",
+  "voice_transcribing": "Transcribing on your PC…",
+  "voice_silence": "That recording was too quiet. Try speaking closer to the microphone.",
+  "voice_microphone_unavailable": "Couldn’t start the microphone. Check the input device and Windows microphone access.",
+  "voice_audio_invalid": "The recording must be between 0.25 and 20 seconds.",
+  "voice_timeout": "Transcription took too long. Try a shorter recording.",
+  "voice_no_text": "I couldn’t make out the words. No text or commands were sent.",
+  "voice_start_failed": "Couldn’t start speech recognition."
 }

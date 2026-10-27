@@ -35,3 +35,15 @@ WindowStyle Hidden must precede -File in PowerShell invocation (0.6 appended aft
 Native mouse_passthrough_polygon clips pixels on Windows; static envelope across11clips avoids SetWindowRgn12Hz and crop/jitter. 0.6 has11 authored procedural states,6parts, not frame/facial/3D animation.
 Xvfb fixed98 stale locks occurred. Harness now picks a free TCP display. Logs still need inspection; exit0 alone insufficient.
 Library helpers current under library-night; already downloaded archive, preserve returned identity. Refresh helpers only per new run, not each retry.
+
+## Блок голоса (продолжение)
+
+Исходники SpeechInput/WhisperTranscriber/MicrophoneRecorder/VoiceAudio и mic.svg уже добавлены. App привязан к voice_input, inline install row и mic button; запись20сек, распознавание<=90сек, CPU1job<=2threads/halfcores, текст вставляется в исходный composer безотправки. ОсновнойLLM выгружается передзаписью. Остановка и отмена очищаютWAV/TXT; stdout/stderr через nonblockingpipes, не влог. Реальная транскрипцияJFK черезGodot PASS23checks (reports/voice_real.txt), headless16checks PASS. 14 старых групп PASS после импортаSVG; свежиеvoice добавлены вrun_checks (теперь15). Native mic/setup assertions прогоняются. Windows физическийmic не доступен.
+
+ASRconfig и обеMITnotice готовы. b5454win ZIP8928640 SHA6ba69e3482d7826214f90a6a9c84ca07782aec1e1d0c6a7c30c994fd5d816ccb. RuntimeRoot Release/, installerнаследуетсяотLocalRuntime и теперь поддерживает archive_prefix. Взятытолькоwhisper-cli/whisper/ggml/base/CPUvariants; нетпостороннихservers/SDL/parakeet/tests. VC++runtimeобщаясистемнаязависимость какуllama.
+
+Моделиоценка: Qwen3.5-2BQ4 text RAMpeak~2000MiB P50~1.83сек в12syntheticcasesCPU2; естьнеточностифактов. 4BQ4~4827MiB P50~5сек; физикакорректнее, ноsimpleanswersперегружены. Translation failures4B в первомbenchнельзяприписыватьнезнаниюязыка: systemстрогопорусски, асамиtranslationtestsEN/zh; нуженправильныйотдельныйprompt каквClipboardTranslator. Все12ответоввmodel-research/qwen35-bench.json/qwen4-bench.json внеGit. Нельзяназыватькачествоисправленным.
+
+Qwen4веса2.74GBскачаныиверифицированы00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4 (unsloth/Qwen3.5-4B-GGUF e87f176479d0855a907a41277aca2f8ee7a09523). 2BF16mmprojнельзяподключатьк4B (другойhidden/outputprojection). Дефолт2Bвыглядитразумнеепопамяти; выбиратьпослеVLMпроверки. NativevisionещёНЕподключён.
+
+Следующийблок: реальный2B+mmprojVLMbenchнаsyntheticUI, выбратькомпактнуюоднуtext+visionмодель; explicit screenshotJPEGbuffer512edge->ownedlocalHTTP, безсохранениякадров; mmprojтольконаexplicitrequest, выгрузкапосле. GenericWindowsUIAследом: избранноеокно/pinned HWND+PID+processStart, scopedinspection иexactnamedcontrols/ValuePattern/Invoke, непроизвольныйshell. Непечататьизmodelвслепуювлюбоеокно. ПоддержатьDOCXновыедокументыиумныйразборошибокпослереальныхмодулей, непутатьtext+visionсASR.

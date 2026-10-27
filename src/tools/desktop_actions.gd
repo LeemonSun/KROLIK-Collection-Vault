@@ -44,7 +44,8 @@ func _request(payload):
 		_finish.call_deferred({"status":"failed"});return true
 	output.store_string(JSON.stringify(payload.merged({"nonce":nonce})));output.close()
 	var arguments=PackedStringArray(["-NoLogo","-NoProfile","-NonInteractive","-ExecutionPolicy","Bypass","-File",ProjectSettings.globalize_path(support+"/desktop_bridge.ps1"),"-RequestPath",ProjectSettings.globalize_path(job+".request.json"),"-ResultPath",ProjectSettings.globalize_path(job+".result.json")])
-	if OS.get_name()=="Windows" and not test_runner:arguments.append_array(["-WindowStyle","Hidden"])
+	if OS.get_name()=="Windows" and not test_runner:
+		arguments.insert(0,"Hidden");arguments.insert(0,"-WindowStyle")
 	var executable=runner
 	if OS.get_name()=="Windows" and not test_runner:executable=OS.get_environment("WINDIR").path_join("System32/WindowsPowerShell/v1.0/powershell.exe")
 	pid=OS.create_process(executable,arguments,false)

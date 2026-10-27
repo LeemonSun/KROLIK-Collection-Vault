@@ -72,6 +72,22 @@
       "bundled_in_source_archive": true,
       "role": "localized_timezone_city_aliases",
       "status": "reviewed_declared_license"
+    },
+    {
+      "id": "whisper_cpp",
+      "name": "whisper.cpp b5454 / v1.9.5",
+      "license": "MIT",
+      "license_file": "legal/upstream/WHISPER_CPP_LICENSE.txt",
+      "status": "implemented_optional_local_voice_runtime",
+      "source_url": "https://github.com/ggml-org/whisper.cpp/tree/d1be6fde11ac6e0407606b4e42fe72d34add8037"
+    },
+    {
+      "id": "whisper_base_q5_1",
+      "name": "Whisper base q5_1",
+      "license": "MIT",
+      "license_file": "legal/upstream/WHISPER_MODEL_LICENSE.txt",
+      "status": "implemented_optional_weights_not_in_git",
+      "source_url": "https://huggingface.co/ggerganov/whisper.cpp/tree/5359861c739e955e79d9a303bcbc70fb988958b1"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "app_version": "0.6.0-desktop-preview",
-  "checkpoint_status": "recovery060_verified_overnight_pass_active",
-  "current_task": "0.6 binary recovered exactly from Library; final source fixes reconstructed, shard capsule verified. Continue authorized overnight assistant work in finished blocks, not a final turn.",
-  "next_action": "Read recovery/NIGHT_PASS.md. Benchmark Qwen3.5-2B and whisper, then implement constrained generic app assistance, explicit screen vision, voice input, compact consumer UX; checkpoint each completed block.",
+  "app_version": "0.7.0-voice-preview",
+  "checkpoint_status": "voice_block_verified_continuing_overnight",
+  "current_task": "Voice input block complete and verified through actual Whisper, bounded microphone/ASR pipeline and inline UI. Continue active night scope: real vision benchmark and generic application actions, then consumer UX/bundle.",
+  "next_action": "Read recovery/NIGHT_PASS.md, inspect 2B/4B benchmark limits, run 2B+its own mmproj image fixtures. Do not stop at voice block or call full Steam release. Checkpoint after next completed block.",
   "read_next": [
     "recovery/NIGHT_PASS.md"
   ],
@@ -19,7 +19,8 @@
     "Recovered 0.6 ZIP exact SHA",
     "14 existing source test groups PASS after restoration",
     "89 source X11 regressions PASS incl actual first-open composer and stable region",
-    "12 recovery Python tests plus offline Node bridge tests PASS"
+    "12 recovery Python tests plus offline Node bridge tests PASS",
+    "Voice:23 checks with actual Whisper and English JFK audio,16 unit checks,15 standard groups planned; physical mic/Windows not tested"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.6.0.zip",

@@ -173,10 +173,12 @@ func _extract_runtime(path):
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
 	# Copy only the pinned allowlist. No paths supplied by the archive are interpreted.
 	for name in manifest.runtime.files:
-		if name.get_file() != name or not zip.file_exists(name):
+		var prefix=str(manifest.runtime.get("archive_prefix",""))
+		var member=prefix+name
+		if ".." in prefix or name.get_file() != name or not zip.file_exists(member):
 			zip.close()
 			return false
-		var data = zip.read_file(name)
+		var data = zip.read_file(member)
 		var context = HashingContext.new()
 		context.start(HashingContext.HASH_SHA256)
 		context.update(data)

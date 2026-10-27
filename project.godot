@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Companion Foundation"
-config/version="0.6.0-desktop-preview"
+config/version="0.7.0-voice-preview"
 run/main_scene="res://scenes/bootstrap.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/foundation.svg"
@@ -30,6 +30,6 @@ environment/defaults/default_clear_color=Color(0.08235, 0.0902, 0.09804, 1)
 textures/default_filters/use_nearest_mipmap_filter=false
 
 [audio]
-driver/enable_input=false
+driver/enable_input=true
 general/text_to_speech=true
 
