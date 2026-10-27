@@ -1,0 +1,27 @@
+extends SceneTree
+var failures=0
+var checks=0
+func _initialize():_run.call_deferred()
+func check(ok,text):
+	checks+=1
+	if not ok:failures+=1;push_error(text)
+func _run():
+	check(ProjectSettings.get_setting("application/config/version")=="0.4.0-functional-preview","Correct product version inside PCK")
+	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
+	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
+	var migration=JSON.parse_string(FileAccess.get_file_as_string("res://native/legacy_patch_files.json"))
+	check(migration is Dictionary and migration.get("entries",[]).size()==12,"Exact migration inventory exported")
+	var app=root.get_node("App")
+	var events=[]
+	app.desktop_actions.completed.connect(func(result):events.append(result))
+	app.desktop_actions.test_runner=true
+	app.desktop_actions.runner=OS.get_environment("COMPANION_PWSH")
+	check(app.desktop_actions.request_metrics([]),"Godot starts the actual helper with typed data")
+	var deadline=Time.get_ticks_msec()+10000
+	while events.is_empty() and Time.get_ticks_msec()<deadline:await process_frame
+	check(not events.is_empty() and events[0].get("status")=="ok" and events[0].get("operation")=="metrics","Actual helper result returns through nonce protocol")
+	var helper=FileAccess.get_file_as_bytes("user://support/desktop_bridge.ps1")
+	check(helper.slice(0,3)==PackedByteArray([239,187,191]),"UTF-8 BOM supports Windows PowerShell 5.1 Cyrillic/CJK")
+	check(DirAccess.get_files_at("user://support/jobs").is_empty(),"No request/result litter after job completion")
+	print("EXPORTED_CONTENT_TESTS: %s checks, %s failures; actual helper round trip; Windows COM not exercised" % [checks,failures])
+	quit(0 if failures==0 else 1)

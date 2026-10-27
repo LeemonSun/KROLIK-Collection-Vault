@@ -22,7 +22,7 @@
   "model_connection_failed": "The local model is unavailable. Check the developer worker or stop the request.",
   "model_invalid_response": "The local model returned an unreadable response.",
   "module_unavailable": "This module is not connected yet.",
-  "help_text": "/timer 30 — timer in seconds\n/note text — save a note\n/notes — show saved notes\nThe AI, voice and screen modules are not bundled yet.\n/search <query> · /поиск <запрос> · /搜索 <内容>",
+  "help_text": "Try: open notepad; open Steam; remember that my favorite color is red; set timer for 5 minutes; search for… Searches are handed to your browser. /notes lists saved notes.",
   "empty_input": "Enter a message.",
   "input_too_long": "Keep a message under 2,048 characters.",
   "timer_invalid": "Use /timer with a whole number from 1 to 86,400 seconds.",
@@ -146,7 +146,7 @@
   "self_memory": "Notes stay on this PC. Conversation history is optional in settings and can be deleted. Automatic observation and memory are not implemented.",
   "self_offline": "Once the model is installed, conversation runs on your PC without internet. Initial downloads and web searches need a connection.",
   "self_offline_uninstalled": "The conversation component is not installed yet. Downloading it requires internet; afterwards conversation runs locally. Notes and timers already work offline.",
-  "self_load": "Conversation uses your CPU and RAM. The profile allows up to {threads} computation threads; I do not measure current CPU percentages yet.",
+  "self_load": "The Usage page measures process memory and CPU for this app and its owned AI worker. Answer complexity, hardware and other applications affect speed.",
   "self_motion": "You can drag me and move me with a red transition. There is subtle hair and breathing motion. Full gestures and facial animation are still in development.",
   "self_power": "An application runs me on your PC. Your CPU generates answers with a local model; its data is stored on disk and loaded into memory.",
   "self_capabilities": "I can launch an installed app or folder on command, save notes, set timers and hand searches to your browser. Chat uses an installed local model. Screen and web page reading are not ready.",
@@ -169,5 +169,7 @@
   "history_hint": "Up to 100 messages / 256 KiB. Off by default. Disabling saving keeps any existing file; use Delete to erase it.",
   "delete_note": "Delete",
   "diagnostics": "Usage",
-  "copy": "Copy report"
+  "copy": "Copy report",
+  "diagnostics_report": "FPS: {fps} / {limit}\nProcess memory (app + owned AI): {memory}\nCPU (share of whole PC): {cpu}\nProcesses measured: {processes}\nEngine allocations: {engine}",
+  "diagnostics_hint": "Updates every 5 seconds while this page is open. CPU needs two samples. The FPS limit is a target, not a measured guarantee."
 }

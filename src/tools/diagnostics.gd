@@ -66,7 +66,8 @@ func _accept(items):
 	previous=next;previous_ms=now
 func report():
 	var cpu="—" if not values.has("cpu_percent") else "%.1f%%" % values.cpu_percent
-	return "FPS: %s / %s\nProcess RAM (app + owned AI): %.1f MiB\nCPU (whole machine): %s\nProcesses sampled: %s\nEngine allocations: %.1f MiB" % [values.get("fps",0),values.get("fps_limit",0),float(values.get("process_bytes",0))/1048576.0,cpu,values.get("process_count",0),float(values.get("engine_bytes",0))/1048576.0]
+	var memory="—" if int(values.get("process_count",0))==0 else "%.1f MiB" % (float(values.get("process_bytes",0))/1048576.0)
+	return app.t("diagnostics_report",{"fps":values.get("fps",0),"limit":values.get("fps_limit",0),"memory":memory,"cpu":cpu,"processes":values.get("process_count",0),"engine":"%.1f MiB" % (float(values.get("engine_bytes",0))/1048576.0)})
 
 func _proc_path(process_id):
 	if process_id==OS.get_process_id():return "/proc/self"

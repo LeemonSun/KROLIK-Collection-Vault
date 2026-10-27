@@ -67,5 +67,24 @@ func _run():
 	app.diagnostics._process(0.01)
 	if OS.get_name()=="Linux":check(app.diagnostics.values.get("process_bytes",0)>0,"Actual Linux process RSS measured")
 	app.diagnostics.active=false
+	var cleaner=preload("res://src/tools/legacy_cleanup.gd").new()
+	var base="user://migration-test-"+str(Time.get_ticks_msec())
+	var archive=base+"/archive"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(base+"/fix033"))
+	for spec in [["old.cmd","known patch"],["fix033/user.txt","user content"],["Companion.pck.before-0.3.3","known backup"],["Companion.pck","active pack"]]:
+		var output=FileAccess.open(base+"/"+spec[0],FileAccess.WRITE);output.store_string(spec[1]);output.close()
+	var manifest={"schema_version":1,"entries":[
+		{"path":"old.cmd","sha256":FileAccess.get_sha256(base+"/old.cmd"),"action":"remove"},
+		{"path":"fix033/user.txt","sha256":"0".repeat(64),"action":"remove"},
+		{"path":"Companion.pck.before-0.3.3","sha256":FileAccess.get_sha256(base+"/Companion.pck.before-0.3.3"),"action":"archive"},
+		{"path":"Companion.pck","sha256":FileAccess.get_sha256(base+"/Companion.pck"),"action":"remove"},
+		{"path":"../outside.txt","sha256":"0".repeat(64),"action":"remove"}]}
+	var cleaned=cleaner.run(base,archive,manifest)
+	check(cleaned.removed==1 and cleaned.archived==1,"Exact old patch removed; backup archived")
+	check(not FileAccess.file_exists(base+"/old.cmd") and FileAccess.get_file_as_string(archive+"/Companion.pck.before-0.3.3")=="known backup","Migration keeps verified backup bytes")
+	check(FileAccess.get_file_as_string(base+"/fix033/user.txt")=="user content" and FileAccess.get_file_as_string(base+"/Companion.pck")=="active pack","Unknown user files and active program preserved")
+	check(cleaner.safe_path(base,"../outside.txt").is_empty() and cleaner.safe_path(base,"/tmp/outside").is_empty(),"Migration rejects traversal and absolute paths")
+	cleaned=cleaner.run(base,archive,manifest)
+	check(cleaned.removed==0 and cleaned.archived==0,"Migration idempotent")
 	print("FUNCTIONAL_TESTS: %s checks, %s failures" % [checks,failures])
 	quit(0 if failures==0 else 1)

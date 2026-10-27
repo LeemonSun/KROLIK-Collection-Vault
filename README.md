@@ -1,3 +1,5 @@
+> Текущий частный preview: **0.4.0**. [Скачать Windows ZIP](https://chatgpt.com/library?file_id=libfile_b3abab6a0df08191ab4367c17a7080dc&account_id=personal) (доступ владельцу). Распаковать в пустую папку и открыть Companion.exe. Модель/профиль из прежнего AppData сохраняются. Это функциональный прототип, не готовый Steam-релиз. Быстрый вход для разработки — RESUME.md.
+
 <!-- Agent entry: read RESUME.md and run python3 tools/resume.py status; full history is optional. -->
 # Companion Preview · 0.3.1
 

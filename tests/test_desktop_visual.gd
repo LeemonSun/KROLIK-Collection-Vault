@@ -11,6 +11,7 @@ func check(value,label):
 func frame():
 	await process_frame
 	await process_frame
+	RenderingServer.force_draw.call_deferred()
 	await RenderingServer.frame_post_draw
 func shot(window,name):
 	var image=window.get_texture().get_image()
@@ -111,6 +112,22 @@ func _run():
 	desktop.recover()
 	await frame()
 	check(desktop.size==Vector2i(330,500),"Original size restored on normal monitor")
+	main.open_panel("diagnostics")
+	await create_timer(0.2).timeout
+	await frame()
+	check(app.diagnostics.values.get("process_bytes",0)>0,"Native panel displays actual process RSS")
+	shot(panel,"diagnostics")
+	panel.hide();app.chat_window.hide()
+	desktop.set_reduced(true)
+	desktop.art.rotation=0;desktop.effect_time=0
+	await frame()
+	var with_shader=root.get_texture().get_image().get_data()
+	var material=desktop.art.material
+	desktop.art.material=null
+	await frame()
+	var without_shader=root.get_texture().get_image().get_data()
+	check(with_shader==without_shader,"Motion-off shader preserves exact rendered RGBA colors")
+	desktop.art.material=material
 	app.desktop_companion.art.queue_free()
 	app.desktop_companion.art=null
 	app.desktop_companion._show_fallback()

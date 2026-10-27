@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.4.0-functional-preview",
-  "checkpoint_status": "functional_tests_pass_package_built_native_pending",
-  "current_task": "Serious patch restored, implemented, all 12 local checks pass. Full ZIP built; native X11 review and final delivery pending.",
-  "next_action": "Run native X11 shader comparison/drag/bounds/UI metrics; review Windows helper/exported resource. Then final package and Library delivery, persist GitHub content delta.",
+  "checkpoint_status": "delivered_final",
+  "current_task": "0.4.0 functional preview built, verified and attached. Source/distribution checkpoint being finalized.",
+  "next_action": "Get user Windows test: open Explorer/Notepad, chat history, measured process usage, drag/color. Next focus: actual model dialogue quality plus independent production of approved mascot animation assets. No new rig/voice promises.",
   "read_next": [
     "RESUME.md"
   ],
@@ -13,17 +13,23 @@
     "No new body clips, custom voice, page reader or screen vision"
   ],
   "validation": [
-    "run_checks: 12/12 PASS, including functional 37 checks, HTTP 27 + token context 8, real two-process persistence restart/erase",
-    "PowerShell 7.6: 21 resolver/protocol/actual process metrics checks PASS; Windows COM not exercised",
-    "Exported resource pack UI smoke PASS; Windows executable not run here"
+    "All 12 local checks PASS (functional 42; self knowledge 173; HTTP 27 + context 8; 2-process persistence)",
+    "PowerShell 7.6: 21 resolver/protocol/actual RAM+CPU checks PASS",
+    "Exported PCK: native X11 50 checks PASS including exact RGBA tint comparison and process RSS; 8 content/helper roundtrip checks PASS",
+    "Actual 0.3.3->0.4.0 delta application: 4 scenarios PASS, hash equality, idempotence, unknown/corrupt input preserved",
+    "Full ZIP clean: 13 files; no external BAT/CMD/PS1 installers. Native Library attachment metadata applied."
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.4.0.zip",
-    "bytes": 54356810,
-    "sha256": "5a412210982963cdb7079c16f48017686ba01d5441ee3ced1f925bd284150aef",
-    "status": "built_not_delivered"
+    "bytes": 54361574,
+    "sha256": "231bb819df68a611d6df2a72a3938fb71e01152bb678cd10e53ec27ba7539604",
+    "library_file_id": "libfile_b3abab6a0df08191ab4367c17a7080dc",
+    "status": "delivered_native_attachment",
+    "patch": "Companion_Fix_0.4.0.zip",
+    "patch_from": "0.3.3",
+    "patch_sha256": "b949a6969b287ae61bb17b0aaacf7defb5cfbc5e1ac2ef37f7990034bc849ea8"
   },
-  "previous_checkpoint": "ee5f93476538d863bec18e191ca37d242874f04a",
-  "shipped_version": "0.3.3-visual-preview",
-  "shipped_app_pack_sha256": "490df17e893389bdb2babc730cf38966fc4147f1e0349c8815f53eba111fd782"
+  "previous_checkpoint": "3c38d1ca12761d2af09aa1dc2d6bbfaeca9ada7f",
+  "shipped_version": "0.4.0-functional-preview",
+  "shipped_app_pack_sha256": "64e0ce6f6d2183505bc6ab2f0e6bfb5c7a2335b061dd31c1e112b9bf54e9988c"
 }

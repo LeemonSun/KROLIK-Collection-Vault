@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "0.3.1-desktop-fix",
+  "version": "0.4.0",
   "status": "private_preview_not_windows_executed",
   "packages": [
     {
@@ -68,9 +68,16 @@
         "downloads/v0.3.1-fix/006.chunk",
         "downloads/v0.3.1-fix/007.chunk"
       ]
+    },
+    {
+      "output": "build/Companion_Fix_0.4.0.zip",
+      "sha256": "b949a6969b287ae61bb17b0aaacf7defb5cfbc5e1ac2ef37f7990034bc849ea8",
+      "parts": [
+        "downloads/v0.4.0-patch/000.chunk"
+      ]
     }
   ],
   "exe_sha256": "7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8",
   "transport_note": "Chunked only for connector payload limits. Data is a local build ZIP and original OFL font, not model weights.",
-  "pack_sha256": "de5edb4ebaf08b921bbaa5e7d2c4d3d6428b7b77a5874116d901c55525bc8d5c"
+  "pack_sha256": "64e0ce6f6d2183505bc6ab2f0e6bfb5c7a2335b061dd31c1e112b9bf54e9988c"
 }

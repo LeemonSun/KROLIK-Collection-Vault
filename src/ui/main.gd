@@ -188,6 +188,7 @@ func _build():
 	page_scroll.add_child(content)
 	if page=="diagnostics":
 		_label(App.t("diagnostics"),content,22)
+		_label(App.t("diagnostics_hint"),content,13,true)
 		diagnostics_label=_label(App.diagnostics.report(),content,15)
 		_button(App.t("copy"),content,func():DisplayServer.clipboard_set(App.diagnostics.report()))
 	elif page == "notes":

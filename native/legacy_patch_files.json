@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "path": "APPLY_FIX_0.3.2.cmd",
+      "sha256": "09ef0b939c6e9146f7c6327eaf64cf185cc8a4afe1aeb540660991b22befdfa8",
+      "bytes": 3685,
+      "action": "remove"
+    },
+    {
+      "path": "READ_ME.txt",
+      "sha256": "f98e14630aea4e5c65e80d3b37b63c244d5d79080b57c0e4011aac28be6d1b42",
+      "bytes": 1242,
+      "action": "remove"
+    },
+    {
+      "path": "fix032/Apply-Update.ps1",
+      "sha256": "49eccc8c5bd755c6af74b298ff1dcce4ef7c21772787cc0fd3fd569e0ed0c67e",
+      "bytes": 3500,
+      "action": "remove"
+    },
+    {
+      "path": "fix032/START_WINDOWS.cmd",
+      "sha256": "add734e13eb4b8a113af2c187073d1151e84926dfcf247a6130235c6471db3ff",
+      "bytes": 2161,
+      "action": "remove"
+    },
+    {
+      "path": "fix032/content_delta.json",
+      "sha256": "9c05ee68ce9692e021425ce48fbfa579e7c35e88db12c241acf091060381a544",
+      "bytes": 550082,
+      "action": "remove"
+    },
+    {
+      "path": "Companion.pck.before-0.3.2",
+      "sha256": "de5edb4ebaf08b921bbaa5e7d2c4d3d6428b7b77a5874116d901c55525bc8d5c",
+      "action": "archive"
+    },
+    {
+      "path": "APPLY_FIX_0.3.3.cmd",
+      "sha256": "f77ba4fc18fd62752e39a7c30655289d43bbd24c03aebc16047ee40117884a2e",
+      "bytes": 3671,
+      "action": "remove"
+    },
+    {
+      "path": "READ_ME.txt",
+      "sha256": "d13875054f9c1afc9c59633a660993aa60c011f77ec25a25ea57d432f2dc275a",
+      "bytes": 1242,
+      "action": "remove"
+    },
+    {
+      "path": "fix033/Apply-Update.ps1",
+      "sha256": "a93603388e68a4d547063e64c1ca510144c42186d77c9770b4b3e8d873ed442a",
+      "bytes": 3486,
+      "action": "remove"
+    },
+    {
+      "path": "fix033/START_WINDOWS.cmd",
+      "sha256": "531fa8f0c24bcb53da59db02a2f5c6ec5aff86fb577826bcce8503f4e9197616",
+      "bytes": 2426,
+      "action": "remove"
+    },
+    {
+      "path": "fix033/content_delta.json",
+      "sha256": "7167b15b01a90a0fbb54d4632b8e2da852a4468434c4d91a8ce4bdf42ea3098d",
+      "bytes": 763645,
+      "action": "remove"
+    },
+    {
+      "path": "Companion.pck.before-0.3.3",
+      "sha256": "5b00e4be0475c449093bc4692188f7fffb7a9cc599b2cc0b2d98a26a115ff6a0",
+      "action": "archive"
+    }
+  ]
+}

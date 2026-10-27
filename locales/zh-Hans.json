@@ -22,7 +22,7 @@
   "model_connection_failed": "本地模型不可用。请检查开发进程或停止请求。",
   "model_invalid_response": "本地模型返回了无法读取的响应。",
   "module_unavailable": "此模块尚未接入。",
-  "help_text": "/timer 30 — 设置秒数计时器\n/note 内容 — 保存笔记\n/notes — 显示笔记\n此版本尚未包含人工智能、语音或屏幕分析模块。\n/search <query> · /поиск <запрос> · /搜索 <内容>",
+  "help_text": "例如：打开记事本、打开Steam、记住我喜欢黄色。/计时 300 设置计时器；/notes 列出笔记；/搜索 关键词 将搜索交给浏览器。",
   "empty_input": "请输入消息。",
   "input_too_long": "每条消息最多 2048 个字符。",
   "timer_invalid": "请在 /timer 后输入 1 到 86400 之间的整数秒数。",
@@ -146,7 +146,7 @@
   "self_memory": "笔记保存在此电脑上。可在设置中开启或删除聊天记录，暂不支持自动观察和记忆。",
   "self_offline": "安装模型后，对话在你的电脑上离线运行。首次下载和网络搜索需要联网。",
   "self_offline_uninstalled": "对话模块尚未安装，首次下载需要联网，安装后可离线对话。笔记和计时器已经能离线使用。",
-  "self_load": "对话会使用 CPU 和内存。当前配置最多使用 {threads} 个计算线程，但我还不能测量实时 CPU 百分比。",
+  "self_load": "资源使用页面会测量本应用和其本地AI进程的内存及CPU。回答复杂度、硬件和其他应用会影响速度。",
   "self_motion": "你可以拖动我，或用红色过渡效果移动我。目前有轻微的头发和呼吸动作，完整手势与表情仍在制作中。",
   "self_power": "电脑上的应用运行我，CPU 通过本地模型生成回答。模型文件保存在磁盘上，运行时加载到内存。",
   "self_capabilities": "我可以按指令启动已安装的应用或文件夹、保存笔记、设置计时器，并将搜索交给浏览器。聊天使用本地模型，暂不能读取屏幕和网页。",
@@ -169,5 +169,7 @@
   "history_hint": "最多100条消息，256 KiB，默认关闭。关闭不会删除旧文件，请使用删除按钮。",
   "delete_note": "删除",
   "diagnostics": "资源使用",
-  "copy": "复制报告"
+  "copy": "复制报告",
+  "diagnostics_report": "FPS：{fps} / {limit}\n进程内存（应用 + 本地AI）：{memory}\nCPU（整台电脑占比）：{cpu}\n已测量进程数：{processes}\n引擎分配内存：{engine}",
+  "diagnostics_hint": "仅在此页面打开时每5秒更新。CPU需要两次采样。FPS上限是目标值，不代表实际帧率。"
 }

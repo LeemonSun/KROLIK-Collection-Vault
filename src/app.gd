@@ -50,6 +50,8 @@ const ConversationMemory=preload("res://src/core/conversation_memory.gd")
 const ResponseGuard=preload("res://src/core/response_guard.gd")
 var desktop_actions
 var diagnostics
+var cleanup_task=-1
+var cleanup_result={}
 var memory=ConversationMemory.new()
 var history_timer
 var active_until_ms=0
@@ -91,6 +93,8 @@ func _ready():
 			local_runtime.start.call_deferred(profiles.config(profile_name))
 	if "--test-mode" not in OS.get_cmdline_user_args():
 		apply_profile()
+		if OS.get_name()=="Windows" and OS.get_executable_path().get_file().to_lower()=="companion.exe":
+			get_tree().create_timer(3.0).timeout.connect(_start_legacy_cleanup)
 
 func t(key, values = {}):
 	return l10n.text(key, values)
@@ -351,6 +355,7 @@ func clear_notes_confirmed():
 	return ok
 
 func _exit_tree():
+	if cleanup_task>=0:WorkerThreadPool.wait_for_task_completion(cleanup_task)
 	if history_enabled():_save_history()
 	voice.stop()
 	if local_runtime:
@@ -467,3 +472,10 @@ func clear_history_confirmed():
 	history_cleared.emit()
 	changed.emit()
 	return true
+
+func _start_legacy_cleanup():
+	var manifest=JSON.parse_string(FileAccess.get_file_as_string("res://native/legacy_patch_files.json"))
+	var base=OS.get_executable_path().get_base_dir()
+	var archive=ProjectSettings.globalize_path("user://support/old-patch-backups")
+	cleanup_task=WorkerThreadPool.add_task(func():
+		cleanup_result=preload("res://src/tools/legacy_cleanup.gd").new().run(base,archive,manifest))
