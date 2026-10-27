@@ -1,0 +1,27 @@
+
+7-Zip (z) 26.05 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-10-21
+ 64-bit locale=C.UTF-8 Threads:9 OPEN_MAX:16384, ASM
+
+Scanning the drive for archives:
+1 file, 500000000 bytes (477 MiB)
+
+Testing archive: /workspace/scratch/deec6c1ed852/Leemon_0.8.0_Offline_Windows.zip.001
+--
+Path = /workspace/scratch/deec6c1ed852/Leemon_0.8.0_Offline_Windows.zip.001
+Type = Split
+Physical Size = 500000000
+Volumes = 4
+Total Physical Size = 1921186885
+----
+Path = Leemon_0.8.0_Offline_Windows.zip
+Size = 1921186885
+--
+Path = Leemon_0.8.0_Offline_Windows.zip
+Type = zip
+Physical Size = 1921186885
+
+Everything is Ok
+
+Files: 66
+Size:       2196044765
+Compressed: 1921186885

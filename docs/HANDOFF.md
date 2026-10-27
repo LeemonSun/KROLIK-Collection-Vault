@@ -1,23 +1,11 @@
-# Продолжение 0.3
+# Передача работы0.8
 
-Прочитать AGENTS.md, PROJECT_STATE.md, README, docs/LOCAL_AI.md и characters/signal_01/README.md. Пиксели отложены, текущая героиня сохранена. GitHub — только хранение; нельзя Actions/CI/удалённую сборку.
+Начинать с RESUME.md и recovery/session.json. tools/resume.py status показывает реальные расхождения; sourcecapsule schema2 хранится частями. Источники уже восстановлены, не начинать проект заново. GitHubтолькохранилище.
 
-В текущей версии есть native desktop-cutout/drag/red-transition, системная озвучка, ручной screenshot preview, managed local text worker и installer. Они ещё не испытаны на Windows. Готовые body clips = 0; каталог = 113 планируемых событий. Нельзя выдавать window FX за полноценную анимацию, текстовый Qwen за VLM или открытие поиска за чтение страниц.
+Модули: src/app.gd; runtime/{local_runtime,pinned_asset,bundled_package}; tools/{speech_input,microphone_recorder,whisper_transcriber,screen_context,application_access,text_documents}; native/{desktop_bridge,accessibility_bridge}.ps1; ui/{chat_view,conversation_view,signal_surface,main}; animation/leemon_rig.gd; desktop/companion_window.gd.
 
-Критично: сохранять offline-first, RU/EN/zh-Hans, лицензии/NOTICE, exact hashes и закрытый публичный gate. Вес модели не коммитить. Изображения/скриншоты пользователя не сохранять в репозиторий. Runtime скачивается только по явной кнопке; нет remote inference. Результат модели не управляет URL, shell или путями ресурсов.
+Последний проверенный пакет0.8. ТочныеSHA/LibraryIDsвrecovery/session.json. READMEсодержитдействующуюссылкунаnativeZIP. START_WINDOWS.cmdисторический0.5,невыдаватьновымустановщиком. Внешниеweightsтолькоai-fixtures/offline-stage,никогдаGit. ОсновнойAppDataidentityCompanionFoundationоставленрадипрофиля. LegacyAIнеудалятьавтоматически.
 
-Проверки tools/run_checks.py и отчёты. tests/test_local_runtime.gd без fixture проверяет unit; с COMPANION_RUNTIME_FIXTURE проверяет реальный локальный процесс на подготовленном разработчиком fixture. Артефакты сборки — локальный build_preview.py с проверенным шаблоном. Windows EXE можно проверить как main-pack на Linux, но это не запуск Windows executable. Перед передачей повторить релевантные проверки и сверить архив/хеши.
+Проверки:tools/run_checks.py;realvisionчерезtests/test_vision.gdсCOMPANION_VISION_FIXTURE/IMAGE;realASRчерезtests/test_voice.gdсCOMPANION_VOICE_FIXTURE/WAV;tools/test_real_leemon.py;tests/test_bundle.gdсCOMPANION_BUNDLE_FIXTURE;tools/test_native_ui.py--pack;exported_contentсточнымhelperSHAиpwsh. NativeWindowsнебыло. Неиспользоватьexit0безпроверкилогов.
 
-## 0.3.1
-
-Прочитать docs/PRODUCT_DIRECTION.md. Старая схема 0.3.1: bootstrap с пустым host; она заменена в 0.3.2. Main Window Godot нельзя скрывать напрямую. Чат/настройки не должны возвращаться к старой большой боковой панели. ChatView использует runtime App lookup для предотвращения циклической preload зависимости; сохранять проверку 320×280 и длинного RU текста. Новые проверки: test_chat_layout.gd и test_desktop_visual.gd (нужен отдельный дисплей). Screenshot-артефакты теста внутренние, в git не включать.
-
-Полный build создаёт EXE + отдельный PCK. make_patch.py делает одноразовый verified delta из точной 0.3. Патч корректирует старый launcher manifest, иначе тот откатит EXE. Новые downloads payloads/manifest должны соответствовать hash полного патча; не включать веса. Windows исполнение всё ещё требует пользовательской проверки.
-
-## Актуально: 0.3.2
-
-Главное окно = персонаж. DesktopCompanion — Node-контроллер root Window, не второе окно. Не выносить root за экран. Минимизация + taskbar/tray сохраняют доступ. Патч make_content_patch.py меняет только PCK, требует точный 0.3.1; полный ZIP работает отдельно. Launcher проверяет финальные EXE/PCK hashes и не применяет старый фикс повторно. Одна визуальная тема, без переключателей. Для X11 есть portable tools/test_native_ui.py.
-
-## 0.3.3
-
-VisualTheme + SignalSurface + WindowHandle общий стиль; ActionMenu — отдельное native окно. ChatView.embedded убирает вложенный chrome. main._window_resized перестраивает навигацию только при смене порога 700px, сохраняя draft. Idle shader один sample texture, небольшая UV-деформация; не rig. Подготовка приложения и одновременные Xvfb тесты через один supervisor. Стандартный запуск восстановлен и проверен в export PCK. Full delivery Library ID указан в session.json, потому что sandbox ссылки недоступны.
+СборкаWindowsлокальнаяtools/build_preview.py,toolbuild_offline_bundle.py. Передследующимпроходомсмотретьdocs/ROADMAP.mdприоритеты,непроизводитьещёслучайныетемы/модели. ОдинЛимон,одинстиль. Безагентовбезпрямогоразрешения.

@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
   "app_version": "0.8.0-desktop-preview",
-  "checkpoint_status": "integrated_voice_vision_uia_consumer_ui_build_ready_validation_finishing",
-  "current_task": "0.8 integrated: local Whisper draft input; Qwen3.5-2B text+one-shot vision; optional offline AI layout; selected-window generic UIA actions; consumer chat/size/motion polish; DOCX creation and leading-verb typo tolerance. Packaging complete offline ZIP and checking exported content.",
-  "next_action": "Read RESUME.md and docs/PREVIEW_README.txt; verify latest reports and binary hashes. Finish offline bundle upload and artifact identities; checkpoint again. No public Steam release claim.",
+  "checkpoint_status": "0.8_packaged_saved_native_artifacts_windows_acceptance_pending",
+  "current_task": "Completed integrated 0.8 private preview. App-only ZIP, full offline archive split into4 native Library parts, report and actual interface screenshot are saved. Source/runtime tests passed; actual Windows acceptance is the next priority.",
+  "next_action": "Use current README download links and RESUME state. Ask user for actual Windows behavior after they test; do not rebuild foundation or promise Steam1.0. Continue ROADMAP priorities from Windows/DPI/mic/UIA and measured performance.",
   "read_next": [
-    "recovery/NIGHT_PASS.md"
+    "docs/HANDOFF.md",
+    "docs/ROADMAP.md"
   ],
   "known_limits": [
     "Windows EXE, microphone hardware, UIA actions, transparency and voices not executed on actual Windows",
@@ -15,21 +16,62 @@
     "Concept art and brand are not commercially cleared; Steam gate remains blocked"
   ],
   "validation": [
-    "18 standard source groups PASS before last minor UI changes; final rerun in progress",
-    "94 native X11 checks PASS, including bounded 24-window picker",
-    "20 vision checks PASS using actual 2B+matched projector through Godot JPEG/HTTP pipeline RU/EN/zh",
-    "24 voice checks PASS using real Whisper and public English audio",
-    "11 actual complete bundle verification/cache tests PASS",
-    "24 desktop helper and16 accessibility helper checks PASS; C# compiled, Windows API not executed"
+    "18 standard source groups PASS",
+    "94 native X11 source and exported-PCK checks PASS, including24-window picker",
+    "20 actual vision checks PASS RU/EN/zh JPEG+ownedlocalHTTP",
+    "24 real Whisper checks PASS, English audio only; physical microphone untested",
+    "18 actual text/translation checks PASS RU/EN/zh; factual accuracy remains limited",
+    "11 actual completeAIbundle verification/cache checks PASS",
+    "24 desktop helper and16 accessibility helper checks PASS, C# compiled; Windows API untested",
+    "11 exported content checks PASS via actual PowerShell roundtrip",
+    "FullZIP CRC and4parts concatenated SHA verified",
+    "Official7-Zip26.05 split-volume test PASS:4volumes,66files,Everything is Ok"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.6.0.zip",
-    "bytes": 53446375,
-    "sha256": "73d4cdece67f22a613076252fdd22d29f0e77d323f0733c207bff15d4968d2f8",
-    "library_file_id": "libfile_29cda571ac3c8191be6b25d254b7838c",
-    "status": "recovered_exact_previously_saved_archive"
+    "full": "Companion_Preview_Windows_v0.8.0.zip",
+    "bytes": 53791063,
+    "sha256": "03922e037f3d9cd79c05203f18881067d7dda59dcf88e131c821317671edeb07",
+    "library_file_id": "libfile_af9e7176839c81918d6cd18a56d8bff6",
+    "status": "saved_native_library_verified_exported_pack"
   },
-  "previous_checkpoint": "ae41660b468c447bfd4055e1b0a4c99577a47563",
-  "shipped_version": "0.6.0-desktop-preview",
-  "shipped_app_pack_sha256": "4ae78938baca438bd15b0ef3ee05392df68dcaab60c88c718423c3c356d2788e"
+  "previous_checkpoint": "6e39759a7f8f1d2bad43454611d9f674a5b4bcb0",
+  "shipped_version": "0.8.0-desktop-preview",
+  "shipped_app_pack_sha256": "b428b57d841b9f7d8af073f7c8cde04e7468c05344ec7ca979130d645094b465",
+  "offline_artifact": {
+    "name": "Leemon_0.8.0_Offline_Windows.zip",
+    "bytes": 1921186885,
+    "sha256": "25665ed441a6d772339a589094cd6ca215705d38e2c615b3d0e228d1e6ba239d",
+    "uncompressed_bytes": 2196044765,
+    "crc_verified": true,
+    "single_upload": "prepare failed; no full-file Library identity created",
+    "parts": [
+      {
+        "bytes": 500000000,
+        "sha256": "bc207f13c372489f96aa5f13b88a58b0d9b00635a84ceed3767b7d42d960d972",
+        "filename": "Leemon_0.8.0_Offline_Windows.zip.001",
+        "library_file_id": "libfile_4772dcd06024819189496a9631aa12ec"
+      },
+      {
+        "bytes": 500000000,
+        "sha256": "f5e7106251eb2a99cb3813c1dd6e0e60451e954dc1972a96bb4d8f7f375eca55",
+        "filename": "Leemon_0.8.0_Offline_Windows.zip.002",
+        "library_file_id": "libfile_567be8fa52e08191baf1a97d4b86680a"
+      },
+      {
+        "bytes": 500000000,
+        "sha256": "1f9dbdcf8414bb6f6aaf0ab7f0194b52aa4a0dd995dedae0252780d0f90592f5",
+        "filename": "Leemon_0.8.0_Offline_Windows.zip.003",
+        "library_file_id": "libfile_c0aa8b16ab008191b8ad505aeaa24466"
+      },
+      {
+        "bytes": 421186885,
+        "sha256": "51e6eb448f88ce44e22efb104cb509a2709bfea5473b431133c8031c7ba925ce",
+        "filename": "Leemon_0.8.0_Offline_Windows.zip.004",
+        "library_file_id": "libfile_61b5844ce3788191897830a7c8fd4b6f"
+      }
+    ]
+  },
+  "report_library_file_id": "libfile_b75e2dfda7c48191905110dcb5321a67",
+  "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
+  "report_version": 1
 }
