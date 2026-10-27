@@ -1,4 +1,5 @@
 extends RefCounted
+const DesktopIntent=preload("res://src/core/desktop_intent.gd")
 ## Deterministic multilingual commands bypass the language model.
 func route(raw):
 	var text = raw.strip_edges()
@@ -28,6 +29,8 @@ func route(raw):
 		if argument.is_empty() or argument.length() > 512:
 			return {"kind": "invalid", "key": "search_invalid"}
 		return {"kind": "tool", "tool": "browser.search", "args": {"query": argument}}
+	var natural=DesktopIntent.new().route(text)
+	if not natural.is_empty():return natural
 	# Unknown slash commands are not forwarded as tool instructions.
 	if text.begins_with("/"):
 		return {"kind": "invalid", "key": "unknown_command"}

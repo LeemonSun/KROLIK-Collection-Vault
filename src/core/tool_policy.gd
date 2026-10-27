@@ -6,7 +6,7 @@ const TOOLS = {
 	"notes.add": {"implemented": true, "confirmation": false},
 	"notes.list": {"implemented": true, "confirmation": false},
 	"notes.clear": {"implemented": true, "confirmation": true},
-	"apps.open": {"implemented": false, "confirmation": false},
+	"apps.open": {"implemented": true, "confirmation": false},
 	"files.read_selected": {"implemented": false, "confirmation": false},
 	"files.delete": {"implemented": false, "confirmation": true},
 	"messages.send": {"implemented": false, "confirmation": true},

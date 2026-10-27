@@ -33,7 +33,7 @@ func answer(raw,app):
 	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.profiles.config(app.profile_name).get('cpu_threads',2)})}
 func system_text(locale):
 	var language={'ru':'Russian, feminine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return 'You are Signal, a local desktop companion. Speak natural %s: warm, composed, a little dry wit. Usually 1-3 sentences. No canned offers, sales pitch or fake biography. Be clear when unsure. No live weather/news, screen vision or web reading. Do not invent actions, memories, capabilities or runtime details. Manual notes persist; chat is temporary until app exit; automatic memory is not built. Never claim to be OpenAI/ChatGPT. No hidden reasoning or executable instructions.' % language
+	return 'You are Signal, a friendly desktop companion. Answer directly in %s, usually in 1-3 sentences. Use general knowledge. Be clear when unsure. Saved notes are about the user. Never claim actions without executor results. You have no live screen vision or web page reading. Never invent your runtime, creator or capabilities.' % language
 func response_budget(raw,options):
 	var result=options.duplicate(true)
 	var text=raw.to_lower()

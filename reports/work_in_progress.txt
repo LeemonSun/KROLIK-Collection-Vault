@@ -1,0 +1,111 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Cannot open file 'res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata'.
+   at: load (core/io/resource_format_binary.cpp:1156)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _apply_theme (res://src/ui/main.gd:58)
+       [2] _ready (res://src/ui/main.gd:33)
+       [3] _ready (res://src/ui/bootstrap.gd:25)
+ERROR: Failed loading resource: res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _apply_theme (res://src/ui/main.gd:58)
+       [2] _ready (res://src/ui/main.gd:33)
+       [3] _ready (res://src/ui/bootstrap.gd:25)
+ERROR: Failed loading resource: res://assets/fonts/NotoSansCJKsc-Regular.otf.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _apply_theme (res://src/ui/main.gd:58)
+       [2] _ready (res://src/ui/main.gd:33)
+       [3] _ready (res://src/ui/bootstrap.gd:25)
+ERROR: Cannot open file 'res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata'.
+   at: load (core/io/resource_format_binary.cpp:1156)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ready (res://src/ui/main.gd:38)
+       [4] _ready (res://src/ui/bootstrap.gd:25)
+ERROR: Failed loading resource: res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ready (res://src/ui/main.gd:38)
+       [4] _ready (res://src/ui/bootstrap.gd:25)
+ERROR: Failed loading resource: res://assets/fonts/NotoSansCJKsc-Regular.otf.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ready (res://src/ui/main.gd:38)
+       [4] _ready (res://src/ui/bootstrap.gd:25)
+ERROR: Cannot open file 'res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata'.
+   at: load (core/io/resource_format_binary.cpp:1156)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Failed loading resource: res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Failed loading resource: res://assets/fonts/NotoSansCJKsc-Regular.otf.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Cannot open file 'res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata'.
+   at: load (core/io/resource_format_binary.cpp:1156)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Failed loading resource: res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Failed loading resource: res://assets/fonts/NotoSansCJKsc-Regular.otf.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Cannot open file 'res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata'.
+   at: load (core/io/resource_format_binary.cpp:1156)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Failed loading resource: res://.godot/imported/NotoSansCJKsc-Regular.otf-234b66ec4f6090cf3cb4fe9bcf1a8765.fontdata.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+ERROR: Failed loading resource: res://assets/fonts/NotoSansCJKsc-Regular.otf.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] make (res://src/ui/visual_theme.gd:22)
+       [1] _ready (res://src/ui/chat_view.gd:25)
+       [2] _build (res://src/ui/main.gd:176)
+       [3] _ui_smoke (res://src/ui/main.gd:471)
+UI_SMOKE_OK: 3 locales, 7 pages

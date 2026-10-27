@@ -18,18 +18,26 @@ func open_query(query, opener = Callable()):
 	var result = prepare(query)
 	if not result.ok:
 		return result
+	return open_url(result.url,opener)
+
+func open_url(url,opener=Callable()):
+	if not url is String or url.length()>2048 or not (url.begins_with("https://") or url.begins_with("http://")):
+		return {"ok":false,"status":"invalid_url"}
+	for i in range(url.length()):
+		if url.unicode_at(i)<33 or url.unicode_at(i)==127:return {"ok":false,"status":"invalid_url"}
+	if url.split("://",false,1)[1].is_empty():return {"ok":false,"status":"invalid_url"}
 	# Injected opener is a test seam; the app uses only the OS default browser.
 	var code = FAILED
 	if opener.is_valid():
-		code = opener.call(result.url)
+		code = opener.call(url)
 	elif browser_id == "system":
-		code = OS.shell_open(result.url)
+		code = OS.shell_open(url)
 	else:
 		var path = find_opera(browser_id)
 		if path.is_empty():
-			return {"ok":false,"status":"browser_missing","url":result.url}
-		code = OK if OS.create_process(path,[result.url],false)>0 else ERR_CANT_OPEN
-	return {"ok": code == OK, "status": "requested" if code == OK else "open_failed", "url": result.url}
+			return {"ok":false,"status":"browser_missing","url":url}
+		code = OK if OS.create_process(path,[url],false)>0 else ERR_CANT_OPEN
+	return {"ok": code == OK, "status": "requested" if code == OK else "open_failed", "url": url}
 
 func set_browser(id):
 	if id not in ["system","opera","opera_gx"]:

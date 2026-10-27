@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "app_version": "0.3.4-dev",
-  "checkpoint_status": "unreleased_source_verified",
-  "current_task": "По реальной переписке исправлены ответы о себе и границы экрана в исходниках; это ещё НЕ выпущено пользователю.",
-  "next_action": "Учесть Windows-тест и оценку 0.3.3. Следующий выпуск собрать одним пакетом. Перед утверждением манеры общения нужен прогон настоящего local worker; веса сейчас не скачаны. Затем единый rig/голос/измерение нагрузки.",
+  "checkpoint_status": "wip_restored_functional_patch",
+  "current_task": "0.4.0 WIP: typed app/folder executor, natural intents, opt-in chat history, note retrieval/deletion, shader tint fix and adaptive rendering reconstructed. Not released.",
+  "next_action": "Finish metrics, context token preflight, functional tests, Windows package. New code not yet validated; do not reuse prior lost test results.",
   "read_next": [
     "RESUME.md"
   ],
   "known_limits": [
-    "0.3.4 source not shipped; user currently testing 0.3.3",
-    "No real-model dialogue regression run for 0.3.4; no cached GGUF in this workspace",
-    "0 finished body clips; no custom voice or automatic semantic memory",
-    "Live CPU/RAM telemetry and native Windows acceptance still absent"
+    "Native Windows execution untested",
+    "No real model regression run in current environment",
+    "New functional patch WIP, not delivered",
+    "No new body clips, custom voice, screen vision or page reader"
   ],
   "validation": [
     "Self knowledge: 173 transcript/runtime/multilingual checks PASS",

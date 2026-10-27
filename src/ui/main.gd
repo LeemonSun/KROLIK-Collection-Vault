@@ -29,6 +29,7 @@ var wide_layout=false
 var responsive_pending=false
 
 func _ready():
+	App.control_panel=self
 	_apply_theme()
 	get_window().size_changed.connect(_window_resized)
 	App.settings_requested.connect(open_panel)
@@ -95,11 +96,13 @@ func _hide_panel():
 	App.show_desktop()
 
 func _window_resized():
+	if not is_inside_tree() or get_window()==null:return
 	if (get_window().size.x>=700)!=wide_layout and not responsive_pending:
 		responsive_pending=true
 		_reflow.call_deferred()
 
 func _reflow():
+	if not is_inside_tree() or get_window()==null:return
 	responsive_pending=false
 	_build()
 
@@ -347,8 +350,12 @@ func _build_notes():
 	content.add_child(list)
 	if App.store.data.notes.is_empty():
 		_label(App.t("notes_empty"), list, 16, true)
-	for note in App.store.data.notes:
-		_label("• " + note.text, list)
+	for index in range(App.store.data.notes.size()):
+		var row=HBoxContainer.new()
+		list.add_child(row)
+		var label=_label("• "+App.store.data.notes[index].text,row)
+		label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		_button(App.t("delete_note"),row,func(): App.store.remove_note(index); _build())
 	var button = _button(App.t("clear_notes"), content, _confirm_clear)
 	button.disabled = App.store.data.notes.is_empty() or not App.persistence_ready
 
@@ -389,6 +396,13 @@ func _build_settings():
 	content.add_child(profile_picker)
 	profile_picker.item_selected.connect(func(index): App.set_profile(names[index]); _build())
 	_label(App.t("settings_hint"), content, 13, true)
+	var history=CheckButton.new()
+	history.text=App.t("save_chat")
+	history.button_pressed=App.history_enabled()
+	history.toggled.connect(App.set_history_enabled)
+	content.add_child(history)
+	_label(App.t("history_hint"),content,13,true)
+	_button(App.t("clear_chat"),content,_confirm_clear_chat)
 	var spacer = Control.new()
 	spacer.custom_minimum_size.y = 24
 	content.add_child(spacer)
@@ -459,3 +473,12 @@ func _ui_smoke():
 	print("UI_SMOKE_OK: 3 locales, 7 pages")
 	get_tree().quit()
 
+
+func _confirm_clear_chat():
+	var dialog=ConfirmationDialog.new()
+	dialog.title=App.t("clear_chat")
+	dialog.dialog_text=App.t("confirm_clear_chat")
+	add_child(dialog)
+	dialog.confirmed.connect(func():App.clear_history_confirmed();dialog.queue_free();_build())
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered(Vector2i(360,150))

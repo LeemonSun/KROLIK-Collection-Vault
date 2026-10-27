@@ -84,3 +84,10 @@ func clear_notes():
 		return false
 	return true
 
+
+func remove_note(index):
+	if not index is int or index<0 or index>=data.notes.size():return false
+	var old=data.notes.duplicate(true)
+	data.notes.remove_at(index)
+	if not save_state():data.notes=old;return false
+	return true

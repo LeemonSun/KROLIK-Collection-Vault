@@ -27,6 +27,7 @@ var tray
 var startup_error = false
 var canvas
 var dragging = false
+var drag_mouse=Vector2i.ZERO
 var drag_offset = Vector2i.ZERO
 var reduced_motion = false
 var effect_time = 0.0
@@ -117,6 +118,7 @@ func _ready():
 		host.mouse_passthrough_polygon = _hit_polygon
 	host.window_input.connect(_input_event)
 	host.focus_entered.connect(_restore_opacity)
+	host.focus_exited.connect(func(): dragging=false; Input.use_accumulated_input=true)
 	host.close_requested.connect(func(): get_tree().quit())
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
 	last_display_bounds=bounds
@@ -139,15 +141,19 @@ func _input_event(event):
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				dragging = true
+				Input.use_accumulated_input=false
+				app.mark_active()
 				moved = false
 				press_position = DisplayServer.mouse_get_position()
 				effect_kind = ""
 				art.modulate.a = 1.0
+				drag_mouse=press_position
 				drag_offset = press_position-position
 			else:
 				dragging = false
+				Input.use_accumulated_input=true
 				if moved:
-					position = bounded(position)
+					position=bounded(DisplayServer.mouse_get_position()-drag_offset)
 					effect_time = 0.25
 				else:
 					chat_requested.emit()
@@ -159,7 +165,7 @@ func _input_event(event):
 		if DisplayServer.mouse_get_position().distance_to(press_position)>=6:
 			moved = true
 		if moved:
-			position = bounded(DisplayServer.mouse_get_position()-drag_offset)
+			drag_mouse=DisplayServer.mouse_get_position()
 
 func _menu_action(id):
 	match id:
@@ -206,6 +212,10 @@ func set_reduced(value):
 func _process(delta):
 	if not visible or art == null:
 		return
+	if dragging:
+		app.mark_active()
+		if moved:position=bounded(drag_mouse-drag_offset)
+	if not reduced_motion:canvas.queue_redraw()
 	elapsed += delta
 	boundary_elapsed+=delta
 	if boundary_elapsed>=1.0 and not dragging:
