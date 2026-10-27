@@ -1,0 +1,30 @@
+{
+  "model": "Qwen3.5-2B-Q4_K_M",
+  "projector": "F16, source-matched 2B",
+  "image": "synthetic512x360",
+  "threads": 2,
+  "peak_rss_mib": 2756.46875,
+  "cases": [
+    {
+      "case": "button",
+      "expected": "SAVE",
+      "answer": "SAVE",
+      "seconds": 10.229,
+      "pass": true
+    },
+    {
+      "case": "count",
+      "expected": "3",
+      "answer": "3",
+      "seconds": 9.995,
+      "pass": true
+    },
+    {
+      "case": "number",
+      "expected": "42",
+      "answer": "42",
+      "seconds": 9.423,
+      "pass": true
+    }
+  ]
+}

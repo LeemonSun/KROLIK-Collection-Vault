@@ -642,6 +642,7 @@ func begin_dictation(editor):
 	# Voice inference and text inference never occupy RAM as two simultaneous workers.
 	if local_runtime.pid>0 or local_runtime.starting:
 		local_runtime.stop();local_runtime.status="ai_sleeping";_set_provider("unconfigured")
+	voice.stop()
 	dictation_target=weakref(editor)
 	var ok=speech_input.start(l10n.locale)
 	if not ok:dictation_target=null

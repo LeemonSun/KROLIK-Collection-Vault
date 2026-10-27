@@ -47,3 +47,7 @@ ASRconfig и обеMITnotice готовы. b5454win ZIP8928640 SHA6ba69e3482d782
 Qwen4веса2.74GBскачаныиверифицированы00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4 (unsloth/Qwen3.5-4B-GGUF e87f176479d0855a907a41277aca2f8ee7a09523). 2BF16mmprojнельзяподключатьк4B (другойhidden/outputprojection). Дефолт2Bвыглядитразумнеепопамяти; выбиратьпослеVLMпроверки. NativevisionещёНЕподключён.
 
 Следующийблок: реальный2B+mmprojVLMbenchнаsyntheticUI, выбратькомпактнуюоднуtext+visionмодель; explicit screenshotJPEGbuffer512edge->ownedlocalHTTP, безсохранениякадров; mmprojтольконаexplicitrequest, выгрузкапосле. GenericWindowsUIAследом: избранноеокно/pinned HWND+PID+processStart, scopedinspection иexactnamedcontrols/ValuePattern/Invoke, непроизвольныйshell. Непечататьизmodelвслепуювлюбоеокно. ПоддержатьDOCXновыедокументыиумныйразборошибокпослереальныхмодулей, непутатьtext+visionсASR.
+
+
+## Точка перед завершением сессии
+Реальный2B+F16projector benchmark завершён:3/3(русскийSAVE/английский3/китайский42),~9.4–10.2сек,2CPUthreads. reports/vision_candidate.json; кадрsyntheticне сохранятьвGit. ВприложениеVLMпокаНЕподключён, local_workerпо-прежнемуQwen3-1.7B. Tinyfixes:stopTTSbeforemic,PCMbytealignment. НезавершённыйZIP0.7невыдавать:требуетсяфинальнаяпересборка. ПользовательспрашивалможноливыключитьПК:да,нонеобещатьфоновуюночнуюработупослезавершениясессии.

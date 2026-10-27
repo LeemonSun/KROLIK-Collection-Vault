@@ -5,6 +5,7 @@ const MAX_SECONDS=20
 func prepare(wav):
 	if not wav is AudioStreamWAV or wav.format!=AudioStreamWAV.FORMAT_16_BITS:return {"ok":false,"key":"voice_audio_invalid"}
 	var channels=2 if wav.stereo else 1
+	if wav.data.size()%(2*channels)!=0:return {"ok":false,"key":"voice_audio_invalid"}
 	var frame_count=wav.data.size()/(2*channels)
 	if wav.mix_rate<8000 or wav.mix_rate>192000 or frame_count<maxi(1,wav.mix_rate/4) or frame_count>wav.mix_rate*MAX_SECONDS:return {"ok":false,"key":"voice_audio_invalid"}
 	var output_frames=mini(TARGET_RATE*MAX_SECONDS,int(float(frame_count)*TARGET_RATE/wav.mix_rate))

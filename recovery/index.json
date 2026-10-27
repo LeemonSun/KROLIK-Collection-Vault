@@ -2,10 +2,10 @@
   "schema_version": 2,
   "repository": "LeemonSun/KROLIK-Collection-Vault",
   "branch": "main",
-  "content_id": "619c09fc45cced2094e1ec90c82941a67cea03ed6f826345ddf07f435a4be457",
-  "capsule_sha256": "0a4b959cc7c415fce6868fed3108e0b48f532db76ced673afc3a89c98e6e1c3f",
-  "capsule_bytes": 458029,
-  "source_files": 326,
+  "content_id": "29b426adddb825f5633ef7f15cdb8e0c86f6da60c451c062f4ecbe79fde2a25d",
+  "capsule_sha256": "dd4713e3e16049ce05828899352b8cf7342e37ee871ef9c82afc86566a52936e",
+  "capsule_bytes": 459235,
+  "source_files": 327,
   "capsule_path": "recovery/source_capsule.b64",
   "files": {
     ".gitattributes": {
@@ -49,9 +49,9 @@
       "bytes": 7614
     },
     "RESUME.md": {
-      "sha256": "6e86cd24a6435bb130807a3e38b3497db506439362cbfbcc4a2d6f2721a52b95",
-      "gitsha": "752d990f8c568cb2114dbfba6628432560016949",
-      "bytes": 2825
+      "sha256": "fc3c416a7d23a7372a42081a6f80de0bd97a797790f4beecc04486b0e0f608a2",
+      "gitsha": "d9892965af96d3a652c572a48778619a728c8856",
+      "bytes": 2960
     },
     "START_WINDOWS.cmd": {
       "sha256": "9902cee30d0c24fce794582888f58ea5bbc0b3098f913f8d792b9a4145467015",
@@ -654,9 +654,9 @@
       "bytes": 2555
     },
     "recovery/NIGHT_PASS.md": {
-      "sha256": "0d7b3bb69c71563e0d4e5933e666e0959341c7222672c923d992637a83e610b9",
-      "gitsha": "3c4bbf277ff1b65b421f6e416966ce7f5e3bcf5e",
-      "bytes": 10256
+      "sha256": "52eb55aa1fbd97f5bc4e08e196ac3ec7807cf9a0c53ad540bb4c672556060c69",
+      "gitsha": "8fe41fa98c280035a990887ae421609ccd5e7680",
+      "bytes": 11000
     },
     "recovery/OFFLINE_HANDOFF.md": {
       "sha256": "ee22597305cce3dd7df45d2041760b64f6efe5f6073eb455ed41c76f2a72b78b",
@@ -684,9 +684,9 @@
       "bytes": 5781
     },
     "recovery/session.json": {
-      "sha256": "8f0fb0e7af8786c7d013bdb11f76c679374fde4d5184976dca80d3e43e747f9a",
-      "gitsha": "b1d496c32b4e6f6eefe45281f95c84850a8f50df",
-      "bytes": 2081
+      "sha256": "136fe08167f87fd6bceba7df82f706e5a63bc984b324bc28e2ff248c2afa5dcf",
+      "gitsha": "262ee8619351f2a565d1e9ce68544bd9aee3cbb0",
+      "bytes": 2353
     },
     "reports/VALIDATION.md": {
       "sha256": "a40659326c31a13733a3e0f1c74e953d24c158e48769a9ef8564a60cbff0a40b",
@@ -873,6 +873,11 @@
       "gitsha": "b67b4ec32b6c6ba837597ced65d270ab25dbd6dc",
       "bytes": 105
     },
+    "reports/vision_candidate.json": {
+      "sha256": "72b91b9aa01ba4f98bbb36658a0a6ec1f0de3d30a1a2db848c6d4d419c62d016",
+      "gitsha": "4afe36c1d4fe1d31259838078ee34da83fe95706",
+      "bytes": 550
+    },
     "reports/voice.txt": {
       "sha256": "62b9780ceedcdf978cd6dc597656ee7c78ac068205d25c127f82f30ae23f3608",
       "gitsha": "d279efb3f65336e6c2bbfb4f70b04815cff9b201",
@@ -884,9 +889,9 @@
       "bytes": 164
     },
     "reports/windows_export.txt": {
-      "sha256": "2a182bf2558b4e9fea127af4f41ce8a0fde6e9f614cf93e178497f01a520c159",
-      "gitsha": "82aa96f9cb7c337c486c770b9facfba08ca9e0fa",
-      "bytes": 12531
+      "sha256": "b9bbfc1e76688cb5e8238bac65e93803fde83e8b11d8ea45720a56b37a59b1fd",
+      "gitsha": "80eef68a936624ba0b7e5df11172206fa09d1d2e",
+      "bytes": 14118
     },
     "reports/work_in_progress.txt": {
       "sha256": "a366be1a1b4e4e8f3e17fb117b88030bad1dc45c2769960394c4e71e248ed3f0",
@@ -929,9 +934,9 @@
       "bytes": 20
     },
     "src/app.gd": {
-      "sha256": "92cbda89cdb1327494e80222421e1441c2a47146d418724b3ca9ddd1b56ac09a",
-      "gitsha": "4289b8b15a4d59e940894d71d4a4da842427f696",
-      "bytes": 25259
+      "sha256": "86659451fede32dff4ce643855c32fe4b6e6e40a52fac38d9a2b73c75f0cf0d6",
+      "gitsha": "ce8e2f77269ac1aaa2b0190cbb68aef302d69649",
+      "bytes": 25273
     },
     "src/app.gd.uid": {
       "sha256": "d080ee8abe873f0d44fce2083e40984cbbd87f4df6c98c3ea4bb44dc4753131b",
@@ -1249,9 +1254,9 @@
       "bytes": 19
     },
     "src/tools/voice_audio.gd": {
-      "sha256": "e49f5b10276d721d48b86c167635c17a8ca8221c83ce3fff9e9df16143ff7c82",
-      "gitsha": "579baa487abd31ffe217700c06ae55cdb7bb5f95",
-      "bytes": 1518
+      "sha256": "10bc5fd74f2d261a230ec8307a8f1a70c9076db2cc4ae18f16326d87d6222218",
+      "gitsha": "a98c3f2b57266a61bf085cd192606a4b9f96bb4a",
+      "bytes": 1602
     },
     "src/tools/voice_audio.gd.uid": {
       "sha256": "dc5b35da4269a1862c7a75bea2a9124d4ab0e0752c28df2d7341fdd4d282f95a",
