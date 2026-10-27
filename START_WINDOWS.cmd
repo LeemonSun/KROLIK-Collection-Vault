@@ -1,19 +1,11 @@
 @echo off
 setlocal
 set "COMPANION_ROOT=%~dp0"
-if not exist "%COMPANION_ROOT%downloads\preview-manifest.json" (
- echo This is the source-only archive. Open project.godot in Godot, or download the full GitHub ZIP.
- pause
- exit /b 1
-)
-echo Preparing Companion Preview. No developer tools required.
-powershell.exe -NoLogo -NoProfile -Command "$ErrorActionPreference='Stop'; $root=$env:COMPANION_ROOT; $manifest=Get-Content -LiteralPath (Join-Path $root 'downloads/preview-manifest.json') -Raw | ConvertFrom-Json; foreach($p in $manifest.packages){ $dest=Join-Path $root $p.output; $ok=(Test-Path -LiteralPath $dest) -and ((Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash -eq $p.sha256); if(-not $ok){ [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($dest)) | Out-Null; $targetStream=[IO.File]::Open($dest,[IO.FileMode]::Create); try { foreach($part in $p.parts){ $chunkStream=[IO.File]::OpenRead((Join-Path $root $part)); try { $chunkStream.CopyTo($targetStream) } finally { $chunkStream.Dispose() } } } finally { $targetStream.Dispose() }; if((Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash -ne $p.sha256){ throw 'Package integrity check failed. Download and unzip the complete project again.' } } }; $dir=Join-Path $root 'build/windows-preview'; $exe=Join-Path $dir 'Companion_Preview/Companion.exe'; if(-not (Test-Path -LiteralPath $exe) -or (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -ne $manifest.exe_sha256){ Expand-Archive -LiteralPath (Join-Path $root 'build/Companion_Preview_Windows_v0.3.zip') -DestinationPath $dir -Force }; if(-not (Test-Path -LiteralPath (Join-Path (Split-Path $exe) 'APPLY_FIX_0.3.1.cmd')) -or (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -ne $manifest.exe_sha256 -or -not (Test-Path -LiteralPath (Join-Path (Split-Path $exe) 'Companion.pck'))){ Expand-Archive -LiteralPath (Join-Path $root 'build/Companion_Fix_0.3.1.zip') -DestinationPath (Split-Path $exe) -Force };"
+echo Preparing Companion Preview.
+powershell.exe -NoLogo -NoProfile -Command "$ErrorActionPreference='Stop';$root=$env:COMPANION_ROOT; $m=Get-Content -LiteralPath (Join-Path $root 'downloads/preview-manifest.json') -Raw | ConvertFrom-Json; $dir=Join-Path $root 'build/windows-preview';$target=Join-Path $dir 'Companion_Preview';$exe=Join-Path $target 'Companion.exe';$pack=Join-Path $target 'Companion.pck'; $ready=(Test-Path -LiteralPath $exe) -and (Test-Path -LiteralPath $pack) -and ((Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash -eq $m.exe_sha256) -and $m.pack_sha256 -and ((Get-FileHash -LiteralPath $pack -Algorithm SHA256).Hash -eq $m.pack_sha256); if(-not $ready){ foreach($p in $m.packages){ $dest=Join-Path $root $p.output; if(-not (Test-Path -LiteralPath $dest) -or (Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash -ne $p.sha256){ [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($dest)) | Out-Null;$output=[IO.File]::Open($dest,[IO.FileMode]::Create); try{foreach($part in $p.parts){$inputStream=[IO.File]::OpenRead((Join-Path $root $part));try{$inputStream.CopyTo($output)}finally{$inputStream.Dispose()}}}finally{$output.Dispose()}; if((Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash -ne $p.sha256){throw 'Package integrity check failed.'}; }; }; Expand-Archive -LiteralPath (Join-Path $root 'build/Companion_Preview_Windows_v0.3.zip') -DestinationPath $dir -Force; Expand-Archive -LiteralPath (Join-Path $root 'build/Companion_Fix_0.3.1.zip') -DestinationPath $target -Force; $env:COMPANION_PATCH_ROOT=$target; & ([scriptblock]::Create((Get-Content -LiteralPath (Join-Path $target 'fix031/Apply-Fix.ps1') -Raw)));if(-not $?){throw '0.3.1 base update failed'}; Expand-Archive -LiteralPath (Join-Path $root 'build/Companion_Fix_0.3.2.zip') -DestinationPath $target -Force; & ([scriptblock]::Create((Get-Content -LiteralPath (Join-Path $target 'fix032/Apply-Update.ps1') -Raw)));if(-not $?){throw '0.3.2 content update failed'}; }; Start-Process -FilePath $exe;"
 if errorlevel 1 (
- echo Preparation failed. Keep the error above for diagnostics.
+ echo Startup failed. Keep the error above.
  pause
  exit /b 1
 )
-call "%COMPANION_ROOT%build\windows-preview\Companion_Preview\APPLY_FIX_0.3.1.cmd"
-if errorlevel 1 exit /b 1
-start "" "%COMPANION_ROOT%build\windows-preview\Companion_Preview\Companion.exe"
 endlocal

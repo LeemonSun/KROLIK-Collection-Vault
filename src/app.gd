@@ -332,7 +332,9 @@ func show_desktop():
 		desktop_companion.chat_requested.connect(show_chat)
 		desktop_companion.settings_requested.connect(func(): open_settings("assistant_tools"))
 		desktop_companion.pause_requested.connect(func(): set_paused(not paused))
-		desktop_companion.hide_requested.connect(func(): open_settings("assistant_tools"); desktop_companion.hide())
+		desktop_companion.hide_requested.connect(func():
+			if is_instance_valid(chat_window): chat_window.hide()
+			desktop_companion.hide())
 		desktop_companion.quit_requested.connect(func(): get_tree().quit())
 		add_child(desktop_companion)
 	desktop_companion.show()

@@ -1,10 +1,9 @@
 {
   "schema_version": 1,
-  "app_version": "0.3.1-desktop-fix",
-  "last_app_commit": "677423a497c8e19ef0a5375cdd3be99f18a1d65b",
+  "app_version": "0.3.2-startup-fix",
   "checkpoint_status": "ready",
-  "current_task": "Быстрый вход в проект настроен и проверен; изменений приложения на этом этапе нет.",
-  "next_action": "Начать с текущего запроса пользователя. Для проверки предыдущего исправления нужен результат запуска 0.3.1 на Windows.",
+  "current_task": "Устранён недоступный offscreen main host; готов 0.3.2 startup fix. Windows ещё не подтверждена.",
+  "next_action": "Сначала учесть результат Windows-запуска 0.3.2, если он есть; затем продолжить большой визуальный проход в ОДНОМ стиле. Не создавать переключение тем.",
   "read_next": [
     "RESUME.md"
   ],
@@ -14,13 +13,17 @@
     "No ASR / autonomous web research / semantic memory / Cloud"
   ],
   "validation": [
-    "0.3.1 application checks passed before workflow-only changes",
-    "X11 rendered exported pack passed",
-    "0.3 -> 0.3.1 patch application tested on PowerShell 7/Linux",
-    "Recovery: 11 offline tests and local bridge cold/warm/conflict/checkpoint/lease integration passed"
+    "run_checks: all application checks passed",
+    "Exported PCK: 29 native X11 checks passed, screenshots reviewed",
+    "0.3.1 -> 0.3.2 content patch: 6 PowerShell 7/Linux scenarios passed, including repeated root startup"
   ],
   "artifact": {
-    "patch": "Companion_Fix_0.3.1.zip",
-    "sha256": "ec1659794af92d64243816ef5b6cdbcf902bb3d468c2eead0545154ec093ca95"
-  }
+    "patch": "Companion_Fix_0.3.2.zip",
+    "bytes": 283255,
+    "sha256": "6dbacfd64f2da8fb9bf40f80e8493e5a6a3df3efe0dc0f044f101b9d0482b6dd",
+    "full": "Companion_Preview_Windows_v0.3.2.zip",
+    "full_sha256": "a28f4a28cb5cf5b47e18ae2e74951ac4384c796c95bc37eb241dcae488e21885"
+  },
+  "previous_checkpoint": "6d31c78400a8991b38996d29ec2b131b013b9d33",
+  "app_pack_sha256": "5b00e4be0475c449093bc4692188f7fffb7a9cc599b2cc0b2d98a26a115ff6a0"
 }

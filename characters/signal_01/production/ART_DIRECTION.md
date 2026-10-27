@@ -20,3 +20,5 @@
 Технические ориентиры, не заимствованные ассеты:
 https://docs.godotengine.org/en/stable/tutorials/2d/2d_sprite_animation.html
 https://docs.godotengine.org/en/stable/tutorials/animation/animation_tree.html
+
+Решение пользователя 27.10: один цельный качественный стиль вокруг текущей героини, без выбора альтернативных тем. Цветовая основа — винный, серебристый лиловый, молочный и красный сигнал. Сначала исправляется запуск.

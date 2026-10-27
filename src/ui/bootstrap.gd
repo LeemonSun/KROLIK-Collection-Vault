@@ -1,21 +1,16 @@
 extends Node
-## Godot's main Window cannot be hidden. Keep it empty; all user UI uses native child windows.
+## Main Window = character; settings and chat are separate native windows.
 var panel_window
 var main_view
 func _ready():
 	get_tree().auto_accept_quit=false
+	# The main native window will contain the character. It remains recoverable
+	# from the Windows taskbar instead of being parked at (-10000,-10000).
 	var host=get_tree().root
-	host.min_size=Vector2i.ONE
-	host.size=Vector2i.ONE
 	host.borderless=true
 	host.transparent=true
 	host.transparent_bg=true
-	host.mouse_passthrough=true
-	host.unfocusable=true
-	host.exclude_from_capture=true
-	if DisplayServer.get_name()!="headless":
-		host.position=Vector2i(-10000,-10000)
-	host.close_requested.connect(func(): get_tree().quit())
+	host.exclude_from_capture=false
 	panel_window=Window.new()
 	panel_window.name="ControlPanel"
 	panel_window.title="Signal — settings"

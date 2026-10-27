@@ -1,0 +1,8 @@
+CONTENT_PATCH_TESTS: 6 scenarios PASS
+Actual minified PowerShell application; exact new PCK, backup, profile retained, Unicode/& path
+Repeat application idempotent
+Unknown base preserved
+Corrupt reconstruction refused before replacement
+Fresh root launcher restores 0.3, applies 0.3.1 and 0.3.2, verifies final files
+Second root launch skips restoration and cannot downgrade 0.3.2
+PowerShell 7/Linux; Windows CMD execution and native Windows UI remain unverified.

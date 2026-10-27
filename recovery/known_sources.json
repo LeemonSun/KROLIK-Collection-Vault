@@ -5,11 +5,13 @@
   ],
   ".gitignore": [
     "2dace3f698e5d4029be15a16576d7ce6aa0f203f",
-    "2dace3f698e5d4029be15a16576d7ce6aa0f203f"
+    "2dace3f698e5d4029be15a16576d7ce6aa0f203f",
+    "d1d410bf9a6b8af25754d645753da08649bb9e96"
   ],
   "AGENTS.md": [
     "d99bbdc8fe459d3c02aa9f7d4047ff97dc1e74ac",
-    "2adec3e5cc4c5b2ee261366142c763e9e03c453f"
+    "2adec3e5cc4c5b2ee261366142c763e9e03c453f",
+    "aadfef3b04937a9aa0f0bb302b0ec445af66f81f"
   ],
   "CHANGELOG.md": [
     "842587a16d8c84724f9150cbb47ef4fc34e7c73e",
@@ -25,7 +27,8 @@
   ],
   "README.md": [
     "0afe44f7844438ba32014928827684b997725e44",
-    "0db8e769dfc44072e249a705a558e9b5cc963513"
+    "0db8e769dfc44072e249a705a558e9b5cc963513",
+    "697715c264c6b360c1648ea91fbf005dbe970cba"
   ],
   "assets/README.md": [
     "01c7a78b8f06f1998e30d36ab1d605aa61af89f8",
@@ -361,7 +364,8 @@
   ],
   "tools/README.md": [
     "4fbc9ea7973627972cfce6b84f4372cae35c7c16",
-    "4fbc9ea7973627972cfce6b84f4372cae35c7c16"
+    "4fbc9ea7973627972cfce6b84f4372cae35c7c16",
+    "ddc8237c85f3396c391da4a64a69090cd5e3d249"
   ],
   "tools/package_source.py": [
     "7d8d9ebce7000abac584ac1c1bdd363ce8564902",
@@ -769,5 +773,41 @@
   ],
   "tools/restore_packages.py": [
     "a80b3abfe3e77c40b0ee426577abdc1358aa991a"
+  ],
+  "RESUME.md": [
+    "7f699e7fd6113207d45a23943e82f134b95d863b"
+  ],
+  "recovery/DEV_ENVIRONMENT.md": [
+    "ac635c3977d6072da13742f391192faf265a8eb1"
+  ],
+  "recovery/assets.json": [
+    "64481aac56e9f3ffaa5a54b5def4dab6065e1b1e"
+  ],
+  "recovery/devkit.json": [
+    "03afcd3d65aea445c62777dea45aa31850be804d"
+  ],
+  "recovery/index.json": [
+    "5e7a85ca4cd666b536b7c3fe9ed4bab11072f814"
+  ],
+  "recovery/known_sources.json": [
+    "1b9a50b1c38e4297ff2f1e8d0b5be90289a6eca7"
+  ],
+  "recovery/session.json": [
+    "ddd034fb97f7a0152391aae2a079983c5c719386"
+  ],
+  "recovery/source_capsule.b64": [
+    "7affe0c043f1a6a92f0490b9a12c09674310d1fc"
+  ],
+  "tests/test_resume.py": [
+    "4ab2c5b4c4e4d4dd4947fef141667611969a73c3"
+  ],
+  "tests/test_resume_bridge.cjs": [
+    "0e3a44d8b25965d67e07a65d8c7127c068b626f5"
+  ],
+  "tools/resume.py": [
+    "787ee3b01b37dc61e2bdd2cc4ab2ea24e95ad7b0"
+  ],
+  "tools/resume_bridge.js": [
+    "0f3ebc368ed805dba41b870cf759984bb21a44d4"
   ]
 }

@@ -351,6 +351,13 @@
       "bytes": 1752682,
       "sha256": "37c7b8e76beb347d8762312bc5f4515072f5fa14d9c87d1503d8a4fb7eb99f83",
       "source": "github"
+    },
+    {
+      "path": "downloads/v0.3.2-patch/000.chunk",
+      "group": "distribution",
+      "bytes": 283255,
+      "sha256": "6dbacfd64f2da8fb9bf40f80e8493e5a6a3df3efe0dc0f044f101b9d0482b6dd",
+      "source": "github"
     }
   ]
 }

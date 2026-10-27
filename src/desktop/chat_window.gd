@@ -9,7 +9,7 @@ func _ready():
 	transparent=true
 	transparent_bg=true
 	always_on_top=true
-	exclude_from_capture=true
+	exclude_from_capture=false
 	min_size=Vector2i(320,280)
 	size=Vector2i(440,440)
 	view=ChatView.new()

@@ -41,7 +41,7 @@ func _ready():
 	if DisplayServer.get_name() != "headless" and "--ui-smoke" not in OS.get_cmdline_user_args():
 		get_tree().auto_accept_quit = false
 		get_window().close_requested.connect(_hide_panel)
-		get_window().exclude_from_capture = true
+		get_window().exclude_from_capture = false
 		get_window().hide()
 		App.show_desktop.call_deferred()
 	# A UI-only self-test can traverse every page without a display.

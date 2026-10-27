@@ -1,5 +1,6 @@
-extends Window
-## Native full-body desktop prototype. Texture movement and FX, not a finished body rig.
+extends Node
+## The visible character uses the MAIN window. No invisible offscreen host.
+## Texture movement and FX are not a finished body rig.
 signal chat_requested
 signal settings_requested
 signal pause_requested
@@ -7,7 +8,22 @@ signal hide_requested
 signal quit_requested
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 const BODY_PATH = "res://assets/characters/signal_01/body_v1.png"
+var host: Window
+var position: Vector2i:
+	get: return host.position if is_instance_valid(host) else Vector2i.ZERO
+	set(value):
+		if is_instance_valid(host): host.position = value
+var size: Vector2i:
+	get: return host.size if is_instance_valid(host) else Vector2i(330,500)
+	set(value):
+		if is_instance_valid(host): host.size = value
+var current_screen: int:
+	get: return host.current_screen if is_instance_valid(host) else 0
+var visible: bool:
+	get: return is_instance_valid(host) and host.mode != Window.MODE_MINIMIZED
 var art
+var tray
+var startup_error = false
 var canvas
 var dragging = false
 var drag_offset = Vector2i.ZERO
@@ -39,23 +55,30 @@ class Surface extends Control:
 
 func _ready():
 	app = get_tree().root.get_node("App")
-	title = "Signal 01"
-	borderless = true
-	unresizable = true
-	transparent = true
-	transparent_bg = true
-	always_on_top = true
-	exclude_from_capture = true
-	size = Vector2i(330, 500)
-	min_size = size
+	host = get_tree().root
+	host.title = "Signal 01"
+	host.mode = Window.MODE_WINDOWED
+	host.borderless = true
+	host.unresizable = true
+	host.transparent = true
+	host.transparent_bg = true
+	host.always_on_top = true
+	host.unfocusable = false
+	host.mouse_passthrough = false
+	host.exclude_from_capture = false
+	var usable = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
+	var fit = minf(1.0,minf(float(usable.size.y)/500.0,float(usable.size.x)/330.0))
+	var fitted = Vector2i(Vector2(330,500)*fit)
+	host.min_size = fitted
+	size = fitted
 	canvas = Surface.new()
 	canvas.owner_window = self
 	canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(canvas)
+	host.add_child(canvas)
 	var texture = load(BODY_PATH)
 	if not texture is Texture2D:
-		hide()
+		_show_fallback()
 		return
 	var image = texture.get_image()
 	if image.is_compressed():
@@ -65,7 +88,7 @@ func _ready():
 	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	art.size = Vector2(330, 495)
+	art.size = Vector2(330, 495)*fit
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(art)
 	# Follow the generated alpha outline, leaving transparent desktop areas clickable.
@@ -77,13 +100,16 @@ func _ready():
 		if polygon.size() > largest.size():
 			largest = polygon
 	for point in largest:
-		_hit_polygon.append(point * Vector2(330.0 / image.get_width(), 495.0 / image.get_height()))
+		_hit_polygon.append(point * art.size / Vector2(image.get_size()))
 	if _hit_polygon.size() >= 3:
-		mouse_passthrough_polygon = _hit_polygon
-	window_input.connect(_input_event)
-	close_requested.connect(hide)
+		host.mouse_passthrough_polygon = _hit_polygon
+	host.window_input.connect(_input_event)
+	host.focus_entered.connect(_restore_opacity)
+	host.close_requested.connect(func(): get_tree().quit())
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
 	position = bounds.end - size - Vector2i(30, 0)
+	print("DESKTOP_READY main_window=", host.get_window_id(), " position=", position, " size=", size)
+	_setup_tray()
 	last_tick_ms = Time.get_ticks_msec()
 	quick_menu = PopupMenu.new()
 	quick_menu.theme = VisualTheme.make()
@@ -200,3 +226,76 @@ func _process(delta):
 				art.modulate.a = 1
 				effect_kind = ""
 		canvas.queue_redraw()
+
+func get_texture():
+	return host.get_texture()
+
+func _restore_opacity():
+	# A taskbar restore must never return an invisible animation frame.
+	if art:
+		art.modulate.a = 1.0
+	effect_kind = ""
+	effect_time = 0
+
+func show():
+	if not is_instance_valid(host): return
+	host.mode = Window.MODE_WINDOWED
+	host.show()
+	position = bounded(position)
+	_restore_opacity()
+
+func hide():
+	# The main Window cannot be hidden. Minimize keeps the taskbar recovery path.
+	if is_instance_valid(host): host.mode = Window.MODE_MINIMIZED
+
+func recover():
+	if not is_instance_valid(host): return
+	show()
+	var screen = DisplayServer.get_primary_screen()
+	var bounds = DisplayServer.screen_get_usable_rect(screen)
+	position = bounds.end - size - Vector2i(30,0)
+	position = bounded(position)
+	host.grab_focus()
+
+func _setup_tray():
+	if OS.get_name() not in ["Windows","macOS"] or not ClassDB.class_exists("StatusIndicator"): return
+	tray = ClassDB.instantiate("StatusIndicator")
+	tray.icon = load("res://assets/foundation.svg")
+	tray.tooltip = "Signal — " + app.t("show_desktop")
+	tray.pressed.connect(func(button,_point):
+		if button == MOUSE_BUTTON_LEFT:
+			recover()
+			app.show_chat()
+		elif button == MOUSE_BUTTON_RIGHT:
+			app.open_settings("assistant_tools"))
+	add_child(tray)
+
+func _show_fallback():
+	startup_error = true
+	host.mouse_passthrough_polygon = PackedVector2Array()
+	host.min_size = Vector2i(360,180)
+	size = Vector2i(360,180)
+	var bounds = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
+	position = bounds.position + (bounds.size-size)/2
+	var panel = PanelContainer.new()
+	panel.name = "RecoveryPanel"
+	panel.theme = VisualTheme.make()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	canvas.add_child(panel)
+	var layout = VBoxContainer.new()
+	panel.add_child(layout)
+	var label = Label.new()
+	label.text = app.t("character_art_missing")
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	layout.add_child(label)
+	var button = Button.new()
+	button.text = app.t("settings")
+	button.pressed.connect(func(): app.open_settings("assistant_tools"))
+	layout.add_child(button)
+	var quit_button = Button.new()
+	quit_button.text = app.t("menu_quit")
+	quit_button.pressed.connect(func(): get_tree().quit())
+	layout.add_child(quit_button)
+	host.close_requested.connect(func(): get_tree().quit())
+	_setup_tray()
+	push_warning("Character texture unavailable; visible recovery panel shown")

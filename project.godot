@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Companion Foundation"
-config/version="0.3.1-desktop-fix"
+config/version="0.3.2-startup-fix"
 run/main_scene="res://scenes/bootstrap.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/foundation.svg"
@@ -12,10 +12,10 @@ config/icon="res://assets/foundation.svg"
 App="*res://src/app.gd"
 
 [display]
-window/size/viewport_width=1
-window/size/viewport_height=1
-window/size/window_width_override=1
-window/size/window_height_override=1
+window/size/viewport_width=330
+window/size/viewport_height=500
+window/size/window_width_override=330
+window/size/window_height_override=500
 window/stretch/mode="disabled"
 window/per_pixel_transparency/allowed=true
 window/subwindows/embed_subwindows=false
