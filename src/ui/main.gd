@@ -27,6 +27,7 @@ var page_scroll
 var page_picker
 var wide_layout=false
 var responsive_pending=false
+var diagnostics_label
 
 func _ready():
 	App.control_panel=self
@@ -156,7 +157,7 @@ func _build():
 	page_picker.fit_to_longest_item = false
 	page_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	page_picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var pages = ["talk","assistant_tools","settings","character","search","notes","modules"]
+	var pages = ["talk","assistant_tools","settings","character","search","notes","modules","diagnostics"]
 	for id in pages:
 		page_picker.add_item(App.t(id))
 	page_picker.select(maxi(0,pages.find(page)))
@@ -185,7 +186,11 @@ func _build():
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	page_scroll.add_child(content)
-	if page == "notes":
+	if page=="diagnostics":
+		_label(App.t("diagnostics"),content,22)
+		diagnostics_label=_label(App.diagnostics.report(),content,15)
+		_button(App.t("copy"),content,func():DisplayServer.clipboard_set(App.diagnostics.report()))
+	elif page == "notes":
 		_build_notes()
 	elif page == "modules":
 		_build_modules()
@@ -216,13 +221,13 @@ func _build_sidebar(parent):
 	var brand=_label("SIGNAL",identity,21)
 	brand.autowrap_mode=TextServer.AUTOWRAP_OFF
 	brand.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	for id in ["talk","assistant_tools","character","notes","search","settings","modules"]:
+	for id in ["talk","assistant_tools","character","notes","search","settings","modules","diagnostics"]:
 		var target=id
 		var button=_button(App.t(id),sidebar,func():page=target;_build())
 		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text=true
 		button.custom_minimum_size.y=40
-		button.icon=load("res://assets/ui/"+{"talk":"chat","assistant_tools":"cpu","character":"character","notes":"note","search":"search","settings":"settings","modules":"cpu"}[id]+".svg")
+		button.icon=load("res://assets/ui/"+{"talk":"chat","assistant_tools":"cpu","character":"character","notes":"note","search":"search","settings":"settings","modules":"cpu","diagnostics":"cpu"}[id]+".svg")
 		button.expand_icon=true
 		button.add_theme_constant_override("icon_max_width",17)
 		if page==id:VisualTheme.primary(button)
@@ -435,6 +440,7 @@ func _state_text():
 	return App.t("state_paused" if App.paused else "state_" + App.state.current)
 
 func _refresh():
+	if page=="diagnostics" and is_instance_valid(diagnostics_label):diagnostics_label.text=App.diagnostics.report()
 	if is_instance_valid(ai_status_label):
 		ai_status_label.text = App.t(App.local_runtime.status)
 		var progress = App.local_runtime.progress()

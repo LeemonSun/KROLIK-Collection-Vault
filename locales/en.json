@@ -168,5 +168,6 @@
   "confirm_clear_chat": "Delete saved history and current messages?",
   "history_hint": "Up to 100 messages / 256 KiB. Off by default. Disabling saving keeps any existing file; use Delete to erase it.",
   "delete_note": "Delete",
-  "diagnostics": "Usage"
+  "diagnostics": "Usage",
+  "copy": "Copy report"
 }

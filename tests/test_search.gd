@@ -36,6 +36,6 @@ func _run():
 	for command in ["/search abc", "/поиск привет", "/搜索 你好"]:
 		check(router.route(command).tool == "browser.search", "Multilingual search")
 	check(router.route("/search").kind == "invalid", "Missing query")
-	check(router.route("search for something").kind == "chat", "Natural language does not cause an automatic browser action")
+	check(router.route("How do I search for something?").kind == "chat", "Discussion of searching does not trigger an action")
 	print("SEARCH_TESTS: %s checks, %s failures; OS opener replaced by test callable" % [checks, failures])
 	quit(0 if failures == 0 else 1)

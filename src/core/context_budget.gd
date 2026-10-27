@@ -1,6 +1,11 @@
 extends RefCounted
 ## Conservative UTF-8 byte bound; preserves complete recent dialogue pairs.
 func build(system_text, user_text, history, options):
+	if options.get("server_token_budget",false):
+		var candidates=[{"role":"system","content":system_text}]
+		candidates.append_array(history.slice(maxi(0,history.size()-16)))
+		candidates.append({"role":"user","content":user_text})
+		return {"ok":true,"messages":candidates}
 	var limit = int(options.get("context_tokens", 2048)) - int(options.get("max_tokens", 128)) - 256
 	var used = system_text.to_utf8_buffer().size() + user_text.to_utf8_buffer().size()
 	if used > limit:

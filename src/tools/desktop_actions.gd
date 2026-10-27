@@ -7,8 +7,15 @@ var started_ms=0
 var last_result={}
 var runner="powershell.exe"
 var test_runner=false
+var operation="open"
 func request(target):
+	if pid>0 and operation=="metrics":cancel()
+	return _request({"operation":"open","target":target})
+func request_metrics(pids):
+	return _request({"operation":"metrics","pids":pids})
+func _request(payload):
 	if pid>0:return false
+	operation=payload.operation
 	if OS.get_name()!="Windows" and not test_runner:
 		_finish.call_deferred({"status":"unsupported"})
 		return true
@@ -18,15 +25,18 @@ func request(target):
 	var output=FileAccess.open(support+"/desktop_bridge.ps1",FileAccess.WRITE)
 	if not output:
 		_finish.call_deferred({"status":"failed"});return true
-	output.store_buffer(helper); output.close()
+	# Windows PowerShell 5.1 requires a BOM to parse non-ASCII script literals as UTF-8.
+	output.store_buffer(PackedByteArray([239,187,191]));output.store_buffer(helper); output.close()
 	nonce=Crypto.new().generate_random_bytes(16).hex_encode()
 	job=support+"/jobs/"+nonce
 	output=FileAccess.open(job+".request.json",FileAccess.WRITE)
 	if not output:
 		_finish.call_deferred({"status":"failed"});return true
-	output.store_string(JSON.stringify({"nonce":nonce,"target":target}));output.close()
+	output.store_string(JSON.stringify(payload.merged({"nonce":nonce})));output.close()
 	var arguments=PackedStringArray(["-NoLogo","-NoProfile","-NonInteractive","-ExecutionPolicy","Bypass","-File",ProjectSettings.globalize_path(support+"/desktop_bridge.ps1"),"-RequestPath",ProjectSettings.globalize_path(job+".request.json"),"-ResultPath",ProjectSettings.globalize_path(job+".result.json")])
-	pid=OS.create_process(runner,arguments,false)
+	var executable=runner
+	if OS.get_name()=="Windows" and not test_runner:executable=OS.get_environment("WINDIR").path_join("System32/WindowsPowerShell/v1.0/powershell.exe")
+	pid=OS.create_process(executable,arguments,false)
 	started_ms=Time.get_ticks_msec()
 	if pid<0:_finish.call_deferred({"status":"failed"})
 	return true
@@ -42,6 +52,7 @@ func _process(_delta):
 		_finish({"status":"timeout"})
 	elif not OS.is_process_running(pid):_finish({"status":"failed"})
 func _finish(result):
+	result["operation"]=operation
 	pid=-1;last_result=result
 	_cleanup()
 	completed.emit(result)

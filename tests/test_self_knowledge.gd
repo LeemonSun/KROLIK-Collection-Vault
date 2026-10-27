@@ -55,7 +55,7 @@ func _run():
 	check(app.messages[-1].text.contains('Qwen3') and not app.messages[-1].text.contains('OpenAI'),'Owned runtime identity is grounded')
 	app.submit('наш чат куда то сохроняется?')
 	check(fake.calls==0,'Memory fact needs no inference')
-	check(app.messages[-1].text.contains('автоматической памяти') and app.messages[-1].text.contains('выхода'),'Memory limits are honest')
+	check(app.messages[-1].text.contains('настройках') and app.messages[-1].text.contains('Автоматического'),'Memory limits are honest')
 	app.local_ai_enabled=false
 	app.submit('на какой мы планете?')
 	check(fake.calls==1,'Ordinary question still uses conversation model')

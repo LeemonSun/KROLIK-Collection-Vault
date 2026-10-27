@@ -168,5 +168,6 @@
   "confirm_clear_chat": "删除已保存的记录和当前消息？",
   "history_hint": "最多100条消息，256 KiB，默认关闭。关闭不会删除旧文件，请使用删除按钮。",
   "delete_note": "删除",
-  "diagnostics": "资源使用"
+  "diagnostics": "资源使用",
+  "copy": "复制报告"
 }

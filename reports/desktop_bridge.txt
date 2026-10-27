@@ -1,0 +1,1 @@
+DESKTOP_BRIDGE_TESTS: 21 checks PASS; resolver/protocol/metrics. Windows COM launching not exercised.

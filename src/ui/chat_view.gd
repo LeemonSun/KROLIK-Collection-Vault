@@ -110,6 +110,7 @@ func _ready():
 	send_button.custom_minimum_size=Vector2(46,34)
 	VisualTheme.primary(send_button)
 	app.message_added.connect(_on_message)
+	app.history_cleared.connect(_render_history)
 	app.changed.connect(refresh)
 	_render_history()
 	refresh()

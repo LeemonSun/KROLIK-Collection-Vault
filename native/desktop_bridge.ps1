@@ -79,13 +79,24 @@ function Open-Target($resolved) {
 try {
  if((Get-Item -LiteralPath $RequestPath).Length -gt 16384){throw 'Request too large'}
  $request=Get-Content -LiteralPath $RequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
- if($request.nonce -notmatch '^[a-f0-9]{32}$' -or $request.target -isnot [string] -or $request.target.Length -gt 2048 -or -not $request.target.Trim()){throw 'Invalid request'}
+ if($request.nonce -notmatch '^[a-f0-9]{32}$'){throw 'Invalid request'}
  $reply.nonce=$request.nonce
+ if($request.operation -eq 'metrics') {
+  if(@($request.pids).Count -gt 2){throw 'Too many processes'}
+  $reply.operation='metrics';$reply.status='ok';$reply.items=@()
+  foreach($processId in $request.pids) {
+   if($processId -isnot [long] -and $processId -isnot [int]){throw 'Invalid process'}
+   $process=Get-Process -Id $processId -ErrorAction SilentlyContinue
+   if($process){$reply.items+=@{pid=[int]$processId;bytes=[long]$process.WorkingSet64;cpu_seconds=[double]$process.TotalProcessorTime.TotalSeconds}}
+  }
+ } else {
+ if($request.operation -ne 'open' -or $request.target -isnot [string] -or $request.target.Length -gt 2048 -or -not $request.target.Trim()){throw 'Invalid target'}
  # Reject URLs here: a separately validated URL opener is handled in the application.
  if($request.target -match '^\w+:\/\/'){throw 'Unsupported target'}
  $resolved=Resolve-Target $request.target (Get-AppCatalog)
  $outcome=Open-Target $resolved
  foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
+ }
 } catch { $reply.status='failed' }
 $json=ConvertTo-Json -InputObject $reply -Depth 5 -Compress
 [IO.File]::WriteAllText($ResultPath+'.tmp',$json,[Text.UTF8Encoding]::new($false))

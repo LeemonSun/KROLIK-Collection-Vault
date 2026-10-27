@@ -1,33 +1,27 @@
 {
   "schema_version": 1,
-  "app_version": "0.3.4-dev",
-  "checkpoint_status": "wip_restored_functional_patch",
-  "current_task": "0.4.0 WIP: typed app/folder executor, natural intents, opt-in chat history, note retrieval/deletion, shader tint fix and adaptive rendering reconstructed. Not released.",
-  "next_action": "Finish metrics, context token preflight, functional tests, Windows package. New code not yet validated; do not reuse prior lost test results.",
+  "app_version": "0.4.0-functional-preview",
+  "checkpoint_status": "functional_tests_pass_package_built_native_pending",
+  "current_task": "Serious patch restored, implemented, all 12 local checks pass. Full ZIP built; native X11 review and final delivery pending.",
+  "next_action": "Run native X11 shader comparison/drag/bounds/UI metrics; review Windows helper/exported resource. Then final package and Library delivery, persist GitHub content delta.",
   "read_next": [
     "RESUME.md"
   ],
   "known_limits": [
-    "Native Windows execution untested",
-    "No real model regression run in current environment",
-    "New functional patch WIP, not delivered",
-    "No new body clips, custom voice, screen vision or page reader"
+    "Qwen weights unchanged; actual model dialogue regression NOT rerun after environment reset",
+    "Native Windows launching/transparency/tray still needs user test",
+    "No new body clips, custom voice, page reader or screen vision"
   ],
   "validation": [
-    "Self knowledge: 173 transcript/runtime/multilingual checks PASS",
-    "Application checks all PASS; HTTP payload verifies Qwen non-thinking sampling",
-    "Native source X11: 47 checks PASS, including small/negative display bounds and restoring scale",
-    "Shipped 0.3.3 full ZIP inspected: no BAT/CMD/PS1 installers"
+    "run_checks: 12/12 PASS, including functional 37 checks, HTTP 27 + token context 8, real two-process persistence restart/erase",
+    "PowerShell 7.6: 21 resolver/protocol/actual process metrics checks PASS; Windows COM not exercised",
+    "Exported resource pack UI smoke PASS; Windows executable not run here"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.3.3.zip",
-    "bytes": 54317078,
-    "sha256": "c0dd50999c0c041f324e6fcd9de7da2cd651d13560485722f6d7f46645c52ab8",
-    "library_file_id": "libfile_918be8a7635c8191bdb7c7c258f84a8c",
-    "patch": "Companion_Fix_0.3.3.zip",
-    "patch_from": "0.3.2",
-    "patch_sha256": "088489f4da80afba5bdf33a6ae3c0ff6e3c9232ba36cadbed9b806e4f7f78042",
-    "delivery_note": "Sandbox links unavailable to user: use native attachment link"
+    "full": "Companion_Preview_Windows_v0.4.0.zip",
+    "bytes": 54356810,
+    "sha256": "5a412210982963cdb7079c16f48017686ba01d5441ee3ced1f925bd284150aef",
+    "status": "built_not_delivered"
   },
   "previous_checkpoint": "ee5f93476538d863bec18e191ca37d242874f04a",
   "shipped_version": "0.3.3-visual-preview",
