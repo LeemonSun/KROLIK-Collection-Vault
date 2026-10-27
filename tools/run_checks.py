@@ -32,6 +32,8 @@ def main():
                     "res://tests/test_search.gd", "--", "--test-mode"]),
         ("animation", [engine, "--headless", "--path", str(ROOT), "--script",
                        "res://tests/test_animation.gd", "--", "--test-mode"]),
+        ("self_knowledge", [engine, "--headless", "--path", str(ROOT), "--script",
+                            "res://tests/test_self_knowledge.gd", "--", "--test-mode"]),
         ("chat_layout", [engine, "--headless", "--path", str(ROOT), "--script",
                          "res://tests/test_chat_layout.gd", "--", "--test-mode"]),
         ("ui", [engine, "--headless", "--path", str(ROOT), "--", "--ui-smoke", "--test-mode"]),

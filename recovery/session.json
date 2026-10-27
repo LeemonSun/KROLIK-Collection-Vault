@@ -1,21 +1,23 @@
 {
   "schema_version": 1,
-  "app_version": "0.3.3-visual-preview",
-  "checkpoint_status": "ready",
-  "current_task": "Один визуальный стиль реализован; startup fix сохранён. Готова полная Windows preview 0.3.3 и небольшой PCK update.",
-  "next_action": "Учесть результат Windows запуска/оценку вида от пользователя. Далее развивать качественный единый rig и выразительные реакции из одного источника, не плодить темы.",
+  "app_version": "0.3.4-dev",
+  "checkpoint_status": "unreleased_source_verified",
+  "current_task": "По реальной переписке исправлены ответы о себе и границы экрана в исходниках; это ещё НЕ выпущено пользователю.",
+  "next_action": "Учесть Windows-тест и оценку 0.3.3. Следующий выпуск собрать одним пакетом. Перед утверждением манеры общения нужен прогон настоящего local worker; веса сейчас не скачаны. Затем единый rig/голос/измерение нагрузки.",
   "read_next": [
     "RESUME.md"
   ],
   "known_limits": [
-    "Windows run not verified",
-    "0 finished body clips",
-    "No ASR / autonomous web research / semantic memory / Cloud"
+    "0.3.4 source not shipped; user currently testing 0.3.3",
+    "No real-model dialogue regression run for 0.3.4; no cached GGUF in this workspace",
+    "0 finished body clips; no custom voice or automatic semantic memory",
+    "Live CPU/RAM telemetry and native Windows acceptance still absent"
   ],
   "validation": [
-    "Application run_checks all PASS",
-    "Exported PCK: 40 native X11 assertions PASS; chat/menu/studio/3 locales inspected",
-    "Content updater: 6 actual PowerShell 7/Linux scenarios PASS, no downgrade on repeated launch"
+    "Self knowledge: 173 transcript/runtime/multilingual checks PASS",
+    "Application checks all PASS; HTTP payload verifies Qwen non-thinking sampling",
+    "Native source X11: 47 checks PASS, including small/negative display bounds and restoring scale",
+    "Shipped 0.3.3 full ZIP inspected: no BAT/CMD/PS1 installers"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.3.3.zip",
@@ -27,6 +29,7 @@
     "patch_sha256": "088489f4da80afba5bdf33a6ae3c0ff6e3c9232ba36cadbed9b806e4f7f78042",
     "delivery_note": "Sandbox links unavailable to user: use native attachment link"
   },
-  "previous_checkpoint": "f3adb6c0f94e734edad924a8d3b07dfd79c8006c",
-  "app_pack_sha256": "490df17e893389bdb2babc730cf38966fc4147f1e0349c8815f53eba111fd782"
+  "previous_checkpoint": "ee5f93476538d863bec18e191ca37d242874f04a",
+  "shipped_version": "0.3.3-visual-preview",
+  "shipped_app_pack_sha256": "490df17e893389bdb2babc730cf38966fc4147f1e0349c8815f53eba111fd782"
 }

@@ -103,6 +103,14 @@ func _run():
 	check(app.desktop_companion.visible and root.mode==Window.MODE_WINDOWED,"Recover restores minimized main window")
 	check(app.desktop_companion.position.x>=0 and app.desktop_companion.art.modulate.a==1,"Recover repairs offscreen position and zero alpha")
 	shot(root,"recovered")
+	var desktop=app.desktop_companion
+	for bounds in [Rect2i(0,0,1366,300),Rect2i(-1280,0,1280,720),Rect2i(0,0,320,240)]:
+		desktop.fit_to_bounds(bounds)
+		check(bounds.encloses(Rect2i(desktop.position,desktop.size)),"Body fits changed display bounds "+str(bounds))
+		check(desktop._hit_polygon.size()==desktop.normalized_outline.size(),"Click outline follows scale")
+	desktop.recover()
+	await frame()
+	check(desktop.size==Vector2i(330,500),"Original size restored on normal monitor")
 	app.desktop_companion.art.queue_free()
 	app.desktop_companion.art=null
 	app.desktop_companion._show_fallback()

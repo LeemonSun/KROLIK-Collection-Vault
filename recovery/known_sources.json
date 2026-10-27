@@ -25,7 +25,8 @@
   "PROJECT_STATE.md": [
     "3e2ce622312b39eb41899c29d6ca4d7c96591f7b",
     "f9e02220255713b3d1e58a9fa0aa7777fb828bdd",
-    "c43a7c2e6a308855f267693d0dd623875912de21"
+    "c43a7c2e6a308855f267693d0dd623875912de21",
+    "63ce6dee5ee28a057c8038bd9624652c622083b7"
   ],
   "README.md": [
     "0afe44f7844438ba32014928827684b997725e44",
@@ -63,7 +64,8 @@
   "config/product.json": [
     "b69de1c73e6a253ca84307bc59a3ce803354f8a7",
     "59fb33a3d0e02615f8bd72a393dc3a08c19bd070",
-    "a8c521499e1b3ffc0449088d5bee8c8485922a8b"
+    "a8c521499e1b3ffc0449088d5bee8c8485922a8b",
+    "78c955d07adf34d053f911302cd13b0443ed8b17"
   ],
   "config/profiles.json": [
     "8762676ba8b49e0321e8587d9e9f37028026ca6f",
@@ -108,7 +110,8 @@
   "docs/HANDOFF.md": [
     "b7dd608853c9b1185c2a2d2739de0b048b7bb4df",
     "84931170f7934b4a89fe460ab1cd6d4eb5828b96",
-    "26b7b5fd0f6c431d7a31fa62a95dcf95d691e6b6"
+    "26b7b5fd0f6c431d7a31fa62a95dcf95d691e6b6",
+    "533f45ceced573a4b25a78a130dcf87b7cf386ef"
   ],
   "docs/INITIAL_RESEARCH.md": [
     "04fc325fb826f8ffdd1567f69266be52bab3bc4f",
@@ -160,15 +163,18 @@
   ],
   "locales/en.json": [
     "9a0c819693f6bcc2763e693fc91c36035405f8c2",
-    "0eb0f1861b7ae9080b6af1caebca967ffaea6583"
+    "0eb0f1861b7ae9080b6af1caebca967ffaea6583",
+    "84efa30110a881136ba3e7dbb70242f612decb8d"
   ],
   "locales/ru.json": [
     "fdb9b9cef5a3deeb50f7533e33688e8e1b3457dc",
-    "7ede3f14746280fbcb5eb8c4af0ab123757fc99d"
+    "7ede3f14746280fbcb5eb8c4af0ab123757fc99d",
+    "af7e0a5a3e8b20d05882738cd9c0afaf02349faa"
   ],
   "locales/zh-Hans.json": [
     "1f04eb0aeb1a10beba92b4453f23eac311ffd69c",
-    "1831fb81b341dbe5c30f90a8ec5589d6e1287444"
+    "1831fb81b341dbe5c30f90a8ec5589d6e1287444",
+    "a8c5cfad4e31c7aeab2d73ada7dcd6687101fe7d"
   ],
   "manifests/capabilities.json": [
     "12e2c260d25b5bc05ef92820644723941c7d3ab6",
@@ -197,7 +203,8 @@
   "project.godot": [
     "7382809172888a61a922ccf6f3f3dec4149d1b61",
     "4e31f3ed645a88b9cf25de5df1f39711437b0ff3",
-    "cfdb7db7f8fe667e12717f6ef7d9d156ca6c50c1"
+    "cfdb7db7f8fe667e12717f6ef7d9d156ca6c50c1",
+    "745a2d61892b28762cb8ed3679c021c7e1805034"
   ],
   "reports/VALIDATION.md": [
     "ebc99ebc3ef1235b02cf2607308c1e83b77cd8ed",
@@ -218,7 +225,8 @@
   "reports/structure.txt": [
     "ce06d5979564e10ee9b186aeff07970fe511ba9c",
     "046d41fb11a116df9496eafec25c9c95498ca1eb",
-    "1df6c19f82237cd309a38a04712e67feb689bfcf"
+    "1df6c19f82237cd309a38a04712e67feb689bfcf",
+    "8b828d55e9ca8bc48a6e0b2091bc50f17416c4d8"
   ],
   "reports/ui.txt": [
     "26f540c1bddb50cbd46cab5233f495101bb8e509",
@@ -235,7 +243,8 @@
   "src/app.gd": [
     "d55067449dd302e59bdd85ccd5724aa589661140",
     "77595d8cbdc3d4ac7ef87f65bc0bb091b3401f58",
-    "88283178b94ebfb3cb833052bd21ac3d1ab5d441"
+    "88283178b94ebfb3cb833052bd21ac3d1ab5d441",
+    "defd01df2d2dcc4d295e84646afc195799696b8f"
   ],
   "src/app.gd.uid": [
     "93543dd414469577630ac92344bb1facde85ca03",
@@ -348,7 +357,8 @@
   "src/ui/main.gd": [
     "8e0423a369db48003d30c5d49b98adeafed2acb3",
     "74c5bbf6651af744d4ddf86cf4dae6cac6a6d122",
-    "98131271bafbba5e47f8021ae6cac4c4adbc4e11"
+    "98131271bafbba5e47f8021ae6cac4c4adbc4e11",
+    "f2af827f01238af889cc43d1a3f8ac59ad65f74f"
   ],
   "src/ui/main.gd.uid": [
     "d5359f707633d417b53a13fa6df9580325db3118",
@@ -400,7 +410,8 @@
   ],
   "START_WINDOWS.cmd": [
     "e61fb0615ce4e73881aa4f6bf566f335cae7e534",
-    "d6063b32130dfe9009efe1e392a451644634fcf1"
+    "d6063b32130dfe9009efe1e392a451644634fcf1",
+    "79304548a9fa4945e9c80f319e6b8ccb4c29c45c"
   ],
   "assets/characters/signal_01/body_v1.png": [
     "9f972b6b2ddbcd061da5fb32be1cbd9bbe6e58f0"
@@ -654,7 +665,8 @@
   ],
   "reports/native_ui.txt": [
     "e56c493fd1ea594ecfddff611464c079dd610744",
-    "138c357ba1646fa5b2cbecb0f5b46db163ca164a"
+    "138c357ba1646fa5b2cbecb0f5b46db163ca164a",
+    "10d08713bddd84a5897e9fe2922dc64c402ffff4"
   ],
   "reports/patch_application.txt": [
     "41186a3c7ef7b3d9cf7755ad8f29956adf805f74"
@@ -676,7 +688,8 @@
   ],
   "reports/windows_export.txt": [
     "c6e75a71d1864b7b129c7d05235de0730d910dc6",
-    "29ac781617f36fb5cfa5c8e496a3b3581222f1fd"
+    "29ac781617f36fb5cfa5c8e496a3b3581222f1fd",
+    "6ab9ada70df5e03f9baf11d3309f53bd6c9d7bd3"
   ],
   "scenes/bootstrap.tscn": [
     "8a3b8a5fc7db0143cdc189518103fc33aabfe05e"
@@ -695,14 +708,16 @@
   ],
   "src/desktop/chat_window.gd": [
     "69edbfc1c4f6557c328cdab3d33d951b2d4bb2fa",
-    "184848fd277891842ed911d79a4901819d966565"
+    "184848fd277891842ed911d79a4901819d966565",
+    "101858e8a0a844c2adce95e886717977deb5467b"
   ],
   "src/desktop/chat_window.gd.uid": [
     "170e4d7648ec6bf16de7a8f00bbd5613b7cb7e26"
   ],
   "src/desktop/companion_window.gd": [
     "40f16f6fa6727e5d8822725457c9f615143239d9",
-    "0c0b99c2e3153e09f7955a5f2c80f81c54c186f8"
+    "0c0b99c2e3153e09f7955a5f2c80f81c54c186f8",
+    "5b7840276a208611f79ce211db81fdcddf736cb3"
   ],
   "src/desktop/companion_window.gd.uid": [
     "d8180c93ab05396d6364b9bd0ec23257d89db00c"
@@ -727,19 +742,22 @@
   ],
   "src/ui/bootstrap.gd": [
     "1aced646172ae4ee9cf7a2ede8cee93a3c80e63b",
-    "ded7cb523b9e6d977e2c6e4f388e527de581709e"
+    "ded7cb523b9e6d977e2c6e4f388e527de581709e",
+    "f4464923ad697d69c6965627043520e392a87f5c"
   ],
   "src/ui/bootstrap.gd.uid": [
     "302f3ddfa4f017d0e63bbc1d8f786ea5089973ff"
   ],
   "src/ui/chat_view.gd": [
-    "50026759be702a6928c9fcb506c6131997112631"
+    "50026759be702a6928c9fcb506c6131997112631",
+    "14ac2091e308e656213ce880124ab440849cd12c"
   ],
   "src/ui/chat_view.gd.uid": [
     "9222fb3bebd33ecf1d768224551eb29efa27be11"
   ],
   "src/ui/visual_theme.gd": [
-    "0eac32556299ae276ba7ab4b3df2c7e6343c8f4a"
+    "0eac32556299ae276ba7ab4b3df2c7e6343c8f4a",
+    "fabf8df366194229c773a123cf331f741072d774"
   ],
   "src/ui/visual_theme.gd.uid": [
     "5b7ec47bcbec56d760e91f926e51a63730d45b15"
@@ -761,7 +779,8 @@
   ],
   "tests/test_desktop_visual.gd": [
     "98ecba648d335b2f6ba8ec97e832c245d5c94ab2",
-    "0bd47d7d64b87e214ebaa63d6fb06ca6545f056d"
+    "0bd47d7d64b87e214ebaa63d6fb06ca6545f056d",
+    "35291497661cdfb0196ed5e8875765cf925eb1d0"
   ],
   "tests/test_desktop_visual.gd.uid": [
     "9c023d3458d12db234cd38b8b40e1e122fa0a170"
@@ -783,7 +802,8 @@
   ],
   "tools/build_preview.py": [
     "323e8ee18cabdf93dfdcfb6515061ea3e43b9305",
-    "bc5f1e1e5605226093798fa457e23d7b7aadb62a"
+    "bc5f1e1e5605226093798fa457e23d7b7aadb62a",
+    "a1dca944730d7a11fd2f4adff6c1ed6915cf60ba"
   ],
   "tools/make_patch.py": [
     "9972917cd3885a8f91395f08a71e3c51e498b43b"
@@ -793,33 +813,39 @@
   ],
   "RESUME.md": [
     "7f699e7fd6113207d45a23943e82f134b95d863b",
-    "85a9ef04787bf589523edff150f25f7fd4bbd05c"
+    "85a9ef04787bf589523edff150f25f7fd4bbd05c",
+    "60b200f779d322cadac062d20d8b7b0d419d42bc"
   ],
   "recovery/DEV_ENVIRONMENT.md": [
     "ac635c3977d6072da13742f391192faf265a8eb1"
   ],
   "recovery/assets.json": [
     "64481aac56e9f3ffaa5a54b5def4dab6065e1b1e",
-    "faf9e507cf57349e74096cb819414a7c77a2ad74"
+    "faf9e507cf57349e74096cb819414a7c77a2ad74",
+    "07818378b90405ef3856595d61d9ddcef083091f"
   ],
   "recovery/devkit.json": [
     "03afcd3d65aea445c62777dea45aa31850be804d"
   ],
   "recovery/index.json": [
     "5e7a85ca4cd666b536b7c3fe9ed4bab11072f814",
-    "ec33d3d03748004c370ebd68d100aca944184634"
+    "ec33d3d03748004c370ebd68d100aca944184634",
+    "75bf57e5db9589ae80d4a255135428a07e9e1f16"
   ],
   "recovery/known_sources.json": [
     "1b9a50b1c38e4297ff2f1e8d0b5be90289a6eca7",
-    "ffc358b979733ee69872bb1c7964ef178ca88657"
+    "ffc358b979733ee69872bb1c7964ef178ca88657",
+    "958576acd198df069e6c4b69316170512500f1b9"
   ],
   "recovery/session.json": [
     "ddd034fb97f7a0152391aae2a079983c5c719386",
-    "e8aeeaec7ef5c246f43f64452ff5879121080dc8"
+    "e8aeeaec7ef5c246f43f64452ff5879121080dc8",
+    "6bb6de2a1523e7c0c37c8aec9306099460c91773"
   ],
   "recovery/source_capsule.b64": [
     "7affe0c043f1a6a92f0490b9a12c09674310d1fc",
-    "61798060c097d6e6a072085fb6a50d2aac340bb3"
+    "61798060c097d6e6a072085fb6a50d2aac340bb3",
+    "1a30365b5ee4ad3485abd54e588fe6abc4310ad6"
   ],
   "tests/test_resume.py": [
     "4ab2c5b4c4e4d4dd4947fef141667611969a73c3"
@@ -837,15 +863,132 @@
     "678a8fd0dd79d39eed48ec798b240109712e5b59"
   ],
   "reports/content_patch.txt": [
-    "39936a2a9f09edda7065ce2053bb48f0aae6ccc4"
+    "39936a2a9f09edda7065ce2053bb48f0aae6ccc4",
+    "6fcd8c0a7b5403e8929bf39c53825edc8609efb4"
   ],
   "tools/make_content_patch.py": [
-    "4fc3012eabc7da5a8d8a4007697584cd5bf7a77b"
+    "4fc3012eabc7da5a8d8a4007697584cd5bf7a77b",
+    "223b6c27aa6ea16540cba2050aa3f11ec733707d"
   ],
   "tools/test_content_patch.py": [
-    "9c810e5c1fa366b9a2030e79ee9ea0edf4adfecd"
+    "9c810e5c1fa366b9a2030e79ee9ea0edf4adfecd",
+    "f286f61f8e7fec89f4192cb5b2e035e05bfbb9ec"
   ],
   "tools/test_native_ui.py": [
     "a21949866e03d147f08f4bfac08435131f6d2e02"
+  ],
+  "assets/characters/signal_01/idle.gdshader": [
+    "30655dbd95a61bb2fb98b23d17f67d055f26613f"
+  ],
+  "assets/characters/signal_01/idle.gdshader.uid": [
+    "4865f5ae8d3ffe8485b8d9afab73581d9968b4b0"
+  ],
+  "assets/ui/character.svg": [
+    "89997ff2ea638607b4b476d530ca738153638837"
+  ],
+  "assets/ui/character.svg.import": [
+    "8999a9f4154301f96943788afe4c114cb3e5ef36"
+  ],
+  "assets/ui/chat.svg": [
+    "730190f56503fbd132cd9dbec8729d89281082d1"
+  ],
+  "assets/ui/chat.svg.import": [
+    "bd2a6d5f32419d98124116fded8b7ead0f8e8ad0"
+  ],
+  "assets/ui/clock.svg": [
+    "c27bd8a120f25cea36ae287547929f424ba674d2"
+  ],
+  "assets/ui/clock.svg.import": [
+    "49f2534d8a8536b5ef42d4d8ad7382dc1423c981"
+  ],
+  "assets/ui/close.svg": [
+    "e00c45ec2048e1553c9402f7f0b7a4a09f1e437d"
+  ],
+  "assets/ui/close.svg.import": [
+    "b6f6e73db094e0a7e0dd44622fa9d36c5add3f50"
+  ],
+  "assets/ui/cpu.svg": [
+    "9699524ac7444e7cd87dc800d57ec3b616a00f1a"
+  ],
+  "assets/ui/cpu.svg.import": [
+    "a4187b412eab797dfd4f07ec5774d470f95b680f"
+  ],
+  "assets/ui/dash.svg": [
+    "6fa92f73dff838999339edb8ac3903b0e9e080e7"
+  ],
+  "assets/ui/dash.svg.import": [
+    "1eadc97e5357abee27c0e6d844d132f32c787591"
+  ],
+  "assets/ui/hide.svg": [
+    "de25ea821509e0255b0269ffd5fd91d008dc5f25"
+  ],
+  "assets/ui/hide.svg.import": [
+    "e68c249748779bb16ca8694df83ae79a619d2e44"
+  ],
+  "assets/ui/mark.svg": [
+    "fbb414a1612cc846b2f205cc10a07c46880b4ccb"
+  ],
+  "assets/ui/mark.svg.import": [
+    "b74cee58885221ed216f1a1a13b0f65a2dac2a21"
+  ],
+  "assets/ui/note.svg": [
+    "ba3b85056e6a89dacb87137c015fb1b8a9aa2eb7"
+  ],
+  "assets/ui/note.svg.import": [
+    "860e000c65e27f8f7d530300a393c48a63c9cb76"
+  ],
+  "assets/ui/pause.svg": [
+    "cd14edff62b67be8a225d65954ffb923e3d5a917"
+  ],
+  "assets/ui/pause.svg.import": [
+    "4337a3eab7fb89d37e8cab35fa56c5af79a2c39a"
+  ],
+  "assets/ui/quit.svg": [
+    "9b2d26204609629f5e084431fb1256f07ca07a27"
+  ],
+  "assets/ui/quit.svg.import": [
+    "c9a332e3ff1a3e1f80fd3b775ca0103c8bd21e14"
+  ],
+  "assets/ui/search.svg": [
+    "5a1fbb60a6f4c7e0470b1304a72d469bdcdff646"
+  ],
+  "assets/ui/search.svg.import": [
+    "efa9286ff51ad1782143c2d1dd189cfd451c0b0a"
+  ],
+  "assets/ui/send.svg": [
+    "ab38a519e5f5ba9968ec1e08fe115d73491fbf89"
+  ],
+  "assets/ui/send.svg.import": [
+    "b7a11ede0dd1803c1e4a304622c7cd5b283c5815"
+  ],
+  "assets/ui/settings.svg": [
+    "0e2cfb5f5a61e453831be152782bb0988fa0fb51"
+  ],
+  "assets/ui/settings.svg.import": [
+    "b8cf87e9c4861117c3d52070b54983b91fa94da4"
+  ],
+  "docs/VISUAL_PASS_033.md": [
+    "c3ec6ac1f1acc57fcfb918623bb8c875e978afed"
+  ],
+  "downloads/v0.3.3-patch/000.chunk": [
+    "a0aaf58906c054bba219a03a5088c2a335a33ea1"
+  ],
+  "src/desktop/action_menu.gd": [
+    "5fc9d52569341acecf6dc72fbfd827035e277bb0"
+  ],
+  "src/desktop/action_menu.gd.uid": [
+    "7f6d45874493b93e35c2b223b1bfe36047d2138f"
+  ],
+  "src/ui/signal_surface.gd": [
+    "83947adaf35ea38b5048684f73ad2d3dea2416ac"
+  ],
+  "src/ui/signal_surface.gd.uid": [
+    "4fda98e3ad8bf9cd63e6077bb60b01813752a2f1"
+  ],
+  "src/ui/window_handle.gd": [
+    "e97dddd835b44e2c8dd7a1d5323369e4dae55fc4"
+  ],
+  "src/ui/window_handle.gd.uid": [
+    "ac5a5dc7557c249bafd74818ff02603f5d308c6f"
   ]
 }

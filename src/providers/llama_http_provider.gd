@@ -24,7 +24,11 @@ func submit(messages, options = {}):
 		"messages": messages,
 		"stream": false,
 		"max_tokens": clampi(int(options.get("max_tokens", 128)), 16, 512),
-		"temperature": 0.6
+		"temperature": 0.7,
+		"top_p": 0.8,
+		"top_k": 20,
+		"min_p": 0.0,
+		"chat_template_kwargs": {"enable_thinking": false}
 	}
 	busy = true
 	var headers = PackedStringArray(["Content-Type: application/json"])

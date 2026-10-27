@@ -107,7 +107,7 @@ func _run():
 	app.persistence_ready = true
 	app.submit("/note integration")
 	check(app.store.data.notes.size() == 1, "Application executes deterministic note")
-	app.submit("hello")
+	app.submit("Tell me about Mars")
 	check(app.state.current == "idle", "Missing model exits busy state")
 	check(app.messages.back().text == app.t("model_missing"), "Missing model honestly reported")
 	app.state.transition("thinking")

@@ -138,5 +138,20 @@
   "menu_caption": "What shall we do?",
   "appearance_title": "Appearance",
   "menu_hide_short": "Minimize",
-  "character_controls_short": "Click to talk. Drag to move. Right-click for actions."
+  "character_controls_short": "Click to talk. Drag to move. Right-click for actions.",
+  "self_model_owned": "I’m Signal, your desktop companion. The conversation component is {model}, running locally.",
+  "self_model_developer": "I’m Signal. A local developer server is connected; I cannot verify which model it has loaded.",
+  "self_model_inactive": "I’m Signal. The conversation model is not running. This build is configured for the {model} package.",
+  "self_origin": "Signal is a separate application with a character and a local conversation component. It is not ChatGPT connected over the internet.",
+  "self_memory": "Our chat lasts until the application exits. Closing the chat window keeps it. Notes are saved separately; automatic personal memory is not built yet.",
+  "self_offline": "Once the model is installed, conversation runs on your PC without internet. Initial downloads and web searches need a connection.",
+  "self_offline_uninstalled": "The conversation component is not installed yet. Downloading it requires internet; afterwards conversation runs locally. Notes and timers already work offline.",
+  "self_load": "Conversation uses your CPU and RAM. The profile allows up to {threads} computation threads; I do not measure current CPU percentages yet.",
+  "self_motion": "You can drag me and move me with a red transition. There is subtle hair and breathing motion. Full gestures and facial animation are still in development.",
+  "self_power": "An application runs me on your PC. Your CPU generates answers with a local model; its data is stored on disk and loaded into memory.",
+  "self_capabilities": "Available now: conversation with an installed model, notes, timers, system speech and desktop movement. Search opens a query in your browser; a screenshot can be shown for you to inspect. Autonomous website reading, screen understanding and automatic memory are not built yet.",
+  "self_weather": "I have no current weather data. Use /search weather in your city to open a search; I will not invent a temperature.",
+  "self_greeting": "I’m here. How is your day going?",
+  "self_identity": "I’m Signal, your desktop companion. You can call me Signal.",
+  "self_offline_developer": "A local developer server is connected. I cannot verify whether that server forwards requests elsewhere. The built-in Signal worker is designed to run offline after installation."
 }

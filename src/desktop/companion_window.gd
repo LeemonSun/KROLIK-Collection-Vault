@@ -43,11 +43,15 @@ var press_position = Vector2i.ZERO
 var moved = false
 var quick_menu
 var _hit_polygon = PackedVector2Array()
+var normalized_outline=PackedVector2Array()
+var last_display_bounds=Rect2i()
+var boundary_elapsed=0.0
 
 class Surface extends Control:
 	var owner_window
 	func _draw():
 		var w = owner_window
+		draw_set_transform(Vector2.ZERO,0,Vector2(w.size)/Vector2(330,500))
 		if w.effect_time > 0 and not w.reduced_motion:
 			var alpha = minf(1.0, w.effect_time / 0.15)
 			var sweep=1.0-w.effect_time/0.52
@@ -107,6 +111,7 @@ func _ready():
 		if polygon.size() > largest.size():
 			largest = polygon
 	for point in largest:
+		normalized_outline.append(point / Vector2(image.get_size()))
 		_hit_polygon.append(point * art.size / Vector2(image.get_size()))
 	if _hit_polygon.size() >= 3:
 		host.mouse_passthrough_polygon = _hit_polygon
@@ -114,6 +119,7 @@ func _ready():
 	host.focus_entered.connect(_restore_opacity)
 	host.close_requested.connect(func(): get_tree().quit())
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
+	last_display_bounds=bounds
 	position = bounds.end - size - Vector2i(30, 0)
 	print("DESKTOP_READY main_window=", host.get_window_id(), " position=", position, " size=", size)
 	_setup_tray()
@@ -167,9 +173,9 @@ func _menu_action(id):
 func bounded(candidate):
 	var screen = DisplayServer.get_screen_from_rect(Rect2i(candidate, size))
 	if screen < 0:
-		screen = current_screen
+		screen = clampi(current_screen,0,maxi(0,DisplayServer.get_screen_count()-1))
 	var bounds = DisplayServer.screen_get_usable_rect(screen)
-	return Vector2i(clampi(candidate.x, bounds.position.x, maxi(bounds.position.x, bounds.end.x-size.x)), clampi(candidate.y, bounds.position.y, maxi(bounds.position.y, bounds.end.y-size.y)))
+	return clamp_to_bounds(candidate,bounds)
 
 func dash_random():
 	if dragging or not visible:
@@ -201,6 +207,10 @@ func _process(delta):
 	if not visible or art == null:
 		return
 	elapsed += delta
+	boundary_elapsed+=delta
+	if boundary_elapsed>=1.0 and not dragging:
+		boundary_elapsed=0
+		refresh_bounds()
 	var lean = clampf(float(DisplayServer.mouse_get_position().x-press_position.x)*0.0005,-0.07,0.07) if dragging and moved else 0.0
 	art.rotation = lerp_angle(art.rotation,lean,minf(1.0,delta*12.0))
 	if reduced_motion: art.rotation=0.0
@@ -246,6 +256,7 @@ func show():
 	if not is_instance_valid(host): return
 	host.mode = Window.MODE_WINDOWED
 	host.show()
+	refresh_bounds(true)
 	position = bounded(position)
 	_restore_opacity()
 
@@ -311,3 +322,27 @@ func play_entrance():
 	effect_kind="spawn"
 	effect_time=0.52
 	art.modulate.a=0
+
+func clamp_to_bounds(candidate,bounds):
+	return Vector2i(clampi(candidate.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-size.x)),clampi(candidate.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-size.y)))
+
+func fit_to_bounds(bounds):
+	if not art or bounds.size.x<=0 or bounds.size.y<=0:return
+	var fit=minf(1.0,minf(float(bounds.size.y)/500.0,float(bounds.size.x)/330.0))
+	var fitted=Vector2i(Vector2(330,500)*fit)
+	host.min_size=fitted
+	size=fitted
+	art.size=Vector2(330,495)*fit
+	art.pivot_offset=Vector2(195,65)*fit
+	_hit_polygon=PackedVector2Array()
+	for point in normalized_outline:_hit_polygon.append(point*art.size)
+	if _hit_polygon.size()>=3:host.mouse_passthrough_polygon=_hit_polygon
+	position=clamp_to_bounds(position,bounds)
+	target_position=clamp_to_bounds(target_position,bounds)
+	last_display_bounds=bounds
+
+func refresh_bounds(force=false):
+	var screen=DisplayServer.get_screen_from_rect(Rect2i(position,size))
+	if screen<0:screen=DisplayServer.get_primary_screen()
+	var bounds=DisplayServer.screen_get_usable_rect(screen)
+	if force or bounds!=last_display_bounds:fit_to_bounds(bounds)

@@ -10,6 +10,7 @@
 | local_runtime | PASS |
 | search | PASS |
 | animation | PASS |
+| self_knowledge | PASS |
 | chat_layout | PASS |
 | ui | PASS |
 | release_gate_expected_block | PASS |

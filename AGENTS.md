@@ -21,3 +21,5 @@ Read characters/signal_01/README.md before modifying the character. Main display
 Latest user decision: defer pixel art; continue the current character. v0.3 adds a private local Windows preview; it is not a cleared Steam release. Keep managed text inference, screenshot capture, visual reasoning and browser reading separate. Never commit downloaded model weights; local build archives may be stored as reviewed private preview artifacts under downloads/.
 
 Current user decision (27 Oct): ONE polished visual style only; no theme switching or alternative palettes now. Fix startup access before continuing visual work. Main Window is now the character; never restore the offscreen 1px host.
+
+Latest feedback: conversational correctness before decorative breadth. SelfKnowledge must describe actual app state, not invented memory/online facts. Keep ordinary tasks with the LLM. Preserve one visual style. Consolidate updates; do not send a new manual patch for every remark. Native files must be delivered as attachments because sandbox archive links failed.

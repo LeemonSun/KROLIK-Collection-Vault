@@ -11,6 +11,7 @@ const Router = preload("res://src/core/router.gd")
 const Policy = preload("res://src/core/tool_policy.gd")
 const Missing = preload("res://src/providers/unconfigured_provider.gd")
 const Llama = preload("res://src/providers/llama_http_provider.gd")
+const SelfKnowledge = preload("res://src/core/self_knowledge.gd")
 const ContextBudget = preload("res://src/core/context_budget.gd")
 const LocalRuntime = preload("res://src/runtime/local_runtime.gd")
 const PopupChat = preload("res://src/desktop/chat_window.gd")
@@ -43,6 +44,7 @@ var local_ai_enabled = false
 var browser_search = BrowserSearch.new()
 var motion = AnimationDirector.new()
 var last_motion_result = {}
+var self_knowledge=SelfKnowledge.new()
 
 func _ready():
 	var catalog = JSON.parse_string(FileAccess.get_file_as_string("res://manifests/animation_catalog.json"))
@@ -141,6 +143,14 @@ func submit(text):
 	if command.kind == "tool":
 		_execute(command)
 		return
+	var verified=self_knowledge.answer(command.text,self)
+	if not verified.is_empty():
+		add_message("assistant",verified.text)
+		session_turns.append({"role":"user","content":command.text})
+		session_turns.append({"role":"assistant","content":verified.text})
+		while session_turns.size()>8:session_turns.pop_front()
+		voice.speak(verified.text,l10n.locale)
+		return
 	if local_ai_enabled and local_runtime.status != "ai_ready":
 		queued_chat_text = command.text
 		if not local_runtime.start(profiles.config(profile_name)):
@@ -156,9 +166,8 @@ func _submit_model_text(text):
 		local_runtime.touch()
 	request_motion("dialogue.think_loop")
 	changed.emit()
-	var language = {"ru": "Russian", "en": "English", "zh-Hans": "Simplified Chinese"}[l10n.locale]
-	var system_text = "You are Signal, a thoughtful desktop AI companion with a warm, composed personality and a little dry wit. Reply concisely in %s. Adapt to the user request. You cannot see the screen, read websites, access files or execute actions in this build. Never invent having done so. Do not emit tool instructions or hidden reasoning." % language
-	var options = profiles.config(profile_name)
+	var system_text=self_knowledge.system_text(l10n.locale)
+	var options=self_knowledge.response_budget(text,profiles.config(profile_name))
 	var context = ContextBudget.new().build(system_text, text, session_turns, options)
 	if not context.ok:
 		_on_failure("model_context_full")
