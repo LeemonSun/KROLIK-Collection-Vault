@@ -8,14 +8,16 @@ signal hide_requested
 signal quit_requested
 const ActionMenu = preload("res://src/desktop/action_menu.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
-const BODY_PATH = "res://assets/characters/signal_01/body_v1.png"
+const BODY_PATH = "res://assets/characters/leemon_01/master_v1.png"
+const Rig=preload("res://src/animation/leemon_rig.gd")
+const BASE_SIZE=Vector2i(300,332)
 var host: Window
 var position: Vector2i:
 	get: return host.position if is_instance_valid(host) else Vector2i.ZERO
 	set(value):
 		if is_instance_valid(host): host.position = value
 var size: Vector2i:
-	get: return host.size if is_instance_valid(host) else Vector2i(330,500)
+	get: return host.size if is_instance_valid(host) else BASE_SIZE
 	set(value):
 		if is_instance_valid(host): host.size = value
 var current_screen: int:
@@ -59,12 +61,12 @@ class Surface extends Control:
 			for i in range(4):
 				var y=470.0-sweep*390.0+i*19.0
 				var offset=sin(sweep*PI)*12.0
-				draw_polyline(PackedVector2Array([Vector2(76+offset,y+15),Vector2(104+offset,y),Vector2(250-offset,y),Vector2(270-offset,y-14)]),Color(1.0,0.31,0.41,alpha*(0.4-i*0.07)),1.4,true)
+				draw_polyline(PackedVector2Array([Vector2(76+offset,y+15),Vector2(104+offset,y),Vector2(250-offset,y),Vector2(270-offset,y-14)]),Color(1.0,0.78,0.26,alpha*(0.4-i*0.07)),1.4,true)
 
 func _ready():
 	app = get_tree().root.get_node("App")
 	host = get_tree().root
-	host.title = "Signal 01"
+	host.title = "Leemon"
 	host.mode = Window.MODE_WINDOWED
 	host.borderless = true
 	host.unresizable = true
@@ -75,8 +77,8 @@ func _ready():
 	host.mouse_passthrough = false
 	host.exclude_from_capture = false
 	var usable = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
-	var fit = minf(1.0,minf(float(usable.size.y)/500.0,float(usable.size.x)/330.0))
-	var fitted = Vector2i(Vector2(330,500)*fit)
+	var fit = minf(1.0,minf(float(usable.size.y)/float(BASE_SIZE.y),float(usable.size.x)/float(BASE_SIZE.x)))
+	var fitted = Vector2i(Vector2(BASE_SIZE)*fit)
 	host.min_size = fitted
 	size = fitted
 	canvas = Surface.new()
@@ -91,16 +93,10 @@ func _ready():
 	var image = texture.get_image()
 	if image.is_compressed():
 		image.decompress()
-	art = TextureRect.new()
+	art = Rig.new()
 	art.texture = texture
-	var material = ShaderMaterial.new()
-	material.shader = load("res://assets/characters/signal_01/idle.gdshader")
-	art.material = material
-	art.pivot_offset = Vector2(195,65)*fit
-	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	art.size = Vector2(330, 495)*fit
+	art.pivot_offset = Vector2(BASE_SIZE)*Vector2(0.5,0.7)*fit
+	art.size = Vector2(BASE_SIZE)*fit
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(art)
 	# Follow the generated alpha outline, leaving transparent desktop areas clickable.
@@ -143,6 +139,7 @@ func _input_event(event):
 				dragging = true
 				Input.use_accumulated_input=false
 				app.mark_active()
+				art.play("grab")
 				moved = false
 				press_position = DisplayServer.mouse_get_position()
 				effect_kind = ""
@@ -151,6 +148,7 @@ func _input_event(event):
 				drag_offset = press_position-position
 			else:
 				dragging = false
+				art.play("idle")
 				Input.use_accumulated_input=true
 				if moved:
 					position=bounded(DisplayServer.mouse_get_position()-drag_offset)
@@ -171,7 +169,7 @@ func _menu_action(id):
 	match id:
 		0: chat_requested.emit()
 		1: settings_requested.emit()
-		2: dash_random()
+		2: walk_random()
 		3: pause_requested.emit()
 		4: hide_requested.emit()
 		5: quit_requested.emit()
@@ -207,7 +205,7 @@ func set_reduced(value):
 	effect_time = 0
 	if art:
 		art.modulate.a = 1.0
-		art.material.set_shader_parameter("motion",0.0 if value else 1.0)
+		art.set_reduced(value)
 
 func _process(delta):
 	if not visible or art == null:
@@ -221,6 +219,18 @@ func _process(delta):
 	if boundary_elapsed>=1.0 and not dragging:
 		boundary_elapsed=0
 		refresh_bounds()
+	if effect_kind=="walk":
+		app.mark_active()
+		phase+=delta
+		var progress=clampf(phase/maxf(0.1,walk_duration),0,1)
+		position=bounded(Vector2i(Vector2(original_position).lerp(Vector2(target_position),smoothstep(0,1,progress))))
+		if progress>=1.0:effect_kind="";art.play("idle")
+	mask_elapsed+=delta
+	if mask_elapsed>0.08:
+		mask_elapsed=0
+		var outline=PackedVector2Array()
+		for point in normalized_outline:outline.append(art.map_outline(point))
+		if outline.size()>3:host.mouse_passthrough_polygon=Geometry2D.convex_hull(outline)
 	var lean = clampf(float(DisplayServer.mouse_get_position().x-press_position.x)*0.0005,-0.07,0.07) if dragging and moved else 0.0
 	art.rotation = lerp_angle(art.rotation,lean,minf(1.0,delta*12.0))
 	if reduced_motion: art.rotation=0.0
@@ -228,7 +238,7 @@ func _process(delta):
 		next_move -= delta
 		if next_move <= 0:
 			next_move = randf_range(25.0, 50.0)
-			dash_random()
+			walk_random()
 	if effect_time > 0:
 		effect_time = maxf(0, effect_time-delta)
 		if effect_kind == "spawn":
@@ -287,7 +297,7 @@ func _setup_tray():
 	if OS.get_name() not in ["Windows","macOS"] or not ClassDB.class_exists("StatusIndicator"): return
 	tray = ClassDB.instantiate("StatusIndicator")
 	tray.icon = load("res://assets/foundation.svg")
-	tray.tooltip = "Signal — " + app.t("show_desktop")
+	tray.tooltip = "Leemon — " + app.t("show_desktop")
 	tray.pressed.connect(func(button,_point):
 		if button == MOUSE_BUTTON_LEFT:
 			recover()
@@ -332,18 +342,19 @@ func play_entrance():
 	effect_kind="spawn"
 	effect_time=0.52
 	art.modulate.a=0
+	art.play("hello",2.0)
 
 func clamp_to_bounds(candidate,bounds):
 	return Vector2i(clampi(candidate.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-size.x)),clampi(candidate.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-size.y)))
 
 func fit_to_bounds(bounds):
 	if not art or bounds.size.x<=0 or bounds.size.y<=0:return
-	var fit=minf(1.0,minf(float(bounds.size.y)/500.0,float(bounds.size.x)/330.0))
-	var fitted=Vector2i(Vector2(330,500)*fit)
+	var fit=minf(1.0,minf(float(bounds.size.y)/float(BASE_SIZE.y),float(bounds.size.x)/float(BASE_SIZE.x)))
+	var fitted=Vector2i(Vector2(BASE_SIZE)*fit)
 	host.min_size=fitted
 	size=fitted
-	art.size=Vector2(330,495)*fit
-	art.pivot_offset=Vector2(195,65)*fit
+	art.size=Vector2(BASE_SIZE)*fit
+	art.pivot_offset=Vector2(BASE_SIZE)*Vector2(0.5,0.7)*fit
 	_hit_polygon=PackedVector2Array()
 	for point in normalized_outline:_hit_polygon.append(point*art.size)
 	if _hit_polygon.size()>=3:host.mouse_passthrough_polygon=_hit_polygon
@@ -356,3 +367,22 @@ func refresh_bounds(force=false):
 	if screen<0:screen=DisplayServer.get_primary_screen()
 	var bounds=DisplayServer.screen_get_usable_rect(screen)
 	if force or bounds!=last_display_bounds:fit_to_bounds(bounds)
+
+var walk_duration=1.8
+var mask_elapsed=0.0
+func walk_random():
+	if dragging or not visible or app.paused:return
+	var distance=randf_range(80,160)*(1 if randf()>0.5 else -1)
+	original_position=position
+	target_position=bounded(position+Vector2i(int(distance),0))
+	if reduced_motion:position=target_position;return
+	effect_kind="walk";phase=0
+	walk_duration=maxf(1.2,absf(target_position.x-original_position.x)/85.0)
+	art.play("walk")
+func react(event_id):
+	if not art or reduced_motion:return false
+	if event_id=="dialogue.think_loop":return art.play("thinking")
+	elif event_id=="dialogue.explain_small":return art.play("talk",2.8)
+	elif event_id in ["work.note_saved","work.timer_notice"]:return art.play("success",1.4)
+	elif event_id in ["work.error_recover","work.model_missing"]:return art.play("error",1.8)
+	return false

@@ -26,11 +26,35 @@
       "release_approved": false,
       "animations": [],
       "runtime_art": "assets/characters/signal_01/body_v1.png"
+    },
+    {
+      "id": "leemon_01",
+      "name": "Leemon (working name)",
+      "status": "user_selected_internal_preview",
+      "renderer": "articulated_2d_cutout",
+      "design_revision": "v1",
+      "source": "assets/characters/leemon_01/master_v1.png",
+      "source_sha256": "3ccdb7edc306262d55bb322e47c7c8180892cd6e4ba474cd283fa4a720d70bc1",
+      "license_status": "ai_generated_preliminary_review_only",
+      "release_approved": false,
+      "animations": [
+        "idle",
+        "hello",
+        "thinking",
+        "talk",
+        "success",
+        "error",
+        "grab",
+        "walk"
+      ],
+      "animation_type": "authored_procedural_curves",
+      "runtime_art": "assets/characters/leemon_01/master_v1.png"
     }
   ],
   "concepts": [
-    "signal_01"
+    "signal_01",
+    "leemon_01"
   ],
   "final_character": null,
-  "selected_concept": "signal_01"
+  "selected_concept": "leemon_01"
 }

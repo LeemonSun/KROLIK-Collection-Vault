@@ -1,0 +1,23 @@
+{
+  "character_id": "leemon_01",
+  "source_library_id": "libfile_2abd1558d858819189d593e9411b4034",
+  "source_concept_sha256": "150735d3723dc2876201ffe7df5095c0036d679f4f913eaa9c226f66467cd334",
+  "method": "built_in_imagegen_identity_reference_transparent_cutout",
+  "prompt_file": "characters/leemon_01/generation_prompt.txt",
+  "runtime_asset": "assets/characters/leemon_01/master_v1.png",
+  "runtime_asset_sha256": "3ccdb7edc306262d55bb322e47c7c8180892cd6e4ba474cd283fa4a720d70bc1",
+  "runtime_asset_bytes": 1075734,
+  "release_approved": false,
+  "rights_status": "internal_ai_generated_concept_not_commercial_clearance",
+  "animation_method": "six_shared_texture_regions_authored_procedural_curves",
+  "animation_states": [
+    "idle",
+    "hello",
+    "thinking",
+    "talk",
+    "success",
+    "error",
+    "grab",
+    "walk"
+  ]
+}

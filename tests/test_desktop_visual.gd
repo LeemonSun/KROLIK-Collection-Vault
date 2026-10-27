@@ -89,7 +89,7 @@ func _run():
 	app.set_paused(false)
 	check(not app.desktop_companion.reduced_motion,"Resume restores motion preference")
 	app.desktop_companion.set_reduced(true)
-	check(app.desktop_companion.art.material.get_shader_parameter("motion")==0.0,"Reduced motion freezes procedural deformation")
+	check(app.desktop_companion.art.reduced,"Reduced motion freezes procedural deformation")
 	app.desktop_companion.set_reduced(false)
 	app.desktop_companion._menu_action(1)
 	check(panel.visible,"Character menu opens settings")
@@ -111,7 +111,7 @@ func _run():
 		check(desktop._hit_polygon.size()==desktop.normalized_outline.size(),"Click outline follows scale")
 	desktop.recover()
 	await frame()
-	check(desktop.size==Vector2i(330,500),"Original size restored on normal monitor")
+	check(desktop.size==Vector2i(300,332),"Original size restored on normal monitor")
 	main.open_panel("diagnostics")
 	await create_timer(0.2).timeout
 	await frame()
@@ -121,13 +121,34 @@ func _run():
 	desktop.set_reduced(true)
 	desktop.art.rotation=0;desktop.effect_time=0
 	await frame()
-	var with_shader=root.get_texture().get_image().get_data()
-	var material=desktop.art.material
-	desktop.art.material=null
+	var rig_image=root.get_texture().get_image()
+	shot(root,"rig-rest")
+	var reference=TextureRect.new()
+	reference.texture=desktop.art.texture
+	reference.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	reference.size=desktop.art.size
+	desktop.canvas.add_child(reference)
+	desktop.art.hide()
 	await frame()
-	var without_shader=root.get_texture().get_image().get_data()
-	check(with_shader==without_shader,"Motion-off shader preserves exact rendered RGBA colors")
-	desktop.art.material=material
+	var reference_image=root.get_texture().get_image()
+	var reference_data=reference_image.get_data()
+	var rig_data=rig_image.get_data()
+	var solid=0;var missing=0
+	for offset in range(3,reference_data.size(),4):
+		if reference_data[offset]>200:
+			solid+=1
+			if rig_data[offset]<100:missing+=1
+	print("RIG_COVERAGE missing=",missing," solid=",solid)
+	check(solid>1000 and float(missing)/maxi(solid,1)<0.015,"Rig pieces cover at least 98.5% of original opaque silhouette")
+	reference.queue_free();desktop.art.show()
+	desktop.art.set_reduced(false)
+	for clip in ["hello","thinking","talk","success","error","grab","walk"]:
+		desktop.art.play(clip,1.5)
+		await create_timer(0.48).timeout
+		await frame()
+		check(desktop.art.parts.size()==6 and desktop.art.parts.head.rotation!=0,"Articulated motion evaluates: "+clip)
+		shot(root,"rig-"+clip)
+	desktop.art.set_reduced(true)
 	app.desktop_companion.art.queue_free()
 	app.desktop_companion.art=null
 	app.desktop_companion._show_fallback()

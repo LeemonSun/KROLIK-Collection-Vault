@@ -57,6 +57,10 @@ var history_timer
 var active_until_ms=0
 var control_panel
 var guard=ResponseGuard.new()
+var reminder_timer
+var translation_mode=false
+var queued_translation=[]
+var clock=preload("res://src/tools/world_clock.gd").new()
 var self_knowledge=SelfKnowledge.new()
 
 func _ready():
@@ -76,6 +80,11 @@ func _ready():
 	if persistence_ready:
 		l10n.set_locale(str(store.data.settings.get("locale", "ru")))
 		profile_request = str(store.data.settings.get("profile", "auto"))
+	reminder_timer=Timer.new()
+	reminder_timer.one_shot=true
+	add_child(reminder_timer)
+	reminder_timer.timeout.connect(_check_reminders)
+	_schedule_reminders()
 	if history_enabled() and memory.load_history():
 		messages=memory.messages.duplicate(true)
 		session_turns=memory.turns.duplicate(true)
@@ -236,14 +245,39 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
-	if command.tool == "apps.open":
+	if command.tool=="clock.now":
+		var result=clock.resolve(command.args.city)
+		if result.ok:
+			if result.city=="local":result.city=t("clock_local")
+			add_message("assistant",t("clock_result",result))
+			request_motion("dialogue.explain_small")
+		else:
+			var reply=t("clock_"+str(result.status))
+			if result.get("status")=="ambiguous":reply+="\n"+"\n".join(PackedStringArray(result.choices))
+			add_message("assistant",reply)
+	elif command.tool=="reminders.add":
+		var result=store.add_reminder(command.args.text,command.args.seconds)
+		add_message("assistant",t("reminder_saved",{"text":command.args.text,"seconds":command.args.seconds}) if result.ok else t("storage_failed"))
+		_schedule_reminders()
+		request_motion("work.note_saved" if result.ok else "work.error_recover")
+	elif command.tool=="reminders.list":
+		add_message("assistant",reminders_text())
+	elif command.tool=="companion.walk":
+		var ok=show_desktop()
+		if ok:desktop_companion.walk_random()
+		add_message("assistant",t("walking_started" if ok else "module_unavailable"))
+	elif command.tool=="clipboard.translate":
+		state.reset()
+		_translate_clipboard(command.args.locale)
+		return
+	elif command.tool == "apps.open":
 		var target=str(command.args.target)
 		if target.begins_with("http://") or target.begins_with("https://"):
 			var result=browser_search.open_url(target)
 			_desktop_completed({"status":"browser_handoff" if result.ok else "failed"})
 		elif not desktop_actions.request(target):_desktop_completed({"status":"failed"})
 		return
-	if command.tool == "notes.add":
+	elif command.tool == "notes.add":
 		var ok = persistence_ready and store.add_note(command.args.text)
 		add_message("assistant", t("note_saved" if ok else "storage_failed"))
 		request_motion("work.note_saved" if ok else "work.error_recover")
@@ -284,7 +318,7 @@ func _execute(command):
 func _on_answer(text):
 	if state.current != "thinking":
 		return
-	if guard.claims_action(text,pending_user_text):
+	if not translation_mode and guard.claims_action(text,pending_user_text):
 		_on_failure("model_action_unverified")
 		return
 	# Only complete user/assistant pairs enter model context.
@@ -294,7 +328,10 @@ func _on_answer(text):
 		while session_turns.size() > 8:
 			session_turns.pop_front()
 	pending_user_text = ""
-	add_message("assistant", text)
+	translation_mode=false
+	var display_text=text
+	if provider is Llama and provider.last_truncated:display_text+="\n\n"+t("reply_limit")
+	add_message("assistant", display_text)
 	voice.speak(text, l10n.locale)
 	if local_runtime:
 		local_runtime.generation_busy = false
@@ -304,6 +341,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	translation_mode=false
 	if local_runtime:
 		local_runtime.generation_busy = false
 		local_runtime.touch()
@@ -314,6 +352,8 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	queued_translation=[]
+	translation_mode=false
 	if is_instance_valid(desktop_actions):desktop_actions.cancel()
 	queued_chat_text = ""
 	voice.stop()
@@ -342,7 +382,10 @@ func set_paused(value):
 	changed.emit()
 
 func request_motion(event_id):
+	var rendered=is_instance_valid(desktop_companion) and desktop_companion.react(event_id)
 	last_motion_result = motion.request(event_id, Time.get_ticks_msec())
+	if rendered:
+		last_motion_result={"ok":true,"reason":"procedural_rig","event_id":event_id}
 	return last_motion_result
 
 func clear_notes_confirmed():
@@ -391,6 +434,10 @@ func _runtime_ready(port, token):
 		return
 	_set_provider("local_worker")
 	provider.configure_local(port, token)
+	if not queued_translation.is_empty():
+		var prepared=queued_translation
+		queued_translation=[]
+		_submit_translation(prepared)
 	changed.emit()
 	if not queued_chat_text.is_empty():
 		var text = queued_chat_text
@@ -479,3 +526,59 @@ func _start_legacy_cleanup():
 	var archive=ProjectSettings.globalize_path("user://support/old-patch-backups")
 	cleanup_task=WorkerThreadPool.add_task(func():
 		cleanup_result=preload("res://src/tools/legacy_cleanup.gd").new().run(base,archive,manifest))
+
+func _schedule_reminders():
+	if not is_instance_valid(reminder_timer):return
+	reminder_timer.stop()
+	var now=int(Time.get_unix_time_from_system())
+	var seconds=30
+	var reminders=store.data.get("reminders",[])
+	if reminders.is_empty():return
+	for item in reminders:seconds=mini(seconds,maxi(1,int(item.deadline)-now))
+	reminder_timer.start(float(seconds))
+func _check_reminders():
+	for item in store.take_due(int(Time.get_unix_time_from_system())):
+		var text=t("reminder_due",{"text":item.text})
+		add_message("assistant",text)
+		if not paused:voice.speak(text,l10n.locale)
+		request_motion("work.timer_notice")
+		if DisplayServer.get_name()!="headless" and not paused:show_chat()
+	_schedule_reminders()
+	changed.emit()
+func cancel_reminder(id):
+	var ok=store.remove_reminder(id)
+	_schedule_reminders()
+	changed.emit()
+	return ok
+func reminders_text():
+	var lines=PackedStringArray()
+	var now=int(Time.get_unix_time_from_system())
+	for item in store.data.get("reminders",[]):lines.append(t("reminder_row",{"text":item.text,"seconds":maxi(0,int(item.deadline)-now)}))
+	return t("reminders_empty") if lines.is_empty() else "\n".join(lines)
+func _translate_clipboard(locale):
+	# Developer endpoints are deliberately excluded; clipboard text stays with the owned worker.
+	if provider_name=="llama_loopback" or (provider_name!="local_worker" and not local_runtime.installed()):
+		add_message("assistant",t("clipboard_local_required"))
+		changed.emit();return
+	var source=DisplayServer.clipboard_get()
+	var prepared=preload("res://src/tools/clipboard_translation.gd").new().prepare(source,l10n.locale if locale.is_empty() else locale)
+	if not prepared.ok:add_message("assistant",t(prepared.error));return
+	if local_runtime.status!="ai_ready":
+		queued_translation=prepared.messages
+		translation_mode=true
+		state.transition("thinking")
+		if not start_local_ai():queued_translation=[];_on_failure("clipboard_local_required")
+		changed.emit();return
+	_submit_translation(prepared.messages)
+func _submit_translation(messages_):
+	var options=profiles.config(profile_name).duplicate(true)
+	options["max_tokens"]=512
+	options["server_token_budget"]=true
+	if state.current=="idle":state.transition("thinking")
+	translation_mode=true
+	pending_user_text="" # Clipboard source is not copied into history or retrieval.
+	local_runtime.generation_busy=true
+	local_runtime.touch()
+	request_motion("dialogue.think_loop")
+	provider.submit(messages_,options)
+	changed.emit()

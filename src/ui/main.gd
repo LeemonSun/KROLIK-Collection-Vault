@@ -157,7 +157,7 @@ func _build():
 	page_picker.fit_to_longest_item = false
 	page_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	page_picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var pages = ["talk","assistant_tools","settings","character","search","notes","modules","diagnostics"]
+	var pages = ["talk","assistant_tools","settings","character","search","notes","modules","diagnostics","reminders"]
 	for id in pages:
 		page_picker.add_item(App.t(id))
 	page_picker.select(maxi(0,pages.find(page)))
@@ -186,7 +186,9 @@ func _build():
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	page_scroll.add_child(content)
-	if page=="diagnostics":
+	if page=="reminders":
+		_build_reminders()
+	elif page=="diagnostics":
 		_label(App.t("diagnostics"),content,22)
 		_label(App.t("diagnostics_hint"),content,13,true)
 		diagnostics_label=_label(App.diagnostics.report(),content,15)
@@ -219,16 +221,16 @@ func _build_sidebar(parent):
 	glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	identity.add_child(glyph)
-	var brand=_label("SIGNAL",identity,21)
+	var brand=_label("LEEMON",identity,21)
 	brand.autowrap_mode=TextServer.AUTOWRAP_OFF
 	brand.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	for id in ["talk","assistant_tools","character","notes","search","settings","modules","diagnostics"]:
+	for id in ["talk","assistant_tools","character","notes","search","settings","modules","diagnostics","reminders"]:
 		var target=id
 		var button=_button(App.t(id),sidebar,func():page=target;_build())
 		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text=true
 		button.custom_minimum_size.y=40
-		button.icon=load("res://assets/ui/"+{"talk":"chat","assistant_tools":"cpu","character":"character","notes":"note","search":"search","settings":"settings","modules":"cpu","diagnostics":"cpu"}[id]+".svg")
+		button.icon=load("res://assets/ui/"+{"talk":"chat","assistant_tools":"cpu","character":"character","notes":"note","search":"search","settings":"settings","modules":"cpu","diagnostics":"cpu","reminders":"clock"}[id]+".svg")
 		button.expand_icon=true
 		button.add_theme_constant_override("icon_max_width",17)
 		if page==id:VisualTheme.primary(button)
@@ -240,9 +242,9 @@ func _build_sidebar(parent):
 	_label(App.t("offline"),sidebar,11,true)
 
 func _build_character():
-	_label("Signal 01",content,26)
+	_label("Leemon",content,26)
 	_label(App.t("signal_tagline"),content,14,true)
-	var art=load("res://assets/characters/signal_01/body_v1.png")
+	var art=load("res://assets/characters/leemon_01/master_v1.png")
 	if art is Texture2D:
 		var preview=TextureRect.new()
 		preview.texture=art
@@ -260,7 +262,7 @@ func _build_character():
 	show_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	VisualTheme.primary(show_button)
 	var dash_button=_button(App.t("menu_dash"),row,func():
-		if App.show_desktop():App.desktop_companion.dash_random())
+		if App.show_desktop():App.desktop_companion.walk_random())
 	dash_button.icon=load("res://assets/ui/dash.svg")
 	dash_button.expand_icon=true
 	dash_button.add_theme_constant_override("icon_max_width",16)
@@ -271,6 +273,7 @@ func _build_assistant_tools():
 	ai_status_label = _label(App.t(App.local_runtime.status), content, 17)
 	ai_progress_label = _label("", content, 14, true)
 	_label(App.t("ai_install_hint"), content, 14, true)
+	_label(App.t("clipboard_hint"),content,13,true)
 	install_button = _button(App.t("ai_install"), content, func(): App.install_local_ai(); _refresh())
 	VisualTheme.primary(install_button)
 	start_ai_button = _button(App.t("ai_start"), content, func(): App.start_local_ai(); _refresh())
@@ -473,11 +476,11 @@ func _confirm_clear():
 func _ui_smoke():
 	for language in ["ru","en","zh-Hans"]:
 		App.l10n.set_locale(language)
-		for id in ["talk","notes","character","assistant_tools","search","modules","settings"]:
+		for id in ["talk","notes","character","assistant_tools","search","modules","settings","diagnostics","reminders"]:
 			page = id
 			_build()
 			await get_tree().process_frame
-	print("UI_SMOKE_OK: 3 locales, 7 pages")
+	print("UI_SMOKE_OK: 3 locales, 9 pages")
 	get_tree().quit()
 
 
@@ -489,3 +492,15 @@ func _confirm_clear_chat():
 	dialog.confirmed.connect(func():App.clear_history_confirmed();dialog.queue_free();_build())
 	dialog.canceled.connect(dialog.queue_free)
 	dialog.popup_centered(Vector2i(360,150))
+
+func _build_reminders():
+	_label(App.t("reminders"),content,22)
+	_label(App.t("reminders_hint"),content,13,true)
+	var items=App.store.data.get("reminders",[]).duplicate(true)
+	items.sort_custom(func(a,b):return a.deadline<b.deadline)
+	if items.is_empty():_label(App.t("reminders_empty"),content,15,true)
+	for item in items:
+		var row=HBoxContainer.new();content.add_child(row)
+		var text=App.t("reminder_row",{"text":item.text,"seconds":maxi(0,int(item.deadline)-int(Time.get_unix_time_from_system()))})
+		var label=_label(text,row,15);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		_button(App.t("reminder_cancel"),row,func():App.cancel_reminder(item.id);_build())

@@ -372,6 +372,13 @@
       "bytes": 407198,
       "sha256": "b949a6969b287ae61bb17b0aaacf7defb5cfbc5e1ac2ef37f7990034bc849ea8",
       "source": "github"
+    },
+    {
+      "path": "assets/characters/leemon_01/master_v1.png",
+      "group": "runtime",
+      "bytes": 1075734,
+      "sha256": "3ccdb7edc306262d55bb322e47c7c8180892cd6e4ba474cd283fa4a720d70bc1",
+      "source": "github"
     }
   ]
 }

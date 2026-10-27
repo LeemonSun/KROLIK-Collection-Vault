@@ -1,16 +1,17 @@
 {
   "schema_version": 1,
-  "app_version": "0.4.0-functional-preview",
-  "checkpoint_status": "delivered_final",
-  "current_task": "0.4.0 functional preview built, verified and attached. Source/distribution checkpoint being finalized.",
-  "next_action": "Get user Windows test: open Explorer/Notepad, chat history, measured process usage, drag/color. Next focus: actual model dialogue quality plus independent production of approved mascot animation assets. No new rig/voice promises.",
+  "app_version": "0.5.0-leemon-preview",
+  "checkpoint_status": "wip_leemon_rig_tools_validation_in_progress",
+  "current_task": "Leemon active: reviewed single generated master, six articulated regions/8 procedural states, graphite amber UI. Offline clock 597 zones/2039 aliases, persistent reminders and explicit local clipboard translation implemented; validation in progress.",
+  "next_action": "Finish real Qwen dialogue/translation evaluation; verify corrected rig limb masks, persistent reminder restart, clipboard native integration; then full 0.5.0 ZIP and storage delta.",
   "read_next": [
     "RESUME.md"
   ],
   "known_limits": [
-    "Qwen weights unchanged; actual model dialogue regression NOT rerun after environment reset",
-    "Native Windows launching/transparency/tray still needs user test",
-    "No new body clips, custom voice, page reader or screen vision"
+    "0.5.0 not yet shipped; user has 0.4.0",
+    "Windows native acceptance still pending",
+    "No 3D rig, ASR/custom voice, vision or page reading; procedural cutout animation only",
+    "Leemon_Mascot.zip contained concept sheet, not animation frames"
   ],
   "validation": [
     "All 12 local checks PASS (functional 42; self knowledge 173; HTTP 27 + context 8; 2-process persistence)",

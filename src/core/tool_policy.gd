@@ -1,6 +1,11 @@
 extends RefCounted
 ## Trusted tool registry controls effects; model text is never executed.
 const TOOLS = {
+	"clock.now":{"implemented":true,"confirmation":false},
+	"reminders.add":{"implemented":true,"confirmation":false},
+	"reminders.list":{"implemented":true,"confirmation":false},
+	"clipboard.translate":{"implemented":true,"confirmation":false},
+	"companion.walk":{"implemented":true,"confirmation":false},
 	"browser.search": {"implemented": true, "confirmation": false},
 	"timer.start": {"implemented": true, "confirmation": false},
 	"notes.add": {"implemented": true, "confirmation": false},

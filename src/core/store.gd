@@ -1,7 +1,7 @@
 extends RefCounted
 ## Foundation storage only. SQLite adapter is a separate future integration.
 var path = "user://foundation-state.json"
-var data = {"schema_version": 1, "notes": [], "settings": {}}
+var data = {"schema_version": 1, "notes": [], "settings": {}, "reminders":[]}
 var last_error = ""
 var writable = true
 
@@ -42,6 +42,17 @@ func load_state():
 			last_error = "invalid_note"
 			writable = false
 			return false
+	var reminders=parsed.get("reminders",[])
+	if not reminders is Array or reminders.size()>32:
+		last_error="invalid_reminders";writable=false;return false
+	var ids={}
+	for item in reminders:
+		if not item is Dictionary or not item.get("id") is String or not item.get("text") is String or item.text.length()>1024 or not (item.get("deadline") is int or item.get("deadline") is float):
+			last_error="invalid_reminder";writable=false;return false
+		if item.id.length()!=32 or not item.id.is_valid_hex_number(false) or ids.has(item.id) or not is_finite(float(item.deadline)) or item.deadline<0:
+			last_error="invalid_reminder";writable=false;return false
+		ids[item.id]=true
+	parsed["reminders"]=reminders
 	data = parsed
 	return true
 
@@ -91,3 +102,25 @@ func remove_note(index):
 	data.notes.remove_at(index)
 	if not save_state():data.notes=old;return false
 	return true
+
+func add_reminder(text,seconds,now=-1):
+	if not text is String or text.strip_edges().is_empty() or text.length()>1024 or seconds<1 or seconds>2678400 or data.get("reminders",[]).size()>=32:return {"ok":false}
+	if now<0:now=int(Time.get_unix_time_from_system())
+	if not data.has("reminders"):data["reminders"]=[]
+	var item={"id":Crypto.new().generate_random_bytes(16).hex_encode(),"text":text.strip_edges(),"deadline":now+int(seconds)}
+	data.reminders.append(item)
+	if not save_state():data.reminders.pop_back();return {"ok":false}
+	return {"ok":true,"item":item}
+func remove_reminder(id):
+	var previous=data.get("reminders",[]).duplicate(true)
+	data["reminders"]=previous.filter(func(item):return item.id!=id)
+	if data.reminders.size()==previous.size():return false
+	if not save_state():data.reminders=previous;return false
+	return true
+func take_due(now):
+	var previous=data.get("reminders",[]).duplicate(true)
+	var due=previous.filter(func(item):return int(item.deadline)<=now)
+	if due.is_empty():return []
+	data["reminders"]=previous.filter(func(item):return int(item.deadline)>now)
+	if not save_state():data.reminders=previous;return []
+	return due

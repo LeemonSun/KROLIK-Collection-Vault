@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Companion Foundation",
   "publisher": null,
-  "version": "0.4.0-functional-preview",
+  "version": "0.5.0-leemon-preview",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [
@@ -14,7 +14,7 @@
   "telemetry": false,
   "models_bundled": false,
   "final_character_selected": false,
-  "project_stage": "behavior_and_display_hardening_unreleased",
+  "project_stage": "leemon_rig_and_local_tools_preview",
   "character_concept_selected": true,
   "pixel_direction": "deferred"
 }

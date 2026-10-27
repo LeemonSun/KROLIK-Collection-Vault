@@ -13,7 +13,7 @@ func _ready():
 	host.exclude_from_capture=false
 	panel_window=Window.new()
 	panel_window.name="ControlPanel"
-	panel_window.title="Signal — settings"
+	panel_window.title="Leemon — settings"
 	panel_window.size=Vector2i(800,600)
 	panel_window.min_size=Vector2i(360,320)
 	panel_window.borderless=true

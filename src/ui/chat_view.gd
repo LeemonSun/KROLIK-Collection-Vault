@@ -39,7 +39,7 @@ func _ready():
 	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	header.add_child(mark)
 	var title=Label.new()
-	title.text='S I G N A L'
+	title.text='L E E M O N'
 	title.add_theme_font_size_override('font_size',20)
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	title.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -71,7 +71,7 @@ func _ready():
 	var suggestions=HBoxContainer.new()
 	suggestions.add_theme_constant_override('separation',6)
 	layout.add_child(suggestions)
-	for spec in [['clock','quick_timer','/timer 300'],['note','quick_note','/note '],['search','search','/search ']]:
+	for spec in [['clock','quick_timer','/timer 300'],['note','quick_note','/note '],['clock','reminders','/remind 300 '],['search','search','/search ']]:
 		var button=_button('',suggestions,func():
 			editor.text=spec[2]
 			editor.grab_focus()
@@ -155,10 +155,10 @@ func _render_history():
 	for item in app.messages:
 		history.push_font_size(11)
 		history.push_color(VisualTheme.MUTED if item.speaker=='user' else VisualTheme.RED)
-		history.add_text((app.t('chat_you').to_upper() if item.speaker=='user' else 'SIGNAL')+'\n')
+		history.add_text((app.t('chat_you').to_upper() if item.speaker=='user' else 'LEEMON')+'\n')
 		history.pop()
 		history.pop()
-		history.push_color(Color('#cab9c9') if item.speaker=='user' else VisualTheme.TEXT)
+		history.push_color(Color('#c8ccbc') if item.speaker=='user' else VisualTheme.TEXT)
 		history.add_text(item.text+'\n\n')
 		history.pop()
 func refresh():

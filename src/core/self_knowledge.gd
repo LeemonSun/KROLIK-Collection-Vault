@@ -32,8 +32,8 @@ func answer(raw,app):
 	if intent=='offline' and not app.local_runtime.installed() and app.provider_name!='llama_loopback':key='self_offline_uninstalled'
 	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.profiles.config(app.profile_name).get('cpu_threads',2)})}
 func system_text(locale):
-	var language={'ru':'Russian, feminine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return 'You are Signal, a friendly desktop companion. Answer directly in %s, usually in 1-3 sentences. Use general knowledge. Be clear when unsure. Saved notes are about the user. Never claim actions without executor results. You have no live screen vision or web page reading. Never invent your runtime, creator or capabilities.' % language
+	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
+	return 'You are Leemon, a friendly desktop companion. Answer directly in %s, usually in 1-3 sentences. Use general knowledge. Be clear when unsure. Saved notes are about the user. Never claim actions without executor results. You have no live screen vision or web page reading. Never invent your runtime, creator or capabilities.' % language
 func response_budget(raw,options):
 	var result=options.duplicate(true)
 	var text=raw.to_lower()

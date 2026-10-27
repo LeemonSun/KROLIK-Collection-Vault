@@ -5,7 +5,7 @@ var view
 var transition: Tween
 func _ready():
 	app=get_tree().root.get_node("App")
-	title="Signal — "+app.t("talk")
+	title="Leemon — "+app.t("talk")
 	borderless=true
 	transparent=true
 	transparent_bg=true
