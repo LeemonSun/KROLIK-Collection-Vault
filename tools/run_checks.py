@@ -31,6 +31,9 @@ def main():
         ("search", [engine, "--headless", "--path", str(ROOT), "--script",
                     "res://tests/test_search.gd", "--", "--test-mode"]),
         ("persistence",[sys.executable,str(ROOT/"tools/test_persistence.py"),engine]),
+        ("vision",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_vision.gd","--","--test-mode"]),
+        ("bundle",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_bundle.gd","--","--test-mode"]),
+        ("access",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_access.gd","--","--test-mode"]),
         ("voice",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_voice.gd","--","--test-mode"]),
         ("desktop060",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_desktop060.gd","--","--test-mode"]),
         ("leemon_tools",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_leemon_tools.gd","--","--test-mode"]),
@@ -57,16 +60,16 @@ def main():
             print(log, flush=True)
     lines = [
         "# Проверки приложения", "",
-        "Дата: 27.10.2026. Linux x86_64, Godot 4.7.2 standard.", "",
+        "Дата: 28.10.2026. Linux x86_64, Godot 4.7.2 standard.", "",
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
-        "", "Leemon 0.6: один мастер, шесть частей 2D-рига и одиннадцать процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
+        "", "Leemon 0.6: один мастер, шесть частей 2D-рига и шестнадцать процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
         "Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.",
         "Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.",
         "Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.",
-        "Модель Qwen3-1.7B не заменена. Короткие переводы ранее проверены на настоящем CPU worker; научная точность ограничена. Веса загружаются отдельно, не входят в ZIP.",
-        "ASR, собственный голос, понимание экрана и самостоятельное чтение веб-страниц пока отсутствуют. Каталог движений — план производства, а не готовые анимации.",
+        "Qwen3.5-2B Q4 заменяет старую модель. Реальные text/vision fixtures проверены отдельно; научная точность ограничена. Полный offline-пакет использует AI/ рядом с EXE, лёгкий пакет предлагает явную установку.",
+        "ASR реализован через локальный Whisper. Разовый анализ экрана реализован; real fixture в vision_real.txt. Общие Windows UIA-действия реализованы, но Windows приёмка впереди. Собственный голос и самостоятельное чтение веб-страниц отсутствуют. Каталог движений — план производства, а не готовые клипы.",
     ]
     (reports / "VALIDATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return 0 if all(ok for _, ok in outcomes) else 1

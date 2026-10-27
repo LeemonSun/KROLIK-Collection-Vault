@@ -5,7 +5,21 @@ func route(text):
 	if normalized in ["который час", "сколько времени", "what time is it", "现在几点", "现在几点？"]:return {"kind":"tool","tool":"clock.now","args":{"city":"local"}}
 	if normalized in ["мои напоминания","напоминания","show reminders","my reminders","查看提醒","/reminders"]:return {"kind":"tool","tool":"reminders.list","args":{}}
 	if normalized in ["пройдись","прогуляйся","walk around","走一走"]:return {"kind":"tool","tool":"companion.walk","args":{}}
+	if normalized in ["посмотри на экран","что на экране","что на экране?","опиши экран","look at my screen","describe my screen","what is on my screen","看看屏幕","描述屏幕","/screen"]:return {"kind":"tool","tool":"screen.describe","args":{}}
+	if normalized in ["что в этом окне","прочитай окно","посмотри элементы окна","inspect window","read selected window","读取窗口"]:return {"kind":"tool","tool":"access.inspect","args":{}}
 	var rx = RegEx.new()
+	rx.compile("^(?:нажми(?: (?:на|кнопку|вкладку))?|выбери вкладку|click|select tab|点击|选择标签)\\s+[«\"“]?(.+?)[»\"”]?[.!?。]?$" )
+	var access_hit=rx.search(text.strip_edges())
+	if access_hit:return {"kind":"tool","tool":"access.invoke","args":{"name":access_hit.get_string(1)}}
+	rx.compile("^(впиши|допиши|вставь|write|append|输入|追加)\\s+[«\"“]?(.+?)[»\"”]?\\s*[:：]\\s*([\\s\\S]+)$" )
+	access_hit=rx.search(text.strip_edges())
+	if access_hit:return {"kind":"tool","tool":"access.write","args":{"name":access_hit.get_string(2),"text":access_hit.get_string(3),"append":access_hit.get_string(1).to_lower() in ["допиши","append","追加"]}}
+
+	rx.compile("^(?:создай(?: мне)? (?:новый )?(?:документ(?: word)?|файл word)|create (?:a )?(?:new )?(?:word )?document|创建(?:Word)?文档)(?:\\s*[:：]\\s*([\\s\\S]*))?$" )
+	var word_hit=rx.search(normalized)
+	if word_hit:
+		var body=text.strip_edges().substr(word_hit.get_start(1)) if word_hit.get_start(1)>=0 else ""
+		return {"kind":"tool","tool":"documents.create","args":{"text":body,"format":"docx"}}
 	# This command creates a NEW file in Documents/Leemon; it never edits a focused window.
 	rx.compile("^(?:создай(?: мне)? (?:в (?:блокноте|блакноте) (?:новый )?файл|(?:новый )?файл в (?:блокноте|блакноте))|create (?:a )?(?:new )?(?:text )?file in notepad|在记事本中?新建(?:文本)?文件)(?:\\s*[:：]\\s*([\\s\\S]*))?[.!?。]?$" )
 	var document_hit=rx.search(normalized)

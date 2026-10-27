@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "id": "local_text_qwen3_1_7b_cpu_v1",
+  "id": "local_qwen35_2b_cpu_v2",
   "platform": "Windows",
   "runtime": {
     "version": "b11901",
@@ -43,14 +43,15 @@
     "executable": "llama-server.exe"
   },
   "model": {
-    "name": "Qwen3-1.7B-Q8_0",
-    "file": "Qwen3-1.7B-Q8_0.gguf",
-    "url": "https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/90862c4b9d2787eaed51d12237eafdfe7c5f6077/Qwen3-1.7B-Q8_0.gguf",
-    "bytes": 1834426016,
-    "sha256": "061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a",
-    "revision": "90862c4b9d2787eaed51d12237eafdfe7c5f6077",
+    "name": "Qwen3.5-2B-Q4_K_M",
+    "file": "Qwen3.5-2B-Q4_K_M.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/f6d5376be1edb4d416d56da11e5397a961aca8ae/Qwen3.5-2B-Q4_K_M.gguf",
+    "bytes": 1280835840,
+    "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+    "revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae",
     "license": "Apache-2.0",
-    "vision": false
+    "vision": true,
+    "publisher": "Unsloth GGUF conversion of Qwen/Qwen3.5-2B"
   },
   "download_policy": "explicit_button_only",
   "publish_to_git": false,

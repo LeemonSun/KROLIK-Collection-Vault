@@ -14,7 +14,7 @@ func _run():
 	var app=root.get_node('App')
 	var knowledge=Knowledge.new()
 	var examples={
-	 'скажи что либо':'greeting','скажи что-либо':'greeting','как дела?':'greeting',
+	 'скажи что либо':'greeting','скажи что-либо':'greeting',
 	 'какая модель у тебя внутри':'runtime_model','что ты за модель ии':'model','what model are you':'model','你是什么模型':'model',
 	 'тобишь тебя написал чат гпт и уже переписал?':'origin',
 	 'ты как то быстро отвечаешь ты сейчас работаетшь от интеренете или локально?:':'offline',
@@ -35,7 +35,7 @@ func _run():
 			check(not result.get('text','').is_empty() and not result.get('text','').begins_with('self_'),code+' localized trusted answer')
 		var memory=knowledge.answer('наш чат',app).text
 		check('{' not in memory,'No unfilled placeholders')
-		check('18' not in knowledge.answer('как дела',app).text,'No fake live temperature')
+		check(knowledge.answer('как дела',app).is_empty(),'Small talk goes to conversation model, no canned temperature or greeting loop')
 	for text in ['на какой мы планете?','что за модель атома Резерфорда','расскажи об истории OpenAI','как работает интернет','как снизить нагрузку в игре','объясни перемещение ферзя','скажи что-нибудь про Марс']:
 		check(knowledge.answer(text,app).is_empty(),'General question stays with LLM: '+text)
 	var source=app.profiles.config('lite')

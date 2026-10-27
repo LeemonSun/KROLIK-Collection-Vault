@@ -10,7 +10,8 @@ const ActionMenu = preload("res://src/desktop/action_menu.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 const BODY_PATH = "res://assets/characters/leemon_01/master_v1.png"
 const Rig=preload("res://src/animation/leemon_rig.gd")
-const BASE_SIZE=Vector2i(300,332)
+const BASE_SIZE=Vector2i(210,232)
+var user_scale=1.0
 var host: Window
 var position: Vector2i:
 	get: return host.position if is_instance_valid(host) else Vector2i.ZERO
@@ -81,8 +82,9 @@ func _ready():
 	host.exclude_from_capture = false
 	host.disable_3d=true
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,host.get_window_id())
+	user_scale=clampf(float(app.store.data.settings.get("character_scale",1.0)),0.75,1.5)
 	var usable = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
-	var fit = minf(1.0,minf(float(usable.size.y)/float(BASE_SIZE.y),float(usable.size.x)/float(BASE_SIZE.x)))
+	var fit = minf(1.0,minf(float(usable.size.y)/float(BASE_SIZE.y*user_scale),float(usable.size.x)/float(BASE_SIZE.x*user_scale)))*user_scale
 	var fitted = Vector2i(Vector2(BASE_SIZE)*fit)
 	host.min_size = fitted
 	size = fitted
@@ -221,7 +223,7 @@ func _process(delta):
 	if art.clip=="idle" and not reduced_motion and not dragging:
 		idle_variation-=delta
 		if idle_variation<=0:
-			art.play("stretch",2.2);idle_variation=randf_range(55,95)
+			art.play(["stretch","rest","nod"][randi()%3],2.2);idle_variation=randf_range(55,95)
 	elapsed += delta
 	boundary_elapsed+=delta
 	if boundary_elapsed>=1.0 and not dragging:
@@ -369,7 +371,7 @@ func clamp_to_bounds(candidate,bounds):
 
 func fit_to_bounds(bounds):
 	if not art or bounds.size.x<=0 or bounds.size.y<=0:return
-	var fit=minf(1.0,minf(float(bounds.size.y)/float(BASE_SIZE.y),float(bounds.size.x)/float(BASE_SIZE.x)))
+	var fit=minf(1.0,minf(float(bounds.size.y)/float(BASE_SIZE.y*user_scale),float(bounds.size.x)/float(BASE_SIZE.x*user_scale)))*user_scale
 	var fitted=Vector2i(Vector2(BASE_SIZE)*fit)
 	host.min_size=fitted
 	size=fitted
@@ -414,3 +416,8 @@ func _update_hit_region():
 	if outline.size()>3:
 		host.mouse_passthrough_polygon=outline
 		region_updates+=1
+
+func set_character_scale(value):
+	user_scale=clampf(float(value),0.75,1.5)
+	app._save_setting("character_scale",user_scale)
+	fit_to_bounds(DisplayServer.screen_get_usable_rect(current_screen))

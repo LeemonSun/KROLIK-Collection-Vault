@@ -157,7 +157,7 @@ func _build():
 	page_picker.fit_to_longest_item = false
 	page_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	page_picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var pages = ["talk","assistant_tools","settings","character","search","notes","modules","diagnostics","reminders"]
+	var pages = _pages()
 	for id in pages:
 		page_picker.add_item(App.t(id))
 	page_picker.select(maxi(0,pages.find(page)))
@@ -224,7 +224,7 @@ func _build_sidebar(parent):
 	var brand=_label("LEEMON",identity,21)
 	brand.autowrap_mode=TextServer.AUTOWRAP_OFF
 	brand.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	for id in ["talk","assistant_tools","character","notes","search","settings","modules","diagnostics","reminders"]:
+	for id in _pages():
 		var target=id
 		var button=_button(App.t(id),sidebar,func():page=target;_build())
 		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
@@ -267,6 +267,12 @@ func _build_character():
 	dash_button.expand_icon=true
 	dash_button.add_theme_constant_override("icon_max_width",16)
 	_label(App.t("character_controls_short"),content,12,true)
+	_label(App.t("character_size"),content,13,true)
+	var scale_row=HBoxContainer.new();content.add_child(scale_row)
+	for spec in [["75%",0.75],["100%",1.0],["125%",1.25],["150%",1.5]]:
+		_button(spec[0],scale_row,func():
+			if App.show_desktop():App.desktop_companion.set_character_scale(spec[1]))
+
 
 func _build_assistant_tools():
 	_label(App.t("assistant_tools"), content, 22)
@@ -415,6 +421,11 @@ func _build_settings():
 	var spacer = Control.new()
 	spacer.custom_minimum_size.y = 24
 	content.add_child(spacer)
+	var advanced=CheckButton.new();advanced.text=App.t("advanced_controls")
+	advanced.button_pressed=bool(App.store.data.settings.get("advanced_controls",false))
+	advanced.toggled.connect(func(value):App._save_setting("advanced_controls",value);_build())
+	content.add_child(advanced)
+	if not advanced.button_pressed:return
 	developer_toggle = CheckButton.new()
 	developer_toggle.text = App.t("dev_mode")
 	developer_toggle.button_pressed = App.provider_name == "llama_loopback"
@@ -504,3 +515,8 @@ func _build_reminders():
 		var text=App.t("reminder_row",{"text":item.text,"seconds":maxi(0,int(item.deadline)-int(Time.get_unix_time_from_system()))})
 		var label=_label(text,row,15);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		_button(App.t("reminder_cancel"),row,func():App.cancel_reminder(item.id);_build())
+
+func _pages():
+	var items=["talk","assistant_tools","character","notes","reminders","settings"]
+	if bool(App.store.data.settings.get("advanced_controls",false)):items.append_array(["search","diagnostics","modules"])
+	return items

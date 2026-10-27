@@ -5,7 +5,10 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('--fixture',type=Path,required=True);parser.add_argument('--godot',type=Path,required=True);a=parser.parse_args()
- model=a.fixture/'Qwen3-1.7B-Q8_0.gguf';server_path=a.fixture/'runtime/llama-b11901/llama-server'
+ model=a.fixture/json.loads((ROOT/'config/local_worker.json').read_text())['model']['file']
+ if not model.exists():model=a.fixture/'model.gguf'
+ server_path=a.fixture/'runtime/llama-server'
+ if not server_path.exists():server_path=a.fixture/'runtime/llama-b11901/llama-server'
  expected=json.loads((ROOT/'config/local_worker.json').read_text())['model']['sha256']
  assert hashlib.file_digest(model.open('rb'),'sha256').hexdigest()==expected
  with socket.socket() as reserve:reserve.bind(('127.0.0.1',0));port=reserve.getsockname()[1]

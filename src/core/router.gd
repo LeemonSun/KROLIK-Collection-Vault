@@ -2,7 +2,7 @@ extends RefCounted
 const DesktopIntent=preload("res://src/core/desktop_intent.gd")
 ## Deterministic multilingual commands bypass the language model.
 func route(raw):
-	var text = raw.strip_edges()
+	var text = preload("res://src/core/intent_spelling.gd").normalize(raw)
 	if text.is_empty():
 		return {"kind": "invalid", "key": "empty_input"}
 	if text.length() > 2048:

@@ -7,6 +7,8 @@ func check(ok,label):
 	checks+=1
 	if not ok:failures+=1;push_error(label)
 func _run():
+	var voice_app=root.get_node("App")
+	check(voice_app.speech_input.transcriber.base_path=="user://voice-v1" and voice_app.speech_input.transcriber.base_path!=voice_app.local_runtime.base_path,"Voice and text models have distinct install/receipt folders")
 	var helper=preload("res://src/tools/voice_audio.gd").new()
 	var input=AudioStreamWAV.new();input.format=AudioStreamWAV.FORMAT_16_BITS;input.mix_rate=48000;input.stereo=true
 	var data=PackedByteArray();data.resize(48000*2*2)
@@ -48,7 +50,7 @@ func _run():
 		while recognized.is_empty() and Time.get_ticks_msec()<deadline:await process_frame
 		check("fellow Americans" in recognized and "ask not" in recognized,"Real audio transcription matches public test recording")
 		check(engine.asr_pid<0 and engine.job_folder.is_empty() and engine.process_io.is_empty(),"Process and private transcript handles released")
-		check(DirAccess.get_directories_at(path.path_join("jobs")).is_empty(),"No WAV or TXT job folders after completion")
+		check(DirAccess.get_directories_at("user://voice-jobs").is_empty(),"No WAV or TXT job folders after completion")
 		check(engine.transcribe(audio,"en"),"Second job can start")
 		engine.cancel_transcription()
 		await create_timer(0.3).timeout

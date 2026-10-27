@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Companion Foundation",
   "publisher": null,
-  "version": "0.7.0-voice-preview",
+  "version": "0.8.0-desktop-preview",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [
@@ -14,7 +14,8 @@
   "telemetry": false,
   "models_bundled": false,
   "final_character_selected": false,
-  "project_stage": "local_voice_complete_screen_and_app_assistance_in_progress",
+  "project_stage": "integrated_local_voice_screen_and_scoped_windows_actions_private_preview",
   "character_concept_selected": true,
-  "pixel_direction": "deferred"
+  "pixel_direction": "deferred",
+  "optional_offline_bundle": true
 }

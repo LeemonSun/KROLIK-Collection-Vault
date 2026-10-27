@@ -68,7 +68,7 @@ function Open-Target($resolved) {
   $null=[Diagnostics.Process]::Start($start)
   for($attempt=0;$attempt -lt 24;$attempt++) {
    foreach($process in Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($resolved.path)) -ErrorAction SilentlyContinue) {
-    try{if($process.Path -ieq $resolved.path -and $process.MainWindowHandle -ne 0){return @{status='visible';name=$resolved.name}}}catch{}
+    try{if($process.Path -ieq $resolved.path -and $process.MainWindowHandle -ne 0){return @{status='visible';name=$resolved.name;identity=@{handle=[string]$process.MainWindowHandle.ToInt64();target_pid=$process.Id;started=[string]$process.StartTime.ToUniversalTime().Ticks;title=$process.MainWindowTitle;app=$process.ProcessName}}}}catch{}
    }
    Start-Sleep -Milliseconds 125
   }
@@ -109,11 +109,16 @@ public static class LeemonWindow {
 function Open-Document($request) {
  $path=[IO.Path]::GetFullPath([string]$request.path)
  $folder=[IO.Path]::GetFullPath((Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Leemon'))
- if([IO.Path]::GetDirectoryName($path) -ine $folder -or [IO.Path]::GetFileName($path) -notmatch '^Leemon-[0-9T-]+-[a-f0-9]{16}\.txt$' -or $request.sha256 -notmatch '^[a-f0-9]{64}$'){throw 'Not an owned draft'}
+ if([IO.Path]::GetDirectoryName($path) -ine $folder -or [IO.Path]::GetFileName($path) -notmatch '^Leemon-[0-9T-]+-[a-f0-9]{16}\.(?:txt|docx)$' -or $request.sha256 -notmatch '^[a-f0-9]{64}$'){throw 'Not an owned draft'}
  $file=Get-Item -LiteralPath $path
  $parent=Get-Item -LiteralPath $folder
- if(($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -or ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $file.Length -gt 8192 -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $request.sha256){throw 'Draft changed'}
+ if(($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -or ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $file.Length -gt 32768 -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $request.sha256){throw 'Draft changed'}
  $outcome=@{status='document_saved';name=$file.Name;path=$path}
+ if($file.Extension -ieq '.docx'){
+  $start=[Diagnostics.ProcessStartInfo]::new();$start.FileName=$path;$start.UseShellExecute=$true
+  try{$null=[Diagnostics.Process]::Start($start);$outcome.status='document_started'}catch{}
+  return $outcome
+ }
  $notepad=Join-Path $env:WINDIR 'System32/notepad.exe'
  if(-not (Test-Path -LiteralPath $notepad)){return $outcome}
  $start=[Diagnostics.ProcessStartInfo]::new();$start.FileName=$notepad;$start.UseShellExecute=$true

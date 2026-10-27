@@ -2,8 +2,10 @@ extends Node
 ## Explicit, pinned local model installation and an owned CPU worker. No cloud inference.
 signal status_changed
 signal ready_for_chat(port, token)
+var bundle_managed=false
+var bundled_verified=false
 var manifest = {}
-var base_path = "user://local-ai-v1"
+var base_path = "user://local-ai-v2"
 var status = "ai_not_installed"
 var detail = ""
 var downloading = false
@@ -60,6 +62,7 @@ func runtime_path():
 	return base_path.path_join("runtime")
 
 func installed():
+	if bundle_managed:return bundled_verified
 	if manifest.is_empty():
 		return false
 	var receipt_path = base_path.path_join("installed.json")
@@ -70,6 +73,7 @@ func installed():
 	return receipt is Dictionary and receipt.get("model_sha256") == manifest.model.sha256 and receipt.get("runtime_sha256") == manifest.runtime.sha256 and model != null and model.get_length() == int(manifest.model.bytes) and int(receipt.get("model_mtime", -1)) == FileAccess.get_modified_time(model_path()) and FileAccess.file_exists(runtime_path().path_join(manifest.runtime.executable))
 
 func install():
+	if bundle_managed:return false
 	if downloading or hash_thread != null or start_verifier!=null or starting or pid > 0:
 		return false
 	if OS.get_name() != manifest.get("platform"):
@@ -252,7 +256,11 @@ func _spawn_worker():
 func build_args(options, processor_count=-1):
 	if processor_count<1:processor_count=OS.get_processor_count()
 	var threads=clampi(int(options.get("cpu_threads",2)),1,mini(8,maxi(1,processor_count/2)))
-	return PackedStringArray(["--model", ProjectSettings.globalize_path(model_path()), "--host", "127.0.0.1", "--port", str(port), "--api-key", token, "--alias", "companion", "--ctx-size", str(clampi(int(options.get("context_tokens", 2048)), 1024, 4096)), "--threads", str(threads), "--threads-batch", str(threads), "--parallel", "1", "--n-gpu-layers", "0", "--batch-size", "128", "--ubatch-size", "128", "--poll", "0", "--prio", "-1", "--no-ui", "--jinja", "--reasoning", "off"])
+	var args=PackedStringArray(["--model", ProjectSettings.globalize_path(model_path()), "--host", "127.0.0.1", "--port", str(port), "--api-key", token, "--alias", "companion", "--ctx-size", str(clampi(int(options.get("context_tokens", 2048)), 1024, 4096)), "--threads", str(threads), "--threads-batch", str(threads), "--parallel", "1", "--n-gpu-layers", "0", "--batch-size", "128", "--ubatch-size", "128", "--poll", "0", "--prio", "-1", "--no-ui", "--jinja", "--reasoning", "off"])
+	args.append("--log-disable")
+	if not str(options.get("vision_projector", "")).is_empty():
+		args.append_array(PackedStringArray(["--mmproj",str(options.vision_projector),"--no-mmproj-offload","--image-max-tokens","256"]))
+	return args
 
 func _probe_complete(result, code, _headers, body):
 	if not starting:

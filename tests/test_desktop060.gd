@@ -42,6 +42,18 @@ func _run():
 	check(FileAccess.get_sha256(first.path)==first.sha256,"Receipt hash verifies actual file")
 	check(FileAccess.get_file_as_string(second.path).is_empty(),"Empty new file exists")
 	check(not writer.create_text("x".repeat(8193)).ok,"Document bounded")
+	var word=writer.create_docx("Привет 世界 & <tag>\nSecond paragraph")
+	check(word.ok and word.name.ends_with(".docx"),"Creates an actual new DOCX")
+	var zip=ZIPReader.new()
+	check(zip.open(word.path)==OK and Array(zip.get_files()).filter(func(name):return not name.ends_with("/")).size()==3,"Minimal standard DOCX package, no macros or external assets")
+	var xml=XMLParser.new()
+	check(xml.open_buffer(zip.read_file("word/document.xml"))==OK,"Word document XML parses")
+	var restored=""
+	while xml.read()==OK:
+		if xml.get_node_type()==XMLParser.NODE_TEXT:restored+=xml.get_node_data()
+	check(restored=="Привет 世界 & <tag>Second paragraph","XML escaping preserves exact multilingual text")
+	zip.close()
+	if not OS.get_environment("COMPANION_DOCX_OUTPUT").is_empty():DirAccess.copy_absolute(word.path,OS.get_environment("COMPANION_DOCX_OUTPUT"))
 	var old_writer=app.documents;app.documents=writer
 	app.submit("создай файл в блокноте: Реальный текст")
 	await process_frame

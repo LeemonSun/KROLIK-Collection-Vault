@@ -1,3 +1,3 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
-VOICE_TESTS: 16 checks, 0 failures; real_fixture=false; no physical microphone on this host
+VOICE_TESTS: 17 checks, 0 failures; real_fixture=false; no physical microphone on this host

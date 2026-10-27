@@ -13,9 +13,9 @@ var requested_language="auto"
 var process_io={}
 var cleanup_queue=[]
 var cleanup_ms=0
+func _init():base_path="user://voice-v1"
 func _ready():
 	if manifest.is_empty():manifest=JSON.parse_string(FileAccess.get_file_as_string("res://config/voice_worker.json"))
-	base_path="user://voice-v1" if base_path=="user://local-ai-v1" else base_path
 	super._ready()
 func install():
 	if asr_pid>0 or verify_thread!=null:return false
@@ -27,7 +27,7 @@ func transcribe(wav,language="auto"):
 	if not wav is AudioStreamWAV or wav.format!=AudioStreamWAV.FORMAT_16_BITS or wav.stereo or wav.mix_rate!=16000 or wav.data.size()>640000:return false
 	job_revision+=1;verify_revision=job_revision
 	requested_language=language
-	job_folder=base_path.path_join("jobs").path_join(Crypto.new().generate_random_bytes(16).hex_encode())
+	job_folder="user://voice-jobs".path_join(Crypto.new().generate_random_bytes(16).hex_encode())
 	if DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(job_folder))!=OK:return false
 	if wav.save_to_wav(job_folder.path_join("audio.wav"))!=OK:_cleanup_job();return false
 	var folder=ProjectSettings.globalize_path(runtime_path());var expected=manifest.runtime.files.duplicate(true)

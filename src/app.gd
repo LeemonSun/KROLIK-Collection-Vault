@@ -49,6 +49,7 @@ const DesktopActions=preload("res://src/tools/desktop_actions.gd")
 const ConversationMemory=preload("res://src/core/conversation_memory.gd")
 const ResponseGuard=preload("res://src/core/response_guard.gd")
 var desktop_actions
+var application_access
 var diagnostics
 var cleanup_task=-1
 var cleanup_result={}
@@ -67,15 +68,32 @@ var clock=preload("res://src/tools/world_clock.gd").new()
 var self_knowledge=SelfKnowledge.new()
 var idle_fps=24
 var speech_input
+const ScreenContext=preload("res://src/tools/screen_context.gd")
+var bundle_catalog
+var vision_asset
+var vision_frame={}
+var vision_question=""
+var screen_mode=false
+var screen_revision=0
+var screen_restore=[]
 var dictation_target
 var documents=preload("res://src/tools/text_documents.gd").new()
 
 func _ready():
+	bundle_catalog=preload("res://src/runtime/bundled_package.gd").new()
+	add_child(bundle_catalog)
+	vision_asset=preload("res://src/runtime/pinned_asset.gd").new()
+	add_child(vision_asset)
+	vision_asset.changed.connect(func():changed.emit())
 	speech_input=preload("res://src/tools/speech_input.gd").new()
 	add_child(speech_input)
 	speech_input.changed.connect(func():changed.emit())
 	speech_input.text_ready.connect(_dictation_ready)
 	speech_input.failed.connect(func(key):add_message("assistant",t(key));dictation_target=null)
+	application_access=preload("res://src/tools/application_access.gd").new()
+	add_child(application_access)
+	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values)))
+	application_access.changed.connect(func():changed.emit())
 	desktop_actions=DesktopActions.new()
 	add_child(desktop_actions)
 	desktop_actions.completed.connect(_desktop_completed)
@@ -108,6 +126,8 @@ func _ready():
 	add_child(local_runtime)
 	local_runtime.status_changed.connect(_runtime_changed)
 	local_runtime.ready_for_chat.connect(_runtime_ready)
+	bundle_catalog.changed.connect(_bundle_changed)
+	_bundle_changed()
 	if "--test-mode" not in OS.get_cmdline_user_args() and local_runtime.installed():
 		local_ai_enabled = bool(store.data.settings.get("local_ai_enabled", false))
 		# Load weights only after a real conversation/translation request.
@@ -156,7 +176,6 @@ func set_profile(name):
 		cancel()
 		local_runtime.stop()
 		_set_provider("unconfigured")
-		local_runtime.start.call_deferred(profiles.config(profile_name))
 	changed.emit()
 
 func _save_setting(key, value):
@@ -196,7 +215,7 @@ func submit(text):
 	if paused:
 		add_message("assistant", t("paused_message"))
 		return
-	if state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()):
+	if state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()) or (is_instance_valid(application_access) and application_access.pid>0):
 		add_message("assistant", t("busy_message"))
 		return
 	mark_active()
@@ -267,8 +286,19 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool.begins_with("access."):
+		state.reset()
+		match command.tool:
+			"access.inspect":application_access.inspect()
+			"access.invoke":application_access.act("invoke",command.args.name)
+			"access.write":application_access.act("write",command.args.name,command.args.text,command.args.get("append",false))
+		changed.emit();return
+	if command.tool=="screen.describe":
+		state.reset()
+		begin_screen(str(command.args.get("question","")))
+		return
 	if command.tool=="documents.create":
-		var result=documents.create_text(command.args.get("text",""))
+		var result=documents.create_docx(command.args.get("text","")) if command.args.get("format")=="docx" else documents.create_text(command.args.get("text",""))
 		if not result.ok:
 			add_message("assistant",t("document_failed"))
 			state.reset();changed.emit();return
@@ -352,20 +382,21 @@ func _on_answer(text):
 	if not translation_mode and guard.claims_action(text,pending_user_text):
 		_on_failure("model_action_unverified")
 		return
-	if not translation_mode and quality.repeated(pending_user_text,text,session_turns):
+	if not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
 		if response_retries<1:
 			response_retries+=1
 			_submit_model_text(pending_user_text,true)
 		else:_on_failure("model_repeated")
 		return
 	# Only complete user/assistant pairs enter model context.
-	if not pending_user_text.is_empty():
+	if not screen_mode and not pending_user_text.is_empty():
 		session_turns.append({"role": "user", "content": pending_user_text})
 		session_turns.append({"role": "assistant", "content": text})
 		while session_turns.size() > 8:
 			session_turns.pop_front()
 	pending_user_text = ""
 	translation_mode=false
+	_forget_screen()
 	var display_text=text
 	if provider is Llama and provider.last_truncated:display_text+="\n\n"+t("reply_limit")
 	add_message("assistant", display_text)
@@ -378,6 +409,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	_forget_screen()
 	queued_chat_text=""
 	queued_translation=[]
 	if provider:provider.cancel()
@@ -392,6 +424,8 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	if is_instance_valid(application_access):application_access.cancel_job()
+	_forget_screen()
 	if is_instance_valid(speech_input):speech_input.cancel()
 	dictation_target=null
 	response_retries=0
@@ -458,7 +492,7 @@ func install_local_ai():
 	return local_runtime.install()
 
 func start_local_ai():
-	if paused:
+	if paused or speech_input.busy() or screen_mode:
 		return false
 	local_ai_enabled = true
 	_save_setting("local_ai_enabled", true)
@@ -479,6 +513,9 @@ func _runtime_ready(port, token):
 		return
 	_set_provider("local_worker")
 	provider.configure_local(port, token)
+	if screen_mode:
+		_submit_screen()
+		return
 	if not queued_translation.is_empty():
 		var prepared=queued_translation
 		queued_translation=[]
@@ -490,10 +527,9 @@ func _runtime_ready(port, token):
 		_submit_model_text(text)
 
 func _runtime_changed():
-	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and not queued_chat_text.is_empty():
+	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode):
 		_on_failure(local_runtime.status)
-	if local_ai_enabled and local_runtime.status == "ai_installed":
-		local_runtime.start.call_deferred(profiles.config(profile_name))
+	# Installing only prepares files. Heavy weights wake on the next actual request.
 	changed.emit()
 
 func show_desktop():
@@ -538,6 +574,7 @@ func _desktop_completed(result):
 	if result.get("operation") in ["metrics","overlay"]:return
 	if state.current!="executing":return
 	var status=str(result.get("status","failed"))
+	if status=="visible" and result.get("identity") is Dictionary:application_access.adopt(result.identity)
 	if not pending_document.is_empty():
 		result=result.merged(pending_document)
 		if status not in ["document_opened","document_started"]:status="document_saved"
@@ -656,4 +693,71 @@ func _dictation_ready(text):
 		editor.insert_text_at_caret(text)
 		editor.grab_focus()
 	request_motion("work.note_saved")
+	changed.emit()
+
+func begin_screen(question=""):
+	if paused or state.current!="idle" or speech_input.busy() or not queued_chat_text.is_empty():return false
+	if not local_runtime.installed():add_message("assistant",t("vision_need_ai"));return false
+	if not vision_asset.installed():add_message("assistant",t("vision_install_hint"));return false
+	if local_runtime.manifest.model.get("sha256")!=vision_asset.manifest.get("compatible_model_sha256"):add_message("assistant",t("vision_failed"));return false
+	if DisplayServer.get_name()=="headless":add_message("assistant",t("capture_failed"));return false
+	voice.stop();screen_mode=true;screen_revision+=1
+	var revision=screen_revision
+	vision_question=question.strip_edges().left(600) if not question.strip_edges().is_empty() else t("vision_default_question")
+	state.transition("executing");changed.emit()
+	var screen=chat_window.current_screen if is_instance_valid(chat_window) and chat_window.visible else DisplayServer.get_primary_screen()
+	screen_restore=[]
+	for panel in [chat_window,control_panel.get_window() if is_instance_valid(control_panel) else null]:
+		if is_instance_valid(panel) and panel.visible and panel!=get_tree().root:
+			screen_restore.append(panel);panel.hide()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if revision!=screen_revision:return false
+	var image=DisplayServer.screen_get_image(screen)
+	vision_frame=ScreenContext.encode(image)
+	_restore_screen_panels()
+	if vision_frame.is_empty():_on_failure("capture_failed");return false
+	add_message("user",t("vision_requested") if question.strip_edges().is_empty() else question)
+	local_runtime.stop()
+	var options=profiles.config(profile_name).duplicate(true)
+	options["vision_projector"]=ProjectSettings.globalize_path(vision_asset.path())
+	options["cpu_threads"]=mini(2,int(options.cpu_threads))
+	local_ai_enabled=true
+	if not local_runtime.start(options):_on_failure(local_runtime.status);return false
+	request_motion("dialogue.think_loop");changed.emit();return true
+func _submit_screen():
+	if not ScreenContext.fresh(vision_frame,Time.get_ticks_msec()):_on_failure("vision_stale");return
+	state.reset();state.transition("thinking")
+	pending_user_text=vision_question
+	var payload=ScreenContext.messages(vision_frame,vision_question,l10n.locale)
+	vision_frame={};vision_question=""
+	local_runtime.generation_busy=true
+	provider.submit(payload,{"multimodal":true,"max_tokens":160,"context_tokens":2048})
+	changed.emit()
+func _restore_screen_panels():
+	for panel in screen_restore:
+		if is_instance_valid(panel):panel.show()
+	screen_restore=[]
+func _forget_screen():
+	screen_revision+=1;vision_frame={};vision_question=""
+	_restore_screen_panels()
+	if screen_mode and is_instance_valid(local_runtime):
+		local_runtime.stop();local_runtime.status="ai_sleeping"
+	screen_mode=false
+
+func _bundle_changed():
+	if not is_instance_valid(local_runtime) or not is_instance_valid(speech_input):return
+	for key in bundle_catalog.packages:
+		var entry=bundle_catalog.packages[key]
+		var engine=local_runtime if key=="text" else (speech_input.transcriber if key=="voice" else vision_asset)
+		if not entry.ready and bundle_catalog.finished:
+			engine.bundle_managed=false;engine.bundled_verified=false
+			if key=="vision":engine.directory="user://vision-v1"
+			else:engine.base_path="user://local-ai-v2" if key=="text" else "user://voice-v1"
+			engine.status="ai_hash_failed"
+			continue
+		engine.bundle_managed=true;engine.bundled_verified=entry.ready
+		if key=="vision":engine.directory=entry.folder
+		else:engine.base_path=entry.folder
+		engine.status=("vision_installed" if key=="vision" else "ai_installed") if entry.ready else "ai_verifying"
 	changed.emit()

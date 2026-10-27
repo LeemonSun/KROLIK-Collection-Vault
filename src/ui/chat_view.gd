@@ -19,6 +19,13 @@ var chips=[]
 var footer_hint
 var install_mode="text"
 var install_row
+var window_button
+var window_picker
+var choose_window=false
+var target_row
+var target_label
+var confirmation_button
+var screen_button
 var voice_button
 var suggestions
 var setup_hint
@@ -63,6 +70,17 @@ func _ready():
 	status_label.add_theme_font_size_override('font_size',12)
 	status_label.add_theme_color_override('font_color',VisualTheme.MUTED)
 	status_row.add_child(status_label)
+	target_row=HBoxContainer.new();layout.add_child(target_row)
+	target_label=Label.new();target_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	target_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	target_label.add_theme_font_size_override("font_size",11)
+	target_label.add_theme_color_override("font_color",VisualTheme.RED);target_row.add_child(target_label)
+	var inspect_button=_button("↻",target_row,func():app.application_access.inspect())
+	inspect_button.tooltip_text=app.t("access_read");VisualTheme.quiet(inspect_button)
+	VisualTheme.quiet(_button("×",target_row,func():app.application_access.clear_target()))
+	confirmation_button=_button("",layout,func():app.application_access.confirm())
+	confirmation_button.clip_text=true;confirmation_button.visible=false
+
 	setup_hint=Label.new()
 	setup_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	setup_hint.add_theme_font_size_override('font_size',12)
@@ -72,15 +90,9 @@ func _ready():
 	installer.add_child(setup_hint)
 	install_row=HBoxContainer.new()
 	installer.add_child(install_row)
-	history=RichTextLabel.new()
-	history.bbcode_enabled=false
-	history.selection_enabled=true
-	history.scroll_active=true
-	history.scroll_following=true
-	history.fit_content=false
+	history=preload("res://src/ui/conversation_view.gd").new()
 	history.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	history.custom_minimum_size.y=24
-	history.add_theme_constant_override('line_separation',5)
 	layout.add_child(history)
 	suggestions=HBoxContainer.new()
 	suggestions.add_theme_constant_override('separation',6)
@@ -119,6 +131,16 @@ func _ready():
 	actions.add_child(footer_hint)
 	setup_button=_button('AI',install_row,_setup_ai)
 	setup_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	window_button=_button("",actions,_windows)
+	window_button.icon=load("res://assets/ui/windows.svg")
+	window_button.expand_icon=true;window_button.add_theme_constant_override("icon_max_width",19)
+	window_button.custom_minimum_size=Vector2(36,34);VisualTheme.quiet(window_button)
+	window_picker=PopupMenu.new();add_child(window_picker)
+	window_picker.id_pressed.connect(func(index):app.application_access.bind(index))
+	screen_button=_button("",actions,_screen)
+	screen_button.icon=load("res://assets/ui/screen.svg")
+	screen_button.expand_icon=true;screen_button.add_theme_constant_override("icon_max_width",19)
+	screen_button.custom_minimum_size=Vector2(36,34);VisualTheme.quiet(screen_button)
 	voice_button=_button('',actions,_voice)
 	voice_button.icon=load('res://assets/ui/mic.svg')
 	voice_button.expand_icon=true
@@ -146,7 +168,7 @@ func _ready():
 	var progress_timer=Timer.new();progress_timer.wait_time=0.25;progress_timer.autostart=true
 	add_child(progress_timer)
 	progress_timer.timeout.connect(func():
-		if is_visible_in_tree() and (app.speech_input.busy() or app.speech_input.installing() or app.local_runtime.downloading):refresh())
+		if is_visible_in_tree() and (app.speech_input.busy() or app.speech_input.installing() or app.local_runtime.downloading or app.vision_asset.installing()):refresh())
 func _button(text,parent,callback):
 	var button=Button.new()
 	button.text=text
@@ -179,26 +201,18 @@ func submit_current():
 	app.submit(text)
 	editor.grab_focus()
 func _setup_ai():
-	var engine=app.speech_input.transcriber if install_mode=="voice" else app.local_runtime
+	var engine=app.vision_asset if install_mode=="screen" else (app.speech_input.transcriber if install_mode=="voice" else app.local_runtime)
 	if engine.downloading and engine.hash_thread==null:
 		engine.cancel_install();refresh();return
-	if install_mode=="voice":app.speech_input.install()
+	if install_mode=="screen":app.vision_asset.install()
+	elif install_mode=="voice":app.speech_input.install()
 	elif app.local_runtime.installed():app.start_local_ai()
 	else:app.install_local_ai()
 	refresh()
 func _on_message(_speaker,_text):
 	_render_history()
 func _render_history():
-	history.clear()
-	for item in app.messages:
-		history.push_font_size(11)
-		history.push_color(VisualTheme.MUTED if item.speaker=='user' else VisualTheme.RED)
-		history.add_text((app.t('chat_you').to_upper() if item.speaker=='user' else 'LEEMON')+'\n')
-		history.pop()
-		history.pop()
-		history.push_color(Color('#c8ccbc') if item.speaker=='user' else VisualTheme.TEXT)
-		history.add_text(item.text+'\n\n')
-		history.pop()
+	history.set_messages(app.messages,app.t('chat_you').to_upper())
 func refresh():
 	if not is_instance_valid(status_label):return
 	if last_locale!=app.l10n.locale:
@@ -213,32 +227,52 @@ func refresh():
 		footer_hint.text=app.t('composer_keys')
 		for chip in chips:chip.button.text=app.t(chip.key)
 		_render_history()
-	suggestions.visible=size.y>=350
+	target_row.visible=not app.application_access.target.is_empty() and size.y>=340
+	target_label.text=app.t("access_target",{"title":app.application_access.target.get("title","")})
+	confirmation_button.visible=not app.application_access.pending.is_empty() and app.application_access.last_result.get("status")=="confirmation_required"
+	confirmation_button.text=app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
+	if choose_window and not app.application_access.windows.is_empty():
+		choose_window=false;window_picker.clear()
+		for index in range(app.application_access.windows.size()):
+			var item=app.application_access.windows[index]
+			window_picker.add_item((str(item.app)+" · "+str(item.title)).left(38),index)
+		var point=Vector2i(window_button.get_screen_position())
+		var screen=DisplayServer.get_screen_from_rect(Rect2i(point,Vector2i.ONE))
+		var bounds=DisplayServer.screen_get_usable_rect(screen if screen>=0 else DisplayServer.get_primary_screen())
+		var extent=Vector2i(mini(560,bounds.size.x-24),mini(420,bounds.size.y-24))
+		window_picker.max_size=extent
+		window_picker.popup(Rect2i(Vector2i(clampi(point.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-extent.x)),clampi(point.y-extent.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-extent.y))),extent))
+	suggestions.visible=size.y>=400 and not confirmation_button.visible
+
 	var voice_busy=app.speech_input.busy()
-	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy
+	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
 	send_button.disabled=app.paused or busy
 	stop_button.disabled=not busy
-	var installed=app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed()
-	var installing=app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null
+	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())
+	var installing=app.vision_asset.installing() if install_mode=='screen' else (app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null)
 	setup_hint.visible=size.y>=380 and not installed
-	setup_hint.text=app.t('voice_install_hint' if install_mode=='voice' else 'chat_setup_hint')
-	install_row.visible=not installed
+	setup_hint.text=app.t('vision_install_hint' if install_mode=='screen' else ('voice_install_hint' if install_mode=='voice' else 'chat_setup_hint'))
+	install_row.visible=not installed and not confirmation_button.visible
 	setup_button.visible=not installed
-	var engine=app.speech_input.transcriber if install_mode=='voice' else app.local_runtime
-	setup_button.text=app.t('cancel_install') if engine.downloading else app.t('voice_install' if install_mode=='voice' else 'chat_install')
-	setup_button.disabled=app.paused or engine.hash_thread!=null
+	var engine=app.vision_asset if install_mode=='screen' else (app.speech_input.transcriber if install_mode=='voice' else app.local_runtime)
+	setup_button.text=app.t('cancel_install') if engine.downloading else app.t('vision_install' if install_mode=='screen' else ('voice_install' if install_mode=='voice' else 'chat_install'))
+	setup_button.disabled=app.paused or engine.hash_thread!=null or engine.bundle_managed
 	editor.editable=not voice_busy
+	window_button.disabled=app.paused or busy
+	window_button.tooltip_text=app.t("access_pick_button")
+	screen_button.disabled=app.paused or busy
+	screen_button.tooltip_text=app.t("vision_button")
 	voice_button.disabled=app.paused or (busy and app.speech_input.state!='recording')
 	voice_button.tooltip_text=app.t('voice_finish' if app.speech_input.state=='recording' else 'voice_start')
 	voice_button.modulate=VisualTheme.RED if voice_busy else Color.WHITE
 	if voice_busy:
 		status_label.text=app.t('voice_'+app.speech_input.state)
 		if app.speech_input.state=='recording':status_label.text+=' · %d / 20 s' % int(app.speech_input.microphone.elapsed)
-	elif install_mode=='voice' and installing:
-		status_label.text=app.t(app.speech_input.transcriber.status)
-		var progress=app.speech_input.transcriber.progress()
+	elif installing:
+		status_label.text=app.t(engine.status)
+		var progress=engine.progress()
 		if progress>=0:status_label.text+=' · %d%%' % int(progress*100)
 
 func _draw():
@@ -248,4 +282,20 @@ func _voice():
 	if not app.speech_input.installed():
 		install_mode="voice";refresh();return
 	app.begin_dictation(editor)
+	refresh()
+
+func _screen():
+	if not app.local_runtime.installed():install_mode="text";refresh();return
+	if not app.vision_asset.installed():install_mode="screen";refresh();return
+	var question=editor.text.strip_edges()
+	# Preserve the draft if capture cannot begin. Never send on install completion.
+	if app.state.current=="idle" and not app.paused:
+		var accepted=await app.begin_screen(question)
+		if accepted and editor.text.strip_edges()==question:editor.clear()
+	refresh()
+
+func _windows():
+	if app.paused:return
+	choose_window=true
+	if not app.application_access.list_windows():choose_window=false
 	refresh()

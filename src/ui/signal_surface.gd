@@ -1,25 +1,22 @@
 extends PanelContainer
-## Drawn locally: cut corners, a signal seam and restrained material layers.
+## Original Leemon surface_style: quiet graphite, warm upper light and a citrus-ring signature.
 const V=preload('res://src/ui/visual_theme.gd')
 var inset=14
+var surface_style
+var header
 func _ready():
 	var empty=StyleBoxEmpty.new()
-	empty.content_margin_left=inset
-	empty.content_margin_right=inset
-	empty.content_margin_top=inset
-	empty.content_margin_bottom=inset
+	empty.content_margin_left=inset;empty.content_margin_right=inset
+	empty.content_margin_top=inset;empty.content_margin_bottom=inset
 	add_theme_stylebox_override('panel',empty)
-	resized.connect(queue_redraw)
-	mouse_filter=Control.MOUSE_FILTER_PASS
+	surface_style=V.box(V.INK,16,0);surface_style.set_border_width_all(1);surface_style.border_color=Color('#3b403d')
+	header=V.box(V.PANEL,15,0);header.corner_radius_bottom_left=0;header.corner_radius_bottom_right=0
+	resized.connect(queue_redraw);mouse_filter=Control.MOUSE_FILTER_PASS
 func _draw():
-	var w=size.x
-	var h=size.y
-	var outline=PackedVector2Array([Vector2(0,10),Vector2(10,0),Vector2(w-26,0),Vector2(w,26),Vector2(w,h-10),Vector2(w-10,h),Vector2(22,h),Vector2(0,h-22)])
-	draw_colored_polygon(outline,V.INK)
-	draw_colored_polygon(PackedVector2Array([Vector2(1,11),Vector2(11,1),Vector2(w-27,1),Vector2(w-2,26),Vector2(w-2,70),Vector2(1,70)]),V.PANEL)
-	draw_line(Vector2(16,1),Vector2(w-32,1),Color('#4f5146'),1,true)
-	draw_line(Vector2(1,78),Vector2(1,h-32),Color('#44483e'),1,true)
-	draw_line(Vector2(w-25,2),Vector2(w-2,25),V.RED,2,true)
-	draw_line(Vector2(2,h-21),Vector2(21,h-2),V.RED,2,true)
-	for i in range(3):
-		draw_line(Vector2(w-48-i*7,h-5),Vector2(w-45-i*7,h-10),Color('#696449'),1,true)
+	if not surface_style:return
+	draw_style_box(surface_style,Rect2(Vector2.ZERO,size))
+	draw_style_box(header,Rect2(Vector2.ONE,Vector2(maxf(0,size.x-2),66)))
+	draw_line(Vector2(18,67),Vector2(size.x-18,67),Color('#3b403a'),1,true)
+	var origin=Vector2(size.x-30,size.y-28)
+	draw_arc(origin,12,PI*0.15,PI*1.4,24,Color('#71613a'),1.2,true)
+	draw_line(origin+Vector2(-3,-11),origin+Vector2(3,-14),V.RED,1.5,true)

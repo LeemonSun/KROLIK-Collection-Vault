@@ -40,5 +40,5 @@ func _run():
 		check(app.session_turns.is_empty() and app.pending_user_text.is_empty() and app.provider.request_messages.is_empty(),"Clipboard source not retained in conversation context")
 		print("REAL_TRANSLATION ",JSON.stringify({"locale":test[0],"input":test[1],"answer":app.messages[-1].text,"usage":app.provider.last_usage}))
 	check(app.desktop_actions.pid<0 and app.desktop_actions.last_result.is_empty(),"Generated text causes no desktop effects")
-	print("REAL_LEEMON_TESTS: %s checks, %s failures; unchanged Qwen3-1.7B Q8_0, CPU 2 threads" % [checks,failures])
+	print("REAL_LEEMON_TESTS: %s checks, %s failures; Qwen3.5-2B Q4_K_M, CPU 2 threads" % [checks,failures])
 	quit(0 if failures==0 else 1)

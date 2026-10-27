@@ -4,7 +4,7 @@
   "profiles": {
     "lite": {
       "animation_fps": 24,
-      "model_class": "1-2B",
+      "model_class": "2B shared text/vision",
       "max_tokens": 96,
       "context_tokens": 2048,
       "cpu_threads": 2,
@@ -15,25 +15,25 @@
     },
     "balanced": {
       "animation_fps": 30,
-      "model_class": "4B",
+      "model_class": "2B shared text/vision",
       "max_tokens": 160,
       "context_tokens": 4096,
-      "cpu_threads": 4,
+      "cpu_threads": 2,
       "max_parallel_heavy_jobs": 1,
       "idle_unload_seconds": 120,
       "screen_min_interval_ms": 1500,
-      "model_memory_budget_mib": 5120
+      "model_memory_budget_mib": 3072
     },
     "quality": {
       "animation_fps": 30,
-      "model_class": "7-8B",
+      "model_class": "2B shared text/vision",
       "max_tokens": 256,
       "context_tokens": 4096,
       "cpu_threads": 4,
       "max_parallel_heavy_jobs": 1,
       "idle_unload_seconds": 180,
       "screen_min_interval_ms": 1000,
-      "model_memory_budget_mib": 8192
+      "model_memory_budget_mib": 4096
     }
   }
 }

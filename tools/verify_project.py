@@ -116,7 +116,7 @@ def validate():
     if worker.get("runtime", {}).get("version") != "b11901" or not worker.get("runtime", {}).get("files"):
         errors.append("Local runtime pin/allowlist missing")
     for part in [worker.get("runtime", {}), worker.get("model", {})]:
-        if not str(part.get("url", "")).startswith(("https://github.com/ggml-org/llama.cpp/releases/download/b11901/", "https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/90862c4b9d2787eaed51d12237eafdfe7c5f6077/")) or len(str(part.get("sha256", ""))) != 64:
+        if not str(part.get("url", "")).startswith(("https://github.com/ggml-org/llama.cpp/releases/download/b11901/", "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/f6d5376be1edb4d416d56da11e5397a961aca8ae/")) or len(str(part.get("sha256", ""))) != 64:
             errors.append("Local package not pinned to reviewed source/hash")
     design = parsed.get("characters/signal_01/design.json", {})
     master = ROOT / "characters/signal_01" / design.get("source_of_truth", "missing")

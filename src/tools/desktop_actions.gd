@@ -1,5 +1,7 @@
 extends Node
 signal completed(result)
+var helper_resource="res://native/desktop_bridge.ps1"
+var support_directory="user://support"
 var pid=-1
 var nonce=""
 var job=""
@@ -29,9 +31,9 @@ func _request(payload):
 	if OS.get_name()!="Windows" and not test_runner:
 		_finish.call_deferred({"status":"unsupported"})
 		return true
-	var support="user://support"
+	var support=support_directory
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(support+"/jobs"))
-	var helper=FileAccess.get_file_as_bytes("res://native/desktop_bridge.ps1")
+	var helper=FileAccess.get_file_as_bytes(helper_resource)
 	var output=FileAccess.open(support+"/desktop_bridge.ps1",FileAccess.WRITE)
 	if not output:
 		_finish.call_deferred({"status":"failed"});return true

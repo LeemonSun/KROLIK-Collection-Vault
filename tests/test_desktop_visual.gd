@@ -71,6 +71,13 @@ func _run():
 	check(not app.speech_input.microphone.recording and app.speech_input.microphone.player==null,"Voice setup does not activate microphone")
 	check(Rect2(Vector2.ZERO,Vector2(app.chat_window.size)).encloses(view.voice_button.get_global_rect()),"Mic button fits native chat")
 	view.install_mode="text";view.refresh()
+	app.application_access.windows=[]
+	for i in range(24):app.application_access.windows.append({"app":"Test app","title":"Synthetic window "+str(i)})
+	view.choose_window=true;view.refresh();await frame()
+	check(view.window_picker.visible,"Application picker opens from the chat toolbar")
+	check(view.window_picker.size.x<=600 and view.window_picker.size.y<=450,"Long application list is bounded on screen")
+	view.window_picker.hide();app.application_access.windows=[]
+
 	for language in ["ru","en","zh-Hans"]:
 		app.set_locale(language)
 		main.open_panel("talk")
@@ -138,7 +145,7 @@ func _run():
 		check(desktop._hit_polygon.size()==desktop.normalized_outline.size(),"Click outline follows scale")
 	desktop.recover()
 	await frame()
-	check(desktop.size==Vector2i(300,332),"Original size restored on normal monitor")
+	check(desktop.size==Vector2i(210,232),"Original size restored on normal monitor")
 	main.open_panel("diagnostics")
 	await create_timer(0.2).timeout
 	await frame()

@@ -1,27 +1,26 @@
 {
   "schema_version": 1,
-  "app_version": "0.7.0-voice-preview",
-  "checkpoint_status": "voice_block_saved_vision_candidate_measured",
-  "current_task": "Voice block implemented and tested. Real 2B+matched projector vision fixture passed RU/EN/zh questions; screen capture and model adoption are NOT integrated yet. User asks about shutdown: do not promise unattended work after session ends.",
-  "next_action": "Continue NIGHT_PASS plan from explicit screenshot/VLM integration, generic app actions, then consumer UX and final verified package. The interrupted 0.7 ZIP is not a validated deliverable; rebuild before use.",
+  "app_version": "0.8.0-desktop-preview",
+  "checkpoint_status": "integrated_voice_vision_uia_consumer_ui_build_ready_validation_finishing",
+  "current_task": "0.8 integrated: local Whisper draft input; Qwen3.5-2B text+one-shot vision; optional offline AI layout; selected-window generic UIA actions; consumer chat/size/motion polish; DOCX creation and leading-verb typo tolerance. Packaging complete offline ZIP and checking exported content.",
+  "next_action": "Read RESUME.md and docs/PREVIEW_README.txt; verify latest reports and binary hashes. Finish offline bundle upload and artifact identities; checkpoint again. No public Steam release claim.",
   "read_next": [
     "recovery/NIGHT_PASS.md"
   ],
   "known_limits": [
-    "Windows EXE and physical microphone not tested here; native X11/PowerShell Linux only",
-    "Current application still uses Qwen3-1.7B; candidate Qwen3.5-2B and projector are not integrated",
-    "11 procedural cutout states; not finished frame clips or facial rig",
-    "Basic explicit microphone/Whisper input implemented; no custom voice, integrated VLM, browser page reader or Steam Cloud",
-    "Models remain separate downloads in current app",
-    "Concept art is internal; commercial release gate remains blocked"
+    "Windows EXE, microphone hardware, UIA actions, transparency and voices not executed on actual Windows",
+    "2B factual accuracy limited; no continuously observed screen or autonomous browser reader",
+    "16 authored procedural cutout states, not thousands of hand-drawn/3D clips",
+    "UIA needs an accessible selected window and exact named elements; multiline custom editors may be unsupported",
+    "Concept art and brand are not commercially cleared; Steam gate remains blocked"
   ],
   "validation": [
-    "Recovered 0.6 ZIP exact SHA",
-    "14 existing source test groups PASS after restoration",
-    "89 source X11 regressions PASS incl actual first-open composer and stable region",
-    "12 recovery Python tests plus offline Node bridge tests PASS",
-    "Voice:23 checks with actual Whisper and English JFK audio,16 unit checks,15 standard groups planned; physical mic/Windows not tested",
-    "Qwen3.5-2B+matched F16 projector: actual CPU 2-thread inference on synthetic image; RU SAVE, EN three squares, zh Total42 all correct, ~9.4–10.2 seconds each; not an integrated app feature"
+    "18 standard source groups PASS before last minor UI changes; final rerun in progress",
+    "94 native X11 checks PASS, including bounded 24-window picker",
+    "20 vision checks PASS using actual 2B+matched projector through Godot JPEG/HTTP pipeline RU/EN/zh",
+    "24 voice checks PASS using real Whisper and public English audio",
+    "11 actual complete bundle verification/cache tests PASS",
+    "24 desktop helper and16 accessibility helper checks PASS; C# compiled, Windows API not executed"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.6.0.zip",

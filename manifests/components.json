@@ -88,6 +88,16 @@
       "license_file": "legal/upstream/WHISPER_MODEL_LICENSE.txt",
       "status": "implemented_optional_weights_not_in_git",
       "source_url": "https://huggingface.co/ggerganov/whisper.cpp/tree/5359861c739e955e79d9a303bcbc70fb988958b1"
+    },
+    {
+      "id": "qwen35-2b-gguf",
+      "name": "Qwen3.5-2B Q4_K_M and matched F16 projector",
+      "license": "Apache-2.0",
+      "license_file": "legal/upstream/Qwen3.5-2B-LICENSE.txt",
+      "source": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/tree/f6d5376be1edb4d416d56da11e5397a961aca8ae",
+      "upstream": "Qwen/Qwen3.5-2B",
+      "status": "pinned_optional_local_model_actual_text_and_image_fixtures",
+      "bundled_in_source_archive": false
     }
   ]
 }

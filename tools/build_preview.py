@@ -25,28 +25,8 @@ def main():
  exe=out/'Companion.exe' 
  if not exe.exists() or exe.read_bytes()[:2]!=b'MZ':raise SystemExit('Missing PE executable')
  shutil.copytree(ROOT/'legal',out/'legal',dirs_exist_ok=True)
- (out/'START_HERE.txt').write_text('''LEEMON COMPANION PREVIEW 0.6.0 — WINDOWS x64\n\n1. Unzip the entire folder. Run Companion.exe. No Godot or Python installation required.\n2. The full-body desktop character is the main window. Click: chat. Right click: quick menu. Drag to move.
-   Restore from the taskbar, or click the companion in the Windows notification area to recover it.
-   Right-click its taskbar icon and Close window to exit. Missing art opens a visible recovery panel.\n3. Click the character to open chat. Installed AI wakes on the first message.
-   If AI is not installed, use the Install AI button right inside chat.\n   First setup downloads about 1.86 GB from official sources and needs about 2.5 GB free disk space.\n   After setup, chat/translation works locally. No cloud API key.\n4. The active character is now the Leemon lemon mascot, with one graphite/amber style.
-   Six articulated cutout parts share one source texture. Eleven procedural motion states:
-   idle, hello, thinking, talking, success, hesitation, grab, walking, listening, stretch and settling.
-   These are authored cutout motions, not finished hand-drawn animation clips or a 3D model.
-   Natural commands: "open notepad", "открой проводник", "打开记事本".
-   Launches a matching installed Start Menu app or known folder. Only the executable is launched,
-   never generated code. Ambiguous names ask for clarification. "Started" does not confirm a window.
-   New commands: "time in Beijing", "время в Москве", "北京几点" work offline.
-   The IANA 2026e/CLDR directory covers 597 zones, not every city in the world.
-   "remind me in 5 minutes check download" / "напомни через 5 минут проверить загрузку".
-   Reminders persist; when the app is closed, overdue reminders appear at next startup.
-   "translate clipboard to Russian" / "переведи буфер на английский" uses only the
-   owned local worker, reads only after explicit command, and does not save the source.
-   Notes, timers, reminders, clocks and browser handoff work without the model.
-   Settings: opt-in chat saving (100 messages / 256 KiB), Delete history, per-note Delete.
-   Usage page: process RAM and sampled CPU for the app and its owned AI worker.
-   Unzip this complete package into an EMPTY folder; run Companion.exe.
-   Your existing model and profile stay in AppData. No BAT/CMD patches needed.\n5. Close the app to stop its worker; Stop AI frees model memory; pause stops AI and effects.\n\nThis is a private test build, not the final Steam release. Detailed facial animation, ASR, finished frame clips,\nvisual screen understanding and browser page reading are NOT ready. Movement uses an articulated 2D cutout with authored curves. System voices depend on your Windows installation.\nWindows execution, transparency, speech and capture still need a real user test.\nIf local AI cannot start, install the official Microsoft Visual C++ x64 runtime:\nhttps://aka.ms/vs/17/release/vc_redist.x64.exe\nThis system dependency is not automatically installed in this preview.\nProject source and checkpoint: https://github.com/LeemonSun/KROLIK-Collection-Vault\n\nDownloaded AI data: %APPDATA%/Godot/app_userdata/Companion Foundation/local-ai-v1\nLicenses are included under legal/. Character concept art was AI-generated; no exclusive\ncopyright claim or commercial asset clearance is implied.\n''',encoding='utf-8')
- metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':11,'public_release_ready':False,'windows_executed_here':False}
+ (out/'START_HERE.txt').write_text((ROOT/'docs/PREVIEW_README.txt').read_text(encoding='utf-8').replace('{VERSION}',version),encoding='utf-8')
+ metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':16,'local_voice':True,'explicit_screen_vision':True,'scoped_windows_uia':True,'optional_offline_bundle':True,'public_release_ready':False,'windows_executed_here':False}
  (out/'BUILD_INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
  archive=out.parent/('Companion_Preview_Windows_v'+version+'.zip')
  with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:

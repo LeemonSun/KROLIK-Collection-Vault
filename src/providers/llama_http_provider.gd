@@ -30,6 +30,10 @@ func submit(messages, options = {}):
 	last_usage={}
 	last_truncated=false
 	busy=true
+	if options.get("multimodal",false):
+		if auth_token.is_empty() or messages.size()!=2 or JSON.stringify(messages).length()>600000:
+			busy=false;failed.emit("vision_failed");return false
+		return _generate()
 	if not auth_token.is_empty():
 		return _apply_template()
 	return _generate()
@@ -41,6 +45,7 @@ func _post(path,payload):
 	var error=http.request(base+path,headers,HTTPClient.METHOD_POST,JSON.stringify(payload))
 	if error!=OK:
 		busy=false
+		request_messages=[];request_options={}
 		failed.emit("model_connection_failed")
 		return false
 	return true
@@ -78,6 +83,7 @@ func _on_completed(result, code, _headers, body):
 		return
 	if result != HTTPRequest.RESULT_SUCCESS or code != 200:
 		busy=false
+		request_messages=[];request_options={}
 		failed.emit("model_connection_failed")
 		return
 	var parser = JSON.new()
