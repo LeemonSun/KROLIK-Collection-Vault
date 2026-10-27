@@ -1,0 +1,2 @@
+PASS: GitHub chunks reconstruct the exact delivered patch ZIP SHA-256 and byte size.
+PASS: ZIP CRC. Existing 0.3/font payloads retained as the reconstruction baseline.

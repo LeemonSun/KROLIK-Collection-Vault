@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Companion Foundation",
   "publisher": null,
-  "version": "0.3.0-desktop-preview",
+  "version": "0.3.1-desktop-fix",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [
@@ -14,7 +14,7 @@
   "telemetry": false,
   "models_bundled": false,
   "final_character_selected": false,
-  "project_stage": "private_windows_preview",
+  "project_stage": "desktop_chat_hotfix",
   "character_concept_selected": true,
   "pixel_direction": "deferred"
 }

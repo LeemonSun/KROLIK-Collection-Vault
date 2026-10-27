@@ -1,4 +1,5 @@
 extends Node
+signal settings_requested(page)
 signal changed
 signal message_added(speaker, text)
 signal timer_finished(seconds)
@@ -12,6 +13,7 @@ const Missing = preload("res://src/providers/unconfigured_provider.gd")
 const Llama = preload("res://src/providers/llama_http_provider.gd")
 const ContextBudget = preload("res://src/core/context_budget.gd")
 const LocalRuntime = preload("res://src/runtime/local_runtime.gd")
+const PopupChat = preload("res://src/desktop/chat_window.gd")
 const DesktopCompanion = preload("res://src/desktop/companion_window.gd")
 const SystemVoice = preload("res://src/tools/system_voice.gd")
 const BrowserSearch = preload("res://src/tools/browser_search.gd")
@@ -34,6 +36,7 @@ var session_turns = []
 var pending_user_text = ""
 var queued_chat_text = ""
 var local_runtime
+var chat_window
 var desktop_companion
 var voice = SystemVoice.new()
 var local_ai_enabled = false
@@ -48,6 +51,7 @@ func _ready():
 	if persistence_ready:
 		l10n.set_locale(str(store.data.settings.get("locale", "ru")))
 		profile_request = str(store.data.settings.get("profile", "auto"))
+	browser_search.set_browser(str(store.data.settings.get("browser", "system")))
 	profile_name = profiles.select(profile_request, OS.get_memory_info().get("physical", 0))
 	# Network adapter must be enabled explicitly; not restored by saved settings.
 	_set_provider("unconfigured")
@@ -183,7 +187,7 @@ func _execute(command):
 			add_message("assistant", "\n".join(lines))
 	elif command.tool == "browser.search":
 		var result = browser_search.open_query(command.args.query)
-		add_message("assistant", t("search_requested" if result.ok else "search_failed"))
+		add_message("assistant", t("search_requested" if result.ok else ("browser_missing" if result.status=="browser_missing" else "search_failed")))
 	elif command.tool == "timer.start":
 		if timers.size() >= 8:
 			add_message("assistant", t("too_many_timers"))
@@ -325,7 +329,29 @@ func show_desktop():
 		return false
 	if not is_instance_valid(desktop_companion):
 		desktop_companion = DesktopCompanion.new()
-		desktop_companion.controller = get_tree().root
+		desktop_companion.chat_requested.connect(show_chat)
+		desktop_companion.settings_requested.connect(func(): open_settings("assistant_tools"))
+		desktop_companion.pause_requested.connect(func(): set_paused(not paused))
+		desktop_companion.hide_requested.connect(func(): open_settings("assistant_tools"); desktop_companion.hide())
+		desktop_companion.quit_requested.connect(func(): get_tree().quit())
 		add_child(desktop_companion)
 	desktop_companion.show()
 	return true
+
+func open_settings(page = "assistant_tools"):
+	settings_requested.emit(page)
+
+func show_chat():
+	if DisplayServer.get_name() == "headless":
+		return false
+	if not is_instance_valid(chat_window):
+		chat_window = PopupChat.new()
+		add_child(chat_window)
+	var anchor = Rect2i(desktop_companion.position,desktop_companion.size) if is_instance_valid(desktop_companion) else DisplayServer.screen_get_usable_rect()
+	chat_window.open_near(anchor)
+	return true
+
+func set_browser(id):
+	if browser_search.set_browser(id):
+		_save_setting("browser",id)
+		changed.emit()

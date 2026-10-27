@@ -1,5 +1,6 @@
 extends RefCounted
 ## Explicit user search only. A fixed HTTPS endpoint; no model-provided URL or shell command.
+var browser_id = "system"
 const ENDPOINT = "https://duckduckgo.com/?q="
 
 func prepare(query):
@@ -18,5 +19,43 @@ func open_query(query, opener = Callable()):
 	if not result.ok:
 		return result
 	# Injected opener is a test seam; the app uses only the OS default browser.
-	var code = opener.call(result.url) if opener.is_valid() else OS.shell_open(result.url)
+	var code = FAILED
+	if opener.is_valid():
+		code = opener.call(result.url)
+	elif browser_id == "system":
+		code = OS.shell_open(result.url)
+	else:
+		var path = find_opera(browser_id)
+		if path.is_empty():
+			return {"ok":false,"status":"browser_missing","url":result.url}
+		code = OK if OS.create_process(path,[result.url],false)>0 else ERR_CANT_OPEN
 	return {"ok": code == OK, "status": "requested" if code == OK else "open_failed", "url": result.url}
+
+func set_browser(id):
+	if id not in ["system","opera","opera_gx"]:
+		return false
+	browser_id=id
+	return true
+
+func opera_candidates(id, roots):
+	if id not in ["opera","opera_gx"]:
+		return []
+	var folder="Opera GX" if id=="opera_gx" else "Opera"
+	var values=[]
+	for key in ["LOCALAPPDATA","PROGRAMFILES","PROGRAMFILES(X86)"]:
+		var base=str(roots.get(key,""))
+		if base.is_empty():
+			continue
+		values.append(base.path_join("Programs").path_join(folder).path_join("launcher.exe") if key=="LOCALAPPDATA" else base.path_join(folder).path_join("launcher.exe"))
+	return values
+
+func find_opera(id):
+	if OS.get_name()!="Windows":
+		return ""
+	var roots={}
+	for key in ["LOCALAPPDATA","PROGRAMFILES","PROGRAMFILES(X86)"]:
+		roots[key]=OS.get_environment(key)
+	for path in opera_candidates(id,roots):
+		if FileAccess.file_exists(path):
+			return path
+	return ""

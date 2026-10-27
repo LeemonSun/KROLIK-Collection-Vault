@@ -26,6 +26,12 @@ func _run():
 	check(opened.is_empty(), "No side effect for invalid input")
 	check(search.open_query("a & b", _open).status == "requested" and opened.size() == 1, "Explicit handoff only once")
 	check(search.open_query("query", _fail).status == "open_failed", "OS failure is reported")
+	check(search.set_browser("opera"),"Opera preference")
+	check(not search.set_browser("arbitrary.exe") and search.browser_id=="opera","Unknown executable choice denied")
+	var candidates=search.opera_candidates("opera_gx",{"LOCALAPPDATA":"C:/Users/test/AppData/Local","PROGRAMFILES":"C:/Program Files"})
+	check(candidates.size()==2 and candidates[0].ends_with("Programs/Opera GX/launcher.exe"),"Known Opera GX locations")
+	check(search.opera_candidates("unknown",{}).is_empty(),"Unknown path recipe denied")
+	search.set_browser("system")
 	var router = Router.new()
 	for command in ["/search abc", "/поиск привет", "/搜索 你好"]:
 		check(router.route(command).tool == "browser.search", "Multilingual search")

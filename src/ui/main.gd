@@ -1,5 +1,6 @@
 extends Control
-const Companion = preload("res://src/ui/companion.gd")
+const ChatView = preload("res://src/ui/chat_view.gd")
+const VisualTheme = preload("res://src/ui/visual_theme.gd")
 var page = "talk"
 var content
 var chat_log
@@ -19,9 +20,13 @@ var start_ai_button
 var stop_ai_button
 var cancel_install_button
 var screen_preview_window
+var embedded_chat
+var page_scroll
+var page_picker
 
 func _ready():
 	_apply_theme()
+	App.settings_requested.connect(open_panel)
 	App.changed.connect(_refresh)
 	App.message_added.connect(_on_message)
 	_build()
@@ -32,45 +37,19 @@ func _ready():
 	refresh_timer.wait_time = 0.5
 	refresh_timer.autostart = true
 	refresh_timer.timeout.connect(_refresh)
-	add_child(refresh_timer)
-	# Do not rebuild this timer when switching pages.
-	remove_child(refresh_timer)
 	App.add_child(refresh_timer)
 	if DisplayServer.get_name() != "headless" and "--ui-smoke" not in OS.get_cmdline_user_args():
-		get_tree().root.exclude_from_capture = true
+		get_tree().auto_accept_quit = false
+		get_window().close_requested.connect(_hide_panel)
+		get_window().exclude_from_capture = true
+		get_window().hide()
 		App.show_desktop.call_deferred()
 	# A UI-only self-test can traverse every page without a display.
 	if "--ui-smoke" in OS.get_cmdline_user_args():
 		_ui_smoke.call_deferred()
 
 func _apply_theme():
-	var theme = Theme.new()
-	theme.default_font_size = 16
-	theme.default_font = load("res://assets/fonts/NotoSansCJKsc-Regular.otf")
-	for type in ["Label", "Button", "CheckButton", "OptionButton", "LineEdit", "RichTextLabel"]:
-		theme.set_color("font_color", type, Color("#e9e6df"))
-	for state in ["normal", "hover", "pressed", "focus"]:
-		var style = StyleBoxFlat.new()
-		style.bg_color = Color("#3b2435") if state in ["hover","pressed"] else Color("#241b2b")
-		style.set_corner_radius_all(10)
-		style.content_margin_left = 16
-		style.content_margin_right = 16
-		style.content_margin_top = 11
-		style.content_margin_bottom = 11
-		if state == "focus":
-			style.set_border_width_all(1)
-			style.border_color = Color("#e5637f")
-		theme.set_stylebox(state, "Button", style)
-		theme.set_stylebox(state, "OptionButton", style)
-	var field = StyleBoxFlat.new()
-	field.bg_color = Color("#2a2030")
-	field.set_corner_radius_all(10)
-	field.content_margin_left = 14
-	field.content_margin_right = 14
-	field.content_margin_top = 12
-	field.content_margin_bottom = 12
-	theme.set_stylebox("normal", "LineEdit", field)
-	self.theme = theme
+	theme = VisualTheme.make()
 
 func _label(text, parent, font_size = 16, dim = false):
 	var node = Label.new()
@@ -90,6 +69,22 @@ func _button(text, parent, callback):
 	parent.add_child(node)
 	return node
 
+func open_panel(target_page = "assistant_tools"):
+	page = target_page
+	_build()
+	var win = get_window()
+	if DisplayServer.get_name() != "headless":
+		var bounds = DisplayServer.screen_get_usable_rect(win.current_screen)
+		win.size = Vector2i(mini(800,bounds.size.x-24),mini(620,bounds.size.y-48))
+		win.position = bounds.position+(bounds.size-win.size)/2
+		win.always_on_top = true
+	win.show()
+	win.grab_focus()
+
+func _hide_panel():
+	get_window().hide()
+	App.show_desktop()
+
 func _build():
 	ai_status_label = null
 	ai_progress_label = null
@@ -97,65 +92,51 @@ func _build():
 	start_ai_button = null
 	stop_ai_button = null
 	cancel_install_button = null
+	chat_log = null
+	embedded_chat = null
+	page_scroll = null
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
 	var margin = MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 28)
-	margin.add_theme_constant_override("margin_right", 28)
-	margin.add_theme_constant_override("margin_top", 26)
-	margin.add_theme_constant_override("margin_bottom", 24)
+	for edge in ["left","right","top","bottom"]:
+		margin.add_theme_constant_override("margin_"+edge,12)
 	add_child(margin)
 	var shell = VBoxContainer.new()
-	shell.add_theme_constant_override("separation", 22)
+	shell.add_theme_constant_override("separation",10)
 	margin.add_child(shell)
 	var header = HBoxContainer.new()
-	header.add_theme_constant_override("separation", 20)
+	header.add_theme_constant_override("separation",8)
 	shell.add_child(header)
-	var title = _label(App.t("app_title"), header, 29)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_label(App.t("foundation"), header, 14, true)
-	_label("● " + App.t("offline"), header, 14, true)
-	var body = HBoxContainer.new()
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 26)
-	shell.add_child(body)
-	var nav = VBoxContainer.new()
-	nav.custom_minimum_size.x = 165
-	nav.add_theme_constant_override("separation", 10)
-	body.add_child(nav)
-	for id in ["talk", "notes", "character", "assistant_tools", "search", "modules", "settings"]:
-		_button(App.t(id), nav, func(): page = id; _build())
-	_button(App.t("show_desktop"), nav, func(): App.show_desktop())
-	var space = Control.new()
-	space.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	nav.add_child(space)
-	pause_button = _button(App.t("resume" if App.paused else "pause"), nav, func(): App.set_paused(not App.paused))
-	_button(App.t("stop"), nav, func(): App.cancel())
-	content = VBoxContainer.new()
-	content.add_theme_constant_override("separation", 14)
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.add_child(content)
-	var side = VBoxContainer.new()
-	side.custom_minimum_size.x = 240
-	side.add_theme_constant_override("separation", 16)
-	body.add_child(side)
-	if page != "character":
-		var character = Companion.new()
-		side.add_child(character)
-	state_label = _label(_state_text(), side, 22)
-	_label(App.t("character_hint"), side, 14, true)
-	timer_label = _label(App.t("active_timers", {"count": App.timers.size()}), side, 14, true)
-	_label(App.t("selected_profile", {"name": App.t(App.profile_name)}), side, 14, true)
-	_label(App.t("privacy_hint"), side, 13, true)
-	if not App.persistence_ready:
-		_label(App.t("storage_warning"), shell, 13)
-	_label(App.t("foundation_notice"), shell, 13, true)
-	chat_log = null
+	page_picker = OptionButton.new()
+	page_picker.fit_to_longest_item = false
+	page_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page_picker.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var pages = ["talk","assistant_tools","settings","character","search","notes","modules"]
+	for id in pages:
+		page_picker.add_item(App.t(id))
+	page_picker.select(maxi(0,pages.find(page)))
+	page_picker.item_selected.connect(func(index): page = pages[index]; _build())
+	header.add_child(page_picker)
+	_button("×",header,_hide_panel).tooltip_text = App.t("hide_panel")
 	if page == "talk":
-		_build_talk()
-	elif page == "notes":
+		embedded_chat = ChatView.new()
+		embedded_chat.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		embedded_chat.close_requested.connect(_hide_panel)
+		embedded_chat.settings_requested.connect(func(): open_panel("assistant_tools"))
+		shell.add_child(embedded_chat)
+		return
+	page_scroll = ScrollContainer.new()
+	page_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	shell.add_child(page_scroll)
+	content = VBoxContainer.new()
+	content.add_theme_constant_override("separation",12)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page_scroll.add_child(content)
+	if page == "notes":
 		_build_notes()
 	elif page == "modules":
 		_build_modules()
@@ -190,14 +171,6 @@ func _build_character():
 	_label(App.t("desktop_controls"), content, 13, true)
 
 func _build_assistant_tools():
-	var parent = content
-	var scroll = ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	parent.add_child(scroll)
-	content = VBoxContainer.new()
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation", 12)
-	scroll.add_child(content)
 	_label(App.t("assistant_tools"), content, 22)
 	ai_status_label = _label(App.t(App.local_runtime.status), content, 17)
 	ai_progress_label = _label("", content, 14, true)
@@ -230,7 +203,6 @@ func _build_assistant_tools():
 			App.desktop_companion.set_reduced(value))
 	content.add_child(reduced_toggle)
 	_label(App.t("desktop_controls"), content, 13, true)
-	content = parent
 	_refresh()
 
 func _capture_once():
@@ -276,44 +248,14 @@ func _build_search():
 	_button(App.t("search_open"), content, run)
 	_label(App.t("search_intelligence_status"), content, 14, true)
 
-func _build_talk():
-	_label(App.t("talk"), content, 22)
-	chat_log = RichTextLabel.new()
-	chat_log.bbcode_enabled = false
-	chat_log.scroll_following = true
-	chat_log.selection_enabled = true
-	chat_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	chat_log.add_theme_constant_override("line_separation", 8)
-	content.add_child(chat_log)
-	_render_messages()
-	var row = HBoxContainer.new()
-	content.add_child(row)
-	input = LineEdit.new()
-	input.placeholder_text = App.t("input_hint")
-	input.max_length = 2048
-	input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	input.text_submitted.connect(_send)
-	row.add_child(input)
-	_button(App.t("send"), row, func(): _send(input.text))
-	_button(App.t("clear_chat"), content, func():
-		App.cancel()
-		App.messages.clear()
-		App.session_turns.clear()
-		App.add_message("assistant", App.t("empty_chat"))
-		_render_messages())
-	_label(App.t("session_hint"), content, 12, true)
 
 func _build_notes():
 	_label(App.t("title_notes"), content, 22)
 	_label(App.t("notes_heading"), content, 14, true)
-	var scroll = ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	content.add_child(scroll)
 	var list = VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 18)
-	scroll.add_child(list)
+	content.add_child(list)
 	if App.store.data.notes.is_empty():
 		_label(App.t("notes_empty"), list, 16, true)
 	for note in App.store.data.notes:
@@ -340,6 +282,15 @@ func _build_settings():
 	locale_picker.select(["ru","en","zh-Hans"].find(App.l10n.locale))
 	content.add_child(locale_picker)
 	locale_picker.item_selected.connect(func(index): App.set_locale(["ru","en","zh-Hans"][index]); _build())
+	_label(App.t("browser_choice"),content)
+	var browser_picker = OptionButton.new()
+	for label in [App.t("browser_system"),"Opera","Opera GX"]:
+		browser_picker.add_item(label)
+	var browser_ids = ["system","opera","opera_gx"]
+	browser_picker.select(browser_ids.find(App.browser_search.browser_id))
+	browser_picker.item_selected.connect(func(index): App.set_browser(browser_ids[index]))
+	content.add_child(browser_picker)
+	_label(App.t("browser_hint"),content,13,true)
 	_label(App.t("profile"), content)
 	profile_picker = OptionButton.new()
 	var names = ["auto","lite","balanced","quality"]

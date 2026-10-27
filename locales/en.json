@@ -92,7 +92,7 @@
   "search_intelligence_status": "Opening search works. Reading pages, comparing sources and answering with citations are not connected yet.",
   "assistant_tools": "AI and tools",
   "show_desktop": "Show on desktop",
-  "desktop_controls": "Left drag: move; double click: app window; right click: red transition; middle click: hide. Full body animation is not ready.",
+  "desktop_controls": "Click to chat; hold and drag to move; right click for quick menu. Body rig animation remains pending.",
   "ai_install_hint": "One download: about 24 MB runtime and 1.8 GB Qwen3-1.7B text model from official sources. Requires internet and about 2.5 GB free disk space. Chat runs locally after installation. Licenses are included.",
   "ai_install": "Download and install local AI",
   "ai_start": "Start local AI",
@@ -118,5 +118,17 @@
   "capture_failed": "The OS could not capture the screen.",
   "auto_move": "Occasional desktop movements",
   "reduced_motion": "Reduce movement effects",
-  "model_context_full": "This request exceeds the current AI context budget. Shorten it or choose a larger context profile."
+  "model_context_full": "This request exceeds the current AI context budget. Shorten it or choose a larger context profile.",
+  "hide_panel": "Hide panel",
+  "chat_write_hint": "Write to me… Enter sends, Shift+Enter adds a line",
+  "chat_you": "You",
+  "ai_start_short": "Enable AI",
+  "menu_dash": "Move",
+  "menu_hide": "Hide character",
+  "menu_quit": "Quit",
+  "browser_choice": "Browser for search",
+  "browser_system": "System default",
+  "browser_hint": "Selected Opera opens the query in its normal profile. Reading or controlling existing tabs is not connected.",
+  "browser_missing": "Selected Opera was not found in standard locations. Check the browser preference.",
+  "chat_placeholder": "Write to me…"
 }

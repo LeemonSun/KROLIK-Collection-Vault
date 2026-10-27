@@ -92,7 +92,7 @@
   "search_intelligence_status": "目前支持打开搜索。尚未接入网页阅读、来源比较和带引用的回答。",
   "assistant_tools": "AI 与工具",
   "show_desktop": "显示桌面角色",
-  "desktop_controls": "左键拖动；双击打开主窗口；右键红色转移；中键隐藏。完整身体动画尚未完成。",
+  "desktop_controls": "点击聊天；按住左键拖动；右键打开快捷菜单。身体绑定动画尚未完成。",
   "ai_install_hint": "首次下载：约 24 MB 运行组件和 1.8 GB Qwen3-1.7B 文本模型，均来自官方来源。需要联网和约 2.5 GB 磁盘空间。安装后可离线聊天，许可证已包含。",
   "ai_install": "下载并安装本地 AI",
   "ai_start": "启动本地 AI",
@@ -118,5 +118,17 @@
   "capture_failed": "系统无法截取屏幕。",
   "auto_move": "偶尔在桌面上移动",
   "reduced_motion": "减少运动效果",
-  "model_context_full": "请求超出当前 AI 上下文预算，请缩短内容或选择更大的上下文配置。"
+  "model_context_full": "请求超出当前 AI 上下文预算，请缩短内容或选择更大的上下文配置。",
+  "hide_panel": "隐藏窗口",
+  "chat_write_hint": "输入消息… Enter 发送，Shift+Enter 换行",
+  "chat_you": "你",
+  "ai_start_short": "启用 AI",
+  "menu_dash": "移动",
+  "menu_hide": "隐藏角色",
+  "menu_quit": "退出",
+  "browser_choice": "搜索浏览器",
+  "browser_system": "系统默认浏览器",
+  "browser_hint": "所选 Opera 会在其常用配置中打开查询。尚未接入现有标签页的读取或控制。",
+  "browser_missing": "未在标准目录找到所选 Opera，请检查浏览器设置。",
+  "chat_placeholder": "输入消息…"
 }

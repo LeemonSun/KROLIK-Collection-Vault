@@ -1,5 +1,11 @@
 extends Window
 ## Native full-body desktop prototype. Texture movement and FX, not a finished body rig.
+signal chat_requested
+signal settings_requested
+signal pause_requested
+signal hide_requested
+signal quit_requested
+const VisualTheme = preload("res://src/ui/visual_theme.gd")
 const BODY_PATH = "res://assets/characters/signal_01/body_v1.png"
 var art
 var canvas
@@ -15,7 +21,10 @@ var elapsed = 0.0
 var auto_move = false
 var next_move = 20.0
 var last_tick_ms = 0
-var controller
+var app
+var press_position = Vector2i.ZERO
+var moved = false
+var quick_menu
 var _hit_polygon = PackedVector2Array()
 
 class Surface extends Control:
@@ -29,6 +38,7 @@ class Surface extends Control:
 				draw_polyline(PackedVector2Array([Vector2(x, 330), Vector2(x+65, 250), Vector2(x+40, 210), Vector2(x+100, 120)]), Color(1.0, 0.18, 0.32, alpha * (0.45-i*0.1)), 2.0, true)
 
 func _ready():
+	app = get_tree().root.get_node("App")
 	title = "Signal 01"
 	borderless = true
 	unresizable = true
@@ -52,6 +62,7 @@ func _ready():
 		image.decompress()
 	art = TextureRect.new()
 	art.texture = texture
+	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	art.size = Vector2(330, 495)
@@ -74,28 +85,57 @@ func _ready():
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
 	position = bounds.end - size - Vector2i(30, 0)
 	last_tick_ms = Time.get_ticks_msec()
+	quick_menu = PopupMenu.new()
+	quick_menu.theme = VisualTheme.make()
+	for key in ["talk","settings","menu_dash","pause","menu_hide","menu_quit"]:
+		quick_menu.add_item(app.t(key))
+	quick_menu.id_pressed.connect(_menu_action)
+	add_child(quick_menu)
+	if not reduced_motion:
+		art.modulate.a = 0
+		phase = 0
+		effect_kind = "spawn"
+		effect_time = 0.52
 
 func _input_event(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.double_click and event.pressed:
-				if is_instance_valid(controller):
-					controller.grab_focus()
-				return
-			dragging = event.pressed
-			if dragging:
+			if event.pressed:
+				dragging = true
+				moved = false
+				press_position = DisplayServer.mouse_get_position()
 				effect_kind = ""
 				art.modulate.a = 1.0
-				drag_offset = DisplayServer.mouse_get_position() - position
+				drag_offset = press_position-position
 			else:
-				position = bounded(position)
-				effect_time = 0.25
+				dragging = false
+				if moved:
+					position = bounded(position)
+					effect_time = 0.25
+				else:
+					chat_requested.emit()
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			dash_random()
+			quick_menu.position = DisplayServer.mouse_get_position()
+			var keys = ["talk","settings","menu_dash","resume" if app.paused else "pause","menu_hide","menu_quit"]
+			for index in range(keys.size()):
+				quick_menu.set_item_text(index,app.t(keys[index]))
+			quick_menu.popup()
 		elif event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
-			hide()
+			hide_requested.emit()
 	elif event is InputEventMouseMotion and dragging:
-		position = bounded(DisplayServer.mouse_get_position() - drag_offset)
+		if DisplayServer.mouse_get_position().distance_to(press_position)>=6:
+			moved = true
+		if moved:
+			position = bounded(DisplayServer.mouse_get_position()-drag_offset)
+
+func _menu_action(id):
+	match id:
+		0: chat_requested.emit()
+		1: settings_requested.emit()
+		2: dash_random()
+		3: pause_requested.emit()
+		4: hide_requested.emit()
+		5: quit_requested.emit()
 
 func bounded(candidate):
 	var screen = DisplayServer.get_screen_from_rect(Rect2i(candidate, size))
@@ -140,7 +180,13 @@ func _process(delta):
 			dash_random()
 	if effect_time > 0:
 		effect_time = maxf(0, effect_time-delta)
-		if effect_kind == "dash":
+		if effect_kind == "spawn":
+			phase += delta
+			art.modulate.a = minf(1.0,phase/0.32)
+			if effect_time <= 0:
+				art.modulate.a = 1.0
+				effect_kind = ""
+		elif effect_kind == "dash":
 			phase += delta
 			if phase < 0.16:
 				art.modulate.a = 1.0 - phase/0.16

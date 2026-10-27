@@ -1,0 +1,7 @@
+PATCH_APPLICATION_TESTS: 5 scenarios PASS
+Exact EXE/PCK produced by actual minified PowerShell command; original backup preserved; Unicode/space/& path works
+Reapply is idempotent
+Unknown EXE refused without modification
+Corrupt payload refused before mutation
+GitHub project layout detected; launcher manifest updated so old launcher cannot revert patch
+Executed PowerShell 7 on Linux against real Windows EXE bytes. Windows CMD/PowerShell 5 and native file-lock semantics remain untested.

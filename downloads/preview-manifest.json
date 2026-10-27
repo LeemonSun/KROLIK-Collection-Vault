@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "0.3.0-desktop-preview",
+  "version": "0.3.1-desktop-fix",
   "status": "private_preview_not_windows_executed",
   "packages": [
     {
@@ -52,8 +52,25 @@
         "downloads/v0.3-windows/024.chunk",
         "downloads/v0.3-windows/025.chunk"
       ]
+    },
+    {
+      "id": "fix031",
+      "output": "build/Companion_Fix_0.3.1.zip",
+      "bytes": 16432746,
+      "sha256": "ec1659794af92d64243816ef5b6cdbcf902bb3d468c2eead0545154ec093ca95",
+      "parts": [
+        "downloads/v0.3.1-fix/000.chunk",
+        "downloads/v0.3.1-fix/001.chunk",
+        "downloads/v0.3.1-fix/002.chunk",
+        "downloads/v0.3.1-fix/003.chunk",
+        "downloads/v0.3.1-fix/004.chunk",
+        "downloads/v0.3.1-fix/005.chunk",
+        "downloads/v0.3.1-fix/006.chunk",
+        "downloads/v0.3.1-fix/007.chunk"
+      ]
     }
   ],
-  "exe_sha256": "7df4b2ba7ada00bee7b860dc76719c60f6fb2405d717ff0b04bd7ee84dee8df4",
-  "transport_note": "Chunked only for connector payload limits. Data is a local build ZIP and original OFL font, not model weights."
+  "exe_sha256": "7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8",
+  "transport_note": "Chunked only for connector payload limits. Data is a local build ZIP and original OFL font, not model weights.",
+  "pack_sha256": "de5edb4ebaf08b921bbaa5e7d2c4d3d6428b7b77a5874116d901c55525bc8d5c"
 }

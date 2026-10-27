@@ -1,0 +1,66 @@
+extends SceneTree
+var checks=0
+var failures=0
+func _initialize():
+	_run.call_deferred()
+func check(value,label):
+	checks+=1
+	if not value:
+		failures+=1
+		push_error(label)
+func frame():
+	await process_frame
+	await process_frame
+	await RenderingServer.frame_post_draw
+func shot(window,name):
+	var image=window.get_texture().get_image()
+	check(image!=null and not image.is_empty(),"Rendered "+name)
+	if image!=null:
+		image.save_png(OS.get_environment("COMPANION_VISUAL_OUTPUT").path_join(name+".png"))
+func _run():
+	if DisplayServer.get_name()=="headless":
+		push_error("Visual review requires an isolated display")
+		quit(1)
+		return
+	var app=root.get_node("App")
+	app.set_locale("ru")
+	var boot=load("res://scenes/bootstrap.tscn").instantiate()
+	root.add_child(boot)
+	var main=boot.main_view
+	var panel=boot.panel_window
+	await create_timer(0.7).timeout
+	check(not panel.visible,"Control panel hidden on normal startup")
+	check(is_instance_valid(app.desktop_companion) and app.desktop_companion.visible,"Character visible on startup")
+	shot(app.desktop_companion,"hero")
+	app.show_chat()
+	await frame()
+	check(app.chat_window.visible,"Chat opens separately")
+	var view=app.chat_window.view
+	view.editor.text="Привет! Хочу поговорить."
+	await frame()
+	shot(app.chat_window,"chat")
+	view.submit_current()
+	await frame()
+	check(app.messages.any(func(x):return x.text=="Привет! Хочу поговорить."),"Visible native composer submits")
+	check(not view.history.get_parsed_text().is_empty(),"Native chat displays provider feedback")
+	for language in ["ru","en","zh-Hans"]:
+		app.set_locale(language)
+		main.open_panel("talk")
+		panel.size=Vector2i(640,360)
+		await frame()
+		var bounds=Rect2(Vector2.ZERO,Vector2(panel.size))
+		check(bounds.encloses(main.embedded_chat.editor.get_global_rect()),"Control panel input visible: "+language)
+		check(bounds.encloses(main.embedded_chat.send_button.get_global_rect()),"Control panel send visible: "+language)
+		shot(panel,"panel-"+language)
+	main.open_panel("assistant_tools")
+	panel.size=Vector2i(640,360)
+	await frame()
+	check(main.page_scroll.get_v_scroll_bar().max_value>main.page_scroll.size.y,"Long setup page has scroll range")
+	shot(panel,"setup-scroll")
+	app.desktop_companion._menu_action(1)
+	check(panel.visible,"Character menu opens settings")
+	main._hide_panel()
+	check(not panel.visible and app.desktop_companion.visible,"Closing panel keeps companion available")
+	app.chat_window.hide()
+	print("DESKTOP_VISUAL_TESTS: %s checks, %s failures; real X11 rendering, synthetic data only; Windows not executed" %[checks,failures])
+	quit(0 if failures==0 else 1)

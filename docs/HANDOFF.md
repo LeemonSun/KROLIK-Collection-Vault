@@ -7,3 +7,9 @@
 Критично: сохранять offline-first, RU/EN/zh-Hans, лицензии/NOTICE, exact hashes и закрытый публичный gate. Вес модели не коммитить. Изображения/скриншоты пользователя не сохранять в репозиторий. Runtime скачивается только по явной кнопке; нет remote inference. Результат модели не управляет URL, shell или путями ресурсов.
 
 Проверки tools/run_checks.py и отчёты. tests/test_local_runtime.gd без fixture проверяет unit; с COMPANION_RUNTIME_FIXTURE проверяет реальный локальный процесс на подготовленном разработчиком fixture. Артефакты сборки — локальный build_preview.py с проверенным шаблоном. Windows EXE можно проверить как main-pack на Linux, но это не запуск Windows executable. Перед передачей повторить релевантные проверки и сверить архив/хеши.
+
+## 0.3.1
+
+Прочитать docs/PRODUCT_DIRECTION.md. Main scene теперь scenes/bootstrap.tscn: пустой host, скрытая native панель и desktop companion. Main Window Godot нельзя скрывать напрямую. Чат/настройки не должны возвращаться к старой большой боковой панели. ChatView использует runtime App lookup для предотвращения циклической preload зависимости; сохранять проверку 320×280 и длинного RU текста. Новые проверки: test_chat_layout.gd и test_desktop_visual.gd (нужен отдельный дисплей). Screenshot-артефакты теста внутренние, в git не включать.
+
+Полный build создаёт EXE + отдельный PCK. make_patch.py делает одноразовый verified delta из точной 0.3. Патч корректирует старый launcher manifest, иначе тот откатит EXE. Новые downloads payloads/manifest должны соответствовать hash полного патча; не включать веса. Windows исполнение всё ещё требует пользовательской проверки.

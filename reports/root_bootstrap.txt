@@ -1,0 +1,2 @@
+PASS: fresh full-repo preparation, exact patch application, repeated start preserves 0.3.1 hashes.
+Executed actual embedded PowerShell commands using PowerShell 7 on Linux; Windows CMD not executed.

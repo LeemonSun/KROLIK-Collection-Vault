@@ -32,6 +32,8 @@ def main():
                     "res://tests/test_search.gd", "--", "--test-mode"]),
         ("animation", [engine, "--headless", "--path", str(ROOT), "--script",
                        "res://tests/test_animation.gd", "--", "--test-mode"]),
+        ("chat_layout", [engine, "--headless", "--path", str(ROOT), "--script",
+                         "res://tests/test_chat_layout.gd", "--", "--test-mode"]),
         ("ui", [engine, "--headless", "--path", str(ROOT), "--", "--ui-smoke", "--test-mode"]),
         ("release_gate_expected_block", [sys.executable, str(ROOT / "tools/release_gate.py"), "--expect-blocked"]),
     ]
@@ -53,10 +55,10 @@ def main():
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
         "", "Не проверены на настоящей Windows: запуск EXE, native-прозрачность/перетаскивание, установщик модели, озвучка/снимок и китайские глифы. Общий визуальный интеллект и автоматизация ещё не подключены.",
-        "UI-проверка проходит все страницы и языки без дисплея; это не визуальная приёмка.",
+        "UI smoke проходит страницы/языки без дисплея; ChatView отдельно проверяется на 4 размерах и 3 языках. Native X11 review и применение патча — отдельные reports/native_ui.txt и reports/patch_application.txt; это не Windows приёмка.",
         "Включены рабочий концепт и прозрачный runtime-cutout Signal 01. Есть native-window прототип, перетаскивание и красный переход; настоящего рига/клипов нет. Текстовая модель скачивается явно по кнопке, не вложена в EXE.",
         "HTML-просмотр: ссылки и JavaScript проверены отдельно; настоящий браузерный рендер не проверен (Chromium отсутствует).",
-        "Поиск: 21 проверка с подменой OS opener; реальный запуск браузера на Windows не проверен.",
+        "Поиск: 25 проверок с подменой OS opener; реальный запуск браузера на Windows не проверен.",
         "Каталог движений — план производства; тесты директора проверяют код на искусственных тестовых ресурсах, не художественное качество анимации.",
     ]
     (reports / "VALIDATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
