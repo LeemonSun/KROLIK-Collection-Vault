@@ -6,11 +6,15 @@ func check(ok,text):
 	checks+=1
 	if not ok:failures+=1;push_error(text)
 func _run():
-	check(ProjectSettings.get_setting("application/config/version")=="0.4.0-functional-preview","Correct product version inside PCK")
+	check(ProjectSettings.get_setting("application/config/version")=="0.5.0-leemon-preview","Correct product version inside PCK")
 	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
 	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
 	var migration=JSON.parse_string(FileAccess.get_file_as_string("res://native/legacy_patch_files.json"))
 	check(migration is Dictionary and migration.get("entries",[]).size()==12,"Exact migration inventory exported")
+	check(ResourceLoader.exists("res://assets/characters/leemon_01/master_v1.png") and load("res://assets/characters/leemon_01/master_v1.png").get_size()==Vector2(1199,1312),"Leemon asset exported")
+	check(not ResourceLoader.exists("res://assets/characters/signal_01/body_v1.png"),"Obsolete girl texture excluded from delivery")
+	var clock=preload("res://src/tools/world_clock.gd").new()
+	check(clock.resolve("Beijing").ok,"Offline world clock data exported")
 	var app=root.get_node("App")
 	var events=[]
 	app.desktop_actions.completed.connect(func(result):events.append(result))

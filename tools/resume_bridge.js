@@ -49,6 +49,15 @@ with tempfile.TemporaryDirectory() as td:
 (root/'recovery/source_capsule.b64').write_text(p['capsule'])
 print(json.dumps(result))`,{capsule,index});
     }
+    // Capsule-specific recovery layer after an execution-environment outage.
+    // A later normal checkpoint changes content_id and makes this layer inactive.
+    const overlay = JSON.parse(await file('recovery/pending-overlay.json',head));
+    if(overlay.base_content_id===index.content_id) {
+      const entries=[];
+      for(const entry of overlay.files) entries.push({...entry,content:await file(entry.path,head)});
+      const patched=await py("import hashlib\ndef gitsha(data):return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\\0'+data).hexdigest()\nwritten=[];conflicts=[]\nfor item in p['entries']:\n name=item['path'];path=root/name\n if pathlib.Path(name).is_absolute() or '..' in pathlib.Path(name).parts or not path.resolve().is_relative_to(root.resolve()):raise ValueError('Unsafe overlay path')\n data=item['content'].encode('utf-8')\n if gitsha(data)!=item['sha']:raise ValueError('Overlay source SHA mismatch: '+name)\n current=gitsha(path.read_bytes()) if path.is_file() else None\n if current==item['sha']:continue\n if current!=item.get('base_sha'):conflicts.append(name);continue\n path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data);written.append(name)\n(root/'recovery/pending-overlay.json').write_text(json.dumps(p['overlay'],indent=2)+'\\n')\nprint(json.dumps({'written':written,'conflicts':conflicts}))",{entries,overlay});
+      result.written.push(...patched.written);result.conflicts.push(...patched.conflicts);
+    }
     await py("f=root/'.resume-remote.json'\nf.write_text(json.dumps({'head':p['head'],'files':p['files']})+'\\n')\nprint(json.dumps({'saved':True}))",{head,files:index.files});
     const state=await tools.exec_command({cmd:'python3 '+quote(root+'/tools/resume.py')+' status',max_output_tokens:4000});
     if(state.exit_code!==0)throw Error(state.output);

@@ -221,8 +221,10 @@ func start(options = {}):
 	_status("ai_starting")
 	return true
 
-func build_args(options):
-	return PackedStringArray(["--model", ProjectSettings.globalize_path(model_path()), "--host", "127.0.0.1", "--port", str(port), "--api-key", token, "--alias", "companion", "--ctx-size", str(clampi(int(options.get("context_tokens", 2048)), 1024, 4096)), "--threads", str(clampi(int(options.get("cpu_threads", 2)), 1, 8)), "--threads-batch", str(clampi(int(options.get("cpu_threads", 2)), 1, 8)), "--parallel", "1", "--n-gpu-layers", "0", "--batch-size", "128", "--ubatch-size", "128", "--poll", "0", "--prio", "-1", "--no-ui", "--jinja", "--reasoning", "off"])
+func build_args(options, processor_count=-1):
+	if processor_count<1:processor_count=OS.get_processor_count()
+	var threads=clampi(int(options.get("cpu_threads",2)),1,mini(8,maxi(1,processor_count/2)))
+	return PackedStringArray(["--model", ProjectSettings.globalize_path(model_path()), "--host", "127.0.0.1", "--port", str(port), "--api-key", token, "--alias", "companion", "--ctx-size", str(clampi(int(options.get("context_tokens", 2048)), 1024, 4096)), "--threads", str(threads), "--threads-batch", str(threads), "--parallel", "1", "--n-gpu-layers", "0", "--batch-size", "128", "--ubatch-size", "128", "--poll", "0", "--prio", "-1", "--no-ui", "--jinja", "--reasoning", "off"])
 
 func _probe_complete(result, code, _headers, body):
 	if not starting:

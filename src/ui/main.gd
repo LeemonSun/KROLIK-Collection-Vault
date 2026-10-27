@@ -98,7 +98,7 @@ func _hide_panel():
 
 func _window_resized():
 	if not is_inside_tree() or get_window()==null:return
-	if (get_window().size.x>=700)!=wide_layout and not responsive_pending:
+	if (get_window().size.x>=700 and get_window().size.y>=540)!=wide_layout and not responsive_pending:
 		responsive_pending=true
 		_reflow.call_deferred()
 
@@ -109,7 +109,7 @@ func _reflow():
 
 func _build():
 	var saved_draft=embedded_chat.editor.text if is_instance_valid(embedded_chat) else ""
-	wide_layout=get_window().size.x>=700
+	wide_layout=get_window().size.x>=700 and get_window().size.y>=540
 	ai_status_label = null
 	ai_progress_label = null
 	install_button = null
@@ -437,7 +437,7 @@ func _render_messages():
 
 func _on_message(_speaker, _text):
 	_render_messages()
-	if booted and page == "notes":
+	if booted and page in ["notes","reminders"]:
 		_build()
 
 func _state_text():

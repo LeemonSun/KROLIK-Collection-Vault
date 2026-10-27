@@ -57,9 +57,9 @@ func _generate():
 		"messages": request_messages,
 		"stream": false,
 		"max_tokens": clampi(int(request_options.get("max_tokens", 128)), 16, 512),
-		"temperature": 0.7,
-		"top_p": 0.8,
-		"top_k": 20,
+		"temperature": 0.4,
+		"top_p": 0.9,
+		"top_k": 40,
 		"min_p": 0.0,
 		"chat_template_kwargs": {"enable_thinking": false}
 	}
@@ -71,6 +71,7 @@ func cancel():
 	busy = false
 	phase=""
 	request_messages=[]
+	request_options={}
 
 func _on_completed(result, code, _headers, body):
 	if not busy:
@@ -124,6 +125,8 @@ func _on_completed(result, code, _headers, body):
 	var usage=parsed.get("usage",{})
 	last_usage=usage if usage is Dictionary else {}
 	last_usage["elapsed_ms"]=Time.get_ticks_msec()-generation_started_ms
+	request_messages=[]
+	request_options={}
 	completed.emit(content)
 
 func capabilities():

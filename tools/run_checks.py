@@ -31,6 +31,7 @@ def main():
         ("search", [engine, "--headless", "--path", str(ROOT), "--script",
                     "res://tests/test_search.gd", "--", "--test-mode"]),
         ("persistence",[sys.executable,str(ROOT/"tools/test_persistence.py"),engine]),
+        ("leemon_tools",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_leemon_tools.gd","--","--test-mode"]),
         ("functional", [engine,"--headless","--path",str(ROOT),"--script","res://tests/test_functional.gd","--","--test-mode"]),
         ("animation", [engine, "--headless", "--path", str(ROOT), "--script",
                        "res://tests/test_animation.gd", "--", "--test-mode"]),
@@ -53,7 +54,7 @@ def main():
         if not ok:
             print(log, flush=True)
     lines = [
-        "# Проверки фундамента", "",
+        "# Проверки приложения", "",
         "Дата: 27.10.2026. Linux x86_64, Godot 4.7.2 standard.", "",
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],

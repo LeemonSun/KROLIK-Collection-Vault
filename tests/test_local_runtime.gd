@@ -17,7 +17,7 @@ func _run():
 	engine.manifest = {"model":{"file":"test.gguf"},"runtime":{}}
 	engine.port = 28763
 	engine.token = "a".repeat(64)
-	var args = engine.build_args({"cpu_threads":200,"context_tokens":999999})
+	var args = engine.build_args({"cpu_threads":200,"context_tokens":999999},16)
 	check(args[args.find("--host")+1] == "127.0.0.1", "Worker binds loopback only")
 	check(args[args.find("--threads")+1] == "8", "Thread bound")
 	check(args[args.find("--ctx-size")+1] == "4096", "Context bound")

@@ -341,6 +341,8 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	queued_translation=[]
+	if provider:provider.cancel()
 	translation_mode=false
 	if local_runtime:
 		local_runtime.generation_busy = false
@@ -557,7 +559,7 @@ func reminders_text():
 	return t("reminders_empty") if lines.is_empty() else "\n".join(lines)
 func _translate_clipboard(locale):
 	# Developer endpoints are deliberately excluded; clipboard text stays with the owned worker.
-	if provider_name=="llama_loopback" or (provider_name!="local_worker" and not local_runtime.installed()):
+	if provider_name=="llama_loopback" or (not (provider_name=="local_worker" and local_runtime.status=="ai_ready") and not local_runtime.installed()):
 		add_message("assistant",t("clipboard_local_required"))
 		changed.emit();return
 	var source=DisplayServer.clipboard_get()

@@ -45,7 +45,7 @@
     },
     {
       "path": "assets/characters/signal_01/body_v1.png",
-      "group": "runtime",
+      "group": "reference",
       "bytes": 1749493,
       "sha256": "8bbc31dfad9b3a51898377b0352462d383d3a46635eff2d06a24d0e01d5541b4",
       "source": "github"

@@ -6,12 +6,12 @@ func route(text):
 	if normalized in ["мои напоминания","напоминания","show reminders","my reminders","查看提醒","/reminders"]:return {"kind":"tool","tool":"reminders.list","args":{}}
 	if normalized in ["пройдись","прогуляйся","walk around","走一走"]:return {"kind":"tool","tool":"companion.walk","args":{}}
 	var rx = RegEx.new()
-	rx.compile("^(?:сколько(?: сейчас)? времени(?: сейчас)? в|который час в|время в|what time is it in|time in)\\s+(.+?)[.!?]?$" )
+	rx.compile("^(?:(?:скажи|покажи)(?: мне)?\\s+)?(?:сколько(?: сейчас)? времени(?: сейчас)? в|который час в|время в|what time is it in|time in)\\s+(.+?)[.!?]?$" )
 	var time_hit=rx.search(normalized)
-	if time_hit:return {"kind":"tool","tool":"clock.now","args":{"city":time_hit.get_string(1).strip_edges()}}
+	if time_hit:return {"kind":"tool","tool":"clock.now","args":{"city":text.strip_edges().substr(time_hit.get_start(1),time_hit.get_end(1)-time_hit.get_start(1)).strip_edges()}}
 	rx.compile("^(?:现在)?(.+?)(?:现在)?几点(?:了)?[？?]?$" )
 	time_hit=rx.search(normalized)
-	if time_hit:return {"kind":"tool","tool":"clock.now","args":{"city":time_hit.get_string(1).strip_edges()}}
+	if time_hit:return {"kind":"tool","tool":"clock.now","args":{"city":text.strip_edges().substr(time_hit.get_start(1),time_hit.get_end(1)-time_hit.get_start(1)).strip_edges()}}
 	rx.compile("^(?:напомни(?: мне)? через|remind me in)\\s+(\\d+)\\s+(секунд[уы]?|минут[уы]?|час[ао]?в?|дней|дня|день|seconds?|minutes?|hours?|days?)\\s*[:,]?\\s+(.+)$" )
 	var reminder_hit=rx.search(normalized)
 	if reminder_hit:
@@ -37,7 +37,7 @@ func route(text):
 	rx.compile("^(?:переведи (?:текст (?:из )?)?буфер(?:а)?(?: обмена)?|translate (?:the )?clipboard|翻译剪贴板)(?:\\s*(?:на|to|为)\\s*(.+))?[.!?。]?$" )
 	var clipboard_hit=rx.search(normalized)
 	if clipboard_hit:
-		var target=clipboard_hit.get_string(1).strip_edges()
+		var target=clipboard_hit.get_string(1).strip_edges().rstrip(".!?。？")
 		var locales={"русский":"ru","русском":"ru","russian":"ru","俄语":"ru","английский":"en","английском":"en","english":"en","英语":"en","英文":"en","китайский":"zh-Hans","китайском":"zh-Hans","chinese":"zh-Hans","中文":"zh-Hans"}
 		if not target.is_empty() and not locales.has(target):return {"kind":"invalid","key":"clipboard_language"}
 		return {"kind":"tool","tool":"clipboard.translate","args":{"locale":locales.get(target,"")}}

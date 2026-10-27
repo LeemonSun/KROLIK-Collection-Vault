@@ -59,5 +59,23 @@ func _run():
 	check(app.messages.size()==before+2 and app.state.current=="idle" and app.messages[-1].text.contains("UTC"),"App answers real clock without model")
 	app.submit("переведи буфер на английский")
 	check(app.messages[-1].text==app.t("clipboard_local_required") and app.state.current=="idle","Unavailable model blocks before clipboard access")
+	var rig=preload("res://src/animation/leemon_rig.gd").new()
+	rig.texture=load("res://assets/characters/leemon_01/master_v1.png")
+	rig.size=Vector2(300,332);root.add_child(rig)
+	var image=rig.texture.get_image()
+	if image.is_compressed():image.decompress()
+	for side in ["l","r"]:
+		var arm=rig.parts["arm_"+side].get_child(0).uv
+		var leg=rig.parts["leg_"+side].get_child(0).uv
+		var overlaps=0
+		for y in range(1009,1055):
+			for x in range(195,1000):
+				var point=Vector2(x,y)
+				if image.get_pixel(x,y).a>0.8 and Geometry2D.is_point_in_polygon(point,arm) and Geometry2D.is_point_in_polygon(point,leg):overlaps+=1
+		check(overlaps==0,"Independent arm/leg UVs do not duplicate opaque hand or hip pixels: "+side+" overlaps="+str(overlaps))
+	rig.queue_free()
+	for spec in [[1,1],[2,1],[4,2],[8,4],[64,8]]:
+		var args=app.local_runtime.build_args({"cpu_threads":8},spec[0])
+		check(args[args.find("--threads")+1]==str(spec[1]) and args[args.find("--threads-batch")+1]==str(spec[1]),"AI thread budget leaves room for the desktop on "+str(spec[0])+" logical processors")
 	print("LEEMON_TOOLS_TESTS: %s checks, %s failures" % [checks,failures])
 	quit(0 if failures==0 else 1)

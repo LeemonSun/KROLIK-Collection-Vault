@@ -81,7 +81,7 @@
   "character_stage_hint": "Appearance concept. The model and animations are not produced yet.",
   "character_art_missing": "Reference artwork is unavailable.",
   "character_clip_status": "Planned motion scenarios: {planned}. Finished clips: {ready}.",
-  "character_motion_hint": "Desktop dragging and a red window transition are available. Full body clips remain planned.",
+  "character_motion_hint": "Articulated 2D rig: 8 procedural states. Internal prototype, without detailed facial animation or frame clips.",
   "search": "Search",
   "search_hint": "Your button sends the query to DuckDuckGo in your default browser. Results require internet; the search service receives the query.",
   "search_placeholder": "What should we find?",

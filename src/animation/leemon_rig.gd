@@ -19,11 +19,11 @@ func _ready():
 	add_child(root_part)
 	# Polygons overlap only on suit seams, and keep all UVs in source pixel coordinates.
 	_piece("leg_l",Vector2(486,1040),[Vector2(360,1009),Vector2(612,1009),Vector2(612,1312),Vector2(280,1312),Vector2(280,1180),Vector2(360,1090)],0)
-	_piece("leg_r",Vector2(721,1040),[Vector2(612,1009),Vector2(855,1009),Vector2(855,1100),Vector2(950,1190),Vector2(950,1312),Vector2(612,1312)],0)
+	_piece("leg_r",Vector2(721,1040),[Vector2(612,1009),Vector2(875,1009),Vector2(875,1100),Vector2(950,1190),Vector2(950,1312),Vector2(612,1312)],0)
 	_piece("arm_l",Vector2(355,772),[Vector2(0,700),Vector2(321,700),Vector2(410,814),Vector2(379,919),Vector2(374,1051),Vector2(0,1051)],1)
-	_piece("arm_r",Vector2(854,772),[Vector2(877,702),Vector2(1199,702),Vector2(1199,1055),Vector2(846,1055),Vector2(826,918),Vector2(811,858)],1)
+	_piece("arm_r",Vector2(854,772),[Vector2(877,702),Vector2(1199,702),Vector2(1199,1032),Vector2(882,1032),Vector2(870,960),Vector2(826,918),Vector2(811,858)],1)
 	_piece("head",Vector2(603,728),[Vector2(0,0),Vector2(1199,0),Vector2(1199,707),Vector2(884,707),Vector2(869,719),Vector2(601,745),Vector2(340,688),Vector2(307,703),Vector2(0,703)],2)
-	_piece("body",Vector2(600,1023),[Vector2(320,703),Vector2(343,681),Vector2(598,734),Vector2(874,689),Vector2(895,737),Vector2(835,902),Vector2(843,1035),Vector2(636,1055),Vector2(599,1030),Vector2(568,1055),Vector2(374,1035),Vector2(375,920),Vector2(404,817)],3)
+	_piece("body",Vector2(600,1023),[Vector2(307,695),Vector2(343,681),Vector2(598,734),Vector2(874,689),Vector2(895,737),Vector2(835,902),Vector2(860,1009),Vector2(843,1035),Vector2(636,1055),Vector2(599,1030),Vector2(568,1055),Vector2(374,1035),Vector2(375,920),Vector2(404,817)],3)
 	resized.connect(_fit)
 	_fit()
 func _piece(id,pivot,points,z):

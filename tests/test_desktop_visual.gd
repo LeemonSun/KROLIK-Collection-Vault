@@ -1,4 +1,8 @@
 extends SceneTree
+class FakeTranslationProvider extends Node:
+	var received=[]
+	func submit(messages,_options):received=messages;return true
+	func cancel():pass
 var checks=0
 var failures=0
 func _initialize():
@@ -62,6 +66,10 @@ func _run():
 	await frame()
 	check(main.page_scroll.get_v_scroll_bar().max_value>main.page_scroll.size.y,"Long setup page has scroll range")
 	shot(panel,"setup-scroll")
+	main.open_panel("reminders")
+	panel.size=Vector2i(800,360)
+	await frame()
+	check(not main.wide_layout and main.page_picker.visible,"Short wide window keeps all nine pages reachable")
 	app.set_locale("ru")
 	main.open_panel("character")
 	panel.size=Vector2i(800,620)
@@ -139,7 +147,7 @@ func _run():
 			solid+=1
 			if rig_data[offset]<100:missing+=1
 	print("RIG_COVERAGE missing=",missing," solid=",solid)
-	check(solid>1000 and float(missing)/maxi(solid,1)<0.015,"Rig pieces cover at least 98.5% of original opaque silhouette")
+	check(solid>1000 and float(missing)/maxi(solid,1)<0.001,"Rig pieces cover at least 99.9% of original opaque silhouette")
 	reference.queue_free();desktop.art.show()
 	desktop.art.set_reduced(false)
 	for clip in ["hello","thinking","talk","success","error","grab","walk"]:
@@ -149,6 +157,37 @@ func _run():
 		check(desktop.art.parts.size()==6 and desktop.art.parts.head.rotation!=0,"Articulated motion evaluates: "+clip)
 		shot(root,"rig-"+clip)
 	desktop.art.set_reduced(true)
+	# Actual clipboard command with an injected owned provider and synthetic OS clipboard.
+	var original_provider=app.provider
+	var original_name=app.provider_name
+	var fake=FakeTranslationProvider.new();app.add_child(fake)
+	app.provider=fake;app.provider_name="local_worker";app.local_runtime.status="ai_ready"
+	app.l10n.set_locale("ru")
+	DisplayServer.clipboard_set("SYNTHETIC_CLIPBOARD_ONLY_731")
+	app.submit("переведи буфер на английский")
+	check(fake.received.size()==2 and fake.received[-1].content=="SYNTHETIC_CLIPBOARD_ONLY_731","Explicit command reads clipboard into the owned provider only")
+	check(not app.messages.any(func(m):return "SYNTHETIC_CLIPBOARD_ONLY_731" in m.text),"Clipboard source absent from visible/saved messages")
+	check(app.pending_user_text.is_empty(),"Clipboard source absent from conversation context")
+	app.cancel()
+	check(app.queued_translation.is_empty() and not app.translation_mode,"Translation cancel clears queued text and mode")
+	app.provider=original_provider;app.provider_name=original_name;fake.queue_free()
+	DisplayServer.clipboard_set("")
+	var reminder=app.store.add_reminder("SYNTHETIC_NATIVE_REMINDER_731",1)
+	app._schedule_reminders()
+	await create_timer(1.35).timeout
+	check(reminder.ok and app.messages.count({"speaker":"assistant","text":app.t("reminder_due",{"text":"SYNTHETIC_NATIVE_REMINDER_731"})})==1,"Real reminder timer notifies once")
+	check(not app.store.data.reminders.any(func(item):return item.id==reminder.item.id),"Delivered reminder removed from persistent store")
+	main.open_panel("reminders")
+	await frame()
+	app.submit("напомни через 5 минут SYNTHETIC_UI_REMINDER_731")
+	await frame()
+	check(main.content.find_children("*","Label",true,false).any(func(label):return "SYNTHETIC_UI_REMINDER_731" in label.text),"Open reminders page refreshes when chat creates an item")
+	var cancel_buttons=main.content.find_children("*","Button",true,false)
+	check(not cancel_buttons.is_empty(),"Reminder cancellation reachable")
+	if not cancel_buttons.is_empty():cancel_buttons[0].pressed.emit()
+	await frame()
+	check(not app.store.data.reminders.any(func(item):return item.text=="SYNTHETIC_UI_REMINDER_731"),"Reminder page cancels its saved item")
+	shot(panel,"reminders")
 	app.desktop_companion.art.queue_free()
 	app.desktop_companion.art=null
 	app.desktop_companion._show_fallback()

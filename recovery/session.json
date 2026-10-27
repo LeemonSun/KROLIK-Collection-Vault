@@ -1,24 +1,27 @@
 {
   "schema_version": 1,
   "app_version": "0.5.0-leemon-preview",
-  "checkpoint_status": "wip_leemon_rig_tools_validation_in_progress",
-  "current_task": "Leemon active: reviewed single generated master, six articulated regions/8 procedural states, graphite amber UI. Offline clock 597 zones/2039 aliases, persistent reminders and explicit local clipboard translation implemented; validation in progress.",
-  "next_action": "Finish real Qwen dialogue/translation evaluation; verify corrected rig limb masks, persistent reminder restart, clipboard native integration; then full 0.5.0 ZIP and storage delta.",
+  "checkpoint_status": "source_saved_environment_offline_final_validation_pending",
+  "current_task": "Leemon 0.5 source preserved after execution environment disconnected. Latest 0.5 binary/GIF existed locally but were not uploaded; do not claim delivery. Capsule plus a hash-checked pending source overlay restore authored changes.",
+  "next_action": "Reconnect; bootstrap via latest resume_bridge.js; rerun corrected test_local_runtime high-core fixture and final native UI/reminders/clipboard/exported-content checks. Rebuild 0.5 ZIP. Promote pending launcher only after storing verified two-file update. Deliver through native Library.",
   "read_next": [
     "RESUME.md"
   ],
   "known_limits": [
-    "0.5.0 not yet shipped; user has 0.4.0",
-    "Windows native acceptance still pending",
-    "No 3D rig, ASR/custom voice, vision or page reading; procedural cutout animation only",
-    "Leemon_Mascot.zip contained concept sheet, not animation frames"
+    "0.5 NOT delivered; last delivered version remains 0.4.0",
+    "Environment disconnected before latest native/exported checks completed",
+    "Old Thread bound assertion expected 8 regardless of host; fixture corrected to explicit 16 processors in saved source, not rerun",
+    "General Qwen3-1.7B factual quality limited: manual review found imprecise science explanation",
+    "Native Windows, ASR/custom voice, universal vision and web page reading remain pending",
+    "Recovery overlay authored but cannot be executed or validated while environment is offline"
   ],
   "validation": [
-    "All 12 local checks PASS (functional 42; self knowledge 173; HTTP 27 + context 8; 2-process persistence)",
-    "PowerShell 7.6: 21 resolver/protocol/actual RAM+CPU checks PASS",
-    "Exported PCK: native X11 50 checks PASS including exact RGBA tint comparison and process RSS; 8 content/helper roundtrip checks PASS",
-    "Actual 0.3.3->0.4.0 delta application: 4 scenarios PASS, hash equality, idempotence, unknown/corrupt input preserved",
-    "Full ZIP clean: 13 files; no external BAT/CMD/PS1 installers. Native Library attachment metadata applied."
+    "Earlier broad checks passed; latest run passed all except old Thread bound assertion",
+    "Leemon tools 42 checks passed; five additional low-core cases included in later leemon_tools PASS",
+    "Exported native X11 72 PASS: missing 12/40392 opaque screen pixels; newer short-wide/reminder-refresh assertions pending",
+    "Real Qwen CPU2 short RU/EN/zh translations correct; 18 automated checks PASS with manual factual caveat",
+    "Two-file EXE+PCK updater 8 scenarios PASS: hashes, backups, idempotence, mixed state, unknown/corrupt bases, rollback and source launcher ready branch",
+    "144 native motion frames rendered; GIF encoder exited zero; not saved to Library before disconnection"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.4.0.zip",
@@ -30,7 +33,15 @@
     "patch_from": "0.3.3",
     "patch_sha256": "b949a6969b287ae61bb17b0aaacf7defb5cfbc5e1ac2ef37f7990034bc849ea8"
   },
-  "previous_checkpoint": "3c38d1ca12761d2af09aa1dc2d6bbfaeca9ada7f",
+  "previous_checkpoint": "dfdd8c02643c157fe7f64d0af021610c02dec127",
   "shipped_version": "0.4.0-functional-preview",
-  "shipped_app_pack_sha256": "64e0ce6f6d2183505bc6ab2f0e6bfb5c7a2335b061dd31c1e112b9bf54e9988c"
+  "shipped_app_pack_sha256": "64e0ce6f6d2183505bc6ab2f0e6bfb5c7a2335b061dd31c1e112b9bf54e9988c",
+  "unreleased_candidate": {
+    "file": "Companion_Preview_Windows_v0.5.0.zip",
+    "last_observed_bytes": 53429052,
+    "last_observed_sha256": "dea5f4758db820dc7dec3a60de1dd9fc4800315af6dc67fc237efea7f2727053",
+    "status": "local_only_environment_unavailable_not_delivered",
+    "update_last_observed_bytes": 1260694,
+    "update_last_observed_sha256": "62d543c9fb9c3156acdb5472f1fbb21a9a1741df97e5b9b5540bbdeb068d7d36"
+  }
 }

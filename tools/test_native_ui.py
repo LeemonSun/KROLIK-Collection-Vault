@@ -4,7 +4,7 @@ import argparse,os,socket,subprocess,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def main():
- p=argparse.ArgumentParser();p.add_argument('--godot',required=True,type=Path);p.add_argument('--xvfb-root',required=True,type=Path);p.add_argument('--output',required=True,type=Path);p.add_argument('--pack',type=Path);a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('--godot',required=True,type=Path);p.add_argument('--xvfb-root',required=True,type=Path);p.add_argument('--output',required=True,type=Path);p.add_argument('--pack',type=Path);p.add_argument('--script',type=Path,default=ROOT/'tests/test_desktop_visual.gd');a=p.parse_args()
  dev=a.xvfb_root.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
  env=dict(os.environ,LD_LIBRARY_PATH=str(dev/'usr/lib/x86_64-linux-gnu'))
  link=Path('/usr/bin/xkbcomp');owned=False;server=None
@@ -21,7 +21,7 @@ def main():
    env.update(DISPLAY='127.0.0.1:98',LIBGL_ALWAYS_SOFTWARE='1',COMPANION_VISUAL_OUTPUT=str(out),XDG_DATA_HOME=str(out/'user'),XDG_CONFIG_HOME=str(out/'user'))
    command=[str(a.godot.resolve()),'--audio-driver','Dummy','--display-driver','x11','--rendering-method','gl_compatibility','--path',str(ROOT)]
    if a.pack:command+=['--main-pack',str(a.pack.resolve())]
-   command+=['--script',str(ROOT/'tests/test_desktop_visual.gd'),'--','--test-mode']
+   command+=['--script',str(a.script.resolve()),'--','--test-mode']
    result=subprocess.run(command,env=env,capture_output=True,text=True,timeout=90)
    output=result.stdout+result.stderr;(out/'godot.log').write_text(output);print(output)
    return int(result.returncode!=0 or 'SCRIPT ERROR:' in output or '\nERROR:' in output or '0 failures' not in output)

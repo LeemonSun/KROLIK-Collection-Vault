@@ -26,7 +26,9 @@ func _run():
 		var relevant=false
 		for word in test[2]:if word in answer:relevant=true
 		check(relevant and "openai" not in answer,"Relevant answer in "+test[0])
-		if test[0]=="ru":check("браузер" not in answer,"Science answer does not invent a browser task")
+		if test[0]=="ru":
+			check("браузер" not in answer,"Science answer does not invent a browser task")
+			check("рассе" in answer and ("молекул" in answer or "атмосфер" in answer or "рэле" in answer),"Sky explanation identifies atmospheric scattering")
 		print("REAL_DIALOGUE ",JSON.stringify({"locale":test[0],"input":test[1],"answer":app.messages[-1].text,"usage":app.provider.last_usage}))
 	var translator=preload("res://src/tools/clipboard_translation.gd").new()
 	for test in [["ru","The sun is bright.","солнц"],["en","今天是星期一。","monday"],["zh-Hans","The moon is bright.","月"]]:
@@ -35,7 +37,7 @@ func _run():
 		app._submit_translation(prepared.messages)
 		await wait_answer()
 		check(test[2] in str(app.messages[-1].text).to_lower(),"Actual local translation "+test[0])
-		check(app.session_turns.is_empty() and app.pending_user_text.is_empty(),"Clipboard source not retained in conversation context")
+		check(app.session_turns.is_empty() and app.pending_user_text.is_empty() and app.provider.request_messages.is_empty(),"Clipboard source not retained in conversation context")
 		print("REAL_TRANSLATION ",JSON.stringify({"locale":test[0],"input":test[1],"answer":app.messages[-1].text,"usage":app.provider.last_usage}))
 	check(app.desktop_actions.pid<0 and app.desktop_actions.last_result.is_empty(),"Generated text causes no desktop effects")
 	print("REAL_LEEMON_TESTS: %s checks, %s failures; unchanged Qwen3-1.7B Q8_0, CPU 2 threads" % [checks,failures])
