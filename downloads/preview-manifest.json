@@ -70,6 +70,24 @@
       ]
     },
     {
+      "id": "fix032",
+      "output": "build/Companion_Fix_0.3.2.zip",
+      "bytes": 283255,
+      "sha256": "6dbacfd64f2da8fb9bf40f80e8493e5a6a3df3efe0dc0f044f101b9d0482b6dd",
+      "parts": [
+        "downloads/v0.3.2-patch/000.chunk"
+      ]
+    },
+    {
+      "id": "fix033",
+      "output": "build/Companion_Fix_0.3.3.zip",
+      "bytes": 391415,
+      "sha256": "088489f4da80afba5bdf33a6ae3c0ff6e3c9232ba36cadbed9b806e4f7f78042",
+      "parts": [
+        "downloads/v0.3.3-patch/000.chunk"
+      ]
+    },
+    {
       "output": "build/Companion_Fix_0.4.0.zip",
       "sha256": "b949a6969b287ae61bb17b0aaacf7defb5cfbc5e1ac2ef37f7990034bc849ea8",
       "parts": [
