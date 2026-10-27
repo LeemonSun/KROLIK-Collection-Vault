@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "character_id": "signal_01",
+  "revision": "v1",
+  "source_of_truth": "art/master_v1.png",
+  "master_sha256": "6d86c3fc204eeb786268d9d853d5b8bf082bcd033729f276974afcae19220b66",
+  "identity": {
+    "eyes": "rose-red almond eyes; same brow, nose, jaw and mouth geometry",
+    "hair": "silver-lilac high voluminous wavy ponytail, burgundy underside, curved burgundy headband",
+    "hair_tip": "natural tapered locks; no three parallel barcode strips",
+    "body": "ivory central torso; deep wine side volumes and legs; swept burgundy shoulder collar; hip side panels",
+    "signature": "crimson motion trail is detached and transient, not a permanent hair accessory"
+  },
+  "palette_targets": {
+    "signal_red": "#E43A52",
+    "wine": "#3C152C",
+    "ivory": "#EEE4EE",
+    "hair_lilac": "#CBBDE5",
+    "hair_shadow": "#807195"
+  },
+  "palette_note": "These are initial production targets, not sampled or finalized material colors.",
+  "display_intent": "full-body desktop overlay, not a portrait chat window",
+  "identity_policy": "one final model and rig; generated reference sheets remain drafts and cannot prove geometrical equality",
+  "draft_observations": [
+    "Turnaround FRONT panel is slightly turned; must be corrected to real orthographic front during model construction.",
+    "Back panel topology is a production proposal; master contains no back view.",
+    "Expression sheet has subtle differences and does not replace blendshape work.",
+    "Storyboard changes pose and hair flow; it is not a sprite atlas."
+  ],
+  "continuity_locks": [
+    "face geometry",
+    "hair attachment and band orientation",
+    "body pattern and panel topology",
+    "proportions and silhouette",
+    "palette",
+    "effect character"
+  ],
+  "do_not_add": [
+    "borrowed logos or character symbols",
+    "spikes, horns or extra arms",
+    "new accessories per image",
+    "permanent red particle cloud"
+  ]
+}

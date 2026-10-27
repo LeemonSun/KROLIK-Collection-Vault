@@ -13,13 +13,23 @@
         "thinking",
         "paused"
       ]
+    },
+    {
+      "id": "signal_01",
+      "name": "Signal 01 (working label)",
+      "status": "concept_selected",
+      "renderer": "not_integrated",
+      "design_revision": "v1",
+      "source": "characters/signal_01/art/master_v1.png",
+      "source_sha256": "6d86c3fc204eeb786268d9d853d5b8bf082bcd033729f276974afcae19220b66",
+      "license_status": "ai_generated_preliminary_review_only",
+      "release_approved": false,
+      "animations": []
     }
   ],
   "concepts": [
-    "niksa",
-    "run",
-    "veil"
+    "signal_01"
   ],
-  "final_character": null
+  "final_character": null,
+  "selected_concept": "signal_01"
 }
-

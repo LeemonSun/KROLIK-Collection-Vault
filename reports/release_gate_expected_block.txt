@@ -8,6 +8,9 @@
     "offline_install_tested_on_windows",
     "cjk_font_bundled",
     "minimum_hardware_benchmarked",
-    "no_approved_bundled_model"
+    "no_approved_bundled_model",
+    "no_approved_final_character",
+    "concept_art_not_cleared_for_release",
+    "rig_and_animation_pack_not_approved"
   ]
 }

@@ -55,6 +55,21 @@
       "id": "task_planning",
       "status": "contract_only",
       "network": "none"
+    },
+    {
+      "id": "browser_search",
+      "status": "implemented_explicit_handoff",
+      "network": "user_requested_external_browser"
+    },
+    {
+      "id": "web_research",
+      "status": "contract_only",
+      "network": "opt_in_internet"
+    },
+    {
+      "id": "character_animation",
+      "status": "director_only_no_clips",
+      "network": "none"
     }
   ]
 }

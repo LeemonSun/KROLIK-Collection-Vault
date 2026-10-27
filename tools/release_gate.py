@@ -22,6 +22,15 @@ def blockers():
             result.append(f"model_not_approved:{model.get('id')}")
         if not model.get("sha256") or not model.get("license"):
             result.append(f"model_provenance_missing:{model.get('id')}")
+    characters = json.loads((ROOT / "manifests/characters.json").read_text())
+    if not characters.get("final_character"):
+        result.append("no_approved_final_character")
+    provenance = json.loads((ROOT / "characters/signal_01/provenance.json").read_text())
+    if any(asset.get("release_approved") is not True for asset in provenance.get("assets", [])):
+        result.append("concept_art_not_cleared_for_release")
+    pack = json.loads((ROOT / "manifests/animation_pack.json").read_text())
+    if pack.get("review_status") != "approved" or not pack.get("rig_revision") or not pack.get("clips"):
+        result.append("rig_and_animation_pack_not_approved")
     return result
 
 def main():

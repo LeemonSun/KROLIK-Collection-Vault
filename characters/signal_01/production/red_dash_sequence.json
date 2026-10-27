@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "id": "locomotion.red_dash",
+  "character_id": "signal_01",
+  "status": "storyboard_only",
+  "duration_ms": 520,
+  "runtime_animation_resource": null,
+  "phases": [
+    {
+      "id": "notice",
+      "start_ms": 0,
+      "end_ms": 80,
+      "action": "Notice destination with gaze before body"
+    },
+    {
+      "id": "anticipate",
+      "start_ms": 80,
+      "end_ms": 160,
+      "action": "Small directional lean, hair lags"
+    },
+    {
+      "id": "dissolve",
+      "start_ms": 160,
+      "end_ms": 220,
+      "action": "Silhouette folds into a localized red trail"
+    },
+    {
+      "id": "transit",
+      "start_ms": 220,
+      "end_ms": 290,
+      "action": "Move the small trail to the valid destination"
+    },
+    {
+      "id": "reform",
+      "start_ms": 290,
+      "end_ms": 360,
+      "action": "Restore the same body and pose with trailing hair"
+    },
+    {
+      "id": "contact",
+      "start_ms": 360,
+      "end_ms": 440,
+      "action": "Contact and weight settle, avoid floor penetration"
+    },
+    {
+      "id": "settle",
+      "start_ms": 440,
+      "end_ms": 520,
+      "action": "Hair settles, trail fades, eyes return to task"
+    }
+  ],
+  "effects": {
+    "scope": "character_local",
+    "fullscreen_flash": false,
+    "default_intensity": "subtle",
+    "reduced_motion_alternative": "transition.fade",
+    "idle_particles": false,
+    "trail_is_separate_from_hair": true
+  },
+  "target_rules": [
+    "destination must remain inside the current allowed desktop work area",
+    "cancel or replan when monitor/window changes",
+    "never transport the cursor or application window",
+    "interrupt/cancel at defined safe points",
+    "do not hide unreadable application content with glow"
+  ],
+  "quality_status": "not_animated_not_benchmarked"
+}

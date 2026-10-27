@@ -43,6 +43,24 @@
       "source": "https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct",
       "declared_license": "Apache-2.0",
       "status": "candidate"
+    },
+    {
+      "id": "qwen3.5-2b",
+      "purpose": "general_vision_and_chat",
+      "source": "https://huggingface.co/Qwen/Qwen3.5-2B",
+      "license_source": "https://huggingface.co/Qwen/Qwen3.5-2B/blob/main/LICENSE",
+      "declared_license": "Apache-2.0",
+      "status": "candidate_not_downloaded_or_benchmarked",
+      "last_metadata_review": "2026-10-27"
+    },
+    {
+      "id": "qwen3.5-4b",
+      "purpose": "general_vision_and_chat",
+      "source": "https://huggingface.co/Qwen/Qwen3.5-4B",
+      "license_source": "https://huggingface.co/Qwen/Qwen3.5-4B/blob/main/LICENSE",
+      "declared_license": "Apache-2.0",
+      "status": "candidate_not_downloaded_or_benchmarked",
+      "last_metadata_review": "2026-10-27"
     }
   ]
 }

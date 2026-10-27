@@ -11,3 +11,5 @@ Run tools/verify_project.py and relevant Godot tests; inspect logs as well as ex
 Never commit API keys, user files, screen captures, model weights or unreviewed assets.
 Use manifest status fields honestly. Public release gate must fail while required release evidence is missing.
 
+
+Read characters/signal_01/README.md before modifying the character. Main display is full body without a frame, never a portrait window replacement. Pixel/hybrid direction remains an option, not approved final art. The animation catalog is planned; never count events or fixtures as completed clips. Reviewed internal AI concept references may be stored privately with provenance and release_approved=false. This is not commercial asset clearance. Keep browser handoff distinct from page reading and reasoning.

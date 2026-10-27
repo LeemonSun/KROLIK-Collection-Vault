@@ -24,6 +24,10 @@ func route(raw):
 		return {"kind": "tool", "tool": "notes.add", "args": {"text": argument}}
 	if command in ["/notes", "/заметки", "/笔记列表"]:
 		return {"kind": "tool", "tool": "notes.list", "args": {}}
+	if command in ["/search", "/поиск", "/搜索"]:
+		if argument.is_empty() or argument.length() > 512:
+			return {"kind": "invalid", "key": "search_invalid"}
+		return {"kind": "tool", "tool": "browser.search", "args": {"query": argument}}
 	# Unknown slash commands are not forwarded as tool instructions.
 	if text.begins_with("/"):
 		return {"kind": "invalid", "key": "unknown_command"}

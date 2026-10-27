@@ -100,7 +100,7 @@ func _build():
 	nav.custom_minimum_size.x = 165
 	nav.add_theme_constant_override("separation", 10)
 	body.add_child(nav)
-	for id in ["talk", "notes", "modules", "settings"]:
+	for id in ["talk", "notes", "character", "search", "modules", "settings"]:
 		_button(App.t(id), nav, func(): page = id; _build())
 	var space = Control.new()
 	space.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -115,8 +115,9 @@ func _build():
 	side.custom_minimum_size.x = 240
 	side.add_theme_constant_override("separation", 16)
 	body.add_child(side)
-	var character = Companion.new()
-	side.add_child(character)
+	if page != "character":
+		var character = Companion.new()
+		side.add_child(character)
 	state_label = _label(_state_text(), side, 22)
 	_label(App.t("character_hint"), side, 14, true)
 	timer_label = _label(App.t("active_timers", {"count": App.timers.size()}), side, 14, true)
@@ -132,8 +133,47 @@ func _build():
 		_build_notes()
 	elif page == "modules":
 		_build_modules()
+	elif page == "character":
+		_build_character()
+	elif page == "search":
+		_build_search()
 	else:
 		_build_settings()
+
+func _build_character():
+	_label(App.t("character_reference"), content, 22)
+	_label(App.t("character_stage_hint"), content, 14, true)
+	var art = Image.new()
+	var result = art.load("res://characters/signal_01/art/master_v1.png")
+	if result == OK:
+		var preview = TextureRect.new()
+		preview.texture = ImageTexture.create_from_image(art)
+		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		preview.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		preview.custom_minimum_size = Vector2(320, 200)
+		content.add_child(preview)
+	else:
+		_label(App.t("character_art_missing"), content, 14, true)
+	var stats = App.motion.summary()
+	_label(App.t("character_clip_status", {"planned": stats.planned_events, "ready": stats.installed_clips}), content, 14, true)
+	_label(App.t("character_motion_hint"), content, 13, true)
+
+func _build_search():
+	_label(App.t("search"), content, 22)
+	_label(App.t("search_hint"), content, 15, true)
+	var field = LineEdit.new()
+	field.max_length = 512
+	field.placeholder_text = App.t("search_placeholder")
+	content.add_child(field)
+	var run = func():
+		App.submit("/search " + field.text)
+		page = "talk"
+		_build()
+	field.text_submitted.connect(func(_value): run.call())
+	_button(App.t("search_open"), content, run)
+	_label(App.t("search_intelligence_status"), content, 14, true)
 
 func _build_talk():
 	_label(App.t("talk"), content, 22)
@@ -262,10 +302,10 @@ func _confirm_clear():
 func _ui_smoke():
 	for language in ["ru","en","zh-Hans"]:
 		App.l10n.set_locale(language)
-		for id in ["talk","notes","modules","settings"]:
+		for id in ["talk","notes","character","search","modules","settings"]:
 			page = id
 			_build()
 			await get_tree().process_frame
-	print("UI_SMOKE_OK: 3 locales, 4 pages")
+	print("UI_SMOKE_OK: 3 locales, 6 pages")
 	get_tree().quit()
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate the source scaffold, without downloading or executing model files."""
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -78,6 +79,36 @@ def validate():
     for item in registry.get("components", []):
         if item.get("license_file") and not (ROOT / item["license_file"]).is_file():
             errors.append(f"Missing license file for {item['id']}")
+    provenance = parsed.get("characters/signal_01/provenance.json", {})
+    listed = set()
+    for asset in provenance.get("assets", []):
+        rel = asset.get("path", "")
+        path = ROOT / "characters/signal_01" / rel
+        if not rel or ".." in Path(rel).parts or not path.is_file():
+            errors.append(f"Character asset missing or invalid: {rel}")
+            continue
+        listed.add(path.resolve())
+        if hashlib.sha256(path.read_bytes()).hexdigest() != asset.get("sha256"):
+            errors.append(f"Character asset hash mismatch: {rel}")
+        if asset.get("review_status") not in {"reviewed_for_internal_reference_only", "approved"}:
+            errors.append(f"Character asset not reviewed: {rel}")
+    for path in (ROOT / "characters").rglob("*.png"):
+        if path.resolve() not in listed:
+            errors.append(f"Character PNG without provenance: {path.relative_to(ROOT)}")
+    design = parsed.get("characters/signal_01/design.json", {})
+    master = ROOT / "characters/signal_01" / design.get("source_of_truth", "missing")
+    if not master.is_file() or hashlib.sha256(master.read_bytes()).hexdigest() != design.get("master_sha256"):
+        errors.append("Canonical reference hash does not match design")
+    catalog = parsed.get("manifests/animation_catalog.json", {})
+    events = catalog.get("events", [])
+    event_ids = [event.get("id") for event in events]
+    if not events or len(event_ids) != len(set(event_ids)):
+        errors.append("Animation event catalog missing or duplicated")
+    pack = parsed.get("manifests/animation_pack.json", {})
+    if catalog.get("implemented_clips") != len(pack.get("clips", [])):
+        errors.append("Animation completed count differs from pack")
+    if not (ROOT / "OPEN_PREVIEW.html").is_file():
+        errors.append("Local materials preview missing")
     return errors, {"json_files": len(parsed), "locale_keys": len(base),
                     "gd_scripts": len(list(ROOT.rglob("*.gd")))}
 

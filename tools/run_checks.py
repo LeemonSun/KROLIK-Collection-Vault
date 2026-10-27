@@ -26,6 +26,10 @@ def main():
         ("core", [engine, "--headless", "--path", str(ROOT), "--script",
                   "res://tests/test_core.gd", "--", "--test-mode"]),
         ("http", [sys.executable, str(ROOT / "tools/test_http.py"), engine]),
+        ("search", [engine, "--headless", "--path", str(ROOT), "--script",
+                    "res://tests/test_search.gd", "--", "--test-mode"]),
+        ("animation", [engine, "--headless", "--path", str(ROOT), "--script",
+                       "res://tests/test_animation.gd", "--", "--test-mode"]),
         ("ui", [engine, "--headless", "--path", str(ROOT), "--", "--ui-smoke", "--test-mode"]),
         ("release_gate_expected_block", [sys.executable, str(ROOT / "tools/release_gate.py"), "--expect-blocked"]),
     ]
@@ -42,13 +46,16 @@ def main():
             print(log, flush=True)
     lines = [
         "# Проверки фундамента", "",
-        "Дата: 26.10.2026. Linux x86_64, Godot 4.7.2 standard.", "",
+        "Дата: 27.10.2026. Linux x86_64, Godot 4.7.2 standard.", "",
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
         "", "Не проверены: реальная Windows, установщик/EXE, визуальный вид на дисплее, китайские глифы на чистой Windows, качество/скорость ИИ и речи, захват/понимание экрана и автоматизация.",
         "UI-проверка проходит все страницы и языки без дисплея; это не визуальная приёмка.",
-        "Исходники не включают нейросетевые веса и конечный персонаж.",
+        "Включён рабочий концепт Signal 01, но нет рига, готовых анимационных клипов и нейросетевых весов.",
+        "HTML-просмотр: ссылки и JavaScript проверены отдельно; настоящий браузерный рендер не проверен (Chromium отсутствует).",
+        "Поиск: 21 проверка с подменой OS opener; реальный запуск браузера на Windows не проверен.",
+        "Каталог движений — план производства; тесты директора проверяют код на искусственных тестовых ресурсах, не художественное качество анимации.",
     ]
     (reports / "VALIDATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return 0 if all(ok for _, ok in outcomes) else 1

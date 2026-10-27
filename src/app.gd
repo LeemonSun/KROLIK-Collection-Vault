@@ -10,6 +10,8 @@ const Router = preload("res://src/core/router.gd")
 const Policy = preload("res://src/core/tool_policy.gd")
 const Missing = preload("res://src/providers/unconfigured_provider.gd")
 const Llama = preload("res://src/providers/llama_http_provider.gd")
+const BrowserSearch = preload("res://src/tools/browser_search.gd")
+const AnimationDirector = preload("res://src/animation/director.gd")
 var l10n = L10n.new()
 var profiles = Profiles.new()
 var state = State.new()
@@ -26,8 +28,13 @@ var persistence_ready = true
 var paused = false
 var session_turns = []
 var pending_user_text = ""
+var browser_search = BrowserSearch.new()
+var motion = AnimationDirector.new()
+var last_motion_result = {}
 
 func _ready():
+	var catalog = JSON.parse_string(FileAccess.get_file_as_string("res://manifests/animation_catalog.json"))
+	motion.configure(catalog)
 	persistence_ready = store.load_state()
 	if persistence_ready:
 		l10n.set_locale(str(store.data.settings.get("locale", "ru")))
@@ -40,6 +47,10 @@ func _ready():
 
 func t(key, values = {}):
 	return l10n.text(key, values)
+
+func _process(_delta):
+	if not motion.active.is_empty():
+		motion.tick(Time.get_ticks_msec())
 
 func apply_profile():
 	var config = profiles.config(profile_name)
@@ -106,6 +117,7 @@ func submit(text):
 		_execute(command)
 		return
 	state.transition("thinking")
+	request_motion("dialogue.think_loop")
 	changed.emit()
 	var language = {"ru": "Russian", "en": "English", "zh-Hans": "Simplified Chinese"}[l10n.locale]
 	var request = [{"role": "system", "content": "You are a concise desktop companion. Reply in %s. Never claim to have performed actions. You have no tools in this build." % language}]
@@ -125,6 +137,7 @@ func _execute(command):
 	if command.tool == "notes.add":
 		var ok = persistence_ready and store.add_note(command.args.text)
 		add_message("assistant", t("note_saved" if ok else "storage_failed"))
+		request_motion("work.note_saved" if ok else "work.error_recover")
 	elif command.tool == "notes.list":
 		if store.data.notes.is_empty():
 			add_message("assistant", t("notes_empty"))
@@ -133,6 +146,9 @@ func _execute(command):
 			for note in store.data.notes:
 				lines.append("• " + note.text)
 			add_message("assistant", "\n".join(lines))
+	elif command.tool == "browser.search":
+		var result = browser_search.open_query(command.args.query)
+		add_message("assistant", t("search_requested" if result.ok else "search_failed"))
 	elif command.tool == "timer.start":
 		if timers.size() >= 8:
 			add_message("assistant", t("too_many_timers"))
@@ -149,6 +165,7 @@ func _execute(command):
 				timer.queue_free()
 				add_message("assistant", t("timer_done", {"seconds": duration}))
 				timer_finished.emit(duration)
+				request_motion("work.timer_notice")
 				changed.emit())
 			timer.start()
 			add_message("assistant", t("timer_started", {"seconds": duration}))
@@ -166,6 +183,7 @@ func _on_answer(text):
 			session_turns.pop_front()
 	pending_user_text = ""
 	add_message("assistant", text)
+	request_motion("dialogue.explain_small")
 	state.transition("idle")
 	changed.emit()
 
@@ -173,9 +191,11 @@ func _on_failure(key):
 	pending_user_text = ""
 	state.reset()
 	add_message("assistant", t(key))
+	request_motion("work.model_missing" if key == "model_missing" else "work.error_recover")
 	changed.emit()
 
 func cancel():
+	motion.clear()
 	pending_user_text = ""
 	if provider:
 		provider.cancel()
@@ -184,8 +204,13 @@ func cancel():
 
 func set_paused(value):
 	paused = value
+	motion.set_paused(value)
 	cancel()
 	changed.emit()
+
+func request_motion(event_id):
+	last_motion_result = motion.request(event_id, Time.get_ticks_msec())
+	return last_motion_result
 
 func clear_notes_confirmed():
 	if not policy.evaluate("notes.clear", true).allowed:

@@ -1,0 +1,3 @@
+PREVIEW_STATIC: all local HTML references exist; JavaScript syntax checked with Node.
+No external scripts/fonts/assets; search requires an explicit click.
+Visual/browser rendering not verified: local Chromium is unavailable.
