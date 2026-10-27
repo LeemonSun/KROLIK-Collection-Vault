@@ -10,6 +10,10 @@ const Router = preload("res://src/core/router.gd")
 const Policy = preload("res://src/core/tool_policy.gd")
 const Missing = preload("res://src/providers/unconfigured_provider.gd")
 const Llama = preload("res://src/providers/llama_http_provider.gd")
+const ContextBudget = preload("res://src/core/context_budget.gd")
+const LocalRuntime = preload("res://src/runtime/local_runtime.gd")
+const DesktopCompanion = preload("res://src/desktop/companion_window.gd")
+const SystemVoice = preload("res://src/tools/system_voice.gd")
 const BrowserSearch = preload("res://src/tools/browser_search.gd")
 const AnimationDirector = preload("res://src/animation/director.gd")
 var l10n = L10n.new()
@@ -28,6 +32,11 @@ var persistence_ready = true
 var paused = false
 var session_turns = []
 var pending_user_text = ""
+var queued_chat_text = ""
+var local_runtime
+var desktop_companion
+var voice = SystemVoice.new()
+var local_ai_enabled = false
 var browser_search = BrowserSearch.new()
 var motion = AnimationDirector.new()
 var last_motion_result = {}
@@ -42,6 +51,14 @@ func _ready():
 	profile_name = profiles.select(profile_request, OS.get_memory_info().get("physical", 0))
 	# Network adapter must be enabled explicitly; not restored by saved settings.
 	_set_provider("unconfigured")
+	local_runtime = LocalRuntime.new()
+	add_child(local_runtime)
+	local_runtime.status_changed.connect(_runtime_changed)
+	local_runtime.ready_for_chat.connect(_runtime_ready)
+	if "--test-mode" not in OS.get_cmdline_user_args() and local_runtime.installed():
+		local_ai_enabled = bool(store.data.settings.get("local_ai_enabled", false))
+		if local_ai_enabled:
+			local_runtime.start.call_deferred(profiles.config(profile_name))
 	if "--test-mode" not in OS.get_cmdline_user_args():
 		apply_profile()
 
@@ -56,6 +73,7 @@ func apply_profile():
 	var config = profiles.config(profile_name)
 	Engine.max_fps = int(config.get("animation_fps", 24))
 	OS.low_processor_usage_mode = true
+	OS.low_processor_usage_mode_sleep_usec = 15000
 
 func set_locale(code):
 	if l10n.set_locale(code):
@@ -81,13 +99,16 @@ func _set_provider(name):
 		remove_child(provider)
 		provider.queue_free()
 	provider_name = name
-	provider = Llama.new() if name == "llama_loopback" else Missing.new()
+	provider = Llama.new() if name in ["llama_loopback", "local_worker"] else Missing.new()
 	add_child(provider)
 	provider.completed.connect(_on_answer)
 	provider.failed.connect(_on_failure)
 
 func enable_developer_llama(enabled):
 	cancel()
+	local_ai_enabled = false
+	if local_runtime:
+		local_runtime.stop()
 	_set_provider("llama_loopback" if enabled else "unconfigured")
 	session_turns.clear()
 	changed.emit()
@@ -102,7 +123,7 @@ func submit(text):
 	if paused:
 		add_message("assistant", t("paused_message"))
 		return
-	if state.current != "idle":
+	if state.current != "idle" or not queued_chat_text.is_empty():
 		add_message("assistant", t("busy_message"))
 		return
 	var command = router.route(text)
@@ -116,16 +137,30 @@ func submit(text):
 	if command.kind == "tool":
 		_execute(command)
 		return
+	if local_ai_enabled and local_runtime.status != "ai_ready":
+		queued_chat_text = command.text
+		if not local_runtime.start(profiles.config(profile_name)):
+			queued_chat_text = ""
+		add_message("assistant", t(local_runtime.status))
+		return
+	_submit_model_text(command.text)
+
+func _submit_model_text(text):
 	state.transition("thinking")
+	if local_runtime:
+		local_runtime.generation_busy = true
+		local_runtime.touch()
 	request_motion("dialogue.think_loop")
 	changed.emit()
 	var language = {"ru": "Russian", "en": "English", "zh-Hans": "Simplified Chinese"}[l10n.locale]
-	var request = [{"role": "system", "content": "You are a concise desktop companion. Reply in %s. Never claim to have performed actions. You have no tools in this build." % language}]
-	request.append_array(session_turns.slice(maxi(0, session_turns.size() - 8)))
-	request.append({"role": "user", "content": command.text})
-	pending_user_text = command.text
+	var system_text = "You are Signal, a thoughtful desktop AI companion with a warm, composed personality and a little dry wit. Reply concisely in %s. Adapt to the user request. You cannot see the screen, read websites, access files or execute actions in this build. Never invent having done so. Do not emit tool instructions or hidden reasoning." % language
 	var options = profiles.config(profile_name)
-	provider.submit(request, options)
+	var context = ContextBudget.new().build(system_text, text, session_turns, options)
+	if not context.ok:
+		_on_failure("model_context_full")
+		return
+	pending_user_text = text
+	provider.submit(context.messages, options)
 
 func _execute(command):
 	var permission = policy.evaluate(command.tool)
@@ -183,11 +218,18 @@ func _on_answer(text):
 			session_turns.pop_front()
 	pending_user_text = ""
 	add_message("assistant", text)
+	voice.speak(text, l10n.locale)
+	if local_runtime:
+		local_runtime.generation_busy = false
+		local_runtime.touch()
 	request_motion("dialogue.explain_small")
 	state.transition("idle")
 	changed.emit()
 
 func _on_failure(key):
+	if local_runtime:
+		local_runtime.generation_busy = false
+		local_runtime.touch()
 	pending_user_text = ""
 	state.reset()
 	add_message("assistant", t(key))
@@ -195,6 +237,11 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	queued_chat_text = ""
+	voice.stop()
+	if local_runtime:
+		local_runtime.generation_busy = false
+		local_runtime.touch()
 	motion.clear()
 	pending_user_text = ""
 	if provider:
@@ -204,6 +251,12 @@ func cancel():
 
 func set_paused(value):
 	paused = value
+	if value and local_runtime:
+		local_runtime.stop()
+		local_runtime.status = "ai_sleeping"
+	if value and is_instance_valid(desktop_companion):
+		desktop_companion.auto_move = false
+		desktop_companion.set_reduced(true)
 	motion.set_paused(value)
 	cancel()
 	changed.emit()
@@ -222,6 +275,57 @@ func clear_notes_confirmed():
 	return ok
 
 func _exit_tree():
+	voice.stop()
+	if local_runtime:
+		local_runtime.stop()
 	if provider:
 		provider.cancel()
 
+
+func install_local_ai():
+	local_ai_enabled = true
+	_save_setting("local_ai_enabled", true)
+	return local_runtime.install()
+
+func start_local_ai():
+	if paused:
+		return false
+	local_ai_enabled = true
+	_save_setting("local_ai_enabled", true)
+	return local_runtime.start(profiles.config(profile_name))
+
+func stop_local_ai():
+	cancel()
+	local_ai_enabled = false
+	_save_setting("local_ai_enabled", false)
+	local_runtime.stop()
+	local_runtime.status = "ai_installed" if local_runtime.installed() else "ai_not_installed"
+	_set_provider("unconfigured")
+	changed.emit()
+
+func _runtime_ready(port, token):
+	if not local_ai_enabled or paused:
+		local_runtime.stop()
+		return
+	_set_provider("local_worker")
+	provider.configure_local(port, token)
+	changed.emit()
+	if not queued_chat_text.is_empty():
+		var text = queued_chat_text
+		queued_chat_text = ""
+		_submit_model_text(text)
+
+func _runtime_changed():
+	if local_ai_enabled and local_runtime.status == "ai_installed":
+		local_runtime.start.call_deferred(profiles.config(profile_name))
+	changed.emit()
+
+func show_desktop():
+	if DisplayServer.get_name() == "headless":
+		return false
+	if not is_instance_valid(desktop_companion):
+		desktop_companion = DesktopCompanion.new()
+		desktop_companion.controller = get_tree().root
+		add_child(desktop_companion)
+	desktop_companion.show()
+	return true

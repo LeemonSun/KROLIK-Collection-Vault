@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Companion Foundation",
   "publisher": null,
-  "version": "0.2.0-character-foundation",
+  "version": "0.3.0-desktop-preview",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [
@@ -14,6 +14,7 @@
   "telemetry": false,
   "models_bundled": false,
   "final_character_selected": false,
-  "project_stage": "character_and_search_foundation",
-  "character_concept_selected": true
+  "project_stage": "private_windows_preview",
+  "character_concept_selected": true,
+  "pixel_direction": "deferred"
 }

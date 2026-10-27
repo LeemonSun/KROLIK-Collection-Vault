@@ -6,7 +6,6 @@
     "final_asset_rights_reviewed",
     "third_party_audit_completed",
     "offline_install_tested_on_windows",
-    "cjk_font_bundled",
     "minimum_hardware_benchmarked",
     "no_approved_bundled_model",
     "no_approved_final_character",

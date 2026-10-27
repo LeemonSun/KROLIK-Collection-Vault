@@ -1,0 +1,3 @@
+PASS: all font/Windows payload chunks reconstruct exact SHA-256 and byte size.
+PASS: Windows ZIP CRC valid, one executable and legal notices; no temporary build data.
+CMD/PowerShell has been inspected, not executed on Windows.

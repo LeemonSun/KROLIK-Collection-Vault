@@ -70,6 +70,31 @@
       "id": "character_animation",
       "status": "director_only_no_clips",
       "network": "none"
+    },
+    {
+      "id": "managed_local_text_ai",
+      "status": "implemented_installer_and_worker",
+      "network": "explicit_setup_then_loopback",
+      "windows_test": "pending"
+    },
+    {
+      "id": "desktop_character",
+      "status": "native_window_and_fx_prototype",
+      "network": "none",
+      "full_body_clips": 0
+    },
+    {
+      "id": "system_tts",
+      "status": "implemented_system_voice_adapter",
+      "network": "none",
+      "windows_test": "pending"
+    },
+    {
+      "id": "screen_capture_once",
+      "status": "implemented_explicit_preview",
+      "network": "none",
+      "reasoning": false,
+      "windows_test": "pending"
     }
   ]
 }

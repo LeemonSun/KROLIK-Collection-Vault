@@ -32,7 +32,26 @@
       "license": "Apache-2.0",
       "bundled_in_source_archive": false,
       "status": "candidate_dependencies_unreviewed"
+    },
+    {
+      "id": "noto-cjk",
+      "version": "f8d157532fbfaeda587e826d4cd5b21a49186f7c",
+      "source": "https://github.com/notofonts/noto-cjk",
+      "license": "SIL-OFL-1.1",
+      "license_file": "legal/upstream/NotoCJK-LICENSE.txt",
+      "bundled_in_source_archive": true,
+      "role": "ui_font",
+      "status": "reviewed_declared_license"
+    },
+    {
+      "id": "llama-cpu-download",
+      "version": "b11901",
+      "source": "https://github.com/ggml-org/llama.cpp/releases/tag/b11901",
+      "license": "MIT_and_upstream_dependency_notices",
+      "license_file": "legal/upstream/llama-b11901-LICENSE.txt",
+      "bundled_in_source_archive": false,
+      "role": "explicit_runtime_download",
+      "status": "pinned_hashes_windows_execution_pending"
     }
   ]
 }
-

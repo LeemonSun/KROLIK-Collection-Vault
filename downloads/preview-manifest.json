@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "version": "0.3.0-desktop-preview",
+  "status": "private_preview_not_windows_executed",
+  "packages": [
+    {
+      "id": "font",
+      "output": "assets/fonts/NotoSansCJKsc-Regular.otf",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "parts": [
+        "downloads/v0.3-font/000.chunk",
+        "downloads/v0.3-font/001.chunk",
+        "downloads/v0.3-font/002.chunk",
+        "downloads/v0.3-font/003.chunk",
+        "downloads/v0.3-font/004.chunk",
+        "downloads/v0.3-font/005.chunk",
+        "downloads/v0.3-font/006.chunk",
+        "downloads/v0.3-font/007.chunk"
+      ]
+    },
+    {
+      "id": "windows",
+      "output": "build/Companion_Preview_Windows_v0.3.zip",
+      "bytes": 53725043,
+      "sha256": "e08b0b80095b8ec3feb312d841aeae99d73da596365a48527000b6dc1b542a39",
+      "parts": [
+        "downloads/v0.3-windows/000.chunk",
+        "downloads/v0.3-windows/001.chunk",
+        "downloads/v0.3-windows/002.chunk",
+        "downloads/v0.3-windows/003.chunk",
+        "downloads/v0.3-windows/004.chunk",
+        "downloads/v0.3-windows/005.chunk",
+        "downloads/v0.3-windows/006.chunk",
+        "downloads/v0.3-windows/007.chunk",
+        "downloads/v0.3-windows/008.chunk",
+        "downloads/v0.3-windows/009.chunk",
+        "downloads/v0.3-windows/010.chunk",
+        "downloads/v0.3-windows/011.chunk",
+        "downloads/v0.3-windows/012.chunk",
+        "downloads/v0.3-windows/013.chunk",
+        "downloads/v0.3-windows/014.chunk",
+        "downloads/v0.3-windows/015.chunk",
+        "downloads/v0.3-windows/016.chunk",
+        "downloads/v0.3-windows/017.chunk",
+        "downloads/v0.3-windows/018.chunk",
+        "downloads/v0.3-windows/019.chunk",
+        "downloads/v0.3-windows/020.chunk",
+        "downloads/v0.3-windows/021.chunk",
+        "downloads/v0.3-windows/022.chunk",
+        "downloads/v0.3-windows/023.chunk",
+        "downloads/v0.3-windows/024.chunk",
+        "downloads/v0.3-windows/025.chunk"
+      ]
+    }
+  ],
+  "exe_sha256": "7df4b2ba7ada00bee7b860dc76719c60f6fb2405d717ff0b04bd7ee84dee8df4",
+  "transport_note": "Chunked only for connector payload limits. Data is a local build ZIP and original OFL font, not model weights."
+}

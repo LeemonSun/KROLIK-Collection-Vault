@@ -1,0 +1,3 @@
+Platform: Linux x86_64; official b11901 CPU runtime and official Qwen3-1.7B Q8_0; no cloud inference.
+LOCAL_RUNTIME_TESTS: 20 checks, 0 failures; real_fixture=true
+Windows worker has not been executed here.

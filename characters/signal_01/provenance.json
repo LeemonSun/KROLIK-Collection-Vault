@@ -68,5 +68,16 @@
       "release_approved": false,
       "note": "Style proposal; costume differs; not a replacement for master_v1."
     }
+  ],
+  "runtime_assets": [
+    {
+      "project_path": "assets/characters/signal_01/body_v1.png",
+      "sha256": "8bbc31dfad9b3a51898377b0352462d383d3a46635eff2d06a24d0e01d5541b4",
+      "bytes": 1749493,
+      "origin": "imagegen_output",
+      "review_status": "reviewed_for_internal_reference_only",
+      "release_approved": false,
+      "note": "Full body transparent runtime cutout, based on master_v1; static art, not a rig."
+    }
   ]
 }

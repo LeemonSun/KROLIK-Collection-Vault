@@ -1,4 +1,5 @@
 extends SceneTree
+const Budget = preload("res://src/core/context_budget.gd")
 const Router = preload("res://src/core/router.gd")
 const Store = preload("res://src/core/store.gd")
 const Policy = preload("res://src/core/tool_policy.gd")
@@ -20,6 +21,15 @@ func check(condition, message):
 		push_error(message)
 
 func _run():
+	var budget = Budget.new()
+	var options = {"context_tokens":1024,"max_tokens":128}
+	for text in ["hello", "привет", "你好"]:
+		check(budget.build("system",text,[],options).ok, "Multilingual context accepted")
+	check(not budget.build("system","中".repeat(400),[],options).ok, "UTF-8 bound protects small context")
+	var history = [{"role":"user","content":"old".repeat(1000)},{"role":"assistant","content":"old"},{"role":"user","content":"recent"},{"role":"assistant","content":"reply"}]
+	var bounded = budget.build("system","question",history,options)
+	check(bounded.ok and bounded.messages.size() == 4, "Trim old complete pairs")
+	check(bounded.messages[1].content == "recent" and bounded.messages[2].content == "reply", "Retain recent pair in order")
 	var router = Router.new()
 	check(router.route("/таймер 30").args.seconds == 30, "Russian timer")
 	check(router.route("/timer 1").args.seconds == 1, "English timer")

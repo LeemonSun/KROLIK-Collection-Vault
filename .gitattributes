@@ -4,3 +4,6 @@
 *.webp binary
 *.zip binary
 
+*.otf binary
+*.ttf binary
+*.chunk binary

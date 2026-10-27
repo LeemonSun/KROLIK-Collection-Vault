@@ -95,6 +95,23 @@ def validate():
     for path in (ROOT / "characters").rglob("*.png"):
         if path.resolve() not in listed:
             errors.append(f"Character PNG without provenance: {path.relative_to(ROOT)}")
+    for asset in provenance.get("runtime_assets", []):
+        rel = asset.get("project_path", "")
+        path = ROOT / rel
+        if not rel or ".." in Path(rel).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != asset.get("sha256"):
+            errors.append(f"Runtime character hash mismatch: {rel}")
+    font = parsed.get("assets/fonts/provenance.json", {})
+    font_path = ROOT / "assets/fonts" / font.get("file", "missing")
+    if not font_path.is_file() or hashlib.sha256(font_path.read_bytes()).hexdigest() != font.get("sha256"):
+        errors.append("Bundled font missing or hash mismatch")
+    worker = parsed.get("config/local_worker.json", {})
+    if worker.get("download_policy") != "explicit_button_only" or worker.get("publish_to_git") is not False:
+        errors.append("Local worker download policy changed")
+    if worker.get("runtime", {}).get("version") != "b11901" or not worker.get("runtime", {}).get("files"):
+        errors.append("Local runtime pin/allowlist missing")
+    for part in [worker.get("runtime", {}), worker.get("model", {})]:
+        if not str(part.get("url", "")).startswith(("https://github.com/ggml-org/llama.cpp/releases/download/b11901/", "https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/90862c4b9d2787eaed51d12237eafdfe7c5f6077/")) or len(str(part.get("sha256", ""))) != 64:
+            errors.append("Local package not pinned to reviewed source/hash")
     design = parsed.get("characters/signal_01/design.json", {})
     master = ROOT / "characters/signal_01" / design.get("source_of_truth", "missing")
     if not master.is_file() or hashlib.sha256(master.read_bytes()).hexdigest() != design.get("master_sha256"):

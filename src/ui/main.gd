@@ -12,6 +12,13 @@ var timer_label
 var pause_button
 var confirm
 var booted = false
+var ai_status_label
+var ai_progress_label
+var install_button
+var start_ai_button
+var stop_ai_button
+var cancel_install_button
+var screen_preview_window
 
 func _ready():
 	_apply_theme()
@@ -21,6 +28,17 @@ func _ready():
 	if App.messages.is_empty():
 		App.add_message("assistant", App.t("welcome"))
 	booted = true
+	var refresh_timer = Timer.new()
+	refresh_timer.wait_time = 0.5
+	refresh_timer.autostart = true
+	refresh_timer.timeout.connect(_refresh)
+	add_child(refresh_timer)
+	# Do not rebuild this timer when switching pages.
+	remove_child(refresh_timer)
+	App.add_child(refresh_timer)
+	if DisplayServer.get_name() != "headless" and "--ui-smoke" not in OS.get_cmdline_user_args():
+		get_tree().root.exclude_from_capture = true
+		App.show_desktop.call_deferred()
 	# A UI-only self-test can traverse every page without a display.
 	if "--ui-smoke" in OS.get_cmdline_user_args():
 		_ui_smoke.call_deferred()
@@ -28,11 +46,12 @@ func _ready():
 func _apply_theme():
 	var theme = Theme.new()
 	theme.default_font_size = 16
+	theme.default_font = load("res://assets/fonts/NotoSansCJKsc-Regular.otf")
 	for type in ["Label", "Button", "CheckButton", "OptionButton", "LineEdit", "RichTextLabel"]:
 		theme.set_color("font_color", type, Color("#e9e6df"))
 	for state in ["normal", "hover", "pressed", "focus"]:
 		var style = StyleBoxFlat.new()
-		style.bg_color = Color("#26333c") if state in ["hover","pressed"] else Color("#1b222c")
+		style.bg_color = Color("#3b2435") if state in ["hover","pressed"] else Color("#241b2b")
 		style.set_corner_radius_all(10)
 		style.content_margin_left = 16
 		style.content_margin_right = 16
@@ -40,11 +59,11 @@ func _apply_theme():
 		style.content_margin_bottom = 11
 		if state == "focus":
 			style.set_border_width_all(1)
-			style.border_color = Color("#89c9c0")
+			style.border_color = Color("#e5637f")
 		theme.set_stylebox(state, "Button", style)
 		theme.set_stylebox(state, "OptionButton", style)
 	var field = StyleBoxFlat.new()
-	field.bg_color = Color("#202b36")
+	field.bg_color = Color("#2a2030")
 	field.set_corner_radius_all(10)
 	field.content_margin_left = 14
 	field.content_margin_right = 14
@@ -72,6 +91,12 @@ func _button(text, parent, callback):
 	return node
 
 func _build():
+	ai_status_label = null
+	ai_progress_label = null
+	install_button = null
+	start_ai_button = null
+	stop_ai_button = null
+	cancel_install_button = null
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -100,8 +125,9 @@ func _build():
 	nav.custom_minimum_size.x = 165
 	nav.add_theme_constant_override("separation", 10)
 	body.add_child(nav)
-	for id in ["talk", "notes", "character", "search", "modules", "settings"]:
+	for id in ["talk", "notes", "character", "assistant_tools", "search", "modules", "settings"]:
 		_button(App.t(id), nav, func(): page = id; _build())
+	_button(App.t("show_desktop"), nav, func(): App.show_desktop())
 	var space = Control.new()
 	space.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(space)
@@ -133,6 +159,8 @@ func _build():
 		_build_notes()
 	elif page == "modules":
 		_build_modules()
+	elif page == "assistant_tools":
+		_build_assistant_tools()
 	elif page == "character":
 		_build_character()
 	elif page == "search":
@@ -143,11 +171,10 @@ func _build():
 func _build_character():
 	_label(App.t("character_reference"), content, 22)
 	_label(App.t("character_stage_hint"), content, 14, true)
-	var art = Image.new()
-	var result = art.load("res://characters/signal_01/art/master_v1.png")
-	if result == OK:
+	var art = load("res://assets/characters/signal_01/body_v1.png")
+	if art is Texture2D:
 		var preview = TextureRect.new()
-		preview.texture = ImageTexture.create_from_image(art)
+		preview.texture = art
 		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -159,6 +186,80 @@ func _build_character():
 	var stats = App.motion.summary()
 	_label(App.t("character_clip_status", {"planned": stats.planned_events, "ready": stats.installed_clips}), content, 14, true)
 	_label(App.t("character_motion_hint"), content, 13, true)
+	_button(App.t("show_desktop"), content, func(): App.show_desktop())
+	_label(App.t("desktop_controls"), content, 13, true)
+
+func _build_assistant_tools():
+	var parent = content
+	var scroll = ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	parent.add_child(scroll)
+	content = VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 12)
+	scroll.add_child(content)
+	_label(App.t("assistant_tools"), content, 22)
+	ai_status_label = _label(App.t(App.local_runtime.status), content, 17)
+	ai_progress_label = _label("", content, 14, true)
+	_label(App.t("ai_install_hint"), content, 14, true)
+	install_button = _button(App.t("ai_install"), content, func(): App.install_local_ai(); _refresh())
+	start_ai_button = _button(App.t("ai_start"), content, func(): App.start_local_ai(); _refresh())
+	stop_ai_button = _button(App.t("ai_stop"), content, func(): App.stop_local_ai(); _refresh())
+	cancel_install_button = _button(App.t("ai_cancel_download"), content, func(): App.local_runtime.cancel_install(); _refresh())
+	_label(App.t("ai_scope_hint"), content, 13, true)
+	var voice_toggle = CheckButton.new()
+	voice_toggle.text = App.t("system_voice")
+	voice_toggle.button_pressed = App.voice.enabled
+	voice_toggle.toggled.connect(func(value): App.voice.enabled = value; App.voice.stop())
+	content.add_child(voice_toggle)
+	_label(App.t("system_voice_hint"), content, 13, true)
+	_button(App.t("capture_once"), content, _capture_once)
+	_label(App.t("capture_hint"), content, 13, true)
+	var move_toggle = CheckButton.new()
+	move_toggle.text = App.t("auto_move")
+	move_toggle.button_pressed = is_instance_valid(App.desktop_companion) and App.desktop_companion.auto_move
+	move_toggle.toggled.connect(func(value):
+		if App.show_desktop():
+			App.desktop_companion.auto_move = value)
+	content.add_child(move_toggle)
+	var reduced_toggle = CheckButton.new()
+	reduced_toggle.text = App.t("reduced_motion")
+	reduced_toggle.toggled.connect(func(value):
+		App.motion.set_reduced_motion(value)
+		if App.show_desktop():
+			App.desktop_companion.set_reduced(value))
+	content.add_child(reduced_toggle)
+	_label(App.t("desktop_controls"), content, 13, true)
+	content = parent
+	_refresh()
+
+func _capture_once():
+	if App.paused or DisplayServer.get_name() == "headless":
+		return
+	var image = DisplayServer.screen_get_image(get_window().current_screen)
+	if image == null or image.is_empty():
+		App.add_message("assistant", App.t("capture_failed"))
+		return
+	if is_instance_valid(screen_preview_window):
+		screen_preview_window.queue_free()
+	screen_preview_window = Window.new()
+	screen_preview_window.title = App.t("capture_once")
+	screen_preview_window.size = Vector2i(900, 600)
+	screen_preview_window.exclude_from_capture = true
+	add_child(screen_preview_window)
+	var layout = VBoxContainer.new()
+	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	screen_preview_window.add_child(layout)
+	var view = TextureRect.new()
+	view.texture = ImageTexture.create_from_image(image)
+	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	view.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	layout.add_child(view)
+	_label(App.t("capture_hint"), layout, 14, true)
+	var owned_preview = screen_preview_window
+	owned_preview.close_requested.connect(func(): owned_preview.queue_free())
+	screen_preview_window.popup_centered()
 
 func _build_search():
 	_label(App.t("search"), content, 22)
@@ -228,7 +329,7 @@ func _build_modules():
 		content.add_child(row)
 		var name_label = _label(App.t("module_" + id), row, 15)
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		_label(App.t("module_ready" if id in ["notes","timers"] else "module_pending"), row, 13, true)
+		_label(App.t("module_ready" if id in ["notes","timers"] or (id == "llm" and App.local_runtime.status == "ai_ready") else "module_pending"), row, 13, true)
 
 func _build_settings():
 	_label(App.t("settings"), content, 22)
@@ -280,6 +381,15 @@ func _state_text():
 	return App.t("state_paused" if App.paused else "state_" + App.state.current)
 
 func _refresh():
+	if is_instance_valid(ai_status_label):
+		ai_status_label.text = App.t(App.local_runtime.status)
+		var progress = App.local_runtime.progress()
+		ai_progress_label.text = ("%d%%" % int(progress * 100)) if progress >= 0 else ""
+		var active = App.local_runtime.downloading or App.local_runtime.hash_thread != null or App.local_runtime.pid > 0
+		install_button.disabled = active or App.paused
+		start_ai_button.disabled = active or App.paused or not App.local_runtime.installed()
+		stop_ai_button.disabled = App.local_runtime.pid <= 0
+		cancel_install_button.disabled = not App.local_runtime.downloading or App.local_runtime.hash_thread != null
 	if is_instance_valid(state_label):
 		state_label.text = _state_text()
 	if is_instance_valid(timer_label):
@@ -302,10 +412,10 @@ func _confirm_clear():
 func _ui_smoke():
 	for language in ["ru","en","zh-Hans"]:
 		App.l10n.set_locale(language)
-		for id in ["talk","notes","character","search","modules","settings"]:
+		for id in ["talk","notes","character","assistant_tools","search","modules","settings"]:
 			page = id
 			_build()
 			await get_tree().process_frame
-	print("UI_SMOKE_OK: 3 locales, 6 pages")
+	print("UI_SMOKE_OK: 3 locales, 7 pages")
 	get_tree().quit()
 

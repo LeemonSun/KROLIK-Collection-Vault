@@ -9,3 +9,7 @@
 6. Прозрачное desktop-окно, захват/перетаскивание, несколько мониторов/DPI, доступность и отключение эффектов. Не маскировать отсутствие модели картинкой.
 7. Бенчмарки CPU/AMD/слабые ПК, загрузка ассетов по требованию, установка/удаление/восстановление. Финальный подбор шрифта и языковая приёмка.
 8. Финальный аудит зависимостей/прав, Steam Content Survey/страница, пользовательская Windows-сборка. До этого не объявлять source ZIP пользовательским EXE.
+
+## 0.3 checkpoint
+
+Desktop native-window prototype and managed text AI baseline implemented. Next: real Windows feedback, first proper character rig/clips, stronger generic VLM, actual page reading, resource measurements. Pixel direction deferred. Preview uses system voices and screenshot viewing only; no image reasoning.

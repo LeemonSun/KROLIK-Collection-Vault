@@ -21,3 +21,7 @@ CPU/RAM/GPU и драйверы; Windows 10/11; RU/EN/ZH имена файлов
 ## Checkpoint 0.2
 
 Добавлены tests/test_animation.gd (директор и пакеты на искусственных ресурсах), tests/test_search.gd (валидность и кодирование запросов, подменённый opener, без сетевого поиска). UI smoke теперь 3 языка × 6 страниц. verify_project.py сверяет SHA-256 изображений с provenance. OPEN_PREVIEW.html — локальный просмотр; существование ссылок и JavaScript можно проверять без браузера, это не визуальная приёмка.
+
+## 0.3 checkpoint
+
+71 core, 27 HTTP, 13 local-runtime unit, 21 search, 46 animation checks; UI 3 языка × 7 страниц. Отдельный реальный Linux fixture: 20 проверок запуска, readiness/auth, ответа через Godot adapter, idle unload, restart и cancel. Синтетический RU/EN/ZH inference проверен отдельно; это не оценка всей точности модели. Экспортированный Windows EXE прочитан как resource pack Linux-движком, UI smoke прошёл. Windows исполнение не подтверждено. Объединение частей проверено по SHA-256, PowerShell launcher не запускался.

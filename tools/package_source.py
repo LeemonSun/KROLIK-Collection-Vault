@@ -6,13 +6,15 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-EXCLUDED = {".git", ".godot", "build", "dist", "__pycache__", "userdata", "captures", "secrets"}
+EXCLUDED = {".git", ".godot", "build", "dist", "__pycache__", "userdata", "captures", "secrets", "downloads"}
 BINARY_MODELS = {".gguf", ".onnx", ".safetensors", ".exe", ".dll", ".pyc", ".log", ".tmp"}
 
 def source_files():
     for path in sorted(ROOT.rglob("*")):
         relative = path.relative_to(ROOT)
         if not path.is_file() or any(p in EXCLUDED for p in relative.parts):
+            continue
+        if any(p.startswith(".") and p not in {".gitignore", ".gitattributes", ".gdignore"} for p in relative.parts):
             continue
         if path.suffix.lower() in BINARY_MODELS or path.name.startswith(".env") or path.name == "export_credentials.cfg":
             continue

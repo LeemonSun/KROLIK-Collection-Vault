@@ -6,8 +6,7 @@
   "third_party_audit_completed": false,
   "offline_install_tested_on_windows": false,
   "windows_signed": false,
-  "cjk_font_bundled": false,
+  "cjk_font_bundled": true,
   "minimum_hardware_benchmarked": false,
   "automated_model_downloads": false
 }
-
