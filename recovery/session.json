@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "app_version": "0.3.2-startup-fix",
+  "app_version": "0.3.3-visual-preview",
   "checkpoint_status": "ready",
-  "current_task": "Устранён недоступный offscreen main host; готов 0.3.2 startup fix. Windows ещё не подтверждена.",
-  "next_action": "Сначала учесть результат Windows-запуска 0.3.2, если он есть; затем продолжить большой визуальный проход в ОДНОМ стиле. Не создавать переключение тем.",
+  "current_task": "Один визуальный стиль реализован; startup fix сохранён. Готова полная Windows preview 0.3.3 и небольшой PCK update.",
+  "next_action": "Учесть результат Windows запуска/оценку вида от пользователя. Далее развивать качественный единый rig и выразительные реакции из одного источника, не плодить темы.",
   "read_next": [
     "RESUME.md"
   ],
@@ -13,17 +13,20 @@
     "No ASR / autonomous web research / semantic memory / Cloud"
   ],
   "validation": [
-    "run_checks: all application checks passed",
-    "Exported PCK: 29 native X11 checks passed, screenshots reviewed",
-    "0.3.1 -> 0.3.2 content patch: 6 PowerShell 7/Linux scenarios passed, including repeated root startup"
+    "Application run_checks all PASS",
+    "Exported PCK: 40 native X11 assertions PASS; chat/menu/studio/3 locales inspected",
+    "Content updater: 6 actual PowerShell 7/Linux scenarios PASS, no downgrade on repeated launch"
   ],
   "artifact": {
-    "patch": "Companion_Fix_0.3.2.zip",
-    "bytes": 283255,
-    "sha256": "6dbacfd64f2da8fb9bf40f80e8493e5a6a3df3efe0dc0f044f101b9d0482b6dd",
-    "full": "Companion_Preview_Windows_v0.3.2.zip",
-    "full_sha256": "a28f4a28cb5cf5b47e18ae2e74951ac4384c796c95bc37eb241dcae488e21885"
+    "full": "Companion_Preview_Windows_v0.3.3.zip",
+    "bytes": 54317078,
+    "sha256": "c0dd50999c0c041f324e6fcd9de7da2cd651d13560485722f6d7f46645c52ab8",
+    "library_file_id": "libfile_918be8a7635c8191bdb7c7c258f84a8c",
+    "patch": "Companion_Fix_0.3.3.zip",
+    "patch_from": "0.3.2",
+    "patch_sha256": "088489f4da80afba5bdf33a6ae3c0ff6e3c9232ba36cadbed9b806e4f7f78042",
+    "delivery_note": "Sandbox links unavailable to user: use native attachment link"
   },
-  "previous_checkpoint": "6d31c78400a8991b38996d29ec2b131b013b9d33",
-  "app_pack_sha256": "5b00e4be0475c449093bc4692188f7fffb7a9cc599b2cc0b2d98a26a115ff6a0"
+  "previous_checkpoint": "f3adb6c0f94e734edad924a8d3b07dfd79c8006c",
+  "app_pack_sha256": "490df17e893389bdb2babc730cf38966fc4147f1e0349c8815f53eba111fd782"
 }

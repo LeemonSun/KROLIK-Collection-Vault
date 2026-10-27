@@ -17,7 +17,7 @@
   "pause": "暂停",
   "resume": "继续",
   "input_hint": "输入消息或 /help",
-  "welcome": "我在这里。笔记和计时器已可用。打开“AI 与工具”安装本地聊天、启用系统语音并显示桌面角色。",
+  "welcome": "我在这里。可以聊天、记下想法或设置计时器。通过 AI 安装本地模型后，即可离线聊天。",
   "model_missing": "尚未安装语言模型。笔记和计时器已可使用。输入 /help 查看命令。",
   "model_connection_failed": "本地模型不可用。请检查开发进程或停止请求。",
   "model_invalid_response": "本地模型返回了无法读取的响应。",
@@ -130,5 +130,13 @@
   "browser_system": "系统默认浏览器",
   "browser_hint": "所选 Opera 会在其常用配置中打开查询。尚未接入现有标签页的读取或控制。",
   "browser_missing": "未在标准目录找到所选 Opera，请检查浏览器设置。",
-  "chat_placeholder": "输入消息…"
+  "chat_placeholder": "输入消息…",
+  "quick_timer": "计时器",
+  "quick_note": "笔记",
+  "composer_keys": "Enter 发送 · Shift+Enter 换行",
+  "signal_tagline": "就在这里，陪你一起。",
+  "menu_caption": "我们做点什么？",
+  "appearance_title": "外观",
+  "menu_hide_short": "最小化",
+  "character_controls_short": "单击聊天，拖动移动，右键打开操作菜单。"
 }

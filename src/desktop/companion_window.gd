@@ -6,6 +6,7 @@ signal settings_requested
 signal pause_requested
 signal hide_requested
 signal quit_requested
+const ActionMenu = preload("res://src/desktop/action_menu.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 const BODY_PATH = "res://assets/characters/signal_01/body_v1.png"
 var host: Window
@@ -49,9 +50,11 @@ class Surface extends Control:
 		var w = owner_window
 		if w.effect_time > 0 and not w.reduced_motion:
 			var alpha = minf(1.0, w.effect_time / 0.15)
-			for i in range(3):
-				var x = 65 + i * 45
-				draw_polyline(PackedVector2Array([Vector2(x, 330), Vector2(x+65, 250), Vector2(x+40, 210), Vector2(x+100, 120)]), Color(1.0, 0.18, 0.32, alpha * (0.45-i*0.1)), 2.0, true)
+			var sweep=1.0-w.effect_time/0.52
+			for i in range(4):
+				var y=470.0-sweep*390.0+i*19.0
+				var offset=sin(sweep*PI)*12.0
+				draw_polyline(PackedVector2Array([Vector2(76+offset,y+15),Vector2(104+offset,y),Vector2(250-offset,y),Vector2(270-offset,y-14)]),Color(1.0,0.31,0.41,alpha*(0.4-i*0.07)),1.4,true)
 
 func _ready():
 	app = get_tree().root.get_node("App")
@@ -85,6 +88,10 @@ func _ready():
 		image.decompress()
 	art = TextureRect.new()
 	art.texture = texture
+	var material = ShaderMaterial.new()
+	material.shader = load("res://assets/characters/signal_01/idle.gdshader")
+	art.material = material
+	art.pivot_offset = Vector2(195,65)*fit
 	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -111,11 +118,9 @@ func _ready():
 	print("DESKTOP_READY main_window=", host.get_window_id(), " position=", position, " size=", size)
 	_setup_tray()
 	last_tick_ms = Time.get_ticks_msec()
-	quick_menu = PopupMenu.new()
-	quick_menu.theme = VisualTheme.make()
-	for key in ["talk","settings","menu_dash","pause","menu_hide","menu_quit"]:
-		quick_menu.add_item(app.t(key))
-	quick_menu.id_pressed.connect(_menu_action)
+	quick_menu = ActionMenu.new()
+	quick_menu.visible = false
+	quick_menu.action.connect(_menu_action)
 	add_child(quick_menu)
 	if not reduced_motion:
 		art.modulate.a = 0
@@ -141,11 +146,7 @@ func _input_event(event):
 				else:
 					chat_requested.emit()
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			quick_menu.position = DisplayServer.mouse_get_position()
-			var keys = ["talk","settings","menu_dash","resume" if app.paused else "pause","menu_hide","menu_quit"]
-			for index in range(keys.size()):
-				quick_menu.set_item_text(index,app.t(keys[index]))
-			quick_menu.popup()
+			quick_menu.open_at(DisplayServer.mouse_get_position())
 		elif event.button_index == MOUSE_BUTTON_MIDDLE and event.pressed:
 			hide_requested.emit()
 	elif event is InputEventMouseMotion and dragging:
@@ -194,11 +195,15 @@ func set_reduced(value):
 	effect_time = 0
 	if art:
 		art.modulate.a = 1.0
+		art.material.set_shader_parameter("motion",0.0 if value else 1.0)
 
 func _process(delta):
 	if not visible or art == null:
 		return
 	elapsed += delta
+	var lean = clampf(float(DisplayServer.mouse_get_position().x-press_position.x)*0.0005,-0.07,0.07) if dragging and moved else 0.0
+	art.rotation = lerp_angle(art.rotation,lean,minf(1.0,delta*12.0))
+	if reduced_motion: art.rotation=0.0
 	if auto_move and not dragging and effect_kind.is_empty():
 		next_move -= delta
 		if next_move <= 0:
@@ -299,3 +304,10 @@ func _show_fallback():
 	host.close_requested.connect(func(): get_tree().quit())
 	_setup_tray()
 	push_warning("Character texture unavailable; visible recovery panel shown")
+
+func play_entrance():
+	if reduced_motion or app.paused or not art:return
+	phase=0
+	effect_kind="spawn"
+	effect_time=0.52
+	art.modulate.a=0

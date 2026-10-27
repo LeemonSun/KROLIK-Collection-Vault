@@ -16,6 +16,9 @@ func _ready():
 	panel_window.title="Signal — settings"
 	panel_window.size=Vector2i(800,600)
 	panel_window.min_size=Vector2i(360,320)
+	panel_window.borderless=true
+	panel_window.transparent=true
+	panel_window.transparent_bg=true
 	panel_window.visible=false
 	add_child(panel_window)
 	main_view=load("res://scenes/main.tscn").instantiate()

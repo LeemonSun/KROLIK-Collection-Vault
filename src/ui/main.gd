@@ -1,5 +1,7 @@
 extends Control
 const ChatView = preload("res://src/ui/chat_view.gd")
+const Handle = preload("res://src/ui/window_handle.gd")
+const Surface = preload("res://src/ui/signal_surface.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 var page = "talk"
 var content
@@ -23,9 +25,12 @@ var screen_preview_window
 var embedded_chat
 var page_scroll
 var page_picker
+var wide_layout=false
+var responsive_pending=false
 
 func _ready():
 	_apply_theme()
+	get_window().size_changed.connect(_window_resized)
 	App.settings_requested.connect(open_panel)
 	App.changed.connect(_refresh)
 	App.message_added.connect(_on_message)
@@ -56,8 +61,9 @@ func _label(text, parent, font_size = 16, dim = false):
 	node.text = text
 	node.add_theme_font_size_override("font_size", font_size)
 	if dim:
-		node.add_theme_color_override("font_color", Color("#93a1ad"))
+		node.add_theme_color_override("font_color", VisualTheme.MUTED)
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(node)
 	return node
 
@@ -80,12 +86,26 @@ func open_panel(target_page = "assistant_tools"):
 		win.always_on_top = true
 	win.show()
 	win.grab_focus()
+	if not App.motion.reduced_motion and not App.paused:
+		modulate.a=0
+		create_tween().tween_property(self,"modulate:a",1.0,0.16)
 
 func _hide_panel():
 	get_window().hide()
 	App.show_desktop()
 
+func _window_resized():
+	if (get_window().size.x>=700)!=wide_layout and not responsive_pending:
+		responsive_pending=true
+		_reflow.call_deferred()
+
+func _reflow():
+	responsive_pending=false
+	_build()
+
 func _build():
+	var saved_draft=embedded_chat.editor.text if is_instance_valid(embedded_chat) else ""
+	wide_layout=get_window().size.x>=700
 	ai_status_label = null
 	ai_progress_label = null
 	install_button = null
@@ -98,17 +118,37 @@ func _build():
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
+	var background=Surface.new()
+	background.inset=0
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	background.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	add_child(background)
 	var margin = MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for edge in ["left","right","top","bottom"]:
-		margin.add_theme_constant_override("margin_"+edge,12)
+		margin.add_theme_constant_override("margin_"+edge,18)
 	add_child(margin)
+	var workspace=HBoxContainer.new()
+	workspace.add_theme_constant_override("separation",24)
+	margin.add_child(workspace)
+	if wide_layout:
+		_build_sidebar(workspace)
 	var shell = VBoxContainer.new()
+	shell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	shell.add_theme_constant_override("separation",10)
-	margin.add_child(shell)
-	var header = HBoxContainer.new()
+	workspace.add_child(shell)
+	var header = Handle.new()
 	header.add_theme_constant_override("separation",8)
 	shell.add_child(header)
+	if not wide_layout:
+		var mark=TextureRect.new()
+		mark.texture=load("res://assets/ui/mark.svg")
+		mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+		mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		mark.custom_minimum_size=Vector2(26,26)
+		mark.modulate=VisualTheme.RED
+		mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		header.add_child(mark)
 	page_picker = OptionButton.new()
 	page_picker.fit_to_longest_item = false
 	page_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -119,13 +159,19 @@ func _build():
 	page_picker.select(maxi(0,pages.find(page)))
 	page_picker.item_selected.connect(func(index): page = pages[index]; _build())
 	header.add_child(page_picker)
+	page_picker.visible=not wide_layout
+	if wide_layout:
+		var section=_label(App.t(page),header,13,true)
+		section.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_button("×",header,_hide_panel).tooltip_text = App.t("hide_panel")
 	if page == "talk":
 		embedded_chat = ChatView.new()
+		embedded_chat.embedded=true
 		embedded_chat.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		embedded_chat.close_requested.connect(_hide_panel)
 		embedded_chat.settings_requested.connect(func(): open_panel("assistant_tools"))
 		shell.add_child(embedded_chat)
+		embedded_chat.editor.text=saved_draft
 		return
 	page_scroll = ScrollContainer.new()
 	page_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -149,26 +195,67 @@ func _build():
 	else:
 		_build_settings()
 
+func _build_sidebar(parent):
+	var sidebar=VBoxContainer.new()
+	sidebar.custom_minimum_size.x=192
+	sidebar.add_theme_constant_override("separation",6)
+	parent.add_child(sidebar)
+	var identity=HBoxContainer.new()
+	identity.custom_minimum_size.y=54
+	sidebar.add_child(identity)
+	var glyph=TextureRect.new()
+	glyph.texture=load("res://assets/ui/mark.svg")
+	glyph.custom_minimum_size=Vector2(32,32)
+	glyph.modulate=VisualTheme.RED
+	glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	identity.add_child(glyph)
+	var brand=_label("SIGNAL",identity,21)
+	brand.autowrap_mode=TextServer.AUTOWRAP_OFF
+	brand.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	for id in ["talk","assistant_tools","character","notes","search","settings","modules"]:
+		var target=id
+		var button=_button(App.t(id),sidebar,func():page=target;_build())
+		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+		button.clip_text=true
+		button.custom_minimum_size.y=40
+		button.icon=load("res://assets/ui/"+{"talk":"chat","assistant_tools":"cpu","character":"character","notes":"note","search":"search","settings":"settings","modules":"cpu"}[id]+".svg")
+		button.expand_icon=true
+		button.add_theme_constant_override("icon_max_width",17)
+		if page==id:VisualTheme.primary(button)
+		else:VisualTheme.quiet(button)
+	var space=Control.new()
+	space.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	sidebar.add_child(space)
+	_label(App.t("signal_tagline"),sidebar,12,true)
+	_label(App.t("offline"),sidebar,11,true)
+
 func _build_character():
-	_label(App.t("character_reference"), content, 22)
-	_label(App.t("character_stage_hint"), content, 14, true)
-	var art = load("res://assets/characters/signal_01/body_v1.png")
+	_label("Signal 01",content,26)
+	_label(App.t("signal_tagline"),content,14,true)
+	var art=load("res://assets/characters/signal_01/body_v1.png")
 	if art is Texture2D:
-		var preview = TextureRect.new()
-		preview.texture = art
-		preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		preview.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		preview.custom_minimum_size = Vector2(320, 200)
+		var preview=TextureRect.new()
+		preview.texture=art
+		preview.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+		preview.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		preview.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		preview.size_flags_vertical=Control.SIZE_EXPAND_FILL
+		preview.custom_minimum_size=Vector2(240,320)
 		content.add_child(preview)
 	else:
-		_label(App.t("character_art_missing"), content, 14, true)
-	var stats = App.motion.summary()
-	_label(App.t("character_clip_status", {"planned": stats.planned_events, "ready": stats.installed_clips}), content, 14, true)
-	_label(App.t("character_motion_hint"), content, 13, true)
-	_button(App.t("show_desktop"), content, func(): App.show_desktop())
-	_label(App.t("desktop_controls"), content, 13, true)
+		_label(App.t("character_art_missing"),content,14,true)
+	var row=HBoxContainer.new()
+	content.add_child(row)
+	var show_button=_button(App.t("show_desktop"),row,func():App.show_desktop())
+	show_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	VisualTheme.primary(show_button)
+	var dash_button=_button(App.t("menu_dash"),row,func():
+		if App.show_desktop():App.desktop_companion.dash_random())
+	dash_button.icon=load("res://assets/ui/dash.svg")
+	dash_button.expand_icon=true
+	dash_button.add_theme_constant_override("icon_max_width",16)
+	_label(App.t("character_controls_short"),content,12,true)
 
 func _build_assistant_tools():
 	_label(App.t("assistant_tools"), content, 22)
@@ -176,6 +263,7 @@ func _build_assistant_tools():
 	ai_progress_label = _label("", content, 14, true)
 	_label(App.t("ai_install_hint"), content, 14, true)
 	install_button = _button(App.t("ai_install"), content, func(): App.install_local_ai(); _refresh())
+	VisualTheme.primary(install_button)
 	start_ai_button = _button(App.t("ai_start"), content, func(): App.start_local_ai(); _refresh())
 	stop_ai_button = _button(App.t("ai_stop"), content, func(): App.stop_local_ai(); _refresh())
 	cancel_install_button = _button(App.t("ai_cancel_download"), content, func(): App.local_runtime.cancel_install(); _refresh())
@@ -197,6 +285,7 @@ func _build_assistant_tools():
 	content.add_child(move_toggle)
 	var reduced_toggle = CheckButton.new()
 	reduced_toggle.text = App.t("reduced_motion")
+	reduced_toggle.button_pressed=App.motion.reduced_motion
 	reduced_toggle.toggled.connect(func(value):
 		App.motion.set_reduced_motion(value)
 		if App.show_desktop():

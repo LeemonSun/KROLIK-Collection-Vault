@@ -17,3 +17,7 @@
 ## Актуально: 0.3.2
 
 Главное окно = персонаж. DesktopCompanion — Node-контроллер root Window, не второе окно. Не выносить root за экран. Минимизация + taskbar/tray сохраняют доступ. Патч make_content_patch.py меняет только PCK, требует точный 0.3.1; полный ZIP работает отдельно. Launcher проверяет финальные EXE/PCK hashes и не применяет старый фикс повторно. Одна визуальная тема, без переключателей. Для X11 есть portable tools/test_native_ui.py.
+
+## 0.3.3
+
+VisualTheme + SignalSurface + WindowHandle общий стиль; ActionMenu — отдельное native окно. ChatView.embedded убирает вложенный chrome. main._window_resized перестраивает навигацию только при смене порога 700px, сохраняя draft. Idle shader один sample texture, небольшая UV-деформация; не rig. Подготовка приложения и одновременные Xvfb тесты через один supervisor. Стандартный запуск восстановлен и проверен в export PCK. Full delivery Library ID указан в session.json, потому что sandbox ссылки недоступны.

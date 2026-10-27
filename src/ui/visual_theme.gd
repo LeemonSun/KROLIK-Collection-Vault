@@ -1,34 +1,66 @@
 extends RefCounted
+## Original Signal palette: ink, silver, porcelain, wine and a red action signal.
+const INK = Color('#17141c')
+const PANEL = Color('#201a25')
+const LAYER = Color('#2b2230')
+const TEXT = Color('#f4edf2')
+const MUTED = Color('#b9a9b9')
+const RED = Color('#f17b8d')
+const WINE = Color('#74364d')
+static func box(color, radius=10, margin=12):
+	var style=StyleBoxFlat.new()
+	style.bg_color=color
+	style.set_corner_radius_all(radius)
+	style.content_margin_left=margin
+	style.content_margin_right=margin
+	style.content_margin_top=8
+	style.content_margin_bottom=8
+	return style
 static func make():
-	var value = Theme.new()
-	value.default_font_size = 16
-	value.default_font = load("res://assets/fonts/NotoSansCJKsc-Regular.otf")
-	for type in ["Label","Button","CheckButton","OptionButton","LineEdit","TextEdit","RichTextLabel","PopupMenu"]:
-		value.set_color("font_color",type,Color("#f4eaf2"))
-	for type in ["Button","OptionButton"]:
-		for state in ["normal","hover","pressed","focus"]:
-			var box = StyleBoxFlat.new()
-			box.bg_color = Color("#452636") if state in ["hover","pressed"] else Color("#2b2030")
-			box.set_corner_radius_all(9)
-			box.content_margin_left = 12
-			box.content_margin_right = 12
-			box.content_margin_top = 8
-			box.content_margin_bottom = 8
-			if state == "focus":
-				box.set_border_width_all(1)
-				box.border_color = Color("#ef7893")
-			value.set_stylebox(state,type,box)
-	for type in ["LineEdit","TextEdit"]:
-		var box = StyleBoxFlat.new()
-		box.bg_color = Color("#231b2a")
-		box.set_corner_radius_all(8)
-		box.set_border_width_all(1)
-		box.border_color = Color("#644052")
-		box.content_margin_left = 10
-		box.content_margin_right = 10
-		box.content_margin_top = 9
-		box.content_margin_bottom = 9
-		value.set_stylebox("normal",type,box)
-		value.set_stylebox("focus",type,box)
-		value.set_color("caret_color",type,Color("#ff90aa"))
+	var value=Theme.new()
+	value.default_font_size=15
+	value.default_font=load('res://assets/fonts/NotoSansCJKsc-Regular.otf')
+	for type in ['Label','Button','CheckButton','OptionButton','LineEdit','TextEdit','RichTextLabel','PopupMenu']:
+		value.set_color('font_color',type,TEXT)
+		value.set_color('font_disabled_color',type,Color('#847887'))
+		value.set_color('font_hover_color',type,Color.WHITE)
+		value.set_color('font_pressed_color',type,Color.WHITE)
+	for type in ['Button','OptionButton']:
+		value.set_stylebox('normal',type,box(LAYER))
+		value.set_stylebox('hover',type,box(Color('#422d3d')))
+		value.set_stylebox('pressed',type,box(WINE))
+		value.set_stylebox('disabled',type,box(Color('#241f29')))
+		var focus=box(Color.TRANSPARENT)
+		focus.set_border_width_all(1)
+		focus.border_color=RED
+		value.set_stylebox('focus',type,focus)
+		value.set_constant('h_separation',type,9)
+	for type in ['LineEdit','TextEdit']:
+		var normal=box(Color('#151219'),10)
+		normal.set_border_width_all(1)
+		normal.border_color=Color('#463546')
+		value.set_stylebox('normal',type,normal)
+		var focus=normal.duplicate()
+		focus.border_color=RED
+		value.set_stylebox('focus',type,focus)
+		value.set_color('caret_color',type,RED)
+		value.set_color('selection_color',type,WINE)
+		value.set_color('font_placeholder_color',type,Color('#9e8e9f'))
+	value.set_stylebox('panel','PopupMenu',box(PANEL,12))
+	value.set_stylebox('hover','PopupMenu',box(WINE,6,8))
+	value.set_constant('v_separation','PopupMenu',12)
+	value.set_stylebox('scroll','VScrollBar',box(Color('#1d1822'),3,0))
+	value.set_stylebox('grabber','VScrollBar',box(Color('#685064'),3,0))
+	value.set_stylebox('grabber_highlight','VScrollBar',box(RED,3,0))
+	value.set_stylebox('grabber_pressed','VScrollBar',box(RED,3,0))
+	value.set_constant('separation','VBoxContainer',10)
+	value.set_color('font_color','RichTextLabel',TEXT)
+	value.set_color('default_color','RichTextLabel',TEXT)
 	return value
+static func primary(button):
+	button.add_theme_stylebox_override('normal',box(WINE,10))
+	button.add_theme_stylebox_override('hover',box(Color('#9a465f'),10))
+	button.add_theme_stylebox_override('pressed',box(Color('#b85a72'),10))
+static func quiet(button):
+	button.add_theme_stylebox_override('normal',box(Color.TRANSPARENT,8,9))
+	button.add_theme_stylebox_override('hover',box(LAYER,8,9))

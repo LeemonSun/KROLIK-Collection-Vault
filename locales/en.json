@@ -17,7 +17,7 @@
   "pause": "Pause",
   "resume": "Resume",
   "input_hint": "Write a message or /help",
-  "welcome": "I am here. Notes and timers work. Open AI and tools to install local chat, enable system speech and show me on the desktop.",
+  "welcome": "I’m here. Talk, save a thought or set a timer. Install local AI via AI to chat — once installed, it works without the cloud.",
   "model_missing": "The language model is not installed yet. Notes and timers already work. Use /help.",
   "model_connection_failed": "The local model is unavailable. Check the developer worker or stop the request.",
   "model_invalid_response": "The local model returned an unreadable response.",
@@ -130,5 +130,13 @@
   "browser_system": "System default",
   "browser_hint": "Selected Opera opens the query in its normal profile. Reading or controlling existing tabs is not connected.",
   "browser_missing": "Selected Opera was not found in standard locations. Check the browser preference.",
-  "chat_placeholder": "Write to me…"
+  "chat_placeholder": "Write to me…",
+  "quick_timer": "Timer",
+  "quick_note": "Note",
+  "composer_keys": "Enter to send · Shift+Enter for a new line",
+  "signal_tagline": "Here. On your side.",
+  "menu_caption": "What shall we do?",
+  "appearance_title": "Appearance",
+  "menu_hide_short": "Minimize",
+  "character_controls_short": "Click to talk. Drag to move. Right-click for actions."
 }

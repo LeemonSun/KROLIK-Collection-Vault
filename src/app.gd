@@ -261,6 +261,8 @@ func set_paused(value):
 	if value and is_instance_valid(desktop_companion):
 		desktop_companion.auto_move = false
 		desktop_companion.set_reduced(true)
+	elif is_instance_valid(desktop_companion):
+		desktop_companion.set_reduced(motion.reduced_motion)
 	motion.set_paused(value)
 	cancel()
 	changed.emit()
@@ -337,6 +339,7 @@ func show_desktop():
 			desktop_companion.hide())
 		desktop_companion.quit_requested.connect(func(): get_tree().quit())
 		add_child(desktop_companion)
+		desktop_companion.play_entrance.call_deferred()
 	desktop_companion.show()
 	return true
 

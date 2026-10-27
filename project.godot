@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Companion Foundation"
-config/version="0.3.2-startup-fix"
+config/version="0.3.3-visual-preview"
 run/main_scene="res://scenes/bootstrap.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/foundation.svg"
