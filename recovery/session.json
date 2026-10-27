@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "app_version": "0.5.0-leemon-preview",
-  "checkpoint_status": "delivered_native_attachment_source_checkpoint_ready",
-  "current_task": "Leemon 0.5 full ZIP and actual rig GIF delivered; final source and two-file distribution update saved together. No further feature work in this pass.",
-  "next_action": "Read RESUME.md, await actual Windows user feedback. Next priorities: native startup/drag/COM acceptance, conversational quality baseline and next animation quality pass. Do not rebuild the project from history.",
+  "app_version": "0.6.0-desktop-preview",
+  "checkpoint_status": "source_in_progress_user_limit_checkpoint",
+  "current_task": "User reported broken white chat window, cursor blinking, Alt-Tab character entry, texture clipping, CPU lag, repetitive model dialogue and passive fake file creation. Global 0.6 code implemented, final native regression/export/delivery pending. Last delivered remains 0.5.",
+  "next_action": "Read RESUME.md. Finish current source tests and new native assertions; fix any errors. Build full 0.6, two-file update from 0.5, deliver native attachments. Model 1.7B unchanged; add bounded repeat retry, do not claim solved intelligence.",
   "read_next": [
     "RESUME.md"
   ],
@@ -16,13 +16,10 @@
     "Concept art is internal; public commercial release gate remains blocked"
   ],
   "validation": [
-    "13 standard groups PASS",
-    "47 Leemon tools checks PASS",
-    "76 exported native X11 checks PASS",
-    "11 exported content and actual Godot→PS roundtrip PASS",
-    "21 executor checks PASS; Windows COM not exercised",
-    "8 two-file updater scenarios PASS",
-    "144 actual rig frames rendered; GIF and ZIP persisted; CRC and SHA verified"
+    "13 existing suites PASS after core changes",
+    "desktop060:27 checks PASS real files, routing, background verifier",
+    "Source native X11:76 checks PASS before latest extra states",
+    "PowerShell helper syntax/21 baseline PASS; extra C# style checks pending"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.5.0.zip",
@@ -38,5 +35,16 @@
   },
   "previous_checkpoint": "ae41660b468c447bfd4055e1b0a4c99577a47563",
   "shipped_version": "0.5.0-leemon-preview",
-  "shipped_app_pack_sha256": "68cc24f0da8f1833e7778a4b35448d4892b9a326ea7e8639a7bd82b27e551309"
+  "shipped_app_pack_sha256": "68cc24f0da8f1833e7778a4b35448d4892b9a326ea7e8639a7bd82b27e551309",
+  "pending_060": [
+    "Chat configured hidden/opaque before attach; full rect after parenting; VSync disabled for secondary windows",
+    "Installed AI lazy wake on chat, inline model install action",
+    "Static precomputed mask rather than updating native region 12Hz; canvas redraw only FX; 30fps panels /60 moving /6 minimized",
+    "Own Win32 tool-window style operation gated on tray support; native Windows acceptance pending",
+    "Real new UTF-8 file creation and typed Notepad launch, passive hallucination guard",
+    "Edge entrance, listen/stretch/settle:11 procedural states",
+    "Runtime file integrity moved to Thread, process liveness polled500ms, idle unload60/120/180s",
+    "Repeat-response guard not yet implemented",
+    "Not yet exported; source distribution launcher/manifest still0.5 intentionally"
+  ]
 }

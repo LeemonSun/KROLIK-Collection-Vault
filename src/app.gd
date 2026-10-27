@@ -58,10 +58,13 @@ var active_until_ms=0
 var control_panel
 var guard=ResponseGuard.new()
 var reminder_timer
+var pending_document={}
 var translation_mode=false
 var queued_translation=[]
 var clock=preload("res://src/tools/world_clock.gd").new()
 var self_knowledge=SelfKnowledge.new()
+var idle_fps=24
+var documents=preload("res://src/tools/text_documents.gd").new()
 
 func _ready():
 	desktop_actions=DesktopActions.new()
@@ -98,8 +101,7 @@ func _ready():
 	local_runtime.ready_for_chat.connect(_runtime_ready)
 	if "--test-mode" not in OS.get_cmdline_user_args() and local_runtime.installed():
 		local_ai_enabled = bool(store.data.settings.get("local_ai_enabled", false))
-		if local_ai_enabled:
-			local_runtime.start.call_deferred(profiles.config(profile_name))
+		# Load weights only after a real conversation/translation request.
 	if "--test-mode" not in OS.get_cmdline_user_args():
 		apply_profile()
 		if OS.get_name()=="Windows" and OS.get_executable_path().get_file().to_lower()=="companion.exe":
@@ -109,11 +111,14 @@ func t(key, values = {}):
 	return l10n.text(key, values)
 
 func _process(_delta):
-	var interacting=state.current!="idle" or Time.get_ticks_msec()<active_until_ms
-	interacting=interacting or (is_instance_valid(chat_window) and chat_window.visible)
-	interacting=interacting or (is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible)
-	diagnostics.active=is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible and control_panel.page=="diagnostics"
-	var limit=60 if interacting else int(profiles.config(profile_name).get("animation_fps",24))
+	var panel_visible=is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible
+	var chat_visible=is_instance_valid(chat_window) and chat_window.visible
+	var character_visible=is_instance_valid(desktop_companion) and desktop_companion.visible
+	var moving=character_visible and (desktop_companion.dragging or desktop_companion.effect_time>0 or desktop_companion.effect_kind in ["walk","edge_enter"])
+	diagnostics.active=panel_visible and control_panel.page=="diagnostics"
+	var limit=60 if moving else (30 if chat_visible or panel_visible else idle_fps)
+	if not character_visible and not chat_visible and not panel_visible:limit=6
+	var interacting=moving or chat_visible or panel_visible
 	if Engine.max_fps!=limit:
 		Engine.max_fps=limit
 		OS.low_processor_usage_mode_sleep_usec=1000 if interacting else 15000
@@ -122,6 +127,7 @@ func _process(_delta):
 
 func apply_profile():
 	var config = profiles.config(profile_name)
+	idle_fps=int(config.get("animation_fps",24))
 	Engine.max_fps = int(config.get("animation_fps", 24))
 	OS.low_processor_usage_mode = true
 	OS.low_processor_usage_mode_sleep_usec = 15000
@@ -210,11 +216,15 @@ func submit(text):
 		for note in recalled:quotes.append("«"+str(note.text)+"»")
 		add_message("assistant",t("saved_note_source")+"\n"+"\n".join(quotes))
 		return
+	if provider_name=="unconfigured" and local_runtime.installed() and not local_ai_enabled:
+		local_ai_enabled=true
+		_save_setting("local_ai_enabled",true)
 	if local_ai_enabled and local_runtime.status != "ai_ready":
 		queued_chat_text = command.text
 		if not local_runtime.start(profiles.config(profile_name)):
 			queued_chat_text = ""
-		add_message("assistant", t(local_runtime.status))
+			add_message("assistant",t(local_runtime.status))
+		changed.emit()
 		return
 	_submit_model_text(command.text)
 
@@ -245,7 +255,16 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
-	if command.tool=="clock.now":
+	if command.tool=="documents.create":
+		var result=documents.create_text(command.args.get("text",""))
+		if not result.ok:
+			add_message("assistant",t("document_failed"))
+			state.reset();changed.emit();return
+		var record={"path":result.path,"sha256":result.sha256,"name":result.name}
+		pending_document=record
+		if not desktop_actions.request_document(record):_desktop_completed({"status":"document_saved","name":record.name,"path":record.path})
+		return
+	elif command.tool=="clock.now":
 		var result=clock.resolve(command.args.city)
 		if result.ok:
 			if result.city=="local":result.city=t("clock_local")
@@ -354,6 +373,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	pending_document={}
 	queued_translation=[]
 	translation_mode=false
 	if is_instance_valid(desktop_actions):desktop_actions.cancel()
@@ -490,14 +510,18 @@ func mark_active():
 	active_until_ms=Time.get_ticks_msec()+1500
 
 func _desktop_completed(result):
-	if result.get("operation")=="metrics":return
+	if result.get("operation") in ["metrics","overlay"]:return
 	if state.current!="executing":return
 	var status=str(result.get("status","failed"))
+	if not pending_document.is_empty():
+		result=result.merged(pending_document)
+		if status not in ["document_opened","document_started"]:status="document_saved"
+		pending_document={}
 	var key="desktop_"+status
-	var reply=t(key,{"name":str(result.get("name",""))})
+	var reply=t(key,{"name":str(result.get("name","")),"path":str(result.get("path",""))})
 	if status=="ambiguous":reply+="\n"+"\n".join(PackedStringArray(result.get("choices",[])))
 	add_message("assistant",reply)
-	request_motion("dialogue.explain_small" if status in ["visible","started","browser_handoff"] else "work.error_recover")
+	request_motion("dialogue.explain_small" if status in ["visible","started","browser_handoff","document_opened","document_started","document_saved"] else "work.error_recover")
 	state.reset()
 	changed.emit()
 

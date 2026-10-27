@@ -9,7 +9,7 @@
       "context_tokens": 2048,
       "cpu_threads": 2,
       "max_parallel_heavy_jobs": 1,
-      "idle_unload_seconds": 120,
+      "idle_unload_seconds": 60,
       "screen_min_interval_ms": 3000,
       "model_memory_budget_mib": 2048
     },
@@ -20,7 +20,7 @@
       "context_tokens": 4096,
       "cpu_threads": 4,
       "max_parallel_heavy_jobs": 1,
-      "idle_unload_seconds": 300,
+      "idle_unload_seconds": 120,
       "screen_min_interval_ms": 1500,
       "model_memory_budget_mib": 5120
     },
@@ -31,10 +31,9 @@
       "context_tokens": 4096,
       "cpu_threads": 4,
       "max_parallel_heavy_jobs": 1,
-      "idle_unload_seconds": 300,
+      "idle_unload_seconds": 180,
       "screen_min_interval_ms": 1000,
       "model_memory_budget_mib": 8192
     }
   }
 }
-

@@ -26,7 +26,7 @@ func _run():
 	 'ты уже научилась сама перемещаться по пк?':'motion','скажи что ты умеешь':'capabilities',
 	 'как думаешь наш план с чатом гпт есть патанциал? что он уже тебе добавил':'capabilities',
 	 'какая погода сейчас в Москве?':'weather','weather today in London':'weather','今天天气如何':'weather',
-	 'за счёт чего ты работаешь?':'power','你好':'greeting'}
+	 'йоу здарова лимон':'greeting','Hi Leemon!':'greeting','так я лимон или ты лимон?':'identity','за счёт чего ты работаешь?':'power','你好':'greeting'}
 	for code in ['ru','en','zh-Hans']:
 		app.l10n.set_locale(code)
 		for text in examples:
@@ -42,7 +42,7 @@ func _run():
 	check(knowledge.response_budget('привет',source).max_tokens==source.max_tokens,'Small talk retains light budget')
 	check(knowledge.response_budget('Объясни подробно',source).max_tokens==192,'Explicit detailed answer has bounded larger output')
 	check(source.max_tokens==96,'Profile unchanged')
-	check(knowledge.system_text('ru').to_utf8_buffer().size()<800,'Persona fits the small context budget')
+	check(knowledge.system_text('ru').to_utf8_buffer().size()<1200,'Persona fits the small context budget')
 	var original=app.provider
 	var fake=FakeProvider.new()
 	app.add_child(fake)

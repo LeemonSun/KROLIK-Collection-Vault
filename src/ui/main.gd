@@ -449,10 +449,10 @@ func _refresh():
 		ai_status_label.text = App.t(App.local_runtime.status)
 		var progress = App.local_runtime.progress()
 		ai_progress_label.text = ("%d%%" % int(progress * 100)) if progress >= 0 else ""
-		var active = App.local_runtime.downloading or App.local_runtime.hash_thread != null or App.local_runtime.pid > 0
+		var active = App.local_runtime.downloading or App.local_runtime.hash_thread != null or App.local_runtime.starting or App.local_runtime.pid > 0
 		install_button.disabled = active or App.paused
 		start_ai_button.disabled = active or App.paused or not App.local_runtime.installed()
-		stop_ai_button.disabled = App.local_runtime.pid <= 0
+		stop_ai_button.disabled = App.local_runtime.pid <= 0 and not App.local_runtime.starting
 		cancel_install_button.disabled = not App.local_runtime.downloading or App.local_runtime.hash_thread != null
 	if is_instance_valid(state_label):
 		state_label.text = _state_text()

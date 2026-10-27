@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Companion Foundation"
-config/version="0.5.0-leemon-preview"
+config/version="0.6.0-desktop-preview"
 run/main_scene="res://scenes/bootstrap.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/foundation.svg"
@@ -17,6 +17,7 @@ window/size/viewport_height=500
 window/size/window_width_override=330
 window/size/window_height_override=500
 window/stretch/mode="disabled"
+window/vsync/vsync_mode=0
 window/per_pixel_transparency/allowed=true
 window/subwindows/embed_subwindows=false
 window/size/min_width=1
@@ -25,7 +26,7 @@ window/size/min_height=1
 [rendering]
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0.055, 0.071, 0.094, 1)
+environment/defaults/default_clear_color=Color(0.08235, 0.0902, 0.09804, 1)
 textures/default_filters/use_nearest_mipmap_filter=false
 
 [audio]

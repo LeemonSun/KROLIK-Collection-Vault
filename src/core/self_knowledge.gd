@@ -16,6 +16,10 @@ func classify(raw):
 	if _has(text,['за счет чего ты работаешь','как ты работаешь','what powers you','how do you work','你如何运行']):return 'power'
 	if _has(text,['что ты умеешь','твои возможности','что у нас можно сделать','что он уже тебе добавил','what can you do','你会做什么']):return 'capabilities'
 	if _has(text,['погода сейчас','погода сегодня','какая погода','сколько сейчас градусов','сегодня будет градусов','weather today','weather right now','今天天气','现在天气']):return 'weather'
+	var greet=RegEx.new()
+	greet.compile("^(?:(?:йоу|ну|эй|hey|yo)[ ,!]+)?(?:привет(?:ик)?|здарова|здорова|здравствуй(?:те)?|салют|hello|hi|hey|你好)(?:[ ,!]+(?:лимон|leemon|lemon|柠檬))?[.!?！。 ]*$")
+	if greet.search(text):return 'greeting'
+	if _has(text,['я лимон или ты','ты лимон или я','как тебя зовут','тебя зовут лимон','who is leemon','what is your name','你叫什么','谁是柠檬']):return 'identity'
 	if text.rstrip('.!? ') in ['привет','приветик','как дела','как ты','скажи что либо','скажи что-нибудь','скажи что нибудь','скажи что то','hello','hi','how are you','你好','你好吗']:return 'greeting'
 	return ''
 func answer(raw,app):
@@ -23,7 +27,7 @@ func answer(raw,app):
 	if intent.is_empty():return {}
 	var key='self_'+intent
 	var model=str(app.local_runtime.manifest.get('model',{}).get('file','')).get_basename()
-	if intent=='model':key='self_identity'
+	if intent in ['model','identity']:key='self_identity'
 	if intent=='runtime_model':
 		if app.provider_name=='local_worker':key='self_model_owned'
 		elif app.provider_name=='llama_loopback':key='self_model_developer'
@@ -33,7 +37,7 @@ func answer(raw,app):
 	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.profiles.config(app.profile_name).get('cpu_threads',2)})}
 func system_text(locale):
 	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return 'You are Leemon, a friendly desktop companion. Answer directly in %s, usually in 1-3 sentences. Use general knowledge and familiar everyday words. For factual questions give a short well-established explanation. Never invent technical terms. Be clear when unsure. Saved notes are about the user. Never claim actions without executor results. You have no live screen vision or web page reading. Never invent your runtime, creator or capabilities.' % language
+	return 'You are Leemon (Лимон), the desktop companion. Leemon is YOUR name, never the user’s. Use masculine first person. Speak like a calm, witty helpful companion, no repetitive offers to help. Answer directly in %s, usually in 1-3 sentences. Use general knowledge and familiar everyday words. For factual questions give a short well-established explanation. Never invent technical terms. Be clear when unsure. Saved notes are about the user. You cannot edit external windows, click, send or save files yourself; only the app executor can. Never describe planned actions as completed. You have no live screen vision or web page reading. Never invent your runtime, creator or capabilities.' % language
 func response_budget(raw,options):
 	var result=options.duplicate(true)
 	var text=raw.to_lower()

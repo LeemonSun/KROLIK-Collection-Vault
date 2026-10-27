@@ -22,6 +22,10 @@ var deadline_ms = 0
 var next_probe_ms = 0
 var starting = false
 var _options = {}
+var next_liveness_ms=0
+var start_verifier
+var start_revision=0
+var verifier_revision=0
 
 func _ready():
 	if manifest.is_empty():
@@ -66,7 +70,7 @@ func installed():
 	return receipt is Dictionary and receipt.get("model_sha256") == manifest.model.sha256 and receipt.get("runtime_sha256") == manifest.runtime.sha256 and model != null and model.get_length() == int(manifest.model.bytes) and int(receipt.get("model_mtime", -1)) == FileAccess.get_modified_time(model_path()) and FileAccess.file_exists(runtime_path().path_join(manifest.runtime.executable))
 
 func install():
-	if downloading or hash_thread != null or starting or pid > 0:
+	if downloading or hash_thread != null or start_verifier!=null or starting or pid > 0:
 		return false
 	if OS.get_name() != manifest.get("platform"):
 		_status("ai_windows_only")
@@ -110,6 +114,12 @@ func _download_complete(result, code, _headers, _body):
 	hash_thread.start(func(): return FileAccess.get_sha256(target))
 
 func _process(_delta):
+	if start_verifier!=null and not start_verifier.is_alive():
+		var valid=start_verifier.wait_to_finish()
+		start_verifier=null
+		if starting and verifier_revision==start_revision:
+			if valid:_spawn_worker()
+			else:starting=false;_status("ai_hash_failed")
 	if hash_thread != null and not hash_thread.is_alive():
 		var digest = hash_thread.wait_to_finish()
 		hash_thread = null
@@ -138,11 +148,13 @@ func _process(_delta):
 					downloading = false
 					_status("ai_installed")
 	var now = Time.get_ticks_msec()
-	if pid > 0 and not OS.is_process_running(pid):
-		pid = -1
-		starting = false
-		_status("ai_worker_failed")
-	if starting:
+	if pid>0 and now>=next_liveness_ms:
+		next_liveness_ms=now+500
+		if not OS.is_process_running(pid):
+			pid=-1
+			starting=false
+			_status("ai_worker_failed")
+	if starting and start_verifier==null:
 		if now > deadline_ms:
 			stop()
 			_status("ai_worker_failed")
@@ -181,9 +193,9 @@ func _extract_runtime(path):
 	return true
 
 func start(options = {}):
-	if pid > 0:
+	if pid > 0 or starting:
 		return true
-	if downloading or hash_thread != null:
+	if downloading or hash_thread != null or start_verifier!=null:
 		return false
 	if not installed():
 		_status("ai_not_installed")
@@ -191,10 +203,22 @@ func start(options = {}):
 	if OS.get_name() != manifest.get("platform"):
 		_status("ai_windows_only")
 		return false
-	for name in manifest.runtime.files:
-		if FileAccess.get_sha256(runtime_path().path_join(name)) != manifest.runtime.files[name]:
-			_status("ai_hash_failed")
-			return false
+	_options=options.duplicate(true)
+	start_revision+=1;verifier_revision=start_revision
+	starting=true
+	deadline_ms=Time.get_ticks_msec()+120000
+	var folder=ProjectSettings.globalize_path(runtime_path())
+	var expected=manifest.runtime.files.duplicate(true)
+	start_verifier=Thread.new()
+	start_verifier.start(func():
+		for name in expected:
+			if FileAccess.get_sha256(folder.path_join(name))!=expected[name]:return false
+		return true)
+	_status("ai_starting")
+	return true
+
+func _spawn_worker():
+	var options=_options
 	var socket = TCPServer.new()
 	port = 0
 	for _attempt in range(32):
@@ -204,6 +228,7 @@ func start(options = {}):
 			socket.stop()
 			break
 	if port == 0:
+		starting=false
 		_status("ai_worker_failed")
 		return false
 	token = Crypto.new().generate_random_bytes(32).hex_encode()
@@ -212,6 +237,7 @@ func start(options = {}):
 	var args = build_args(options)
 	pid = OS.create_process(ProjectSettings.globalize_path(runtime_path().path_join(manifest.runtime.executable)), args, false)
 	if pid <= 0:
+		starting=false
 		_status("ai_worker_failed")
 		return false
 	starting = true
@@ -261,6 +287,7 @@ func _fail(key):
 	_status(key)
 
 func stop():
+	start_revision+=1
 	starting = false
 	generation_busy = false
 	if probe:
@@ -271,6 +298,7 @@ func stop():
 	token = ""
 
 func _exit_tree():
+	if start_verifier!=null:start_verifier.wait_to_finish()
 	if download:
 		download.cancel_request()
 	if hash_thread != null:

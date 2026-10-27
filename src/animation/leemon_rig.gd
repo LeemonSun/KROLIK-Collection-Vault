@@ -2,7 +2,7 @@ extends Control
 ## One identity source, six articulated texture pieces, authored motion curves.
 ## No per-frame model inference or generated replacement faces.
 const SOURCE_SIZE=Vector2(1199,1312)
-const CLIPS=["idle","hello","thinking","talk","success","error","grab","walk"]
+const CLIPS=["idle","hello","thinking","talk","success","error","grab","walk","listen","stretch","settle"]
 var texture:Texture2D
 var parts={}
 var pivots={}
@@ -12,7 +12,7 @@ var duration=0.0
 var elapsed=0.0
 var reduced=false
 var root_part:Node2D
-var installed_clips=8
+var installed_clips=11
 func _ready():
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	root_part=Node2D.new()
@@ -42,7 +42,7 @@ func _fit():
 	if root_part:root_part.scale=size/SOURCE_SIZE
 func play(id,seconds=0.0):
 	if id not in CLIPS:return false
-	if clip==id and id in ["thinking","grab","walk"]:return true
+	if clip==id and id in ["thinking","grab","walk","listen","stretch","settle"]:return true
 	clip=id;clip_time=0;duration=seconds
 	return true
 func set_reduced(value):
@@ -89,6 +89,18 @@ func _process(delta):
 			parts.arm_l.rotation=weight*0.25;parts.arm_r.rotation=-weight*0.25
 			parts.leg_l.rotation=sin(clip_time*4)*0.05
 			parts.leg_r.rotation=-sin(clip_time*4)*0.05
+		"listen":
+			parts.head.rotation=-0.025*weight+sin(elapsed*0.7)*0.009
+			parts.arm_l.rotation=0.05*weight
+		"stretch":
+			var stretch=sin(minf(clip_time/1.8,1.0)*PI)*weight
+			parts.arm_l.rotation=stretch*0.42;parts.arm_r.rotation=-stretch*0.42
+			parts.head.position.y-=stretch*7
+		"settle":
+			var spring=sin(clip_time*16)*exp(-clip_time*5)
+			parts.head.position.y+=spring*9
+			parts.body.scale.y=1+spring*0.015
+			parts.arm_l.rotation=spring*0.16;parts.arm_r.rotation=-spring*0.16
 		"walk":
 			var step=sin(clip_time*10.5)*weight
 			parts.leg_l.rotation=step*0.095;parts.leg_r.rotation=-step*0.095
@@ -103,3 +115,21 @@ func map_outline(point):
 	elif source.x<374:id="arm_l"
 	elif source.x>846:id="arm_r"
 	return (parts[id].transform*(source-pivots[id]))*root_part.scale+root_part.position
+
+func hit_envelope(source_outline):
+	# Precompute an input/render envelope for all current clips. Windows clips pixels
+	# outside this region, so a moving region causes redraws and limb cut-offs.
+	var saved=[clip,clip_time,duration,elapsed,reduced]
+	reduced=false
+	var cloud=PackedVector2Array()
+	for id in CLIPS:
+		play(id)
+		for step in range(12):
+			_process(0.12)
+			for point in source_outline:
+				var mapped=map_outline(point)
+				for offset in [Vector2(-12,-12),Vector2(12,-12),Vector2(12,12),Vector2(-12,12)]:
+					cloud.append((mapped+offset).clamp(Vector2.ZERO,size))
+	clip=saved[0];clip_time=saved[1];duration=saved[2];elapsed=saved[3];reduced=saved[4]
+	_rest()
+	return Geometry2D.convex_hull(cloud)

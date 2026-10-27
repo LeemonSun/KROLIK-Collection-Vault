@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Companion Foundation",
   "publisher": null,
-  "version": "0.5.0-leemon-preview",
+  "version": "0.6.0-desktop-preview",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [

@@ -5,12 +5,17 @@ const Surface=preload('res://src/ui/signal_surface.gd')
 var buttons=[]
 var app
 var caption
+func _init():
+	visible=false
+	transparent=false
+	transparent_bg=false
+	disable_3d=true
 func _ready():
 	app=get_tree().root.get_node('App')
-	title='Signal — actions'
+	title='Leemon — actions'
 	borderless=true
-	transparent=true
-	transparent_bg=true
+	transparent=false
+	transparent_bg=false
 	always_on_top=true
 	unresizable=true
 	size=Vector2i(306,264)
@@ -68,4 +73,6 @@ func open_at(point):
 	var bounds=DisplayServer.screen_get_usable_rect(screen)
 	position=Vector2i(clampi(point.x-24,bounds.position.x,maxi(bounds.position.x,bounds.end.x-size.x)),clampi(point.y-size.y/2,bounds.position.y,maxi(bounds.position.y,bounds.end.y-size.y)))
 	show()
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,get_window_id())
+	app.mark_active()
 	grab_focus()

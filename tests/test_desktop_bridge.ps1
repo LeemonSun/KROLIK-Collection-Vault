@@ -8,6 +8,12 @@ Assert ($errors.Count -eq 0) 'PowerShell syntax'
 foreach($fn in $ast.FindAll({param($node)$node -is [Management.Automation.Language.FunctionDefinitionAst]},$false)){
  Invoke-Expression $fn.Extent.Text
 }
+# Compile the owned P/Invoke code on this host, but do not call Windows APIs here.
+$native=$ast.FindAll({param($node)$node -is [Management.Automation.Language.StringConstantExpressionAst] -and $node.Value.Contains('public static class LeemonWindow')},$true)[0].Value
+Add-Type -TypeDefinition $native
+Assert (([LeemonWindow]::OverlayStyle(0xC0000) -band 0x40000) -eq 0) 'Overlay drops taskbar app-window bit'
+Assert (([LeemonWindow]::OverlayStyle(0xC0000) -band 0x80) -eq 0x80) 'Overlay uses tool-window role'
+Assert (([LeemonWindow]::OverlayStyle(0xC0000) -band 0x80000) -eq 0x80000) 'Overlay preserves transparency-related flags'
 $catalog=@(
  @{name='Notepad';aliases=@('блокнот','记事本');path='C:\Windows\System32\notepad.exe'},
  @{name='Steam';aliases=@();path='C:\Steam\steam.exe'},

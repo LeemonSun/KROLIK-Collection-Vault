@@ -17,6 +17,7 @@ var close_button
 var last_locale=''
 var chips=[]
 var footer_hint
+var setup_hint
 var status_dot
 func _ready():
 	if embedded:inset=0
@@ -58,6 +59,11 @@ func _ready():
 	status_label.add_theme_font_size_override('font_size',12)
 	status_label.add_theme_color_override('font_color',VisualTheme.MUTED)
 	status_row.add_child(status_label)
+	setup_hint=Label.new()
+	setup_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	setup_hint.add_theme_font_size_override('font_size',12)
+	setup_hint.add_theme_color_override('font_color',VisualTheme.MUTED)
+	layout.add_child(setup_hint)
 	history=RichTextLabel.new()
 	history.bbcode_enabled=false
 	history.selection_enabled=true
@@ -88,6 +94,10 @@ func _ready():
 	editor.custom_minimum_size.y=58
 	editor.scroll_fit_content_height=false
 	editor.caret_blink=true
+	editor.mouse_default_cursor_shape=Control.CURSOR_IBEAM
+	editor.text_changed.connect(func():
+		if is_instance_valid(app.desktop_companion) and app.state.current=="idle" and not app.paused and not app.desktop_companion.reduced_motion:
+			app.desktop_companion.art.play("listen",1.2))
 	editor.gui_input.connect(_editor_input)
 	layout.add_child(editor)
 	var actions=HBoxContainer.new()
@@ -100,6 +110,8 @@ func _ready():
 	footer_hint.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	actions.add_child(footer_hint)
 	setup_button=_button('AI',actions,_setup_ai)
+	setup_button.add_theme_font_size_override('font_size',11)
+	setup_button.clip_text=true
 	VisualTheme.quiet(setup_button)
 	stop_button=_button('■',actions,func():app.cancel())
 	VisualTheme.quiet(stop_button)
@@ -113,6 +125,7 @@ func _ready():
 	app.history_cleared.connect(_render_history)
 	app.changed.connect(refresh)
 	_render_history()
+	resized.connect(refresh)
 	refresh()
 func _button(text,parent,callback):
 	var button=Button.new()
@@ -147,7 +160,8 @@ func submit_current():
 	editor.grab_focus()
 func _setup_ai():
 	if app.local_runtime.installed():app.start_local_ai()
-	else:settings_requested.emit()
+	else:app.install_local_ai()
+	refresh()
 func _on_message(_speaker,_text):
 	_render_history()
 func _render_history():
@@ -180,7 +194,11 @@ func refresh():
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
 	send_button.disabled=app.paused or busy
 	stop_button.disabled=not busy
-	setup_button.visible=not app.local_ai_enabled or not app.local_runtime.installed()
+	var installed=app.local_runtime.installed()
+	setup_hint.visible=size.y>=380 and not installed and not app.local_runtime.downloading
+	setup_hint.text=app.t('chat_setup_hint')
+	setup_button.visible=not installed and not app.local_runtime.downloading
+	setup_button.text=app.t('chat_install')
 	setup_button.disabled=app.paused or app.local_runtime.downloading or app.local_runtime.hash_thread!=null
 
 func _draw():

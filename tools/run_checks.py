@@ -31,6 +31,7 @@ def main():
         ("search", [engine, "--headless", "--path", str(ROOT), "--script",
                     "res://tests/test_search.gd", "--", "--test-mode"]),
         ("persistence",[sys.executable,str(ROOT/"tools/test_persistence.py"),engine]),
+        ("desktop060",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_desktop060.gd","--","--test-mode"]),
         ("leemon_tools",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_leemon_tools.gd","--","--test-mode"]),
         ("functional", [engine,"--headless","--path",str(ROOT),"--script","res://tests/test_functional.gd","--","--test-mode"]),
         ("animation", [engine, "--headless", "--path", str(ROOT), "--script",

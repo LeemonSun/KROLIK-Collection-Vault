@@ -18,6 +18,9 @@
     "success",
     "error",
     "grab",
-    "walk"
+    "walk",
+    "listen",
+    "stretch",
+    "settle"
   ]
 }

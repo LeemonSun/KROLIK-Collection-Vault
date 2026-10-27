@@ -8,9 +8,19 @@ var last_result={}
 var runner="powershell.exe"
 var test_runner=false
 var operation="open"
+var next_poll_ms=0
 func request(target):
-	if pid>0 and operation=="metrics":cancel()
+	if pid>0 and operation in ["metrics","overlay"]:cancel()
 	return _request({"operation":"open","target":target})
+func request_document(record):
+	if pid>0 and operation in ["metrics","overlay"]:cancel()
+	if OS.get_name()!="Windows" and not test_runner:
+		operation="document"
+		_finish.call_deferred(record.merged({"status":"document_saved"}))
+		return true
+	return _request({"operation":"document","path":record.path,"sha256":record.sha256,"name":record.name})
+func request_overlay(handle):
+	return _request({"operation":"overlay","handle":str(handle),"owner_pid":OS.get_process_id()})
 func request_metrics(pids):
 	return _request({"operation":"metrics","pids":pids})
 func _request(payload):
@@ -41,7 +51,8 @@ func _request(payload):
 	if pid<0:_finish.call_deferred({"status":"failed"})
 	return true
 func _process(_delta):
-	if pid<=0:return
+	if pid<=0 or Time.get_ticks_msec()<next_poll_ms:return
+	next_poll_ms=Time.get_ticks_msec()+75
 	if FileAccess.file_exists(job+".result.json"):
 		var file=FileAccess.open(job+".result.json",FileAccess.READ)
 		var parsed=JSON.new()

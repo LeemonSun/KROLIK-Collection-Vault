@@ -6,6 +6,15 @@ func route(text):
 	if normalized in ["мои напоминания","напоминания","show reminders","my reminders","查看提醒","/reminders"]:return {"kind":"tool","tool":"reminders.list","args":{}}
 	if normalized in ["пройдись","прогуляйся","walk around","走一走"]:return {"kind":"tool","tool":"companion.walk","args":{}}
 	var rx = RegEx.new()
+	# This command creates a NEW file in Documents/Leemon; it never edits a focused window.
+	rx.compile("^(?:создай(?: мне)? (?:в (?:блокноте|блакноте) (?:новый )?файл|(?:новый )?файл в (?:блокноте|блакноте))|create (?:a )?(?:new )?(?:text )?file in notepad|在记事本中?新建(?:文本)?文件)(?:\\s*[:：]\\s*([\\s\\S]*))?[.!?。]?$" )
+	var document_hit=rx.search(normalized)
+	if document_hit:
+		var body=""
+		if document_hit.get_start(1)>=0:body=text.strip_edges().substr(document_hit.get_start(1))
+		return {"kind":"tool","tool":"documents.create","args":{"text":body}}
+	rx.compile("^(?:вставь|запиши|напиши|сохрани|удали|переименуй|перемести|нажми|click|type|save|delete|rename|move|输入|保存|删除).*(?:блокнот|блакнот|браузер|вкладк|файл|документ|notepad|browser|tab|file|document|记事本|浏览器|文件)")
+	if rx.search(normalized):return {"kind":"invalid","key":"desktop_edit_unavailable"}
 	rx.compile("^(?:(?:скажи|покажи)(?: мне)?\\s+)?(?:сколько(?: сейчас)? времени(?: сейчас)? в|который час в|время в|what time is it in|time in)\\s+(.+?)[.!?]?$" )
 	var time_hit=rx.search(normalized)
 	if time_hit:return {"kind":"tool","tool":"clock.now","args":{"city":text.strip_edges().substr(time_hit.get_start(1),time_hit.get_end(1)-time_hit.get_start(1)).strip_edges()}}

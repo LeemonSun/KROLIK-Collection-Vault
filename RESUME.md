@@ -1,3 +1,15 @@
+# Сейчас: 0.6 WIP, исходники сохранены
+
+Последний выданный ZIP — 0.5. Текущая работа по обратной связи пользователя: белый сломанный чат, мигание курсора, Alt-Tab, фон/обрезка текстуры, нагрузка, ложное «создан файл», цикл «нормально, как у тебя». Код нового большого прохода уже на месте, но 0.6 ещё не выдан.
+
+Сначала python3 tools/resume.py status и recovery/session.json (pending_060). Не восстанавливать весь проект заново. Веса для UI не скачивать. GitHub только хранилище.
+
+Закончить: новые native assertions для стабильной маски/прямого чата/анимации входа/трёх новых состояний; bounded repeat retry для ответов; контроль parse/runtime ошибок; сборка и проверка exported PCK; delta от 0.5 и native Library ZIP/GIF. Версию и launcher НЕ объявлять выданными до binary/attachment. Старый source starter пока 0.5 намеренно.
+
+Новые файлы: src/tools/text_documents.gd, tests/test_desktop060.gd (27 PASS). Изменены chat_window/chat_view/bootstrap, companion_window/leemon_rig, app, self_knowledge/response_guard/desktop_intent, local_runtime, desktop_actions, native/desktop_bridge.ps1, profiles/locales. 13 прежних групп PASS. Native source76 PASS до последнего добавления11states. Native Windows/API здесь не исполнялись. Модель Qwen3-1.7B та же: не обещать решение интеллекта промптом.
+
+## Справка предыдущей выданной 0.5
+
 # Быстрый вход: Leemon / Companion 0.5
 
 GitHub LeemonSun/KROLIK-Collection-Vault main — только хранилище, никаких Actions/CI/удалённых сборок.

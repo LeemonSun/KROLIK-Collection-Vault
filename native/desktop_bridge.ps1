@@ -76,6 +76,58 @@ function Open-Target($resolved) {
  }
  return @{status=$resolved.kind;choices=$resolved.choices}
 }
+function Set-CompanionOverlay($request) {
+ if([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT){throw 'Windows required'}
+ if($request.handle -notmatch '^\d{1,19}$' -or $request.owner_pid -lt 1){throw 'Invalid window'}
+ Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class LeemonWindow {
+ [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint processId);
+ [DllImport("user32.dll",SetLastError=true)] public static extern IntPtr GetWindowLongPtrW(IntPtr hwnd,int index);
+ [DllImport("user32.dll",SetLastError=true)] public static extern IntPtr SetWindowLongPtrW(IntPtr hwnd,int index,IntPtr value);
+ [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hwnd,IntPtr after,int x,int y,int w,int h,uint flags);
+ [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hwnd,int command);
+ public static long OverlayStyle(long original) { return (original|0x80L)&~0x40000L; }
+ public static bool Overlay(IntPtr hwnd,uint expected) {
+  uint actual; GetWindowThreadProcessId(hwnd,out actual);
+  if(actual!=expected) return false;
+  long original=GetWindowLongPtrW(hwnd,-20).ToInt64();
+  long desired=OverlayStyle(original);
+  if(desired==original) return true;
+  ShowWindow(hwnd,0);
+  SetWindowLongPtrW(hwnd,-20,new IntPtr(desired));
+  SetWindowPos(hwnd,IntPtr.Zero,0,0,0,0,0x37);
+  ShowWindow(hwnd,8);
+  return GetWindowLongPtrW(hwnd,-20).ToInt64()==desired;
+ }
+}
+'@
+ if(-not [LeemonWindow]::Overlay([IntPtr]::new([long]$request.handle),[uint32]$request.owner_pid)){throw 'Window style failed'}
+ return @{status='ok'}
+}
+function Open-Document($request) {
+ $path=[IO.Path]::GetFullPath([string]$request.path)
+ $folder=[IO.Path]::GetFullPath((Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Leemon'))
+ if([IO.Path]::GetDirectoryName($path) -ine $folder -or [IO.Path]::GetFileName($path) -notmatch '^Leemon-[0-9T-]+-[a-f0-9]{16}\.txt$' -or $request.sha256 -notmatch '^[a-f0-9]{64}$'){throw 'Not an owned draft'}
+ $file=Get-Item -LiteralPath $path
+ $parent=Get-Item -LiteralPath $folder
+ if(($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -or ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $file.Length -gt 8192 -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $request.sha256){throw 'Draft changed'}
+ $outcome=@{status='document_saved';name=$file.Name;path=$path}
+ $notepad=Join-Path $env:WINDIR 'System32/notepad.exe'
+ if(-not (Test-Path -LiteralPath $notepad)){return $outcome}
+ $start=[Diagnostics.ProcessStartInfo]::new();$start.FileName=$notepad;$start.UseShellExecute=$true
+ # A fixed, validated path is the only argument; file contents never become code.
+ $start.Arguments='"'+$path+'"'
+ try{$null=[Diagnostics.Process]::Start($start);$outcome.status='document_started'}catch{return $outcome}
+ for($attempt=0;$attempt -lt 16;$attempt++) {
+  foreach($process in Get-Process -Name notepad -ErrorAction SilentlyContinue) {
+   if($process.MainWindowHandle -ne 0 -and $process.MainWindowTitle.Contains($file.Name)){$outcome.status='document_opened';return $outcome}
+  }
+  Start-Sleep -Milliseconds 100
+ }
+ return $outcome
+}
 try {
  if((Get-Item -LiteralPath $RequestPath).Length -gt 16384){throw 'Request too large'}
  $request=Get-Content -LiteralPath $RequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -89,6 +141,12 @@ try {
    $process=Get-Process -Id $processId -ErrorAction SilentlyContinue
    if($process){$reply.items+=@{pid=[int]$processId;bytes=[long]$process.WorkingSet64;cpu_seconds=[double]$process.TotalProcessorTime.TotalSeconds}}
   }
+ } elseif($request.operation -eq 'overlay') {
+  $reply.operation='overlay';$outcome=Set-CompanionOverlay $request
+  foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
+ } elseif($request.operation -eq 'document') {
+  $reply.operation='document';$outcome=Open-Document $request
+  foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
  } else {
  if($request.operation -ne 'open' -or $request.target -isnot [string] -or $request.target.Length -gt 2048 -or -not $request.target.Trim()){throw 'Invalid target'}
  # Reject URLs here: a separately validated URL opener is handled in the application.

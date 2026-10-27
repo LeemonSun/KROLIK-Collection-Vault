@@ -1,6 +1,6 @@
 extends Node
 ## The visible character uses the MAIN window. No invisible offscreen host.
-## Texture movement and FX are not a finished body rig.
+## Articulated 2D companion; the native input region is stable between size changes.
 signal chat_requested
 signal settings_requested
 signal pause_requested
@@ -49,6 +49,9 @@ var _hit_polygon = PackedVector2Array()
 var normalized_outline=PackedVector2Array()
 var last_display_bounds=Rect2i()
 var boundary_elapsed=0.0
+var idle_variation=45.0
+var region_updates=0
+var overlay_pending=false
 
 class Surface extends Control:
 	var owner_window
@@ -76,6 +79,8 @@ func _ready():
 	host.unfocusable = false
 	host.mouse_passthrough = false
 	host.exclude_from_capture = false
+	host.disable_3d=true
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,host.get_window_id())
 	var usable = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
 	var fit = minf(1.0,minf(float(usable.size.y)/float(BASE_SIZE.y),float(usable.size.x)/float(BASE_SIZE.x)))
 	var fitted = Vector2i(Vector2(BASE_SIZE)*fit)
@@ -110,8 +115,7 @@ func _ready():
 	for point in largest:
 		normalized_outline.append(point / Vector2(image.get_size()))
 		_hit_polygon.append(point * art.size / Vector2(image.get_size()))
-	if _hit_polygon.size() >= 3:
-		host.mouse_passthrough_polygon = _hit_polygon
+	_update_hit_region()
 	host.window_input.connect(_input_event)
 	host.focus_entered.connect(_restore_opacity)
 	host.focus_exited.connect(func(): dragging=false; Input.use_accumulated_input=true)
@@ -148,7 +152,7 @@ func _input_event(event):
 				drag_offset = press_position-position
 			else:
 				dragging = false
-				art.play("idle")
+				art.play("settle",0.8) if moved else art.play("idle")
 				Input.use_accumulated_input=true
 				if moved:
 					position=bounded(DisplayServer.mouse_get_position()-drag_offset)
@@ -213,24 +217,33 @@ func _process(delta):
 	if dragging:
 		app.mark_active()
 		if moved:position=bounded(drag_mouse-drag_offset)
-	if not reduced_motion:canvas.queue_redraw()
+	# The static effect surface redraws only during the short effect, not each idle frame.
+	if art.clip=="idle" and not reduced_motion and not dragging:
+		idle_variation-=delta
+		if idle_variation<=0:
+			art.play("stretch",2.2);idle_variation=randf_range(55,95)
 	elapsed += delta
 	boundary_elapsed+=delta
 	if boundary_elapsed>=1.0 and not dragging:
 		boundary_elapsed=0
 		refresh_bounds()
+	if effect_kind=="edge_enter":
+		phase+=delta
+		var progress=clampf(phase/0.9,0,1)
+		position=Vector2i(Vector2(original_position).lerp(Vector2(target_position),1.0-pow(1.0-progress,3)))
+		art.modulate.a=smoothstep(0.0,0.2,progress)
+		if progress>=1:
+			position=target_position;effect_kind="";art.modulate.a=1
+			art.play("hello",1.3)
 	if effect_kind=="walk":
 		app.mark_active()
 		phase+=delta
 		var progress=clampf(phase/maxf(0.1,walk_duration),0,1)
 		position=bounded(Vector2i(Vector2(original_position).lerp(Vector2(target_position),smoothstep(0,1,progress))))
 		if progress>=1.0:effect_kind="";art.play("idle")
-	mask_elapsed+=delta
-	if mask_elapsed>0.08:
-		mask_elapsed=0
-		var outline=PackedVector2Array()
-		for point in normalized_outline:outline.append(art.map_outline(point))
-		if outline.size()>3:host.mouse_passthrough_polygon=Geometry2D.convex_hull(outline)
+	if overlay_pending and app.desktop_actions.pid<=0:
+		overlay_pending=false
+		if OS.get_name()=="Windows" and is_instance_valid(tray):app.desktop_actions.request_overlay(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,host.get_window_id()))
 	var lean = clampf(float(DisplayServer.mouse_get_position().x-press_position.x)*0.0005,-0.07,0.07) if dragging and moved else 0.0
 	art.rotation = lerp_angle(art.rotation,lean,minf(1.0,delta*12.0))
 	if reduced_motion: art.rotation=0.0
@@ -276,7 +289,7 @@ func show():
 	if not is_instance_valid(host): return
 	host.mode = Window.MODE_WINDOWED
 	host.show()
-	refresh_bounds(true)
+	refresh_bounds()
 	position = bounded(position)
 	_restore_opacity()
 
@@ -305,6 +318,7 @@ func _setup_tray():
 		elif button == MOUSE_BUTTON_RIGHT:
 			app.open_settings("assistant_tools"))
 	add_child(tray)
+	overlay_pending=true
 
 func _show_fallback():
 	startup_error = true
@@ -338,11 +352,17 @@ func _show_fallback():
 
 func play_entrance():
 	if reduced_motion or app.paused or not art:return
+	var destination=bounded(position)
+	var bounds=DisplayServer.screen_get_usable_rect(current_screen)
+	target_position=destination
+	original_position=Vector2i(bounds.end.x+12,destination.y)
+	position=original_position
 	phase=0
-	effect_kind="spawn"
-	effect_time=0.52
+	effect_kind="edge_enter"
+	effect_time=0
 	art.modulate.a=0
-	art.play("hello",2.0)
+	art.play("walk")
+	canvas.queue_redraw()
 
 func clamp_to_bounds(candidate,bounds):
 	return Vector2i(clampi(candidate.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-size.x)),clampi(candidate.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-size.y)))
@@ -357,7 +377,8 @@ func fit_to_bounds(bounds):
 	art.pivot_offset=Vector2(BASE_SIZE)*Vector2(0.5,0.7)*fit
 	_hit_polygon=PackedVector2Array()
 	for point in normalized_outline:_hit_polygon.append(point*art.size)
-	if _hit_polygon.size()>=3:host.mouse_passthrough_polygon=_hit_polygon
+	_update_hit_region()
+	overlay_pending=true
 	position=clamp_to_bounds(position,bounds)
 	target_position=clamp_to_bounds(target_position,bounds)
 	last_display_bounds=bounds
@@ -366,7 +387,7 @@ func refresh_bounds(force=false):
 	var screen=DisplayServer.get_screen_from_rect(Rect2i(position,size))
 	if screen<0:screen=DisplayServer.get_primary_screen()
 	var bounds=DisplayServer.screen_get_usable_rect(screen)
-	if force or bounds!=last_display_bounds:fit_to_bounds(bounds)
+	if (force or bounds!=last_display_bounds) and effect_kind!="edge_enter":fit_to_bounds(bounds)
 
 var walk_duration=1.8
 var mask_elapsed=0.0
@@ -386,3 +407,10 @@ func react(event_id):
 	elif event_id in ["work.note_saved","work.timer_notice"]:return art.play("success",1.4)
 	elif event_id in ["work.error_recover","work.model_missing"]:return art.play("error",1.8)
 	return false
+
+func _update_hit_region():
+	if not art or normalized_outline.is_empty():return
+	var outline=art.hit_envelope(normalized_outline)
+	if outline.size()>3:
+		host.mouse_passthrough_polygon=outline
+		region_updates+=1
