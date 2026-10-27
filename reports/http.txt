@@ -1,6 +1,6 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
-HTTP_TESTS: 27 checks, 0 failures
+HTTP_TESTS: 28 checks, 0 failures
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
 CONTEXT_HTTP_TESTS: 8 checks, 0 failures

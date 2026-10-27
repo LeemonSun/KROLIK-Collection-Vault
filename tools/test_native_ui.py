@@ -19,10 +19,11 @@ def main():
     except OSError:time.sleep(.1)
    else:raise RuntimeError('Xvfb did not listen')
    env.update(DISPLAY='127.0.0.1:98',LIBGL_ALWAYS_SOFTWARE='1',COMPANION_VISUAL_OUTPUT=str(out),XDG_DATA_HOME=str(out/'user'),XDG_CONFIG_HOME=str(out/'user'))
-   command=[str(a.godot.resolve()),'--audio-driver','Dummy','--display-driver','x11','--rendering-method','gl_compatibility','--path',str(ROOT)]
+   project_path=a.pack.resolve().parent if a.pack else ROOT
+   command=[str(a.godot.resolve()),'--audio-driver','Dummy','--display-driver','x11','--rendering-method','gl_compatibility','--path',str(project_path)]
    if a.pack:command+=['--main-pack',str(a.pack.resolve())]
    command+=['--script',str(a.script.resolve()),'--','--test-mode']
-   result=subprocess.run(command,env=env,capture_output=True,text=True,timeout=90)
+   result=subprocess.run(command,cwd=project_path,env=env,capture_output=True,text=True,timeout=90)
    output=result.stdout+result.stderr;(out/'godot.log').write_text(output);print(output)
    return int(result.returncode!=0 or 'SCRIPT ERROR:' in output or '\nERROR:' in output or '0 failures' not in output)
  finally:

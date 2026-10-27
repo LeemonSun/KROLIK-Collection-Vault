@@ -1,47 +1,42 @@
 {
   "schema_version": 1,
   "app_version": "0.5.0-leemon-preview",
-  "checkpoint_status": "source_saved_environment_offline_final_validation_pending",
-  "current_task": "Leemon 0.5 source preserved after execution environment disconnected. Latest 0.5 binary/GIF existed locally but were not uploaded; do not claim delivery. Capsule plus a hash-checked pending source overlay restore authored changes.",
-  "next_action": "Reconnect; bootstrap via latest resume_bridge.js; rerun corrected test_local_runtime high-core fixture and final native UI/reminders/clipboard/exported-content checks. Rebuild 0.5 ZIP. Promote pending launcher only after storing verified two-file update. Deliver through native Library.",
+  "checkpoint_status": "delivered_native_attachment_source_checkpoint_ready",
+  "current_task": "Leemon 0.5 full ZIP and actual rig GIF delivered; final source and two-file distribution update saved together. No further feature work in this pass.",
+  "next_action": "Read RESUME.md, await actual Windows user feedback. Next priorities: native startup/drag/COM acceptance, conversational quality baseline and next animation quality pass. Do not rebuild the project from history.",
   "read_next": [
     "RESUME.md"
   ],
   "known_limits": [
-    "0.5 NOT delivered; last delivered version remains 0.4.0",
-    "Environment disconnected before latest native/exported checks completed",
-    "Old Thread bound assertion expected 8 regardless of host; fixture corrected to explicit 16 processors in saved source, not rerun",
-    "General Qwen3-1.7B factual quality limited: manual review found imprecise science explanation",
-    "Native Windows, ASR/custom voice, universal vision and web page reading remain pending",
-    "Recovery overlay authored but cannot be executed or validated while environment is offline"
+    "Windows EXE not executed here; X11/PowerShell Linux tests only",
+    "Qwen3-1.7B general factual accuracy limited; weights still separate initial download",
+    "Eight authored procedural cutout states; not finished frame clips or facial rig",
+    "No ASR/custom voice/VLM/browser page reader/Steam Cloud",
+    "Historical full source starter chain 0.3→0.5 not rerun; ready branch and 0.4→0.5 tested",
+    "Concept art is internal; public commercial release gate remains blocked"
   ],
   "validation": [
-    "Earlier broad checks passed; latest run passed all except old Thread bound assertion",
-    "Leemon tools 42 checks passed; five additional low-core cases included in later leemon_tools PASS",
-    "Exported native X11 72 PASS: missing 12/40392 opaque screen pixels; newer short-wide/reminder-refresh assertions pending",
-    "Real Qwen CPU2 short RU/EN/zh translations correct; 18 automated checks PASS with manual factual caveat",
-    "Two-file EXE+PCK updater 8 scenarios PASS: hashes, backups, idempotence, mixed state, unknown/corrupt bases, rollback and source launcher ready branch",
-    "144 native motion frames rendered; GIF encoder exited zero; not saved to Library before disconnection"
+    "13 standard groups PASS",
+    "47 Leemon tools checks PASS",
+    "76 exported native X11 checks PASS",
+    "11 exported content and actual Godot→PS roundtrip PASS",
+    "21 executor checks PASS; Windows COM not exercised",
+    "8 two-file updater scenarios PASS",
+    "144 actual rig frames rendered; GIF and ZIP persisted; CRC and SHA verified"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.4.0.zip",
-    "bytes": 54361574,
-    "sha256": "231bb819df68a611d6df2a72a3938fb71e01152bb678cd10e53ec27ba7539604",
-    "library_file_id": "libfile_b3abab6a0df08191ab4367c17a7080dc",
+    "full": "Companion_Preview_Windows_v0.5.0.zip",
+    "bytes": 53434851,
+    "sha256": "a6d07d15b2d3085dbbefb637fb5ce9cfb67847413422040ce7c52b5d439f2f88",
+    "library_file_id": "libfile_aa492c7431c88191a105c25f22539735",
     "status": "delivered_native_attachment",
-    "patch": "Companion_Fix_0.4.0.zip",
-    "patch_from": "0.3.3",
-    "patch_sha256": "b949a6969b287ae61bb17b0aaacf7defb5cfbc5e1ac2ef37f7990034bc849ea8"
+    "patch": "Companion_Update_0.5.0.zip",
+    "patch_from": "0.4.0",
+    "patch_bytes": 1326645,
+    "patch_sha256": "e64b2f0d3bf75b3a948d54c3dc1e206ba0acdca33d5f668988fa9e6b2e05ea9f",
+    "motion_gif_library_file_id": "libfile_16144d9ee04c81919c334a2752d09a1c"
   },
-  "previous_checkpoint": "dfdd8c02643c157fe7f64d0af021610c02dec127",
-  "shipped_version": "0.4.0-functional-preview",
-  "shipped_app_pack_sha256": "64e0ce6f6d2183505bc6ab2f0e6bfb5c7a2335b061dd31c1e112b9bf54e9988c",
-  "unreleased_candidate": {
-    "file": "Companion_Preview_Windows_v0.5.0.zip",
-    "last_observed_bytes": 53429052,
-    "last_observed_sha256": "dea5f4758db820dc7dec3a60de1dd9fc4800315af6dc67fc237efea7f2727053",
-    "status": "local_only_environment_unavailable_not_delivered",
-    "update_last_observed_bytes": 1260694,
-    "update_last_observed_sha256": "62d543c9fb9c3156acdb5472f1fbb21a9a1741df97e5b9b5540bbdeb068d7d36"
-  }
+  "previous_checkpoint": "ae41660b468c447bfd4055e1b0a4c99577a47563",
+  "shipped_version": "0.5.0-leemon-preview",
+  "shipped_app_pack_sha256": "68cc24f0da8f1833e7778a4b35448d4892b9a326ea7e8639a7bd82b27e551309"
 }

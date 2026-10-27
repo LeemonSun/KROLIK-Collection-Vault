@@ -1,0 +1,10 @@
+PREVIEW_UPDATE_TESTS: 8 scenarios PASS
+EXE/icon and PCK reconstructed exactly; unrelated profile preserved
+Repeat application idempotent
+Both verified old files preserved in one support folder
+Mixed old/new state completes without rewriting the current engine
+Unknown version rejected before any replacement
+Corrupt second file blocks both replacements; staging cleaned
+Failure after replacement restores both original files
+Source launcher/metadata updated; ready branch cannot downgrade new EXE/icon or PCK
+PowerShell 7/Linux; native Windows process/file locking still requires acceptance.

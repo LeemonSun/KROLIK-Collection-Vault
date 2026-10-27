@@ -100,6 +100,12 @@ def validate():
         path = ROOT / rel
         if not rel or ".." in Path(rel).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != asset.get("sha256"):
             errors.append(f"Runtime character hash mismatch: {rel}")
+    leemon = parsed.get("characters/leemon_01/provenance.json", {})
+    leemon_path = ROOT / leemon.get("runtime_asset", "missing")
+    if not leemon_path.is_file() or hashlib.sha256(leemon_path.read_bytes()).hexdigest() != leemon.get("runtime_asset_sha256"):
+        errors.append("Leemon runtime master missing or hash mismatch")
+    if leemon.get("release_approved") is not False:
+        errors.append("Leemon concept must not imply commercial clearance")
     font = parsed.get("assets/fonts/provenance.json", {})
     font_path = ROOT / "assets/fonts" / font.get("file", "missing")
     if not font_path.is_file() or hashlib.sha256(font_path.read_bytes()).hexdigest() != font.get("sha256"):

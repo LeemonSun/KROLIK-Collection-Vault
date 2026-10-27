@@ -1,21 +1,23 @@
-# Быстрый вход: Leemon / Companion
+# Быстрый вход: Leemon / Companion 0.5
 
-GitHub: LeemonSun/KROLIK-Collection-Vault, main. Только хранилище; никакого Actions/CI/удалённой сборки.
+GitHub LeemonSun/KROLIK-Collection-Vault main — только хранилище, никаких Actions/CI/удалённых сборок.
 
-Исходники: 0.5.0-leemon-preview. НЕ ВЫПУЩЕНО. Среда отключилась на финальной проверке. Последняя выданная версия — 0.4.0, Library ID libfile_b3abab6a0df08191ab4367c17a7080dc. Не выдавать её за лимона.
+**0.5.0-leemon-preview собран и выдан.** Full ZIP: libfile_aa492c7431c88191a105c25f22539735, 53434851 байт. GIF фактического рига: libfile_16144d9ee04c81919c334a2752d09a1c. Не выдавать прежнюю 0.4 за лимона. Факты/хеши — recovery/session.json; отчёт — reports/WORK_REPORT_0.5.md.
 
-1. Если среда пуста/старая: получить актуальный tools/resume_bridge.js из GitHub, прочитать и вызвать bootstrap. Он восстановит капсулу и pending-overlay с проверкой Git SHA. Несовпавшие локальные правки не заменяются.
-2. Overlay привязан к старому content_id капсулы; следующий обычный checkpoint автоматически отключит этот слой новым content_id. До этого source_changed после overlay ожидаем. Не накатывать старую капсулу поверх новых файлов вручную.
-3. python3 tools/resume.py status, затем только файлы задачи. Runtime assets — Leemon master и Noto; девушка перенесена в reference. Веса не нужны для UI/командных проверок.
-4. Финально проверить test_local_runtime.gd: старая проверка ожидала 8 потоков независимо от малоядерного хоста; теперь задан fixture 16 processors. Этот фикс после отключения не запускался.
-5. Проверить последний exported PCK: ResourceLoader для импортированного PNG (FileAccess.exists сырого PNG внутри PCK неверен), короткий широкий layout, создание/отмена reminder из чата, перевод и очистку исходника.
-6. Пересобрать ZIP и two-file update. Не публиковать 0.5 launcher до binary chunk/preview-manifest. Кандидат — packaging/START_WINDOWS_0.5.pending.cmd; скопировать в корневой START_WINDOWS.cmd перед make_preview_update, затем сохранить update и metadata.
-7. Выдать native Library attachment. Sandbox ZIP у пользователя не открываются. Обновить session.json и checkpoint. Не оставлять большие незаписанные куски.
+1. Запустить python3 tools/resume.py status. Если среда пуста — получить свежий tools/resume_bridge.js из GitHub, прочитать, вызвать bootstrap. Капсула/хеши восстанавливают код, неизвестные локальные правки сохраняются.
+2. Для UI нужны только runtime assets: Leemon master и Noto; для всех structural tests — также архивные reference assets. bridge assets group runtime/test. Веса для UI не скачивать.
+3. Прежний pending-overlay привязан к старому content_id и после нового checkpoint неактивен. Не накатывать старую капсулу поверх новой вручную.
+4. Работать локально; новую задачу делать по карте ниже. Не тратить время на всю переписку/архивные отчёты. Сохранять большие куски checkpoint.
+5. Для выдачи ZIP использовать native Library attachment: sandbox ZIP у пользователя не скачивался. Корневой START_WINDOWS.cmd и downloads manifest уже 0.5, binary update сохранён вместе. packaging/START_WINDOWS_0.5.pending.cmd — прежний кандидат, теперь идентичен корневому.
 
-Реализовано: лимон, один графитово-жёлтый стиль, 6 shared-texture частей, 8 процедурных состояний; офлайн часы 597 зон/2039 aliases (IANA 2026e/CLDR + notices); сохраняемые reminders; explicit owned-local clipboard translation; adaptive AI threads для малоядерных CPU; EXE+PCK updater с SHA/backup/rollback.
+Текущая база: один графитово-янтарный стиль; лимон Leemon, очки/костюм/лист; shared master1199×1312, шесть частей рига, восемь процедурных состояний. Source/provenance — characters/leemon_01; texture — assets/characters/leemon_01/master_v1.png, не менять размеры без UV. Старую Signal сохранить как reference, не экспортировать.
 
-Мастер: assets/characters/leemon_01/master_v1.png, 1199×1312. Не менять размеры без UV. Происхождение/промпт — characters/leemon_01. Мастер уже сохранён в GitHub. Leemon_Mascot.zip содержал concept sheet, не анимационные кадры.
+Добавлены часы597зон/2039aliases, напоминания32/31день с сохранением/отменой, explicit clipboard translation only owned local worker с очисткой исходника; threads half logical CPU min1/max8. EXE+PCK updater проверяет оба до замены, backup и rollback; около1.3MB. Модель/профильAppData прежние.
 
-До отключения: native 72 PASS, короткие переводы трёх языков, updater 8 сценариев, 144 render frames. Последние UI/CPU/source-retention изменения требуют финального прохода. Научная точность 1.7B слабая; не называть smoke гарантией интеллекта. Нет ASR/custom voice/3D/facial rig/VLM/page reading. Windows native не запускался.
+Последняя проверка: 13 групп PASS; Leemon tools47; exported X11 UI76; exported content/actual PS roundtrip11; executor21; updater8сценариев. Native UI test теперь запускает PCK из его папки, без подмешивания исходников. Логи current: VALIDATION.md, native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt. work_in_progress.txt и старые leemon_import/smoke — исторические сбои, не текущий результат.
 
-Карта: src/animation/leemon_rig.gd; src/desktop/companion_window.gd; src/app.gd; src/tools/world_clock.gd; src/tools/clipboard_translation.gd; src/core/store.gd; src/ui/main.gd; tools/make_preview_update.py.
+Windows native не запускался: ждать обратной связи пользователя. Qwen3-1.7B прежний, короткие переводы проверялись на CPU, общая научная точность слабая. Не обещать исправление интеллекта системным промптом. Нет ASR/custom voice/VLM/page reader/Cloud; не тысячи художественных клипов. Модель1.86GB всё ещё отдельная установка. Public Steam release gate закрыт.
+
+Карта: src/animation/leemon_rig.gd; src/desktop/companion_window.gd; src/app.gd; src/tools/world_clock.gd и clipboard_translation.gd; src/core/store.gd и desktop_intent.gd; src/ui/main.gd и chat_view.gd; tools/make_preview_update.py и test_preview_update.py.
+
+Следующий проход: сначала фактические Windows ошибки; затем качество разговора/действий и художественное качество движения, не новые десятки пустых меню. Минимальные требования/выигрыш FPS ещё не измерены на слабом ПК.

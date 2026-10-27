@@ -379,6 +379,13 @@
       "bytes": 1075734,
       "sha256": "3ccdb7edc306262d55bb322e47c7c8180892cd6e4ba474cd283fa4a720d70bc1",
       "source": "github"
+    },
+    {
+      "path": "downloads/v0.5.0-update/000.chunk",
+      "group": "distribution",
+      "bytes": 1326645,
+      "sha256": "e64b2f0d3bf75b3a948d54c3dc1e206ba0acdca33d5f668988fa9e6b2e05ea9f",
+      "source": "github"
     }
   ]
 }

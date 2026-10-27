@@ -1,5 +1,5 @@
 extends RefCounted
-## Original Signal palette: ink, silver, porcelain, wine and a red action signal.
+## One Leemon palette: graphite, warm paper and amber.
 const INK = Color('#151719')
 const PANEL = Color('#202326')
 const LAYER = Color('#2b2f32')

@@ -9,7 +9,7 @@ def main():
  template=a.template.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
  version=json.loads((ROOT/'config/product.json').read_text())['version'].split('-')[0]
  template_sha=hashlib.sha256(template.read_bytes()).hexdigest()
- if template_sha not in [TEMPLATE_SHA,'7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8']:raise SystemExit('Wrong export template hash')
+ if template_sha not in [TEMPLATE_SHA,'7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee']:raise SystemExit('Wrong export template hash')
  preset=ROOT/'export_presets.cfg';original=preset.read_text()
  try:
   preset.write_text(original.replace('custom_template/release=""','custom_template/release="'+template.as_posix()+'"'))
@@ -26,7 +26,7 @@ def main():
  if not exe.exists() or exe.read_bytes()[:2]!=b'MZ':raise SystemExit('Missing PE executable')
  shutil.copytree(ROOT/'legal',out/'legal',dirs_exist_ok=True)
  (out/'START_HERE.txt').write_text('''LEEMON COMPANION PREVIEW 0.5.0 — WINDOWS x64\n\n1. Unzip the entire folder. Run Companion.exe. No Godot or Python installation required.\n2. The full-body desktop character is the main window. Click: chat. Right click: quick menu. Drag to move.
-   Restore from the taskbar, or click Signal in the Windows notification area to recover it.
+   Restore from the taskbar, or click the companion in the Windows notification area to recover it.
    Right-click its taskbar icon and Close window to exit. Missing art opens a visible recovery panel.\n3. In the app open AI and tools / ИИ и инструменты, then download and install local AI.\n   First setup downloads about 1.86 GB from official sources and needs about 2.5 GB free disk space.\n   After setup, chat/translation works locally. No cloud API key.\n4. The active character is now the Leemon lemon mascot, with one graphite/amber style.
    Six articulated cutout parts share one source texture. Eight procedural motion states:
    idle, hello, thinking, talking, success, hesitation, grab and walking.

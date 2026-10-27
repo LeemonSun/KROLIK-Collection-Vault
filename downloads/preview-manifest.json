@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "status": "private_preview_not_windows_executed",
   "packages": [
     {
@@ -75,9 +75,18 @@
       "parts": [
         "downloads/v0.4.0-patch/000.chunk"
       ]
+    },
+    {
+      "id": "leemon-0.5.0-update",
+      "output": "build/Companion_Update_0.5.0.zip",
+      "bytes": 1326645,
+      "sha256": "e64b2f0d3bf75b3a948d54c3dc1e206ba0acdca33d5f668988fa9e6b2e05ea9f",
+      "parts": [
+        "downloads/v0.5.0-update/000.chunk"
+      ]
     }
   ],
-  "exe_sha256": "7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8",
+  "exe_sha256": "9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee",
   "transport_note": "Chunked only for connector payload limits. Data is a local build ZIP and original OFL font, not model weights.",
-  "pack_sha256": "64e0ce6f6d2183505bc6ab2f0e6bfb5c7a2335b061dd31c1e112b9bf54e9988c"
+  "pack_sha256": "68cc24f0da8f1833e7778a4b35448d4892b9a326ea7e8639a7bd82b27e551309"
 }
