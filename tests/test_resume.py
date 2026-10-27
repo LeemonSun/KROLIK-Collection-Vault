@@ -18,6 +18,19 @@ class RecoveryTests(unittest.TestCase):
   self.assertEqual(self.index,resume.make_capsule(self.source))
   with zipfile.ZipFile(io.BytesIO(self.raw)) as z:
    self.assertEqual(set(z.namelist()),{'AGENTS.md','_CAPSULE_INDEX.json'})
+ def test_large_capsule_parts_roundtrip(self):
+  import random,string
+  rng=random.Random(17)
+  (self.source/'large.txt').write_text(''.join(rng.choices(string.ascii_letters+string.digits,k=650000)))
+  index=resume.make_capsule(self.source)
+  self.assertEqual(index['schema_version'],2)
+  encoded=''.join((self.source/name).read_text().strip() for name in index['capsule_parts'])
+  self.assertTrue(all((self.source/name).stat().st_size<500000 for name in index['capsule_parts']))
+  raw=base64.b64decode(encoded)
+  self.assertEqual(resume.sha(raw),index['capsule_sha256'])
+  self.assertEqual(resume.make_capsule(self.source),index)
+  result=resume.restore(self.dest,raw,index['capsule_sha256'])
+  self.assertEqual(set(result['written']),{'AGENTS.md','large.txt'})
  def test_empty_then_idempotent(self):
   self.assertEqual(self.restore()['written'],['AGENTS.md'])
   self.assertEqual(self.restore()['written'],[])

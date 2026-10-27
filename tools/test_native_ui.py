@@ -6,19 +6,22 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser();p.add_argument('--godot',required=True,type=Path);p.add_argument('--xvfb-root',required=True,type=Path);p.add_argument('--output',required=True,type=Path);p.add_argument('--pack',type=Path);p.add_argument('--script',type=Path,default=ROOT/'tests/test_desktop_visual.gd');a=p.parse_args()
  dev=a.xvfb_root.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
+ with socket.socket() as reservation:
+  reservation.bind(('127.0.0.1',0));display_port=reservation.getsockname()[1]
+ display_number=display_port-6000
  env=dict(os.environ,LD_LIBRARY_PATH=str(dev/'usr/lib/x86_64-linux-gnu'))
  link=Path('/usr/bin/xkbcomp');owned=False;server=None
  try:
   if not link.exists():link.symlink_to(dev/'usr/bin/xkbcomp');owned=True
   with (out/'xvfb.log').open('w') as log:
-   server=subprocess.Popen([str(dev/'usr/bin/Xvfb'),':98','-screen','0','1366x768x24','-listen','tcp','-nolisten','unix','-nolisten','local','-ac','-xkbdir',str(dev/'usr/share/X11/xkb')],env=env,stdout=log,stderr=log)
+   server=subprocess.Popen([str(dev/'usr/bin/Xvfb'),':'+str(display_number),'-screen','0','1366x768x24','-listen','tcp','-nolisten','unix','-nolisten','local','-ac','-xkbdir',str(dev/'usr/share/X11/xkb')],env=env,stdout=log,stderr=log)
    for _ in range(50):
     if server.poll() is not None:raise RuntimeError((out/'xvfb.log').read_text())
     try:
-     with socket.create_connection(('127.0.0.1',6098),timeout=.2):break
+     with socket.create_connection(('127.0.0.1',display_port),timeout=.2):break
     except OSError:time.sleep(.1)
    else:raise RuntimeError('Xvfb did not listen')
-   env.update(DISPLAY='127.0.0.1:98',LIBGL_ALWAYS_SOFTWARE='1',COMPANION_VISUAL_OUTPUT=str(out),XDG_DATA_HOME=str(out/'user'),XDG_CONFIG_HOME=str(out/'user'))
+   env.update(DISPLAY='127.0.0.1:'+str(display_number),LIBGL_ALWAYS_SOFTWARE='1',COMPANION_VISUAL_OUTPUT=str(out),XDG_DATA_HOME=str(out/'user'),XDG_CONFIG_HOME=str(out/'user'))
    project_path=a.pack.resolve().parent if a.pack else ROOT
    command=[str(a.godot.resolve()),'--audio-driver','Dummy','--display-driver','x11','--rendering-method','gl_compatibility','--path',str(project_path)]
    if a.pack:command+=['--main-pack',str(a.pack.resolve())]

@@ -20,7 +20,7 @@ def source_entries(root):
  out={}
  for p in sorted(root.rglob('*')):
   rel=p.relative_to(root);name=rel.as_posix()
-  if not p.is_file() or p.is_symlink() or name in GENERATED or any(x in SKIP for x in rel.parts):continue
+  if not p.is_file() or p.is_symlink() or name in GENERATED or name.startswith("recovery/source_capsule.") or any(x in SKIP for x in rel.parts):continue
   if any(x.startswith('.') and x not in {'.gitignore','.gitattributes','.gdignore'} for x in rel.parts):continue
   if p.suffix.lower() in BINARY or p.name.startswith('.env') or p.name=='export_credentials.cfg':continue
   data=p.read_bytes()
@@ -41,6 +41,12 @@ def make_capsule(root):
  target=root/'recovery';target.mkdir(exist_ok=True)
  (target/'source_capsule.b64').write_text(encoded+'\n')
  index={'schema_version':1,'repository':'LeemonSun/KROLIK-Collection-Vault','branch':'main','content_id':content_id,'capsule_sha256':sha(data),'capsule_bytes':len(data),'source_files':len(entries),'capsule_path':'recovery/source_capsule.b64','files':meta}
+ if len(encoded)>500000:
+  parts=[]
+  for offset in range(0,len(encoded),400000):
+   name='recovery/source_capsule.%03d.b64' % (offset//400000)
+   (root/name).write_text(encoded[offset:offset+400000]+'\n');parts.append(name)
+  index['schema_version']=2;index['capsule_parts']=parts
  (target/'index.json').write_text(json.dumps(index,indent=2)+'\n')
  return {k:v for k,v in index.items() if k!='files'}
 

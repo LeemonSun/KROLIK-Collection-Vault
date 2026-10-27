@@ -31,7 +31,7 @@ vm.runInContext(fs.readFileSync(path.join(project,'tools/resume_bridge.js'),'utf
   const target=path.join(root,'AGENTS.md');fs.appendFileSync(target,'\nlocal preserved edit\n');
   const warm=await context.companionResume({root,action:'bootstrap'});assert.equal(warm.warm,true);assert.equal(warm.written,0);assert(warm.status.source_changed.includes('AGENTS.md'));
   const assets=await context.companionResume({root,action:'assets',group:'code'});assert.equal(assets.downloaded.length,0);
-  const saved=await context.companionResume({root,action:'checkpoint'});assert.equal(saved.head,'next-head');assert(created.message.includes('[skip ci]'));assert(storedTree.tree_elements.some(x=>x.path==='recovery/source_capsule.b64'));
+  const saved=await context.companionResume({root,action:'checkpoint'});assert.equal(saved.head,'next-head');assert(created.message.includes('[skip ci]'));assert(storedTree.tree_elements.some(x=>/^recovery\/source_capsule(?:\.\d{3})?\.b64$/.test(x.path)));
   assert(fs.readFileSync(target,'utf8').includes('local preserved edit'));
   head='someone-else';await assert.rejects(()=>context.companionResume({root,action:'checkpoint'}),/Remote changed/);
   console.log('Bridge: cold restore, warm resume, local edits, zero-asset code mode, checkpoint and remote lease passed.');

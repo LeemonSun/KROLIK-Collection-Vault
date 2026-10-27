@@ -35,7 +35,16 @@ globalThis.companionResume = async function(options = {}) {
     let result={written:[],conflicts:[]};
     const warm=local.content_id===index.content_id && await py("print(json.dumps(all((root/name).is_file() for name in p['names'])))",{names:Object.keys(index.files)});
     if(!warm) {
-      const capsule=await file(index.capsule_path,head);
+      let capsule;
+      if(index.capsule_parts){
+        if(index.capsule_parts.length>128)throw Error('Capsule part bounds');
+        const parts=[];
+        for(const part of index.capsule_parts){
+          if(!/^recovery\/source_capsule\.\d{3}\.b64$/.test(part))throw Error('Unsafe capsule part');
+          parts.push((await file(part,head)).trim());
+        }
+        capsule=parts.join('');
+      }else capsule=await file(index.capsule_path,head);
       result=await py(`import base64, hashlib, io, zipfile, tempfile, importlib.util
 raw=base64.b64decode(p['capsule'],validate=False)
 if hashlib.sha256(raw).hexdigest()!=p['index']['capsule_sha256']:raise ValueError('Capsule SHA mismatch')
@@ -102,7 +111,7 @@ print(json.dumps({'verified':p['path']}))`,{...entry,url});
 import resume
 summary=resume.make_capsule(root)
 entries=resume.source_entries(root)
-for name in ['recovery/index.json','recovery/source_capsule.b64']:entries[name]=(root/name).read_bytes()
+for name in ['recovery/index.json',*summary.get('capsule_parts',[summary['capsule_path']])]:entries[name]=(root/name).read_bytes()
 print(json.dumps({'summary':summary,'entries':{name:{'bytes':len(data),'sha':resume.gitsha(data)} for name,data in entries.items()}}))`);
     const commit=await get(api+'/git/commits/'+head);
     const tree=await get(api+'/git/trees/'+commit.tree.sha+'?recursive=1');

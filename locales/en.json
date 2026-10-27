@@ -198,5 +198,6 @@
   "desktop_document_opened": "Created “{name}” and opened it in Notepad.\n{path}",
   "desktop_document_started": "Created “{name}” and sent it to Notepad. Its window is not confirmed yet.\n{path}",
   "desktop_document_saved": "Saved “{name}”, but couldn’t open it in Notepad.\n{path}",
-  "desktop_edit_unavailable": "I can’t edit an existing window yet. Try “create a file in notepad: your text”."
+  "desktop_edit_unavailable": "I can’t edit an existing window yet. Try “create a file in notepad: your text”.",
+  "model_repeated": "I’m repeating myself. That reply didn’t work — please try rephrasing."
 }

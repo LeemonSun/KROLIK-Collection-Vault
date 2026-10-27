@@ -45,6 +45,20 @@ func _run():
 	await frame()
 	check(app.chat_window.visible,"Chat opens separately")
 	var view=app.chat_window.view
+	await create_timer(0.3).timeout
+	var chat_bounds=Rect2(Vector2.ZERO,Vector2(app.chat_window.size))
+	check(view.size==Vector2(app.chat_window.size),"Native first-open view matches viewport")
+	check(chat_bounds.encloses(view.editor.get_global_rect()),"Native first-open input visible")
+	check(chat_bounds.encloses(view.send_button.get_global_rect()),"Native first-open send visible")
+	check(not view.setup_button.visible or view.setup_button.size.x>=140,"Inline installer has a usable hit area")
+	var region_updates=app.desktop_companion.region_updates
+	for i in range(12):view.editor.insert_text_at_caret("x")
+	await create_timer(0.2).timeout
+	check(view.editor.text=="x".repeat(12),"Native typing retained")
+	check(app.desktop_companion.region_updates==region_updates,"Typing does not rewrite region")
+	app.chat_window.close_soft();app.show_chat()
+	await create_timer(0.3).timeout
+	check(app.chat_window.visible and view.modulate.a==1,"Quick reopen stays visible")
 	view.editor.text="Привет! Хочу поговорить."
 	await frame()
 	shot(app.chat_window,"chat")
@@ -150,7 +164,7 @@ func _run():
 	check(solid>1000 and float(missing)/maxi(solid,1)<0.001,"Rig pieces cover at least 99.9% of original opaque silhouette")
 	reference.queue_free();desktop.art.show()
 	desktop.art.set_reduced(false)
-	for clip in ["hello","thinking","talk","success","error","grab","walk"]:
+	for clip in ["hello","thinking","talk","success","error","grab","walk","listen","stretch","settle"]:
 		desktop.art.play(clip,1.5)
 		await create_timer(0.48).timeout
 		await frame()

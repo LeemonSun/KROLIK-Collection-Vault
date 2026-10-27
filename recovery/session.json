@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "app_version": "0.6.0-desktop-preview",
-  "checkpoint_status": "source_in_progress_user_limit_checkpoint",
-  "current_task": "User reported broken white chat window, cursor blinking, Alt-Tab character entry, texture clipping, CPU lag, repetitive model dialogue and passive fake file creation. Global 0.6 code implemented, final native regression/export/delivery pending. Last delivered remains 0.5.",
-  "next_action": "Read RESUME.md. Finish current source tests and new native assertions; fix any errors. Build full 0.6, two-file update from 0.5, deliver native attachments. Model 1.7B unchanged; add bounded repeat retry, do not claim solved intelligence.",
+  "checkpoint_status": "recovery060_verified_overnight_pass_active",
+  "current_task": "0.6 binary recovered exactly from Library; final source fixes reconstructed, shard capsule verified. Continue authorized overnight assistant work in finished blocks, not a final turn.",
+  "next_action": "Read recovery/NIGHT_PASS.md. Benchmark Qwen3.5-2B and whisper, then implement constrained generic app assistance, explicit screen vision, voice input, compact consumer UX; checkpoint each completed block.",
   "read_next": [
-    "RESUME.md"
+    "recovery/NIGHT_PASS.md"
   ],
   "known_limits": [
     "Windows EXE not executed here; X11/PowerShell Linux tests only",
@@ -16,35 +16,19 @@
     "Concept art is internal; public commercial release gate remains blocked"
   ],
   "validation": [
-    "13 existing suites PASS after core changes",
-    "desktop060:27 checks PASS real files, routing, background verifier",
-    "Source native X11:76 checks PASS before latest extra states",
-    "PowerShell helper syntax/21 baseline PASS; extra C# style checks pending"
+    "Recovered 0.6 ZIP exact SHA",
+    "14 existing source test groups PASS after restoration",
+    "89 source X11 regressions PASS incl actual first-open composer and stable region",
+    "12 recovery Python tests plus offline Node bridge tests PASS"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.5.0.zip",
-    "bytes": 53434851,
-    "sha256": "a6d07d15b2d3085dbbefb637fb5ce9cfb67847413422040ce7c52b5d439f2f88",
-    "library_file_id": "libfile_aa492c7431c88191a105c25f22539735",
-    "status": "delivered_native_attachment",
-    "patch": "Companion_Update_0.5.0.zip",
-    "patch_from": "0.4.0",
-    "patch_bytes": 1326645,
-    "patch_sha256": "e64b2f0d3bf75b3a948d54c3dc1e206ba0acdca33d5f668988fa9e6b2e05ea9f",
-    "motion_gif_library_file_id": "libfile_16144d9ee04c81919c334a2752d09a1c"
+    "full": "Companion_Preview_Windows_v0.6.0.zip",
+    "bytes": 53446375,
+    "sha256": "73d4cdece67f22a613076252fdd22d29f0e77d323f0733c207bff15d4968d2f8",
+    "library_file_id": "libfile_29cda571ac3c8191be6b25d254b7838c",
+    "status": "recovered_exact_previously_saved_archive"
   },
   "previous_checkpoint": "ae41660b468c447bfd4055e1b0a4c99577a47563",
-  "shipped_version": "0.5.0-leemon-preview",
-  "shipped_app_pack_sha256": "68cc24f0da8f1833e7778a4b35448d4892b9a326ea7e8639a7bd82b27e551309",
-  "pending_060": [
-    "Chat configured hidden/opaque before attach; full rect after parenting; VSync disabled for secondary windows",
-    "Installed AI lazy wake on chat, inline model install action",
-    "Static precomputed mask rather than updating native region 12Hz; canvas redraw only FX; 30fps panels /60 moving /6 minimized",
-    "Own Win32 tool-window style operation gated on tray support; native Windows acceptance pending",
-    "Real new UTF-8 file creation and typed Notepad launch, passive hallucination guard",
-    "Edge entrance, listen/stretch/settle:11 procedural states",
-    "Runtime file integrity moved to Thread, process liveness polled500ms, idle unload60/120/180s",
-    "Repeat-response guard not yet implemented",
-    "Not yet exported; source distribution launcher/manifest still0.5 intentionally"
-  ]
+  "shipped_version": "0.6.0-desktop-preview",
+  "shipped_app_pack_sha256": "4ae78938baca438bd15b0ef3ee05392df68dcaab60c88c718423c3c356d2788e"
 }

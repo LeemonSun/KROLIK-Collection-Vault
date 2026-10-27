@@ -9,7 +9,7 @@ def main():
  template=a.template.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
  version=json.loads((ROOT/'config/product.json').read_text())['version'].split('-')[0]
  template_sha=hashlib.sha256(template.read_bytes()).hexdigest()
- if template_sha not in [TEMPLATE_SHA,'7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee']:raise SystemExit('Wrong export template hash')
+ if template_sha not in [TEMPLATE_SHA,'7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee','85331073ec1e95bf0f09dc9535c03887627f5bfd5b9484ba1bef58a5d696ecbd']:raise SystemExit('Wrong export template hash')
  preset=ROOT/'export_presets.cfg';original=preset.read_text()
  try:
   preset.write_text(original.replace('custom_template/release=""','custom_template/release="'+template.as_posix()+'"'))
@@ -25,11 +25,12 @@ def main():
  exe=out/'Companion.exe' 
  if not exe.exists() or exe.read_bytes()[:2]!=b'MZ':raise SystemExit('Missing PE executable')
  shutil.copytree(ROOT/'legal',out/'legal',dirs_exist_ok=True)
- (out/'START_HERE.txt').write_text('''LEEMON COMPANION PREVIEW 0.5.0 — WINDOWS x64\n\n1. Unzip the entire folder. Run Companion.exe. No Godot or Python installation required.\n2. The full-body desktop character is the main window. Click: chat. Right click: quick menu. Drag to move.
+ (out/'START_HERE.txt').write_text('''LEEMON COMPANION PREVIEW 0.6.0 — WINDOWS x64\n\n1. Unzip the entire folder. Run Companion.exe. No Godot or Python installation required.\n2. The full-body desktop character is the main window. Click: chat. Right click: quick menu. Drag to move.
    Restore from the taskbar, or click the companion in the Windows notification area to recover it.
-   Right-click its taskbar icon and Close window to exit. Missing art opens a visible recovery panel.\n3. In the app open AI and tools / ИИ и инструменты, then download and install local AI.\n   First setup downloads about 1.86 GB from official sources and needs about 2.5 GB free disk space.\n   After setup, chat/translation works locally. No cloud API key.\n4. The active character is now the Leemon lemon mascot, with one graphite/amber style.
-   Six articulated cutout parts share one source texture. Eight procedural motion states:
-   idle, hello, thinking, talking, success, hesitation, grab and walking.
+   Right-click its taskbar icon and Close window to exit. Missing art opens a visible recovery panel.\n3. Click the character to open chat. Installed AI wakes on the first message.
+   If AI is not installed, use the Install AI button right inside chat.\n   First setup downloads about 1.86 GB from official sources and needs about 2.5 GB free disk space.\n   After setup, chat/translation works locally. No cloud API key.\n4. The active character is now the Leemon lemon mascot, with one graphite/amber style.
+   Six articulated cutout parts share one source texture. Eleven procedural motion states:
+   idle, hello, thinking, talking, success, hesitation, grab, walking, listening, stretch and settling.
    These are authored cutout motions, not finished hand-drawn animation clips or a 3D model.
    Natural commands: "open notepad", "открой проводник", "打开记事本".
    Launches a matching installed Start Menu app or known folder. Only the executable is launched,
@@ -45,7 +46,7 @@ def main():
    Usage page: process RAM and sampled CPU for the app and its owned AI worker.
    Unzip this complete package into an EMPTY folder; run Companion.exe.
    Your existing model and profile stay in AppData. No BAT/CMD patches needed.\n5. Close the app to stop its worker; Stop AI frees model memory; pause stops AI and effects.\n\nThis is a private test build, not the final Steam release. Detailed facial animation, ASR, finished frame clips,\nvisual screen understanding and browser page reading are NOT ready. Movement uses an articulated 2D cutout with authored curves. System voices depend on your Windows installation.\nWindows execution, transparency, speech and capture still need a real user test.\nIf local AI cannot start, install the official Microsoft Visual C++ x64 runtime:\nhttps://aka.ms/vs/17/release/vc_redist.x64.exe\nThis system dependency is not automatically installed in this preview.\nProject source and checkpoint: https://github.com/LeemonSun/KROLIK-Collection-Vault\n\nDownloaded AI data: %APPDATA%/Godot/app_userdata/Companion Foundation/local-ai-v1\nLicenses are included under legal/. Character concept art was AI-generated; no exclusive\ncopyright claim or commercial asset clearance is implied.\n''',encoding='utf-8')
- metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':8,'public_release_ready':False,'windows_executed_here':False}
+ metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':11,'public_release_ready':False,'windows_executed_here':False}
  (out/'BUILD_INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
  archive=out.parent/('Companion_Preview_Windows_v'+version+'.zip')
  with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:

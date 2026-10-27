@@ -10,6 +10,7 @@
 | local_runtime | PASS |
 | search | PASS |
 | persistence | PASS |
+| desktop060 | PASS |
 | leemon_tools | PASS |
 | functional | PASS |
 | animation | PASS |

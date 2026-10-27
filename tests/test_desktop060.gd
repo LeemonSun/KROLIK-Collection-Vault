@@ -13,6 +13,8 @@ class WakeRuntime extends Node:
 	func touch():pass
 	func stop():pass
 class QuietProvider extends Node:
+	var calls=0
+	func submit(_messages,_options):calls+=1;return true
 	func cancel():pass
 func _initialize():_run.call_deferred()
 func check(ok,label):
@@ -59,6 +61,23 @@ func _run():
 	app.local_runtime=runtime;app.provider=provider;app.provider_name=provider_name;app.local_ai_enabled=enabled
 	app.store.data.settings=settings;app.store.save_state()
 	wake.queue_free();quiet.queue_free()
+	var quality=preload("res://src/core/response_quality.gd").new()
+	var transcript=[{"role":"user","content":"норм у тебя каку"},{"role":"assistant","content":"Нормально. Как у тебя?"}]
+	check(quality.repeated("да тоже нормально а у тебя?","Нормально. Как у тебя?",transcript),"Reported small-talk loop detected")
+	check(not quality.repeated("повтори ответ","Нормально. Как у тебя?",transcript),"Explicit repeat allowed")
+	check(not quality.repeated("норм у тебя каку","Нормально. Как у тебя?",transcript),"Repeated question may retain answer")
+	var turns=app.session_turns.duplicate(true)
+	app.session_turns=transcript.duplicate(true)
+	var retry_provider=QuietProvider.new();app.add_child(retry_provider)
+	app.provider=retry_provider;app.provider_name="local_worker";app.local_ai_enabled=false
+	app.submit("да тоже нормально а у тебя?")
+	app._on_answer("Нормально. Как у тебя?")
+	check(retry_provider.calls==2 and app.response_retries==1 and app.state.current=="thinking","One bounded retry")
+	app._on_answer("Нормально. Как у тебя?")
+	check(retry_provider.calls==2 and app.state.current=="idle" and app.messages[-1].text==app.t("model_repeated"),"Repeated retry stops honestly")
+	check(app.session_turns==transcript,"Rejected drafts absent from context")
+	app.cancel();app.provider=provider;app.provider_name=provider_name;app.local_ai_enabled=enabled
+	app.session_turns=turns;retry_provider.queue_free()
 	var verifier=preload("res://src/runtime/local_runtime.gd").new()
 	verifier.base_path="user://bad-runtime-test"
 	verifier.manifest={"platform":OS.get_name(),"model":{"file":"fixture.gguf","bytes":4,"sha256":"a".repeat(64)},"runtime":{"executable":"fixture","sha256":"b".repeat(64),"files":{"fixture":"0".repeat(64)}}}

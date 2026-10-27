@@ -96,7 +96,7 @@ func _ready():
 	editor.caret_blink=true
 	editor.mouse_default_cursor_shape=Control.CURSOR_IBEAM
 	editor.text_changed.connect(func():
-		if is_instance_valid(app.desktop_companion) and app.state.current=="idle" and not app.paused and not app.desktop_companion.reduced_motion:
+		if is_instance_valid(app.desktop_companion) and is_instance_valid(app.desktop_companion.art) and app.state.current=="idle" and not app.paused and not app.desktop_companion.reduced_motion:
 			app.desktop_companion.art.play("listen",1.2))
 	editor.gui_input.connect(_editor_input)
 	layout.add_child(editor)
@@ -110,6 +110,7 @@ func _ready():
 	footer_hint.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	actions.add_child(footer_hint)
 	setup_button=_button('AI',actions,_setup_ai)
+	setup_button.custom_minimum_size.x=144
 	setup_button.add_theme_font_size_override('font_size',11)
 	setup_button.clip_text=true
 	VisualTheme.quiet(setup_button)

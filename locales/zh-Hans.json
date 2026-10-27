@@ -198,5 +198,6 @@
   "desktop_document_opened": "已创建“{name}”并在记事本中打开。\n{path}",
   "desktop_document_started": "已创建“{name}”并交给记事本，但还无法确认窗口。\n{path}",
   "desktop_document_saved": "文件“{name}”已保存，但没能在记事本中打开。\n{path}",
-  "desktop_edit_unavailable": "暂时不能编辑现有窗口。可以说“在记事本中新建文件：你的文本”。"
+  "desktop_edit_unavailable": "暂时不能编辑现有窗口。可以说“在记事本中新建文件：你的文本”。",
+  "model_repeated": "我在重复自己，这次没能好好回答。请换个说法试试。"
 }

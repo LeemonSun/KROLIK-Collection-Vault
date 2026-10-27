@@ -23,8 +23,11 @@ func _ready():
 	min_size=Vector2i(320,280)
 	size=Vector2i(460,460)
 	view=ChatView.new()
+	view.size=Vector2(size)
 	add_child(view)
-	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_fit_view()
+	size_changed.connect(_fit_view)
+	_fit_view.call_deferred()
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,get_window_id())
 	view.close_requested.connect(close_soft)
 	view.settings_requested.connect(func(): app.open_settings("assistant_tools"))
@@ -45,7 +48,9 @@ func open_near(anchor):
 	if transition:transition.kill()
 	view.modulate.a=1.0
 	view.position=Vector2.ZERO
+	_fit_view()
 	show()
+	_fit_view.call_deferred()
 	app.mark_active()
 	if not app.motion.reduced_motion and not app.paused:
 		view.modulate.a=0.2
@@ -65,3 +70,8 @@ func close_soft():
 	transition.tween_property(view,"modulate:a",0.0,0.12)
 	transition.tween_callback(hide)
 	app.mark_active()
+
+func _fit_view():
+	if not is_instance_valid(view):return
+	if is_instance_valid(view.setup_hint):view.setup_hint.visible=size.y>=380 and not app.local_runtime.installed() and not app.local_runtime.downloading
+	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
