@@ -2,32 +2,6 @@
   "schema_version": 1,
   "characters": [
     {
-      "id": "foundation_seed",
-      "name": "Foundation Seed",
-      "status": "temporary_original",
-      "renderer": "procedural_2d",
-      "source": "src/ui/companion.gd",
-      "license_status": "project_original",
-      "animations": [
-        "idle",
-        "thinking",
-        "paused"
-      ]
-    },
-    {
-      "id": "signal_01",
-      "name": "Signal 01 (working label)",
-      "status": "concept_selected",
-      "renderer": "native_cutout_prototype",
-      "design_revision": "v1",
-      "source": "characters/signal_01/art/master_v1.png",
-      "source_sha256": "6d86c3fc204eeb786268d9d853d5b8bf082bcd033729f276974afcae19220b66",
-      "license_status": "ai_generated_preliminary_review_only",
-      "release_approved": false,
-      "animations": [],
-      "runtime_art": "assets/characters/signal_01/body_v1.png"
-    },
-    {
       "id": "leemon_01",
       "name": "Leemon (working name)",
       "status": "user_selected_internal_preview",
@@ -45,14 +19,31 @@
         "success",
         "error",
         "grab",
-        "walk"
+        "walk",
+        "listen",
+        "stretch",
+        "settle",
+        "read",
+        "point",
+        "nod",
+        "shrug",
+        "rest",
+        "wait",
+        "scan",
+        "present",
+        "agree",
+        "disagree",
+        "celebrate",
+        "curious",
+        "sleep",
+        "turn",
+        "salute"
       ],
       "animation_type": "authored_procedural_curves",
       "runtime_art": "assets/characters/leemon_01/master_v1.png"
     }
   ],
   "concepts": [
-    "signal_01",
     "leemon_01"
   ],
   "final_character": null,

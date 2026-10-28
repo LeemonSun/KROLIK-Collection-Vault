@@ -30,7 +30,7 @@ func _run():
 	check(d.configure(catalog), "Production catalog accepted")
 	check(d.summary().planned_events == 113, "113 distinct production scenarios")
 	check(d.summary().installed_clips == 0, "Plans never count as finished clips")
-	check(d.request("locomotion.red_dash", 0).reason == "asset_missing", "No fake movement without clip")
+	check(d.request("locomotion.amber_dash", 0).reason == "asset_missing", "No fake movement without clip")
 	var empty_pack = JSON.parse_string(FileAccess.get_file_as_string("res://manifests/animation_pack.json"))
 	check(not d.install_bundle(empty_pack).ok, "Unproduced rig cannot be installed")
 	var fixture_root = "user://animation-fixture-%s/" % Time.get_ticks_usec()
@@ -42,11 +42,11 @@ func _run():
 	_fixture_animation(method_path, Animation.TYPE_METHOD)
 	_fixture_animation(empty_path, -1)
 	check(d.configure(catalog, fixture_root), "Isolated fixture root")
-	var events_to_install = ["idle.relaxed", "work.progress", "work.success_proud", "interaction.pickup", "emotion.smile_warm", "transition.fade", "locomotion.red_dash"]
+	var events_to_install = ["idle.relaxed", "work.progress", "work.success_proud", "interaction.pickup", "emotion.smile_warm", "transition.fade", "locomotion.amber_dash"]
 	var quality = {}
 	for key in Director.QUALITY_KEYS:
 		quality[key] = true
-	var bundle = {"schema_version": 1, "character_id": "signal_01", "design_revision": "v1", "rig_revision": "signal_01_rig_v1", "review_status": "approved", "clips": []}
+	var bundle = {"schema_version": 1, "character_id": "leemon_01", "design_revision": "v1", "rig_revision": "leemon_01_rig_v1", "review_status": "approved", "clips": []}
 	for id in events_to_install:
 		bundle.clips.append({"id": d.events[id].clip_id, "resource": normal_path, "sha256": FileAccess.get_sha256(normal_path), "review_status": "approved", "rights_status": "owned", "quality": quality.duplicate()})
 	var bad = bundle.duplicate(true)
@@ -59,7 +59,7 @@ func _run():
 	bad.design_revision = "v0"
 	check(d.install_bundle(bad).reason == "identity_mismatch", "Design revision bound")
 	bad = bundle.duplicate(true)
-	bad.clips[0].quality.hair = false
+	bad.clips[0].quality.secondary_motion = false
 	check(d.install_bundle(bad).reason == "quality_missing", "Hair quality cannot be skipped")
 	bad = bundle.duplicate(true)
 	bad.clips[0].rights_status = "unknown"
@@ -102,7 +102,7 @@ func _run():
 	check(not d.tick(-1) and d.active.size() == 1, "Negative tick cannot corrupt state")
 	check(d.tick(1900) and d.active.is_empty(), "Success finishes")
 	d.set_reduced_motion(true)
-	var soft = d.request("locomotion.red_dash", 2000)
+	var soft = d.request("locomotion.amber_dash", 2000)
 	check(soft.ok and soft.event_id == "transition.fade", "Reduced motion resolves reviewed alternative")
 	d.set_paused(true)
 	check(d.active.is_empty(), "Pause cancels all channels")

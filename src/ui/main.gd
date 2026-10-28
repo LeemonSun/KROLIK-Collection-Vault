@@ -1,7 +1,7 @@
 extends Control
 const ChatView = preload("res://src/ui/chat_view.gd")
 const Handle = preload("res://src/ui/window_handle.gd")
-const Surface = preload("res://src/ui/signal_surface.gd")
+const Surface = preload("res://src/ui/leemon_surface.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 var page = "talk"
 var content
@@ -238,12 +238,12 @@ func _build_sidebar(parent):
 	var space=Control.new()
 	space.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	sidebar.add_child(space)
-	_label(App.t("signal_tagline"),sidebar,12,true)
+	_label(App.t("leemon_tagline"),sidebar,12,true)
 	_label(App.t("offline"),sidebar,11,true)
 
 func _build_character():
 	_label("Leemon",content,26)
-	_label(App.t("signal_tagline"),content,14,true)
+	_label(App.t("leemon_tagline"),content,14,true)
 	var art=load("res://assets/characters/leemon_01/master_v1.png")
 	if art is Texture2D:
 		var preview=TextureRect.new()

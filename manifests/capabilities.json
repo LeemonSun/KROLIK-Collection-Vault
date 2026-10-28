@@ -95,6 +95,19 @@
       "network": "none",
       "reasoning": false,
       "windows_test": "pending"
+    },
+    {
+      "id": "bounded_chat_queue",
+      "status": "implemented_three_waiting_text_requests",
+      "network": "none",
+      "verification": "fake_provider_fifo_cancel_failure_tests"
+    },
+    {
+      "id": "office_file_adapters",
+      "status": "implemented_bounded_docx_xlsx_csv_tsv",
+      "network": "none",
+      "windows_test": "pending",
+      "limits": "selected_file<=1MiB; DOCX one text run; XLSX existing cell as text, no formula workbooks; review+backup+verified commit"
     }
   ]
 }

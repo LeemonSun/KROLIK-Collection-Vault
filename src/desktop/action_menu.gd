@@ -1,7 +1,7 @@
 extends Window
 signal action(id)
 const V=preload('res://src/ui/visual_theme.gd')
-const Surface=preload('res://src/ui/signal_surface.gd')
+const Surface=preload('res://src/ui/leemon_surface.gd')
 var buttons=[]
 var app
 var caption

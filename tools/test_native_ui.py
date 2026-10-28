@@ -10,11 +10,13 @@ def main():
   reservation.bind(('127.0.0.1',0));display_port=reservation.getsockname()[1]
  display_number=display_port-6000
  env=dict(os.environ,LD_LIBRARY_PATH=str(dev/'usr/lib/x86_64-linux-gnu'))
+ xkb_dir=dev/'usr/share/X11/xkb'
+ if not xkb_dir.is_dir():xkb_dir=Path('/usr/share/X11/xkb')
  link=Path('/usr/bin/xkbcomp');owned=False;server=None
  try:
   if not link.exists():link.symlink_to(dev/'usr/bin/xkbcomp');owned=True
   with (out/'xvfb.log').open('w') as log:
-   server=subprocess.Popen([str(dev/'usr/bin/Xvfb'),':'+str(display_number),'-screen','0','1366x768x24','-listen','tcp','-nolisten','unix','-nolisten','local','-ac','-xkbdir',str(dev/'usr/share/X11/xkb')],env=env,stdout=log,stderr=log)
+   server=subprocess.Popen([str(dev/'usr/bin/Xvfb'),':'+str(display_number),'-screen','0','1366x768x24','-listen','tcp','-nolisten','unix','-nolisten','local','-ac','-xkbdir',str(xkb_dir)],env=env,stdout=log,stderr=log)
    for _ in range(50):
     if server.poll() is not None:raise RuntimeError((out/'xvfb.log').read_text())
     try:

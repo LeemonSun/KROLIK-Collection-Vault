@@ -6,7 +6,7 @@ const LAYER = Color('#2b2f32')
 const TEXT = Color('#f3f0e5')
 const MUTED = Color('#adafa6')
 const RED = Color('#f5c64f')
-const WINE = Color('#6a5427')
+const AMBER_DARK = Color('#6a5427')
 static func box(color, radius=10, margin=12):
 	var style=StyleBoxFlat.new()
 	style.bg_color=color
@@ -28,7 +28,7 @@ static func make():
 	for type in ['Button','OptionButton']:
 		value.set_stylebox('normal',type,box(LAYER))
 		value.set_stylebox('hover',type,box(Color('#3e3b30')))
-		value.set_stylebox('pressed',type,box(WINE))
+		value.set_stylebox('pressed',type,box(AMBER_DARK))
 		value.set_stylebox('disabled',type,box(Color('#242729')))
 		var focus=box(Color.TRANSPARENT)
 		focus.set_border_width_all(1)
@@ -44,10 +44,10 @@ static func make():
 		focus.border_color=RED
 		value.set_stylebox('focus',type,focus)
 		value.set_color('caret_color',type,RED)
-		value.set_color('selection_color',type,WINE)
+		value.set_color('selection_color',type,AMBER_DARK)
 		value.set_color('font_placeholder_color',type,Color('#999e95'))
 	value.set_stylebox('panel','PopupMenu',box(PANEL,12))
-	value.set_stylebox('hover','PopupMenu',box(WINE,6,8))
+	value.set_stylebox('hover','PopupMenu',box(AMBER_DARK,6,8))
 	value.set_constant('v_separation','PopupMenu',12)
 	value.set_stylebox('scroll','VScrollBar',box(Color('#1b1f21'),3,0))
 	value.set_stylebox('grabber','VScrollBar',box(Color('#62675b'),3,0))
@@ -58,7 +58,7 @@ static func make():
 	value.set_color('default_color','RichTextLabel',TEXT)
 	return value
 static func primary(button):
-	button.add_theme_stylebox_override('normal',box(WINE,10))
+	button.add_theme_stylebox_override('normal',box(AMBER_DARK,10))
 	button.add_theme_stylebox_override('hover',box(Color('#8b6d2c'),10))
 	button.add_theme_stylebox_override('pressed',box(Color('#a38237'),10))
 static func quiet(button):

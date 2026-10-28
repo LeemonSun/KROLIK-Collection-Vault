@@ -291,7 +291,7 @@ func _process(delta):
 		phase+=delta
 		var progress=clampf(phase/maxf(0.1,walk_duration),0,1)
 		position=bounded(Vector2i(Vector2(original_position).lerp(Vector2(target_position),smoothstep(0,1,progress))))
-		if progress>=1.0:effect_kind="";art.play("idle")
+		if progress>=1.0:effect_kind="";art.play("settle",0.65)
 	if overlay_pending and app.desktop_actions.pid<=0:
 		overlay_pending=false
 		if OS.get_name()=="Windows" and is_instance_valid(tray):app.desktop_actions.request_overlay(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,host.get_window_id()))
@@ -448,7 +448,8 @@ func focus_target(identity):
 	return park_near(anchor)
 func park_near(anchor):
 	if not auto_move or dragging or app.paused or reduced_motion or not visible:return false
-	var bounds=DisplayServer.screen_get_usable_rect(current_screen)
+	var target_screen=DisplayServer.get_screen_from_rect(anchor)
+	var bounds=DisplayServer.screen_get_usable_rect(target_screen if target_screen>=0 else current_screen)
 	var destination=Behavior.beside(anchor,bounds,size,position)
 	return walk_to(destination)
 func return_home():

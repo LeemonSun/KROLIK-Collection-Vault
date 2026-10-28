@@ -19,4 +19,5 @@ static func activity(app):
 	if not app.window_read_mode.is_empty():return "read"
 	if not app.goal_mode.is_empty() or not app.queued_chat_text.is_empty() or app.state.current=="thinking":return "thinking"
 	if app.state.current=="executing":return "scan"
+	if not app.file_activity.is_empty():return app.file_activity
 	return "idle"

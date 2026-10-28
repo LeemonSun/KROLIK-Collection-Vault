@@ -16,7 +16,6 @@ Never commit API keys, user files, screen captures, model weights or unreviewed 
 Use manifest status fields honestly. Public release gate must fail while required release evidence is missing.
 
 
-Read characters/signal_01/README.md before modifying the character. Main display is full body without a frame, never a portrait window replacement. Pixel/hybrid direction remains an option, not approved final art. The animation catalog is planned; never count events or fixtures as completed clips. Reviewed internal AI concept references may be stored privately with provenance and release_approved=false. This is not commercial asset clearance. Keep browser handoff distinct from page reading and reasoning.
 
 Latest user decision: defer pixel art; continue the current character. v0.3 adds a private local Windows preview; it is not a cleared Steam release. Keep managed text inference, screenshot capture, visual reasoning and browser reading separate. Never commit downloaded model weights; local build archives may be stored as reviewed private preview artifacts under downloads/.
 
@@ -24,4 +23,5 @@ Current user decision (27 Oct): ONE polished visual style only; no theme switchi
 
 Latest feedback: conversational correctness before decorative breadth. SelfKnowledge must describe actual app state, not invented memory/online facts. Keep ordinary tasks with the LLM. Preserve one visual style. Consolidate updates; do not send a new manual patch for every remark. Native files must be delivered as attachments because sandbox archive links failed.
 
-Latest explicit user decision: switch the active companion to the new Leemon lemon mascot; preserve old Signal files as archived references. One graphite/amber style. Reuse one master texture for the articulated 2D rig; do not generate each motion independently. Concept sheet poses are not animation frames.
+
+Only Leemon is active. Do not restore retired characters or alternate appearances. One graphite/amber style, one shared master texture. Git history and mandatory license notices must remain intact. Local source retirement is recorded in recovery/retired_paths.json; validate dependencies before removing files.

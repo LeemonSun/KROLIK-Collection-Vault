@@ -314,13 +314,6 @@
   "src/providers/unconfigured_provider.gd.uid": [
     "73be2fd6d4ffd4dacba501fad3414cb4e0c5e753"
   ],
-  "src/ui/companion.gd": [
-    "5e06485764b2109e1fd4d36c7dd0ed88adbc66cf",
-    "d2626d6e1a4f8af1c6a808dac2d326d92b1d2071"
-  ],
-  "src/ui/companion.gd.uid": [
-    "39154c4c1ebfa0bdf8c2f06fc5b49747ebf985c3"
-  ],
   "src/ui/main.gd": [
     "8e0423a369db48003d30c5d49b98adeafed2acb3",
     "74c5bbf6651af744d4ddf86cf4dae6cac6a6d122",
@@ -378,66 +371,11 @@
     "d6063b32130dfe9009efe1e392a451644634fcf1",
     "79304548a9fa4945e9c80f319e6b8ccb4c29c45c"
   ],
-  "assets/characters/signal_01/body_v1.png": [
-    "9f972b6b2ddbcd061da5fb32be1cbd9bbe6e58f0"
-  ],
-  "assets/characters/signal_01/body_v1.png.import": [
-    "1db40ce435b1c052ebbf0d42401638f2ecb28922"
-  ],
   "assets/fonts/NotoSansCJKsc-Regular.otf.import": [
     "bf15d566f3d272e094c0c77e43e2423c85be6157"
   ],
   "assets/fonts/provenance.json": [
     "324c7f7c6bea79b8f6b205915d1c079cb74f1209"
-  ],
-  "characters/signal_01/.gdignore": [
-    "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
-  ],
-  "characters/signal_01/README.md": [
-    "3cbc0fce8cc7aa7953669d2ed1e16724582b64dd"
-  ],
-  "characters/signal_01/art/expressions_draft_v1.png": [
-    "ac71185e348ee22ae38496179266367d309e4253"
-  ],
-  "characters/signal_01/art/master_v1.png": [
-    "55fd77d1bc5e36e40a6270808bc7f0825930bbf6"
-  ],
-  "characters/signal_01/art/red_dash_storyboard_v1.png": [
-    "bc45e8081eef4f62217bcbed53ef6ee8fb7b4f4a"
-  ],
-  "characters/signal_01/art/style_study_v1.png": [
-    "85e92b33f1bf7f30b1094a47b867312e63adcdda"
-  ],
-  "characters/signal_01/art/turnaround_draft_v1.png": [
-    "44aa56bd980eaa4a03bdad60abcca9f38ea234ef"
-  ],
-  "characters/signal_01/design.json": [
-    "c1905ce92d4147561175950a7f4a1284404b0f6e"
-  ],
-  "characters/signal_01/production/ANIMATION_BRIEF.md": [
-    "06f3e0710cffa39f3e26723cd91b9a1bd5ef3fa7"
-  ],
-  "characters/signal_01/production/ART_DIRECTION.md": [
-    "c43204ca414fa3cdc5fc74f0724ed978ac3e3ee9",
-    "74137213bb9ca0c53086c8191db1b03c7c9d2fe7"
-  ],
-  "characters/signal_01/production/red_dash_sequence.json": [
-    "010fe590967715f35dc11e090682aa27ef379820"
-  ],
-  "characters/signal_01/prompts/GENERATION_RECORD.md": [
-    "109ed0401cc2476eb43754e510401329b7afb86c"
-  ],
-  "characters/signal_01/prompts/body_v1.txt": [
-    "cdaf102d21945079c6564f78fcc2354439050f7e"
-  ],
-  "characters/signal_01/prompts/style_study_v1.txt": [
-    "fd5c02532082d8f0f65ca32812b18ddb7ea77d4b"
-  ],
-  "characters/signal_01/provenance.json": [
-    "955b76a9b3ce07eb15dbff0d3c7ee2cbc416fcd9"
-  ],
-  "characters/signal_01/reference/concept_v0.png": [
-    "a69d6f8b59e2358edb202fd6667cbc8528221b6b"
   ],
   "config/local_worker.json": [
     "e134346d478ac5191b260fa82f2b52788694ade4"
@@ -586,9 +524,6 @@
   ],
   "legal/ASSET_POLICY.md": [
     "0079ac95e50e15fa02bea46d8ca8c0ec1e09ff7d"
-  ],
-  "legal/CHARACTER_REVIEW_2026-10-27.md": [
-    "660cb53592e97a9390565d377006256f54f97456"
   ],
   "legal/upstream/Godot-COPYRIGHT.txt": [
     "758917ae4c861384e9596e2271534a4534859d87"
@@ -856,13 +791,6 @@
   "tools/test_native_ui.py": [
     "a21949866e03d147f08f4bfac08435131f6d2e02"
   ],
-  "assets/characters/signal_01/idle.gdshader": [
-    "30655dbd95a61bb2fb98b23d17f67d055f26613f",
-    "985af1d4370514b3d89e17aa6f0595e4381447fc"
-  ],
-  "assets/characters/signal_01/idle.gdshader.uid": [
-    "4865f5ae8d3ffe8485b8d9afab73581d9968b4b0"
-  ],
   "assets/ui/character.svg": [
     "89997ff2ea638607b4b476d530ca738153638837"
   ],
@@ -947,9 +875,6 @@
   "assets/ui/settings.svg.import": [
     "b8cf87e9c4861117c3d52070b54983b91fa94da4"
   ],
-  "docs/VISUAL_PASS_033.md": [
-    "c3ec6ac1f1acc57fcfb918623bb8c875e978afed"
-  ],
   "downloads/v0.3.3-patch/000.chunk": [
     "a0aaf58906c054bba219a03a5088c2a335a33ea1"
   ],
@@ -958,12 +883,6 @@
   ],
   "src/desktop/action_menu.gd.uid": [
     "7f6d45874493b93e35c2b223b1bfe36047d2138f"
-  ],
-  "src/ui/signal_surface.gd": [
-    "83947adaf35ea38b5048684f73ad2d3dea2416ac"
-  ],
-  "src/ui/signal_surface.gd.uid": [
-    "4fda98e3ad8bf9cd63e6077bb60b01813752a2f1"
   ],
   "src/ui/window_handle.gd": [
     "e97dddd835b44e2c8dd7a1d5323369e4dae55fc4"

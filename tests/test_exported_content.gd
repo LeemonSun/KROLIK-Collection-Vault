@@ -6,14 +6,13 @@ func check(ok,text):
 	checks+=1
 	if not ok:failures+=1;push_error(text)
 func _run():
-	check(ProjectSettings.get_setting("application/config/version")=="0.11.0-desktop-preview","Correct product version inside PCK")
+	check(ProjectSettings.get_setting("application/config/version")=="0.12.0-desktop-preview","Correct product version inside PCK")
 	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
 	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
 	check(FileAccess.get_sha256("res://native/accessibility_bridge.ps1")==OS.get_environment("COMPANION_ACCESS_HELPER_SHA"),"Exact scoped UIA/selected-state helper exported")
 	var migration=JSON.parse_string(FileAccess.get_file_as_string("res://native/legacy_patch_files.json"))
 	check(migration is Dictionary and migration.get("entries",[]).size()==12,"Exact migration inventory exported")
 	check(ResourceLoader.exists("res://assets/characters/leemon_01/master_v1.png") and load("res://assets/characters/leemon_01/master_v1.png").get_size()==Vector2(1199,1312),"Leemon asset exported")
-	check(not ResourceLoader.exists("res://assets/characters/signal_01/body_v1.png"),"Obsolete girl texture excluded from delivery")
 	check(preload("res://src/animation/leemon_rig.gd").CLIPS.size()==26,"All26procedural states shipped")
 	check(preload("res://src/core/fact_memory.gd").MAX_FACTS==1024,"Compact fact storage shipped")
 	check("ini" in preload("res://src/tools/text_patch.gd").EXTENSIONS,"Selected text/config review shipped")

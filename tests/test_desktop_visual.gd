@@ -237,6 +237,29 @@ func _run():
 	editor.restore();check(not editor.apply_button.disabled,"Restore also needs an explicit review")
 	editor.apply();check(FileAccess.get_file_as_string(path).contains("FPS=60"),"Native restore returns original configuration")
 	editor.dismiss();check(editor.engine.pending.is_empty(),"Closing review revokes pending write")
+	var table_path=path.get_base_dir().path_join("synthetic-table.csv")
+	var table_file=FileAccess.open(table_path,FileAccess.WRITE);table_file.store_string("name,value\nЛимон,старое\n");table_file.close()
+	editor.open_path(table_path);editor.table_row.value=2;editor.table_column.value=2;editor.read_cell()
+	check(editor.find_edit.text=="старое" and editor.apply_button.disabled,"Native selected-cell reading does not grant write permission")
+	editor.replace_edit.text="новое";editor.review();await frame()
+	check(not editor.apply_button.disabled and app.file_activity=="wait","Table review produces real waiting state")
+	for locale in ["ru","en","zh-Hans"]:
+		app.l10n.set_locale(locale)
+		var localized_editor=preload("res://src/ui/file_edit_window.gd").new();root.add_child(localized_editor);localized_editor.open_path(table_path)
+		for dimensions in [Vector2i(400,420),Vector2i(640,500)]:
+			localized_editor.size=dimensions;await frame()
+			check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(localized_editor.apply_button.get_global_rect()),"Table approval reachable "+locale+str(dimensions))
+		localized_editor.dismiss();localized_editor.queue_free()
+	shot(editor,"table-review-012")
+	editor.apply();check(FileAccess.get_file_as_string(table_path).contains("новое") and app.task_event=="file_verified","Native table commit reports success only after verified write")
+	editor.dismiss();app.l10n.set_locale("ru")
+	app.application_access.target={};app.cancel()
+	app.state.transition("thinking");app.pending_user_text="synthetic current reply"
+	app.queue_chat("Explain gravity");view.refresh();await frame()
+	check(view.queue_row.visible and view.queue_label.text.contains("Explain gravity"),"Visible queue shows the real next request")
+	shot(app.chat_window,"queue-012")
+	view.queue_clear.pressed.emit();check(app.chat_queue.items.is_empty() and app.state.current=="thinking","Queue clear preserves the active reply")
+	app.cancel()
 	editor.queue_free()
 	# Actual clipboard command with an injected owned provider and synthetic OS clipboard.
 	var original_provider=app.provider

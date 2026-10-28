@@ -4,7 +4,7 @@ signal animation_requested(layer, event_id, animation)
 signal animation_stopped(layer, event_id)
 
 const LAYERS = ["body", "face", "gaze"]
-const QUALITY_KEYS = ["identity", "silhouette", "contacts", "hair", "face", "transitions", "low_fps"]
+const QUALITY_KEYS = ["identity", "silhouette", "contacts", "secondary_motion", "face", "transitions", "low_fps"]
 var events = {}
 var clips = {}
 var active = {}
@@ -15,9 +15,9 @@ var last_time_ms = -1
 var character_id = ""
 var design_revision = ""
 var expected_rig_revision = ""
-var allowed_resource_root = "res://assets/characters/signal_01/runtime/"
+var allowed_resource_root = "res://assets/characters/leemon_01/runtime/"
 
-func configure(catalog, resource_root = "res://assets/characters/signal_01/runtime/"):
+func configure(catalog, resource_root = "res://assets/characters/leemon_01/runtime/"):
 	if not catalog is Dictionary or catalog.get("schema_version") != 1:
 		return false
 	if not catalog.get("events") is Array or str(catalog.get("character_id", "")).is_empty() or str(catalog.get("design_revision", "")).is_empty() or str(catalog.get("expected_rig_revision", "")).is_empty():

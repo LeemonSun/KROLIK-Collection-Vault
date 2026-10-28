@@ -37,6 +37,11 @@ var paused = false
 var session_turns = []
 var pending_user_text = ""
 var queued_chat_text = ""
+var chat_queue=preload("res://src/core/chat_queue.gd").new()
+var chat_started_ms=0
+var file_activity=""
+var task_event=""
+var last_task_stage=""
 var local_runtime
 var chat_window
 var speech_bubble
@@ -148,6 +153,8 @@ func _ready():
 	add_child(local_runtime)
 	local_runtime.status_changed.connect(_runtime_changed)
 	local_runtime.ready_for_chat.connect(_runtime_ready)
+	changed.connect(_schedule_queued_chat)
+	changed.connect(_task_stage_changed)
 	bundle_catalog.changed.connect(_bundle_changed)
 	_bundle_changed()
 	if "--test-mode" not in OS.get_cmdline_user_args() and local_runtime.installed():
@@ -168,8 +175,9 @@ func _process(_delta):
 	var chat_visible=is_instance_valid(chat_window) and chat_window.visible
 	var character_visible=is_instance_valid(desktop_companion) and desktop_companion.visible
 	var moving=character_visible and (desktop_companion.dragging or desktop_companion.effect_time>0 or desktop_companion.effect_kind in ["walk","edge_enter"])
+	var blending=character_visible and is_instance_valid(desktop_companion.art) and not desktop_companion.reduced_motion and desktop_companion.art.blend_time<0.18
 	diagnostics.active=panel_visible and control_panel.page=="diagnostics"
-	var limit=60 if moving else (30 if chat_visible or panel_visible else idle_fps)
+	var limit=60 if moving or blending else (30 if chat_visible or panel_visible else idle_fps)
 	if not character_visible and not chat_visible and not panel_visible:limit=6
 	if is_instance_valid(speech_input) and speech_input.busy():limit=maxi(limit,30)
 	var interacting=moving or chat_visible or panel_visible
@@ -286,8 +294,34 @@ func submit(text):
 		return
 	_submit_model_text(command.text)
 
+func chat_busy():
+	return state.current!="idle" or not queued_chat_text.is_empty() or speech_input.busy() or application_access.pid>0 or not goal_mode.is_empty() or not window_read_mode.is_empty()
+
+func queue_chat(text):
+	# Deferred work must never inherit a selected window or trigger an OS action.
+	if paused or screen_mode or translation_mode or speech_input.busy() or not goal_mode.is_empty() or not window_read_mode.is_empty() or application_access.pid>0 or not application_access.target.is_empty():return false
+	if not ((state.current=="thinking" and not pending_user_text.is_empty()) or not queued_chat_text.is_empty()):return false
+	if not chat_queue.push(text,router):return false
+	changed.emit();return true
+
+func _schedule_queued_chat():
+	if paused or chat_busy() or chat_queue.items.is_empty():return
+	_drain_queued_chat.call_deferred(chat_queue.revision)
+
+func _drain_queued_chat(revision):
+	if paused or chat_busy() or revision!=chat_queue.revision:return
+	if not application_access.target.is_empty() or screen_mode or translation_mode:
+		chat_queue.clear();changed.emit();return
+	var text=chat_queue.take(revision)
+	if text.is_empty():return
+	if router.route(text).get("kind")!="chat":chat_queue.clear();changed.emit();return
+	submit(text)
+	# Also drain deterministic self-knowledge replies which do not emit changed.
+	_schedule_queued_chat()
+
 func _submit_model_text(text,retry=false):
-	if not retry:response_retries=0
+	if not retry:response_retries=0;chat_started_ms=Time.get_ticks_msec()
+	pending_user_text=text
 	state.transition("thinking")
 	if local_runtime:
 		local_runtime.generation_busy = true
@@ -468,6 +502,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	chat_queue.clear()
 	if not window_read_mode.is_empty():
 		_window_read_error(key);return
 	if not goal_mode.is_empty():
@@ -487,6 +522,8 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	chat_queue.clear();chat_started_ms=0
+	file_activity="";task_event=""
 	if is_instance_valid(file_editor):file_editor.revoke()
 	if is_instance_valid(file_picker):file_picker.hide()
 	if is_instance_valid(speech_bubble):speech_bubble.dismiss()
@@ -634,6 +671,25 @@ func say_companion(text):
 	if not is_instance_valid(speech_bubble):
 		speech_bubble=preload("res://src/desktop/speech_bubble.gd").new();add_child(speech_bubble)
 	return speech_bubble.say(text,Rect2i(desktop_companion.position,desktop_companion.size))
+
+func report_task(event):
+	task_event=event
+	# Task events are deterministic UI text; no extra inference or chat history.
+	say_companion(t("task_"+event));changed.emit()
+
+func _task_stage_changed():
+	var stage=""
+	if not goal_mode.is_empty():stage="goal_"+goal_mode
+	elif not window_read_mode.is_empty():stage="read_"+window_read_mode
+	elif not queued_chat_text.is_empty():stage="model_loading"
+	elif state.current=="thinking" and not pending_user_text.is_empty():stage="reply"
+	if stage==last_task_stage:return
+	last_task_stage=stage
+	if stage in ["model_loading","reply"]:
+		task_event=stage;say_companion(t("task_"+stage))
+	elif not stage.is_empty():
+		var key="goal_status_"+goal_mode if not goal_mode.is_empty() else "window_read_status_"+window_read_mode
+		say_companion(t(key))
 
 func show_chat():
 	if DisplayServer.get_name() == "headless":

@@ -79,27 +79,9 @@ def validate():
     for item in registry.get("components", []):
         if item.get("license_file") and not (ROOT / item["license_file"]).is_file():
             errors.append(f"Missing license file for {item['id']}")
-    provenance = parsed.get("characters/signal_01/provenance.json", {})
-    listed = set()
-    for asset in provenance.get("assets", []):
-        rel = asset.get("path", "")
-        path = ROOT / "characters/signal_01" / rel
-        if not rel or ".." in Path(rel).parts or not path.is_file():
-            errors.append(f"Character asset missing or invalid: {rel}")
-            continue
-        listed.add(path.resolve())
-        if hashlib.sha256(path.read_bytes()).hexdigest() != asset.get("sha256"):
-            errors.append(f"Character asset hash mismatch: {rel}")
-        if asset.get("review_status") not in {"reviewed_for_internal_reference_only", "approved"}:
-            errors.append(f"Character asset not reviewed: {rel}")
-    for path in (ROOT / "characters").rglob("*.png"):
-        if path.resolve() not in listed:
-            errors.append(f"Character PNG without provenance: {path.relative_to(ROOT)}")
-    for asset in provenance.get("runtime_assets", []):
-        rel = asset.get("project_path", "")
-        path = ROOT / rel
-        if not rel or ".." in Path(rel).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != asset.get("sha256"):
-            errors.append(f"Runtime character hash mismatch: {rel}")
+    characters = parsed.get("manifests/characters.json", {})
+    if [item.get("id") for item in characters.get("characters", [])] != ["leemon_01"]:
+        errors.append("Only Leemon may be registered")
     leemon = parsed.get("characters/leemon_01/provenance.json", {})
     leemon_path = ROOT / leemon.get("runtime_asset", "missing")
     if not leemon_path.is_file() or hashlib.sha256(leemon_path.read_bytes()).hexdigest() != leemon.get("runtime_asset_sha256"):
@@ -118,10 +100,6 @@ def validate():
     for part in [worker.get("runtime", {}), worker.get("model", {})]:
         if not str(part.get("url", "")).startswith(("https://github.com/ggml-org/llama.cpp/releases/download/b11901/", "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/f6d5376be1edb4d416d56da11e5397a961aca8ae/")) or len(str(part.get("sha256", ""))) != 64:
             errors.append("Local package not pinned to reviewed source/hash")
-    design = parsed.get("characters/signal_01/design.json", {})
-    master = ROOT / "characters/signal_01" / design.get("source_of_truth", "missing")
-    if not master.is_file() or hashlib.sha256(master.read_bytes()).hexdigest() != design.get("master_sha256"):
-        errors.append("Canonical reference hash does not match design")
     catalog = parsed.get("manifests/animation_catalog.json", {})
     events = catalog.get("events", [])
     event_ids = [event.get("id") for event in events]

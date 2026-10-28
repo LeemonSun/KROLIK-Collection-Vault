@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "assets/characters/signal_01/body_v1.png",
+      "gitsha": "9f972b6b2ddbcd061da5fb32be1cbd9bbe6e58f0"
+    },
+    {
+      "path": "assets/characters/signal_01/body_v1.png.import",
+      "gitsha": "1db40ce435b1c052ebbf0d42401638f2ecb28922"
+    },
+    {
+      "path": "assets/characters/signal_01/idle.gdshader",
+      "gitsha": "985af1d4370514b3d89e17aa6f0595e4381447fc"
+    },
+    {
+      "path": "assets/characters/signal_01/idle.gdshader.uid",
+      "gitsha": "4865f5ae8d3ffe8485b8d9afab73581d9968b4b0"
+    },
+    {
+      "path": "assets/characters/signal_01/tmpkbe6wlue",
+      "gitsha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "characters/signal_01/.gdignore",
+      "gitsha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "characters/signal_01/README.md",
+      "gitsha": "3cbc0fce8cc7aa7953669d2ed1e16724582b64dd"
+    },
+    {
+      "path": "characters/signal_01/art/expressions_draft_v1.png",
+      "gitsha": "ac71185e348ee22ae38496179266367d309e4253"
+    },
+    {
+      "path": "characters/signal_01/art/master_v1.png",
+      "gitsha": "55fd77d1bc5e36e40a6270808bc7f0825930bbf6"
+    },
+    {
+      "path": "characters/signal_01/art/red_dash_storyboard_v1.png",
+      "gitsha": "bc45e8081eef4f62217bcbed53ef6ee8fb7b4f4a"
+    },
+    {
+      "path": "characters/signal_01/art/style_study_v1.png",
+      "gitsha": "85e92b33f1bf7f30b1094a47b867312e63adcdda"
+    },
+    {
+      "path": "characters/signal_01/art/tmpchrc84av",
+      "gitsha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "characters/signal_01/art/turnaround_draft_v1.png",
+      "gitsha": "44aa56bd980eaa4a03bdad60abcca9f38ea234ef"
+    },
+    {
+      "path": "characters/signal_01/design.json",
+      "gitsha": "c1905ce92d4147561175950a7f4a1284404b0f6e"
+    },
+    {
+      "path": "characters/signal_01/production/ANIMATION_BRIEF.md",
+      "gitsha": "06f3e0710cffa39f3e26723cd91b9a1bd5ef3fa7"
+    },
+    {
+      "path": "characters/signal_01/production/ART_DIRECTION.md",
+      "gitsha": "74137213bb9ca0c53086c8191db1b03c7c9d2fe7"
+    },
+    {
+      "path": "characters/signal_01/production/red_dash_sequence.json",
+      "gitsha": "010fe590967715f35dc11e090682aa27ef379820"
+    },
+    {
+      "path": "characters/signal_01/prompts/GENERATION_RECORD.md",
+      "gitsha": "109ed0401cc2476eb43754e510401329b7afb86c"
+    },
+    {
+      "path": "characters/signal_01/prompts/body_v1.txt",
+      "gitsha": "cdaf102d21945079c6564f78fcc2354439050f7e"
+    },
+    {
+      "path": "characters/signal_01/prompts/style_study_v1.txt",
+      "gitsha": "fd5c02532082d8f0f65ca32812b18ddb7ea77d4b"
+    },
+    {
+      "path": "characters/signal_01/provenance.json",
+      "gitsha": "955b76a9b3ce07eb15dbff0d3c7ee2cbc416fcd9"
+    },
+    {
+      "path": "characters/signal_01/reference/concept_v0.png",
+      "gitsha": "a69d6f8b59e2358edb202fd6667cbc8528221b6b"
+    },
+    {
+      "path": "docs/VISUAL_PASS_033.md",
+      "gitsha": "c3ec6ac1f1acc57fcfb918623bb8c875e978afed"
+    },
+    {
+      "path": "legal/CHARACTER_REVIEW_2026-10-27.md",
+      "gitsha": "660cb53592e97a9390565d377006256f54f97456"
+    },
+    {
+      "path": "src/ui/companion.gd",
+      "gitsha": "d2626d6e1a4f8af1c6a808dac2d326d92b1d2071"
+    },
+    {
+      "path": "src/ui/companion.gd.uid",
+      "gitsha": "39154c4c1ebfa0bdf8c2f06fc5b49747ebf985c3"
+    },
+    {
+      "path": "src/ui/signal_surface.gd",
+      "gitsha": "1d741b0986723b9f6625b9da562627fcb462b61d"
+    },
+    {
+      "path": "src/ui/signal_surface.gd.uid",
+      "gitsha": "4fda98e3ad8bf9cd63e6077bb60b01813752a2f1"
+    }
+  ]
+}

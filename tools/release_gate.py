@@ -25,8 +25,8 @@ def blockers():
     characters = json.loads((ROOT / "manifests/characters.json").read_text())
     if not characters.get("final_character"):
         result.append("no_approved_final_character")
-    provenance = json.loads((ROOT / "characters/signal_01/provenance.json").read_text())
-    if any(asset.get("release_approved") is not True for asset in provenance.get("assets", [])):
+    provenance = json.loads((ROOT / "characters/leemon_01/provenance.json").read_text())
+    if provenance.get("release_approved") is not True:
         result.append("concept_art_not_cleared_for_release")
     pack = json.loads((ROOT / "manifests/animation_pack.json").read_text())
     if pack.get("review_status") != "approved" or not pack.get("rig_revision") or not pack.get("clips"):

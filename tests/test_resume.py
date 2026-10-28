@@ -69,4 +69,17 @@ class RecoveryTests(unittest.TestCase):
   (self.source/'recovery/assets.json').write_text(json.dumps({'files':[{'path':'missing.png','group':'runtime','bytes':4,'sha256':'x'}]}))
   self.assertEqual(resume.asset_plan(self.source,'code')['download_bytes'],0)
   self.assertEqual(resume.asset_plan(self.source,'runtime')['download_bytes'],4)
+ def test_retirement_preserves_unknown_edits(self):
+  self.dest.mkdir();path=self.dest/'retired.txt';path.write_bytes(b'known')
+  entries=[{'path':'retired.txt','gitsha':resume.gitsha(b'known')}]
+  self.assertEqual(resume.retire(self.dest,entries)['retired'],['retired.txt'])
+  path.write_bytes(b'user edit')
+  self.assertEqual(resume.retire(self.dest,entries)['conflicts'],['retired.txt'])
+  self.assertEqual(path.read_bytes(),b'user edit')
+ def test_retirement_protects_license_and_traversal(self):
+  for name in ['LICENSE','legal/upstream/any.txt','../outside']:
+   with self.subTest(name=name),self.assertRaises(ValueError):resume.retire(self.dest,[{'path':name,'gitsha':'x'}])
+ def test_transient_asset_download_not_checkpointed(self):
+  (self.source/'tmp-unfinished').write_text('partial temporary asset')
+  self.assertNotIn('tmp-unfinished',resume.source_entries(self.source))
 if __name__=='__main__':unittest.main(verbosity=2)

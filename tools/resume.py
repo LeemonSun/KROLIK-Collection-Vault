@@ -9,6 +9,17 @@ BINARY={'.png','.jpg','.jpeg','.webp','.otf','.ttf','.zip','.gguf','.onnx','.saf
 GENERATED={'recovery/source_capsule.b64','recovery/index.json','reports/resume_tests.txt'}
 def sha(data):return hashlib.sha256(data).hexdigest()
 def gitsha(data):return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+def retire(root,entries):
+ planned=[];conflicts=[]
+ for entry in entries:
+  name=entry['path'];path=safe_path(root,name)
+  if path.name.lower().startswith(('license','copying','notice')) or name.startswith('legal/upstream/'):
+   raise ValueError('Cannot retire mandatory license notices')
+  if not path.exists():continue
+  if not path.is_file() or gitsha(path.read_bytes())!=entry['gitsha']:conflicts.append(name);continue
+  planned.append(path)
+ for path in planned:path.unlink()
+ return {'retired':[p.relative_to(root).as_posix() for p in planned],'conflicts':conflicts}
 def safe_path(root,relative):
  p=PurePosixPath(relative)
  if not relative or not p.parts or '\\' in relative or p.is_absolute() or '..' in p.parts or ':' in p.parts[0] or '.git' in p.parts:raise ValueError('Unsafe path: '+relative)
@@ -22,7 +33,7 @@ def source_entries(root):
   rel=p.relative_to(root);name=rel.as_posix()
   if not p.is_file() or p.is_symlink() or name in GENERATED or name.startswith("recovery/source_capsule.") or any(x in SKIP for x in rel.parts):continue
   if any(x.startswith('.') and x not in {'.gitignore','.gitattributes','.gdignore'} for x in rel.parts):continue
-  if p.suffix.lower() in BINARY or p.name.startswith('.env') or p.name=='export_credentials.cfg':continue
+  if p.suffix.lower() in BINARY or p.name.startswith(('.env','tmp')) or p.name=='export_credentials.cfg':continue
   data=p.read_bytes()
   try:data.decode('utf-8')
   except UnicodeDecodeError:continue
@@ -85,6 +96,10 @@ def restore(root,data,expected_sha,known=None):
     stream.write(content);temp=stream.name
    os.replace(temp,path)
    next_receipt[name]=digest;result['written'].append(name)
+  retired=json.loads(validated.get('recovery/retired_paths.json',b'{"files":[]}'))
+  result_retired=retire(root,retired.get('files',[]))
+  result['retired']=result_retired['retired'];result['conflicts'].extend(result_retired['conflicts'])
+  for name in result_retired['retired']:next_receipt.pop(name,None)
   receipt_path.write_text(json.dumps({'content_id':manifest['content_id'],'files':next_receipt},sort_keys=True)+'\n')
  return result
 

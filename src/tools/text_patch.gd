@@ -1,7 +1,8 @@
 extends RefCounted
 ## User-selected UTF-8 text only. One-use reviewed patch, backup, conflict detection.
 const MAX_BYTES=1048576
-const EXTENSIONS=["txt","ini","cfg","conf","json","jsonc","toml","yaml","yml","xml","csv","md","properties","log"]
+const EXTENSIONS=["txt","ini","cfg","conf","json","jsonc","toml","yaml","yml","xml","csv","tsv","md","properties","log"]
+const Table=preload("res://src/tools/delimited_table.gd")
 var backup_directory="user://file-backups-v1"
 var pending={}
 var last_backup={}
@@ -39,6 +40,37 @@ func _plan(path,source,bytes,find,replacement,line):
 	var token=Crypto.new().generate_random_bytes(16).hex_encode()
 	pending={"token":token,"path":path,"before":source.sha,"old":source.bytes,"after":digest(bytes),"bytes":bytes,"deadline":Time.get_ticks_msec()+120000}
 	return {"ok":true,"token":token,"path":path,"line":line,"before":find.left(1200),"after":replacement.left(1200)}
+func prepare_cell(path,row,column,expected,replacement):
+	cancel()
+	if not path is String or path.get_extension().to_lower() not in ["csv","tsv"]:return {"ok":false,"status":"unsupported"}
+	if not row is int or not column is int or row<1 or column<1 or not expected is String or not replacement is String or replacement.to_utf8_buffer().size()>65536:return {"ok":false,"status":"input"}
+	if Table.formula(replacement) and not replacement.strip_edges().is_valid_float():return {"ok":false,"status":"table_formula"}
+	var source=_read(path)
+	if not source.ok:return source
+	var separator="\t" if path.get_extension().to_lower()=="tsv" else ","
+	var parsed=Table.parse(source.text,separator)
+	if not parsed.ok:return parsed
+	if row>parsed.rows.size() or column>parsed.columns:return {"ok":false,"status":"table_address"}
+	var cell=parsed.rows[row-1][column-1]
+	if cell.value!=expected:return {"ok":false,"status":"changed"}
+	var after=source.text.left(cell.start)+Table.encode(replacement,separator,cell.quoted)+source.text.substr(cell.end)
+	var checked=Table.parse(after,separator)
+	if not checked.ok:return checked
+	if checked.rows.size()!=parsed.rows.size() or checked.columns!=parsed.columns:return {"ok":false,"status":"table_invalid"}
+	var bytes=after.to_utf8_buffer()
+	if source.bom:bytes=PackedByteArray([239,187,191])+bytes
+	return _plan(path,source,bytes,expected,replacement,row)
+func inspect_cell(path,row,column):
+	cancel()
+	if not path is String or path.get_extension().to_lower() not in ["csv","tsv"]:return {"ok":false,"status":"unsupported"}
+	var source=_read(path)
+	if not source.ok:return source
+	var parsed=Table.parse(source.text,"\t" if path.get_extension().to_lower()=="tsv" else ",")
+	if not parsed.ok:return parsed
+	if row<1 or column<1 or row>parsed.rows.size() or column>parsed.columns:return {"ok":false,"status":"table_address"}
+	var value=parsed.rows[row-1][column-1].value
+	if value.to_utf8_buffer().size()>65536:return {"ok":false,"status":"table_limit"}
+	return {"ok":true,"value":value}
 func commit(token):
 	if pending.is_empty() or not token is String or token!=pending.token:return {"ok":false,"status":"approval"}
 	var plan=pending;pending={}

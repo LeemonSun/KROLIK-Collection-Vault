@@ -1,49 +1,47 @@
 {
   "schema_version": 1,
-  "app_version": "0.11.0-desktop-preview",
-  "checkpoint_status": "0.11_saved_windows_acceptance_pending",
-  "current_task": "0.11 completed and saved: bounded user workflows/literal fast path,26 procedural motions/effects/bubbles/task-aware placement, reviewed selected-file transactions+durable restore, compact explicit facts+three-way merge, RAM headroom guard and IPC cleanup. ZIP/report/video saved. No SteamCloud/XLSX/universal autonomy claimed.",
-  "next_action": "Continue0.11, do not rebuild foundation. Priorities: actual Windows/DPI/UIA/file-lock/mic acceptance; stronger measured offline reasoning on target hardware; standard document/table adapters; bounded model-authored planning and safe guide-to-patch proposals. SteamCloud needs ownAppID/accounts/integration; developer download pages consolidation future.",
+  "app_version": "0.12.0-desktop-preview",
+  "checkpoint_status": "0.12_saved_windows_acceptance_pending",
+  "current_task": "0.12 completed: Leemon-only active assets/docs/recovery; bounded FIFO chat queue and deterministic task progress; reviewed CSV/TSV cells and bounded DOCX/XLSX adapters; visible editor/queue improvements, file-state behavior, smoother settling. Windows ZIP and update/status guide saved.",
+  "next_action": "Actual Windows acceptance and hardware measurements. Extend shared document/table/browser tools (typed ranges, DOCX multi-run/structure, XLSX calculation dependencies), bounded model-authored plans with verified results; stronger measured offline model. No per-program models. Preserve one Leemon style and low load. Do not rebuild completed foundation.",
   "read_next": [
-    "docs/WORKFLOWS_011.md",
-    "docs/STEAM_CLOUD_PLAN.md",
-    "docs/WINDOW_READING.md"
+    "docs/WORKFLOWS_012.md",
+    "docs/WINDOW_READING.md",
+    "docs/STEAM_CLOUD_PLAN.md"
   ],
   "known_limits": [
-    "Windows EXE/UIA/native picker/file locks/mic/voice not executed here",
-    "Workflow uses up to4USER-AUTHORED steps; per-step approval, no universal autonomous task decomposition",
-    "File review: selected UTF8 text<=1MB, unique literal replace; no binary/XLSX engine, OS elevation or complete race protection",
-    "Memory: explicit facts<=1024/512KB, not automatic infinite transcript compression",
-    "SteamCloud researched/planned and local three-way merge tested; no Cloud connection/AppID/SDK integration",
-    "Small2B factual accuracy remains limited; scientific keywords may pass while mechanism is wrong",
-    "26 procedural2D states, not thousands of hand-drawn clips or facial/lip-sync rig; public release clearance incomplete"
+    "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
+    "Queue holds at most3 ordinary text messages and uses one model inference; no deferred OS/window/capture/voice/tools context",
+    "Selected file<=1MiB; CSV comma/TSV tab, bounded rectangular tables; DOCX unique text inside one run only; XLSX existing cell as text, formula workbooks refused; not full Office",
+    "OOXML ZIP<=256entries/8MiB expanded/2MiB per part; no signed/encrypted/ZIP64/.bin packages; bounded XML balance checks, not full schema validation",
+    "SHA+rename/file backup guard is not complete adversarial Windows race/reparse protection",
+    "Only user-authored workflow up to4steps; browser reading via chosen-window UIA and search handoff, no universal autonomous planner/browser",
+    "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and not remeasured",
+    "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud"
   ],
   "validation": [
-    "23 source groups PASS",
-    "31 workflow checks PASS; literal cases use0LLM calls",
-    "61 behavior/pose checks PASS",
-    "29 actual file/backup/restore/fact/merge checks PASS",
-    "140 layout checks PASS",
-    "143 nativeX11 checks PASS from final pack",
-    "18 exported-content/helper checks PASS twice in fresh/reused isolated profile",
-    "16 access helper and11 read-helper synthetic-provider checks PASS",
-    "27 real conversation checks over11requests RU/EN/zh PASS; narrow quality sample",
-    "18 mixed real text/translation checks PASS; keyword tests do not certify factual truth",
-    "96 native-rendered frames encoded to9.6sMP4",
-    "Final ZIP CRC PASS"
+    "25 local check groups PASS (source, locales, worker, workflow, file/memory, UI, expected public gate block)",
+    "39 queue/table checks PASS from source and final PCK; fake inference, actual CSV/TSV files",
+    "15 real OOXML checks PASS from source and final PCK; independent python-docx/openpyxl style/type/readback, CRC and all untouched parts compared",
+    "156 native X11 checks PASS from final PCK; actual windows/rendering, synthetic fixtures; not Windows",
+    "9 final PCK composition/localization/version checks PASS; only Leemon character asset directory",
+    "15 Python recovery tests PASS; retirement hash guards, changed local files preserved, licenses protected",
+    "Local connector-contract tests PASS: cold/warm restore, unknown local edits, capsule/checkpoint, remote-head lease",
+    "Final ZIP CRC PASS; current update guide bundled",
+    "Real model/conversation/vision/voice quality not re-benchmarked in this pass"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.11.0.zip",
-    "bytes": 53853821,
-    "sha256": "20b1dd21622e72d06c8ab4fa659c19e53bd9e4af468329eb0b538840832db80c",
-    "library_file_id": "libfile_89e926fb5d308191b7b799ffd9cdad63",
-    "file_id": "file_0000000013e08230ac8e7d72212e61b6",
+    "full": "Companion_Preview_Windows_v0.12.0.zip",
+    "bytes": 53869785,
+    "sha256": "f4626bf6cc47a6dda7cc3374e4a2594bb174a195f4eb0fc0d412fc740586a4f4",
+    "library_file_id": "libfile_59fd4fb8f5ac81919d46809a2044f85f",
+    "file_id": "file_00000000bfdc81f5aefd6680d2659d77",
     "version": 0,
-    "status": "saved_native_library_export_verified"
+    "status": "saved_native_library_with_local_metadata_zip_crc_verified"
   },
-  "previous_checkpoint": "61d8f4db33c483291ce391242f77ab6305004da7",
-  "shipped_version": "0.11.0-desktop-preview",
-  "shipped_app_pack_sha256": "daed0ac9ba80895bf9f91839136762d60db7ba3b9f0ab24fd56864d7053a4274",
+  "previous_checkpoint": "fb9c8195099ed1503c1c89e459fc510c8056da7f",
+  "shipped_version": "0.12.0-desktop-preview",
+  "shipped_app_pack_sha256": "11f6d992eaee7d9387602dd9d4824de0c9991ce9f3fcff360fe9521bec76c9e7",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -78,18 +76,28 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_1e5d6ff33c4881918bba4f9096c3c888",
+  "report_library_file_id": "libfile_5a9a8d0e9a248191aef85a9968b11518",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
     "date_moscow": "2026-10-28",
-    "source_head": "3aa27decdd5a240dd8fa8381763dc4e596d5bed5",
-    "source_files": 369,
+    "source_head": "fb9c8195099ed1503c1c89e459fc510c8056da7f",
     "restored_without_conflicts": true,
-    "previous_workspace_preserved": "companion-foundation-before-restore-20261028T015717",
-    "checks": "18 groups PASS"
+    "current_character": "leemon_01",
+    "retirement_manifest": "recovery/retired_paths.json",
+    "legacy_character_restore_forbidden": true,
+    "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.11.0.zip",
+      "bytes": 53853821,
+      "sha256": "20b1dd21622e72d06c8ab4fa659c19e53bd9e4af468329eb0b538840832db80c",
+      "library_file_id": "libfile_89e926fb5d308191b7b799ffd9cdad63",
+      "file_id": "file_0000000013e08230ac8e7d72212e61b6",
+      "version": 0,
+      "status": "saved_native_library_export_verified"
+    },
     {
       "full": "Companion_Preview_Windows_v0.10.0.zip",
       "bytes": 53811828,
@@ -114,7 +122,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000666082309b45c25318d2cc56",
+  "report_file_id": "file_00000000232481fd8f08b505f6690b8a",
   "motion_artifact": {
     "filename": "Leemon_0.11_Motions.mp4",
     "bytes": 182482,
@@ -124,6 +132,9 @@
     "library_file_id": "libfile_5c6b298b9660819191f42d4675012038",
     "file_id": "file_0000000052c081f589007f2d5538b71d",
     "version": 0,
-    "sha256": "217f5008402b9216f13a01f91405b90b565fbb3268271779faeb74c156d4a722"
-  }
+    "sha256": "217f5008402b9216f13a01f91405b90b565fbb3268271779faeb74c156d4a722",
+    "version_label": "0.11_reference_not_0.12_capture"
+  },
+  "shipped_exe_sha256": "916f5bc5d667aa7727f11432049dbd1a64558a6e280ec5ef4ff8c804f0b915c1",
+  "ui_preview_version_label": "0.11_reference_not_0.12_capture"
 }

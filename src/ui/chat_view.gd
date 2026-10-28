@@ -1,4 +1,4 @@
-extends "res://src/ui/signal_surface.gd"
+extends "res://src/ui/leemon_surface.gd"
 ## Input/actions always remain visible. Conversation is the only expanding region.
 signal close_requested
 signal settings_requested
@@ -33,6 +33,9 @@ var voice_button
 var suggestions
 var setup_hint
 var status_dot
+var queue_row
+var queue_label
+var queue_clear
 func _ready():
 	if embedded:inset=0
 	super._ready()
@@ -73,6 +76,9 @@ func _ready():
 	status_label.add_theme_font_size_override('font_size',12)
 	status_label.add_theme_color_override('font_color',VisualTheme.MUTED)
 	status_row.add_child(status_label)
+	queue_row=HBoxContainer.new();layout.add_child(queue_row);queue_row.visible=false
+	queue_label=Label.new();queue_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;queue_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;queue_label.add_theme_font_size_override("font_size",11);queue_label.add_theme_color_override("font_color",VisualTheme.RED);queue_row.add_child(queue_label)
+	queue_clear=_button("×",queue_row,func():app.chat_queue.clear();app.changed.emit());VisualTheme.quiet(queue_clear)
 	target_row=HBoxContainer.new();layout.add_child(target_row)
 	target_label=Label.new();target_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	target_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -175,7 +181,7 @@ func _ready():
 	var progress_timer=Timer.new();progress_timer.wait_time=0.25;progress_timer.autostart=true
 	add_child(progress_timer)
 	progress_timer.timeout.connect(func():
-		if is_visible_in_tree() and (app.speech_input.busy() or app.speech_input.installing() or app.local_runtime.downloading or app.vision_asset.installing() or app.goal_mode=="proposal"):refresh())
+		if is_visible_in_tree() and (app.chat_busy() or not app.chat_queue.items.is_empty() or app.speech_input.installing() or app.local_runtime.downloading or app.vision_asset.installing()):refresh())
 func _button(text,parent,callback):
 	var button=Button.new()
 	button.text=text
@@ -201,7 +207,11 @@ func submit_current():
 	if text.length()>2048:
 		status_label.text=app.t('input_too_long')
 		return
-	if app.paused or app.state.current!='idle' or not app.queued_chat_text.is_empty() or not app.goal_mode.is_empty():
+	if app.chat_busy() and not app.paused:
+		if app.queue_chat(text):editor.clear();refresh()
+		else:status_label.text=app.t('queue_unavailable')
+		return
+	if app.paused:
 		status_label.text=app.t('paused_message' if app.paused else 'busy_message')
 		return
 	editor.clear()
@@ -266,8 +276,13 @@ func refresh():
 	read_button.tooltip_text=app.t("window_read_button")
 	plan_button.tooltip_text=app.t("goal_button")
 	inspect_button.tooltip_text=app.t("access_read")
-	send_button.disabled=app.paused or busy
-	stop_button.disabled=not busy
+	if app.state.current=="thinking" and not app.pending_user_text.is_empty():status_label.text+=" · "+app.t("task_elapsed",{"seconds":maxi(0,(Time.get_ticks_msec()-app.chat_started_ms)/1000)})
+	if not app.chat_queue.items.is_empty():status_label.text+=" · "+app.t("queue_pending",{"count":app.chat_queue.items.size()})
+	queue_row.visible=not app.chat_queue.items.is_empty()
+	queue_label.text=app.t("queue_pending",{"count":app.chat_queue.items.size()})+" / 3 · "+(str(app.chat_queue.items[0]).left(65) if queue_row.visible else "")
+	queue_clear.tooltip_text=app.t("queue_clear")
+	send_button.disabled=app.paused
+	stop_button.disabled=not busy and app.chat_queue.items.is_empty()
 	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())
 	var installing=app.vision_asset.installing() if install_mode=='screen' else (app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null)
 	setup_hint.visible=size.y>=380 and not installed
