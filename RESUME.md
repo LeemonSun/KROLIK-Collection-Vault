@@ -1,4 +1,4 @@
-# Leemon 0.15 — source tested, packaging
+# Leemon 0.15 — сохранено и выдано
 
 Start `python3 tools/resume.py status` and recovery/session.json. Canonical folder leemon-013 (historical name). Source head .resume-remote.json. GitHub LeemonSun/KROLIK-Collection-Vault storage only, no CI/build/deploy. No subagents without authorization.
 
@@ -6,6 +6,6 @@ Read docs/WORKFLOWS_015.md for active loop and limitations. New adaptive_agent.g
 
 Copy button beside status copies all retained visible messages, including explicitly visible ephemeral source messages, no new notes. Max100chat retained; discarded older history unavailable/disclosed, marker survives optional history. Max4MiB refusal. Actual X11 clipboard/layout31checks PASS across3locales/2sizes; headless copy/self-knowledge45PASS. Self facts answer actual app capabilities; not model fine-tuning. Future voice/chibi idea docs/VISUAL_IDEAS.md only; Lemon active, no retired assets restored.
 
-31source groups PASS. Version metadata0.15.0. Need final build/exported-pack tests/delivery and report, update session. Existing0.14 artifact IDs remain last delivered until updated. Godot /workspace/scratch/deec6c1ed852/devtools/Godot_v4.7.2-stable_linux.x86_64; Xvfb devtools/xvfb014; template /workspace/scratch/aeddae26cfed/windows-template/Companion.exe hash49bdb7a55e668a3a5e8f88f374ac502b84454d23bde9561bf3b9d8e38bab2538. If absent use existing0.14ZIP EXE.
+31source groups PASS. Version metadata0.15.0. Final0.15 pack smoke+25adaptive+45copy/selfknowledge+31native clipboard/layout PASS; ZIPCRC PASS. ZIP/report native IDs and hashes in session. No new models required; EXE/PCK together, keep AI/. Godot /workspace/scratch/deec6c1ed852/devtools/Godot_v4.7.2-stable_linux.x86_64; Xvfb devtools/xvfb014; template /workspace/scratch/aeddae26cfed/windows-template/Companion.exe hash49bdb7a55e668a3a5e8f88f374ac502b84454d23bde9561bf3b9d8e38bab2538. If absent use existing0.14ZIP EXE.
 
 Real current pinned2B dev fixture exists outside repo devtools/agent015/model.gguf (SHAaaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223). Linux llama runtime devtools/agent015/runtime/llama-b11901/llama-server, not started yet. Do not commit weights. Actual model semantic agent trials and performance/Windows acceptance still pending. Keep one heavy worker/quiet profile.0.14 source utilities and21entry backlog retained. Public direct DNS failed here, localTLS verified only. Upstream notices intact.

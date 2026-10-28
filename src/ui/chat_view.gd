@@ -246,6 +246,7 @@ func refresh():
 	if not is_instance_valid(status_label):return
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
 	if last_locale!=app.l10n.locale:
+		copy_status_until=0
 		last_locale=app.l10n.locale
 		editor.placeholder_text=app.t('chat_placeholder')
 		editor.tooltip_text=app.t('chat_write_hint')
