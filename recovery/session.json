@@ -1,42 +1,43 @@
 {
   "schema_version": 1,
   "app_version": "0.10.0-desktop-preview",
-  "checkpoint_status": "window_reading_implemented_under_validation",
-  "current_task": "Continue0.9 with explicit bounded read-only selected-window Q&A.41 reader tests and20 source groups PASS;11 synthetic native read-tree checks PASS.0.10 artifact not delivered yet.",
-  "next_action": "Finish real model RU/EN/zh read QA, native visual review and final export; save new0.10 ZIP/report, update session artifacts and checkpoint.0.9 ZIP recovered under recovered-09; do not redownload full offline parts.",
+  "checkpoint_status": "0.10_saved_windows_acceptance_pending",
+  "current_task": "0.10 completed and saved: explicit read-only selected-window Q&A with host-sourced excerpts and ephemeral privacy; final app ZIP/report saved, source/native/exported/model checks PASS.",
+  "next_action": "Continue0.10 from docs/WINDOW_READING.md. Need actual Windows/UIA/Opera/Word/DPI/mic acceptance, broader read accuracy/injection corpus, then bounded multistep workflow. No autonomous website traversal yet.",
   "read_next": [
     "docs/WINDOW_READING.md",
     "docs/GOAL_PROPOSALS.md"
   ],
   "known_limits": [
     "Actual Windows EXE/transparency/UIA/microphone not executed here",
-    "Single proposed step with user approval, not a multistep autonomous agent",
-    "Generic button invocation requires explicit click verb and literal observed button name",
-    "Current real CPU planner cases take17–28seconds with2threads; optimization unfinished",
-    "UIA requires accessible controls; custom multiline editors/games may be unsupported",
-    "Model factual accuracy limited; no autonomous browser reader, custom voice, SteamCloud or commercial release clearance"
+    "Read-only UIA excerpts may be partial or unavailable; no automatic browser navigation or page traversal",
+    "Sources are verified, but semantic correctness of model answer is not guaranteed",
+    "Single-step goals require approval; no multistep autonomous agent",
+    "0.9 real CPU planner17–28s remains unfinished; new simple read cases2.7–5.5s generation only, not Windows latency",
+    "No custom voice, SteamCloud, thousands of authored clips or public release clearance"
   ],
   "validation": [
-    "All night0.8 source/artifact hashes recovered;18 baseline source groups PASS",
-    "19 final source groups PASS",
-    "37 proposal/controller/routing unit checks PASS",
-    "3 actual Qwen3.5-2B proposal cases RU/EN/zh PASS; full mixed suite38checks, unrelated intent filtered before model",
-    "110 layout checks PASS(3locales,4sizes,proposal approval,draft preservation)",
-    "102 actual nativeX11 checks PASS from final exportedPCK",
-    "12 exported content/helper checks PASS",
-    "16 accessibility helper checks PASS; C#compiled, WindowsAPI not run",
-    "Final0.9ZIP CRC checked; original0.8 offline parts remain saved andcompatible"
+    "20 source groups PASS",
+    "42 window-reader unit/controller/privacy checks PASS",
+    "5 real Qwen3.5-2B cases PASS: RU/EN/zh, injected instruction, missing evidence;58 mixed checks in real log (one earlier baseline count)",
+    "140 layout checks PASS",
+    "105 nativeX11 checks PASS from final exportedPCK",
+    "15 exported-content/real-helper IPC checks PASS",
+    "16 access helper checks and11 read walker synthetic-provider checks PASS",
+    "Final0.10 ZIP CRC PASS"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.9.0.zip",
-    "bytes": 53800506,
-    "sha256": "a960468ffa4d42d2c3a7ca167d5ef0544d56f2d1af954eaf1a09427fc5cd9c68",
-    "library_file_id": "libfile_269b9a752e78819197809d8f5341729e",
+    "full": "Companion_Preview_Windows_v0.10.0.zip",
+    "bytes": 53811828,
+    "sha256": "fee920d8244be42a937121489113fa724c2f3f9375af0cc2db37e296bfabd519",
+    "library_file_id": "libfile_75f383ba0f208191afedbe33a70ee8a2",
+    "file_id": "file_000000003ba081fb9890d2d358ad9ca5",
+    "version": 0,
     "status": "saved_native_library_export_verified"
   },
-  "previous_checkpoint": "d5bccec549bfcfdb3d14664fc838c2c72373daac",
-  "shipped_version": "0.9.0-desktop-preview",
-  "shipped_app_pack_sha256": "1a13e86427c1d4477618c3e09e693be83283a39ce617fe2ef802eae6f478c1da",
+  "previous_checkpoint": "f2df45081895ac68e52918988991ba7964e20702",
+  "shipped_version": "0.10.0-desktop-preview",
+  "shipped_app_pack_sha256": "abf058d6580ef07d7bae53593fd51b610ceec27528b661e2441365588bc224bf",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -71,7 +72,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_574a65adb7f0819182f6764771e296c3",
+  "report_library_file_id": "libfile_e736abadc51c8191933b44e709589ff4",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -84,11 +85,19 @@
   },
   "previous_artifacts": [
     {
+      "full": "Companion_Preview_Windows_v0.9.0.zip",
+      "bytes": 53800506,
+      "sha256": "a960468ffa4d42d2c3a7ca167d5ef0544d56f2d1af954eaf1a09427fc5cd9c68",
+      "library_file_id": "libfile_269b9a752e78819197809d8f5341729e",
+      "status": "saved_native_library_export_verified"
+    },
+    {
       "full": "Companion_Preview_Windows_v0.8.0.zip",
       "bytes": 53791063,
       "sha256": "03922e037f3d9cd79c05203f18881067d7dda59dcf88e131c821317671edeb07",
       "library_file_id": "libfile_af9e7176839c81918d6cd18a56d8bff6",
       "status": "saved_native_library_verified_exported_pack"
     }
-  ]
+  ],
+  "report_file_id": "file_00000000dcf88230b7a082e45bae0f1b"
 }

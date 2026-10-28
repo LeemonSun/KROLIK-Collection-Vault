@@ -57,7 +57,9 @@ func _run():
 	var provider=FakeProvider.new();app.add_child(provider);var runtime=FakeRuntime.new();app.add_child(runtime)
 	app.application_access=access;app.provider=provider;app.provider_name="local_worker";app.local_runtime=runtime
 	var turns=app.session_turns.duplicate(true)
+	access.pending={"operation":"invoke","element_name":"Send"};access.queued_action={"kind":"invoke","name":"Delete"}
 	check(app.begin_window_read("When is the meeting?"),"App starts one explicit read request")
+	check(access.pending.is_empty() and access.queued_action.is_empty(),"Reading invalidates older confirmations and queued action authority")
 	check(access.requests.size()==1 and access.requests[0].operation=="read","Reading requests no screenshot or model-generated effect")
 	var receipt={"status":"read","blocks":blocks(),"title":"Demo"};access._finish(receipt)
 	check(app.window_read_mode=="thinking" and provider.requests.size()==1,"Observed text passes to one constrained local request")

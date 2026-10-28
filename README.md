@@ -1,3 +1,9 @@
+# Leemon 0.10 — актуальная сборка
+
+[Скачать Windows ZIP (~54 МБ)](https://chatgpt.com/library?file_id=libfile_75f383ba0f208191afedbe33a70ee8a2&account_id=personal) · [Отчёт](https://chatgpt.com/library?file_id=libfile_e736abadc51c8191933b44e709589ff4&account_id=personal)
+
+Закрой Лимона, скопируй содержимое Companion_Preview поверх папки программы. Сохрани AI/: модели 0.8/0.9 совместимы. В чате выбери окно, нажми значок листа с лупой или напиши «По этому окну: вопрос». Это чтение доступного текста с выдержками, не автономный обход сайтов. Детали: docs/WINDOW_READING.md. Старый START_WINDOWS.cmd не является установщиком новой версии.
+
 # Leemon Companion · 0.9.0
 
 [Скачать Windows x64 приложение · 54 МБ](https://chatgpt.com/library?file_id=libfile_269b9a752e78819197809d8f5341729e&account_id=personal) · [Полный отчёт](https://chatgpt.com/library?file_id=libfile_574a65adb7f0819182f6764771e296c3&account_id=personal)

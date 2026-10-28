@@ -1,3 +1,3 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
-CHAT_LAYOUT_TESTS: 110 checks, 0 failures; 3 locales x 4 sizes
+CHAT_LAYOUT_TESTS: 140 checks, 0 failures; 3 locales x 4 sizes

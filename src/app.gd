@@ -896,7 +896,7 @@ func _access_changed():
 
 
 func begin_window_read(question="",record_question=true):
-	if paused or state.current!="idle" or speech_input.busy() or application_access.pid>0 or not goal_mode.is_empty() or not window_read_mode.is_empty():return false
+	if paused or state.current!="idle" or speech_input.busy() or application_access.pid>0 or not queued_chat_text.is_empty() or screen_mode or not goal_mode.is_empty() or not window_read_mode.is_empty():return false
 	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
 	if not question is String or question.length()>600:add_message("assistant",t("input_too_long"));return false
 	if not local_runtime.installed():add_message("assistant",t("goal_need_ai"));return false

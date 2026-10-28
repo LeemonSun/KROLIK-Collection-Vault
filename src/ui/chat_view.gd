@@ -78,7 +78,7 @@ func _ready():
 	target_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	target_label.add_theme_font_size_override("font_size",11)
 	target_label.add_theme_color_override("font_color",VisualTheme.RED);target_row.add_child(target_label)
-	read_button=_button("≡",target_row,func():app.begin_window_read())
+	read_button=_icon("read",target_row,func():app.begin_window_read())
 	read_button.tooltip_text=app.t("window_read_button");VisualTheme.quiet(read_button)
 	plan_button=_button("✦",target_row,_prepare_goal)
 	plan_button.tooltip_text=app.t("goal_button");VisualTheme.quiet(plan_button)
@@ -218,7 +218,8 @@ func _setup_ai():
 	refresh()
 func _on_message(_speaker,_text):
 	_render_history()
-	if app.goal_mode=="proposal":history.follow_latest()
+	if not app.messages.is_empty() and app.messages[-1].get("ephemeral",false):history.reveal_latest()
+	elif app.goal_mode=="proposal":history.follow_latest()
 func _render_history():
 	history.set_messages(app.messages,app.t('chat_you').to_upper())
 func refresh():

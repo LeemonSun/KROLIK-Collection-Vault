@@ -290,5 +290,5 @@
   "window_read_insufficient": "读取的片段中没有答案。请细化问题或打开窗口的相关部分。",
   "window_read_source": "来自窗口「{title}」",
   "window_read_quotes": "依据以下片段：",
-  "window_read_partial": "仅包含请求时的部分可访问内容。此回答不会保存到聊天记录中。"
+  "window_read_partial": "仅为请求时的部分文本 · 不保存到聊天记录。"
 }

@@ -9,7 +9,7 @@ def main():
  template=a.template.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
  version=json.loads((ROOT/'config/product.json').read_text())['version'].split('-')[0]
  template_sha=hashlib.sha256(template.read_bytes()).hexdigest()
- if template_sha not in [TEMPLATE_SHA,'33c4fcdb4bf6d9c4452d881a9d57467125630719cbd5e7d231ffb7d16a6b9b1e','7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee','85331073ec1e95bf0f09dc9535c03887627f5bfd5b9484ba1bef58a5d696ecbd','83813377ae61e5cb02cec687a38da5ab83749964a59fefaabd20b3d40f5167e6']:raise SystemExit('Wrong export template hash')
+ if template_sha not in [TEMPLATE_SHA,'548c75741efc597e4e54037d85838d37f43bbfffbffc750f29ee49289a74793b','33c4fcdb4bf6d9c4452d881a9d57467125630719cbd5e7d231ffb7d16a6b9b1e','7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee','85331073ec1e95bf0f09dc9535c03887627f5bfd5b9484ba1bef58a5d696ecbd','83813377ae61e5cb02cec687a38da5ab83749964a59fefaabd20b3d40f5167e6']:raise SystemExit('Wrong export template hash')
  preset=ROOT/'export_presets.cfg';original=preset.read_text()
  try:
   preset.write_text(original.replace('custom_template/release=""','custom_template/release="'+template.as_posix()+'"'))
