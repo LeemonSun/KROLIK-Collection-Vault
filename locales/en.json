@@ -445,5 +445,7 @@
   "goal_status_verify_wait": "Waiting for the window to update…",
   "chat_draft_heading": "Draft · not sent",
   "chat_draft_repairing": "Correcting the draft…",
-  "chat_draft_unverified": "I could not produce a draft without unsupported details. Nothing was sent."
+  "chat_draft_unverified": "I could not produce a draft without unsupported details. Nothing was sent.",
+  "window_read_interpretation": "Answer based on excerpts:",
+  "window_read_unverified": "The answer did not pass validation. Below are original excerpts; they may not answer the question."
 }

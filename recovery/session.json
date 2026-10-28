@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.20.0-desktop-preview",
-  "checkpoint_status": "0.20_delivered_final_pack_native_and_semantic_evidence_saved",
-  "current_task": "020delivered; cachememory optimization and bounded practical drafts complete, remaining quality failures retained",
-  "next_action": "ActualWindows acceptance incl cacheflags, UIA/DPI, model vision memory; broader held-out source-grounded semantics and adaptive tasks before default model change",
+  "checkpoint_status": "021_in_progress_user_prioritizes_model_intelligence",
+  "current_task": "User explicitly steered away from minor guards toward model intelligence. Reader021boundedselection/grounding/fallback code46checksPASS;36realReadercomparisons inprogress. Verified4Bcandidate2740937888B; matched30case model/reasoning comparison next; no defaultchange yet.",
+  "next_action": "Finish sole-readerworker, run matched2B/4B model reasoning/typos/planning/UIA tests then implement only evidenced model/inference upgrade; preserveweakPCmode.",
   "read_next": [
     "docs/WORKFLOWS_020.md",
     "reports/quality020-review.md",

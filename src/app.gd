@@ -1256,25 +1256,36 @@ func _window_read_observe():
 func _window_read_observed(snapshot):
 	if window_read_mode!="observing":return
 	if not goal_planner.same_target(window_read_target,snapshot.target) or window_read_target.get("title")!=snapshot.target.get("title"):_window_read_error("goal_changed");return
+	if not snapshot.get("observed_ms") is int or snapshot.observed_ms>Time.get_ticks_msec() or Time.get_ticks_msec()-snapshot.observed_ms>30000:_window_read_error("window_read_expired");return
 	window_read_context=window_reader.prepare(window_read_question,snapshot.target,snapshot.blocks,snapshot.observed_ms,l10n.locale)
 	if not window_read_context.get("ok",false):_window_read_error("window_read_empty");return
 	window_read_mode="thinking";window_read_deadline=Time.get_ticks_msec()+90000
 	state.reset();state.transition("thinking");local_runtime.generation_busy=true;local_runtime.touch()
 	request_motion("dialogue.think_loop")
-	provider.submit(window_read_context.messages,{"max_tokens":256,"context_tokens":2048,"response_schema":window_read_context.schema})
+	if not provider.submit(window_read_context.messages,{"max_tokens":256,"context_tokens":2048,"response_schema":window_read_context.schema}):_window_read_error("window_read_failed");return
 	changed.emit()
 func _window_read_answer(text):
-	if provider is Llama and provider.last_truncated:_window_read_error("window_read_failed");return
+	if provider is Llama and provider.last_truncated:_window_read_fallback();return
 	var result=window_reader.validate(text,window_read_context,application_access.target,Time.get_ticks_msec())
-	if not result.get("ok",false):_window_read_error("window_read_failed");return
+	if not result.get("ok",false):_window_read_fallback();return
 	if result.insufficient:_window_read_error("window_read_insufficient");return
 	var title=str(window_read_target.get("title",""))
 	_clear_window_read();state.reset()
-	var reply=t("window_read_source",{"title":title})+"\n\n"+result.answer+"\n\n"+t("window_read_quotes")
+	var reply=t("window_read_source",{"title":title})+"\n\n"+t("window_read_interpretation")+"\n"+result.answer+"\n\n"+t("window_read_quotes")
 	for quote in result.quotes:reply+="\n• "+quote
 	reply+="\n\n"+t("window_read_partial")
 	add_message("assistant",reply,true)
 	voice.speak(result.answer,l10n.locale);request_motion("dialogue.explain_small");changed.emit()
+func _window_read_fallback():
+	var quotes=window_reader.fallback(window_read_context,application_access.target,Time.get_ticks_msec())
+	if quotes.is_empty():_window_read_error("window_read_failed");return
+	var title=str(window_read_target.get("title",""))
+	_clear_window_read();state.reset()
+	var reply=t("window_read_source",{"title":title})+"\n\n"+t("window_read_unverified")+"\n\n"+t("window_read_quotes")
+	for quote in quotes:reply+="\n• "+quote
+	reply+="\n\n"+t("window_read_partial")
+	add_message("assistant",reply,true);request_motion("dialogue.explain_small");changed.emit()
+
 func _window_read_error(key):
 	_clear_window_read();state.reset();add_message("assistant",t(key),true);changed.emit()
 func _clear_window_read():

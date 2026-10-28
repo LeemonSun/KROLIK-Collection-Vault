@@ -445,5 +445,7 @@
   "goal_status_verify_wait": "等待窗口更新后再次检查…",
   "chat_draft_heading": "草稿 · 未发送",
   "chat_draft_repairing": "正在修改草稿…",
-  "chat_draft_unverified": "未能生成不含未经确认细节的草稿。没有发送任何内容。"
+  "chat_draft_unverified": "未能生成不含未经确认细节的草稿。没有发送任何内容。",
+  "window_read_interpretation": "基于摘录的回答：",
+  "window_read_unverified": "回答未通过检查。以下是原始摘录，可能无法回答你的问题。"
 }
