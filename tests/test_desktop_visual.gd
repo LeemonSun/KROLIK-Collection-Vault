@@ -199,6 +199,8 @@ func _run():
 	print("RIG_COVERAGE missing=",missing," solid=",solid)
 	check(solid>1000 and float(missing)/maxi(solid,1)<0.001,"Rig pieces cover at least 99.9% of original opaque silhouette")
 	reference.queue_free();desktop.art.show()
+	# Isolate the low-level rig catalogue from the live task-pose arbiter.
+	desktop.set_process(false)
 	desktop.art.set_reduced(false)
 	for clip in ["hello","thinking","talk","success","error","grab","walk","listen","stretch","settle"]:
 		desktop.art.play(clip,1.5)
@@ -210,6 +212,7 @@ func _run():
 		desktop.art.play(clip,1.8);await create_timer(0.55).timeout;await frame()
 		check(desktop.art.clip==clip and desktop.art.parts.size()==6,"New native motion remains stable: "+clip)
 		shot(root,"new-"+clip)
+	desktop.set_process(true)
 	var region_count=desktop.region_updates
 	app.chat_window.hide()
 	check(app.say_companion("Проверка окна реплики: ответ остаётся рядом с Лимоном."),"A closed chat can show a short companion reply")

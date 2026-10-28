@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| locomotion018 | PASS |
 | diagnostics017 | PASS |
 | capability017 | PASS |
 | composer017 | PASS |

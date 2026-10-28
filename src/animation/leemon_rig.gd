@@ -15,6 +15,11 @@ var root_part:Node2D
 var installed_clips=CLIPS.size()
 var blend_from={}
 var blend_time=1.0
+var locomotion_driven=false
+var gait_distance=0.0
+var gait_speed=0.0
+var gait_direction=1.0
+var suspended=false
 func _ready():
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	root_part=Node2D.new()
@@ -52,8 +57,19 @@ func play(id,seconds=0.0):
 	blend_time=0
 	clip=id;clip_time=0;duration=seconds
 	return true
+func set_locomotion(direction,speed,distance):
+	locomotion_driven=true
+	gait_direction=clampf(direction,-1,1)
+	gait_speed=clampf(speed,0,360)
+	gait_distance=maxf(0,distance)
+func clear_locomotion():
+	locomotion_driven=false;gait_speed=0
+func set_suspended(value):
+	suspended=bool(value)
+	set_process(not suspended and not reduced)
 func set_reduced(value):
 	reduced=value
+	set_process(not reduced and not suspended)
 	if reduced:_rest()
 func _rest():
 	if not root_part:return
@@ -164,11 +180,15 @@ func _process(delta):
 			parts.head.rotation=-0.025*weight
 			parts.body.position.y-=2*weight
 		"walk":
-			var step=sin(clip_time*10.5)*weight
+			var stride=gait_distance/maxf(1.0,size.x/210.0)/82.0*TAU if locomotion_driven else clip_time*10.5
+			var travel_weight=clampf(gait_speed/90.0,0,1) if locomotion_driven else weight
+			var step=sin(stride)*travel_weight
+			parts.body.rotation=-gait_direction*0.012*travel_weight
+			parts.head.rotation=-gait_direction*0.018*travel_weight
 			parts.leg_l.rotation=step*0.095;parts.leg_r.rotation=-step*0.095
 			parts.arm_l.rotation=-step*0.06;parts.arm_r.rotation=step*0.06
 			root_part.position.y=-absf(step)*3.0
-			parts.head.position.y+=sin(clip_time*10.5)*1.4
+			parts.head.position.y+=sin(stride)*1.4*travel_weight
 	# Blend between authored poses over 180ms, including interruption/cancellation.
 	blend_time+=delta
 	var blend=smoothstep(0.0,0.18,blend_time)
@@ -193,6 +213,11 @@ func hit_envelope(source_outline):
 	# Precompute an input/render envelope for all current clips. Windows clips pixels
 	# outside this region, so a moving region causes redraws and limb cut-offs.
 	var saved=[clip,clip_time,duration,elapsed,reduced,blend_from.duplicate(true),blend_time]
+	var saved_gait=[locomotion_driven,gait_distance,gait_speed,gait_direction]
+	var saved_root=root_part.position
+	var saved_parts={}
+	for id in parts:saved_parts[id]=parts[id].transform
+	locomotion_driven=false
 	reduced=false
 	var cloud=PackedVector2Array()
 	for id in CLIPS:
@@ -204,5 +229,7 @@ func hit_envelope(source_outline):
 				for offset in [Vector2(-12,-12),Vector2(12,-12),Vector2(12,12),Vector2(-12,12)]:
 					cloud.append((mapped+offset).clamp(Vector2.ZERO,size))
 	clip=saved[0];clip_time=saved[1];duration=saved[2];elapsed=saved[3];reduced=saved[4];blend_from=saved[5];blend_time=saved[6]
-	_rest()
+	locomotion_driven=saved_gait[0];gait_distance=saved_gait[1];gait_speed=saved_gait[2];gait_direction=saved_gait[3]
+	root_part.position=saved_root
+	for id in parts:parts[id].transform=saved_parts[id]
 	return Geometry2D.convex_hull(cloud)

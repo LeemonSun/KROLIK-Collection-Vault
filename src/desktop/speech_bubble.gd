@@ -1,15 +1,18 @@
 extends Window
 ## Non-modal, bounded notification near Leemon. Full text remains in the chat.
 const V=preload("res://src/ui/visual_theme.gd")
+const Behavior=preload("res://src/desktop/companion_behavior.gd")
 var body
 var life
 var app
 var transition
+var follow_elapsed=0.0
 func _init():
 	visible=false;borderless=true;unresizable=true;unfocusable=true
 	transient=true;always_on_top=false;mouse_passthrough=true
 	disable_3d=true;size=Vector2i(300,160)
 func _ready():
+	set_process(false)
 	app=get_tree().root.get_node("App");title="Leemon — reply"
 	var panel=PanelContainer.new();panel.theme=V.make()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -24,13 +27,9 @@ func _ready():
 	life=Timer.new();life.one_shot=true;life.timeout.connect(dismiss);add_child(life)
 func say(text,anchor):
 	if app.paused or not app.store.data.settings.get("speech_bubbles",true):return false
-	var screen=DisplayServer.get_screen_from_rect(anchor)
-	if screen<0:screen=DisplayServer.get_primary_screen()
-	var bounds=DisplayServer.screen_get_usable_rect(screen)
-	size=Vector2i(mini(300,bounds.size.x),mini(160,bounds.size.y))
-	var left=anchor.position.x-size.x-10
-	if left<bounds.position.x:left=anchor.end.x+10
-	position=Vector2i(clampi(left,bounds.position.x,maxi(bounds.position.x,bounds.end.x-size.x)),clampi(anchor.position.y-24,bounds.position.y,maxi(bounds.position.y,bounds.end.y-size.y)))
+	_reposition(anchor)
+	follow_elapsed=0
+	set_process(true)
 	body.text=text.strip_edges().left(190)+( "…" if text.length()>190 else "")
 	if transition:transition.kill()
 	get_child(0).modulate.a=1;show()
@@ -39,7 +38,26 @@ func say(text,anchor):
 		get_child(0).modulate.a=0.3
 		transition=create_tween();transition.tween_property(get_child(0),"modulate:a",1.0,0.18)
 	life.start(clampf(text.length()/14.0+2,4,12));return true
+
+func _reposition(anchor):
+	var screen=DisplayServer.get_screen_from_rect(anchor)
+	if screen<0:screen=DisplayServer.get_primary_screen()
+	var bounds=DisplayServer.screen_get_usable_rect(screen)
+	size=Vector2i(mini(300,bounds.size.x),mini(160,bounds.size.y))
+	var next=Behavior.bubble_position(anchor,bounds,size)
+	if next!=position:position=next
+
+func _process(delta):
+	if not visible:return
+	follow_elapsed+=delta
+	if follow_elapsed<0.1:return
+	follow_elapsed=0
+	if app.paused or not is_instance_valid(app.desktop_companion) or not app.desktop_companion.visible or (is_instance_valid(app.chat_window) and app.chat_window.visible):
+		dismiss();return
+	_reposition(Rect2i(app.desktop_companion.position,app.desktop_companion.size))
+
 func dismiss():
+	set_process(false)
 	if transition:transition.kill()
 	if is_instance_valid(life):life.stop()
 	hide()

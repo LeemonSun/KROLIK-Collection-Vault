@@ -11,6 +11,7 @@ const ActionMenu = preload("res://src/desktop/action_menu.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 const BODY_PATH = "res://assets/characters/leemon_01/master_v1.png"
 const Behavior=preload("res://src/desktop/companion_behavior.gd")
+const Locomotion=preload("res://src/desktop/locomotion.gd")
 const Rig=preload("res://src/animation/leemon_rig.gd")
 const BASE_SIZE=Vector2i(210,232)
 var user_scale=1.0
@@ -63,6 +64,11 @@ var boundary_elapsed=0.0
 var idle_variation=45.0
 var region_updates=0
 var overlay_pending=false
+var locomotion=Locomotion.new()
+var reaction_clip=""
+var reaction_left=0.0
+var reaction_priority=0
+var pose_elapsed=0.0
 
 class Surface extends Control:
 	var owner_window
@@ -145,7 +151,7 @@ func _ready():
 	_update_hit_region()
 	host.window_input.connect(_input_event)
 	host.focus_entered.connect(_restore_opacity)
-	host.focus_exited.connect(func(): dragging=false; Input.use_accumulated_input=true)
+	host.focus_exited.connect(_release_drag)
 	host.close_requested.connect(func(): get_tree().quit())
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
 	last_display_bounds=bounds
@@ -169,6 +175,7 @@ func _input_event(event):
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				if is_instance_valid(app.speech_bubble):app.speech_bubble.dismiss()
+				_cancel_travel()
 				dragging = true
 				Input.use_accumulated_input=false
 				app.mark_active()
@@ -181,7 +188,7 @@ func _input_event(event):
 				drag_offset = press_position-position
 			else:
 				dragging = false
-				art.play("settle",0.8) if moved else art.play("idle")
+				perform_gesture("settle",0.8) if moved else _sync_pose()
 				Input.use_accumulated_input=true
 				if moved:
 					position=bounded(DisplayServer.mouse_get_position()-drag_offset)
@@ -224,6 +231,8 @@ func dash_random():
 	dash_to(candidate)
 
 func dash_to(candidate):
+	if dragging or not visible or app.paused:return
+	_cancel_travel()
 	original_position = position
 	target_position = bounded(candidate)
 	if reduced_motion:
@@ -235,6 +244,7 @@ func dash_to(candidate):
 	set_process(true)
 
 func set_reduced(value):
+	_cancel_travel()
 	reduced_motion = value
 	effect_kind = ""
 	effect_time = 0
@@ -245,34 +255,31 @@ func set_reduced(value):
 		art.set_reduced(value)
 
 func _process(delta):
+	if is_instance_valid(art) and art.suspended==visible:art.set_suspended(not visible)
 	if not visible or art == null:
 		return
 	if dragging:
 		app.mark_active()
 		if moved:position=bounded(drag_mouse-drag_offset)
+	if reaction_left>0:reaction_left=maxf(0,reaction_left-delta)
 	activity_elapsed+=delta
-	if activity_elapsed>=0.15 and not dragging and effect_kind not in ["walk","edge_enter","dash"]:
+	if activity_elapsed>=0.15 and not dragging:
 		activity_elapsed=0
-		if is_instance_valid(app.chat_window) and app.chat_window.visible:
-			var anchor=Rect2i(app.chat_window.position,app.chat_window.size)
-			if anchor!=last_chat_rect:last_chat_rect=anchor;park_delay=0.45
-			elif park_delay>0:
-				park_delay-=0.15
-				if park_delay<=0:park_near(anchor)
-		var next=Behavior.activity(app)
-		if next!=activity_key:
-			activity_key=next
-			if next!="idle":
-				art.play(next)
-				if next in ["scan","read","wait"]:pulse("scan" if next!="wait" else "wait")
-			elif art.clip in ["thinking","read","scan","wait","listen","sleep"]:art.play("settle",0.7)
+		if effect_kind not in ["walk","edge_enter","dash"]:
+			if is_instance_valid(app.chat_window) and app.chat_window.visible:
+				var anchor=Rect2i(app.chat_window.position,app.chat_window.size)
+				if anchor!=last_chat_rect:last_chat_rect=anchor;park_delay=0.45
+				elif park_delay>0:
+					park_delay-=0.15
+					if park_delay<=0:park_near(anchor)
+		_sync_pose()
 	if fx_time>0:
 		fx_time=maxf(0,fx_time-delta);canvas.queue_redraw()
 	# The static effect surface redraws only during the short effect, not each idle frame.
 	if art.clip=="idle" and not reduced_motion and not dragging:
 		idle_variation-=delta
 		if idle_variation<=0:
-			art.play(["stretch","rest","nod"][randi()%3],2.2);idle_variation=randf_range(55,95)
+			perform_gesture(["stretch","rest","nod"][randi()%3],2.2,0);idle_variation=randf_range(55,95)
 	elapsed += delta
 	boundary_elapsed+=delta
 	if boundary_elapsed>=1.0 and not dragging:
@@ -285,13 +292,20 @@ func _process(delta):
 		art.modulate.a=smoothstep(0.0,0.2,progress)
 		if progress>=1:
 			position=target_position;effect_kind="";art.modulate.a=1
-			art.play("hello",1.3)
+			perform_gesture("hello",1.3,2)
 	if effect_kind=="walk":
 		app.mark_active()
-		phase+=delta
-		var progress=clampf(phase/maxf(0.1,walk_duration),0,1)
-		position=bounded(Vector2i(Vector2(original_position).lerp(Vector2(target_position),smoothstep(0,1,progress))))
-		if progress>=1.0:effect_kind="";art.play("settle",0.65)
+		var travel=locomotion.sample(delta)
+		position=bounded(Vector2i(travel.position.round()))
+		if travel.stage=="prepare":
+			if art.clip!="turn":art.play("turn")
+		else:
+			if art.clip!="walk":art.play("walk")
+			art.set_locomotion(travel.direction,travel.speed,travel.distance)
+		if not travel.active:
+			position=bounded(target_position);effect_kind=""
+			art.clear_locomotion()
+			perform_gesture("settle",0.65,2)
 	if overlay_pending and app.desktop_actions.pid<=0:
 		overlay_pending=false
 		if OS.get_name()=="Windows" and is_instance_valid(tray):app.desktop_actions.request_overlay(DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,host.get_window_id()))
@@ -325,6 +339,7 @@ func get_texture():
 	return host.get_texture()
 
 func _restore_opacity():
+	_cancel_travel()
 	# A taskbar restore must never return an invisible animation frame.
 	if art:
 		art.modulate.a = 1.0
@@ -335,11 +350,16 @@ func show():
 	if not is_instance_valid(host): return
 	host.mode = Window.MODE_WINDOWED
 	host.show()
+	if is_instance_valid(art):art.set_suspended(false)
 	refresh_bounds()
 	position = bounded(position)
 	_restore_opacity()
 
 func hide():
+	_release_drag()
+	_cancel_travel()
+	if is_instance_valid(art):art.set_suspended(true)
+	if is_instance_valid(app.speech_bubble):app.speech_bubble.dismiss()
 	# The main Window cannot be hidden. Minimize keeps the taskbar recovery path.
 	if is_instance_valid(host): host.mode = Window.MODE_MINIMIZED
 
@@ -415,6 +435,7 @@ func clamp_to_bounds(candidate,bounds):
 
 func fit_to_bounds(bounds):
 	if not art or bounds.size.x<=0 or bounds.size.y<=0:return
+	_cancel_travel()
 	var fit=minf(1.0,minf(float(bounds.size.y)/float(BASE_SIZE.y*user_scale),float(bounds.size.x)/float(BASE_SIZE.x*user_scale)))*user_scale
 	var fitted=Vector2i(Vector2(BASE_SIZE)*fit)
 	host.min_size=fitted
@@ -441,11 +462,12 @@ func focus_target(identity):
 	var rect=identity.get("bounds",{})
 	if not rect is Dictionary or not rect.has_all(["x","y","width","height"]):return false
 	var key=str(identity.get("handle",""))+":"+JSON.stringify(rect)
-	if key==target_location_key:return false
-	target_location_key=key
+	if key==target_location_key and not Rect2i(position,size).intersects(Rect2i(int(rect.x),int(rect.y),int(rect.width),int(rect.height))):return false
 	var anchor=Rect2i(int(rect.x),int(rect.y),int(rect.width),int(rect.height))
 	if anchor.size.x<=0 or anchor.size.y<=0:return false
-	return park_near(anchor)
+	var moved_to_target=park_near(anchor)
+	if moved_to_target:target_location_key=key
+	return moved_to_target
 func park_near(anchor):
 	if not auto_move or dragging or app.paused or reduced_motion or not visible:return false
 	var target_screen=DisplayServer.get_screen_from_rect(anchor)
@@ -456,13 +478,54 @@ func return_home():
 	if not auto_move or dragging or app.paused or reduced_motion or not visible:return false
 	return walk_to(bounded(home_position))
 func walk_to(destination):
-	if dragging or not visible or app.paused:return false
-	if Vector2(destination).distance_to(Vector2(position))<8:return false
-	original_position=position;target_position=bounded(destination)
+	if dragging or not visible or app.paused or not art:return false
+	var target=bounded(destination)
+	if Vector2(target).distance_to(Vector2(position))<8:return false
+	if effect_kind=="walk" and target==target_position:return false
+	_cancel_travel()
+	original_position=position;target_position=target
 	if reduced_motion:position=target_position;return true
+	if not locomotion.start(position,target_position,180.0*user_scale):return false
 	effect_kind="walk";phase=0
-	walk_duration=clampf(Vector2(target_position).distance_to(Vector2(original_position))/160.0,0.7,2.4)
-	art.play("walk");return true
+	walk_duration=locomotion.travel_seconds+locomotion.anticipation
+	art.play("turn");return true
+
+func _cancel_travel():
+	locomotion.cancel()
+	if is_instance_valid(art):
+		art.clear_locomotion()
+		art.modulate.a=1.0
+	effect_kind="";effect_time=0
+	reaction_clip="";reaction_left=0;reaction_priority=0
+
+func _release_drag():
+	var was_dragging=dragging
+	dragging=false
+	Input.use_accumulated_input=true
+	if was_dragging and is_instance_valid(art):
+		position=bounded(position)
+		home_position=position
+		perform_gesture("settle",0.65,2)
+
+func perform_gesture(id,seconds=1.4,priority=1):
+	if not is_instance_valid(art) or reduced_motion or app.paused or dragging or not visible:return false
+	if id not in Rig.CLIPS or not is_finite(seconds) or seconds<=0:return false
+	if reaction_left>0 and priority<reaction_priority:return false
+	reaction_clip=id;reaction_left=clampf(seconds,0.2,8.0);reaction_priority=priority
+	_sync_pose()
+	return true
+
+func _sync_pose():
+	if not is_instance_valid(art) or dragging or reduced_motion or effect_kind in ["walk","edge_enter","dash","spawn"]:return
+	var next=Behavior.activity(app)
+	if next!=activity_key:
+		activity_key=next
+		if next in ["scan","read","wait"]:pulse("scan" if next!="wait" else "wait")
+	var desired=next
+	# Real work/listening takes precedence; short reactions never strand a busy pose.
+	if next=="idle" and reaction_left>0:desired=reaction_clip
+	if art.clip!=desired:art.play(desired)
+
 func pulse(kind):
 	if reduced_motion or app.paused:return
 	fx_kind=kind;fx_time=0.85
@@ -473,11 +536,11 @@ func walk_random():
 	walk_to(position+Vector2i(int(distance),0))
 func react(event_id):
 	if not art or reduced_motion:return false
-	if event_id=="dialogue.think_loop":return art.play("thinking")
-	elif event_id=="dialogue.explain_small":return art.play("talk",2.8)
+	if event_id=="dialogue.think_loop":return perform_gesture("thinking",1.0)
+	elif event_id=="dialogue.explain_small":return perform_gesture("talk",2.8)
 	elif event_id in ["work.note_saved","work.timer_notice"]:
-		pulse("success");return art.play("celebrate",1.4)
-	elif event_id in ["work.error_recover","work.model_missing"]:return art.play("error",1.8)
+		pulse("success");return perform_gesture("celebrate",1.4,2)
+	elif event_id in ["work.error_recover","work.model_missing"]:return perform_gesture("error",1.8,3)
 	return false
 
 func _update_hit_region():

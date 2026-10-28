@@ -1,14 +1,13 @@
 {
   "schema_version": 1,
-  "app_version": "0.17.0-desktop-preview",
-  "checkpoint_status": "0.17_saved_general_reasoning_limits_documented",
-  "current_task": "0.17 built/validated/saved: separate field selection/plain authoring/destination cleanup, one witness-driven repair, temporal guards, registry capability answers, private retained phase diagnostics. No default model/sampler change; general reasoning remains unsolved.",
-  "next_action": "Real Windows/hardware acceptance using docs/WINDOWS_ACCEPTANCE_017.md, and broader24case semantic comparison of compact instruction models/observation formats. Do not enable failed thinking/critic/vendor sampler or ship4B by assumption. General agent remains primary, not per-app models or replacementOffice. Inspect failed real semantic outputs before claims.",
+  "app_version": "0.18.0-desktop-preview",
+  "checkpoint_status": "0.18_behavior_implemented_testing_and_delivery_in_progress",
+  "current_task": "018 distance-driven bounded travel, task pose arbitration, interruption/pause fixes, hidden rig suspension and following speech bubbles. Source/native tests passed; build and delivery pending.",
+  "next_action": "Finish 018 export, packed checks and native delivery. Then real Windows acceptance; model reasoning still unresolved, general adaptive desktop agent remains primary.",
   "read_next": [
-    "docs/WORKFLOWS_017.md",
-    "reports/real_test_composer_real017.txt",
-    "reports/benchmark017-ab.json",
-    "docs/WINDOWS_ACCEPTANCE_017.md"
+    "docs/WORKFLOWS_018.md",
+    "docs/WINDOWS_ACCEPTANCE_017.md",
+    "reports/real_test_composer_real017.txt"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",

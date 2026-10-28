@@ -575,7 +575,7 @@ func _on_answer(text):
 		local_runtime.generation_busy = false
 		local_runtime.touch()
 	request_motion("dialogue.explain_small")
-	if is_instance_valid(desktop_companion) and not desktop_companion.reduced_motion:desktop_companion.art.play(quality.gesture(text),clampf(text.length()/45.0,2.0,6.0))
+	if is_instance_valid(desktop_companion) and not desktop_companion.reduced_motion:desktop_companion.perform_gesture(quality.gesture(text),clampf(text.length()/45.0,2.0,6.0))
 	state.transition("idle")
 	changed.emit()
 
@@ -644,6 +644,7 @@ func set_paused(value):
 		desktop_companion.set_reduced(true)
 	elif is_instance_valid(desktop_companion):
 		desktop_companion.set_reduced(motion.reduced_motion)
+		desktop_companion.auto_move=bool(store.data.settings.get("companion_roam",true))
 	motion.set_paused(value)
 	cancel()
 	changed.emit()

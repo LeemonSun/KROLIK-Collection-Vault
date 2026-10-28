@@ -1,9 +1,7 @@
-# Продолжение Leemon0.17
+# Продолжение Leemon0.18
 
-Начать с RESUME.md и recovery/session.json. Последние механизмы/ошибки: WORKFLOWS_017.md. Не начинать со старой companion-foundation или исторического0.14README.
+Начать с RESUME.md, recovery/session.json и WORKFLOWS_018.md. Не восстанавливать старую companion-foundation. GitHub storageonly; source capsule/bootstrap via tools/resume_bridge.js. БезCI/remote builds/deploy/subagents. Артефакты/хеши/IDs вsession, текущийhead в.resume-remote.json.
 
-Главный приоритет — общий адаптивный помощник, не набор ручных кнопок/модель на каждую программу.017добавляет separate field selection/plain composition, destination cleanup, canonical temporal checks, one witness-based repair, registry capability answers and retained private numeric inference diagnostics. Модель/обычныйsampler/quietprofileпрежние. Никакого автоматическогоSend/overwrite/произвольного кода из ответа.
+018: distance-driven quintic route/gait, task pose arbiter, reaction priorities/expiry, interruption and pause preference fixes, hidden rig suspension, exact envelope snapshot, bounded following speech bubbles. Same26procedural states, no new model/art. Tests use nativeX11synthetic tasks, not actualWindows actions/FPS.
 
-Ограничения серьёзные: реально наблюдались неправильная логика, выдуманное место и слабое китайское содержание. Не считать синтетическийPASS доказательством интеллекта; failed outputs сохранены.4B и режимы только исследованы, не вошли впродукт. Windows/sourceweb/hardware acceptance нужны. План WINDOWS_ACCEPTANCE_017.md;24case seed не полностью исполнен.
-
-Перед паузой session+checkpoint. GitHub storageonly, noCI/build/deploy, no subagents without authorization; не коммитить модели/ключи/userdata, не возвращать retired characters. ТолькоЛимон иодинстиль. Артефакты/IDs/хеши вsession.
+Общий адаптивный помощник остаётся целью. Следующее — Windows acceptance (добавки018вWORKFLOWS_018.md и WINDOWS_ACCEPTANCE_017.md),24case semantic seed and compact model/observation comparison.017failed semantic outputs сохранены, интеллект не решён. Новые тяжёлые модели не включать без сравнения. Никакого автоматическогоSend/overwrite/произвольного кода из ответов. Лицензии/историю/границы разрешений сохранять. ТолькоЛимон/одинстиль; retiredcharacters не возвращать.
