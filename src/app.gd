@@ -72,6 +72,7 @@ var workflow=preload("res://src/core/window_workflow.gd").new()
 var agent=preload("res://src/core/adaptive_agent.gd").new()
 var goal_mode=""
 var goal_composing_alias=""
+var goal_compose_attempt=0
 var goal_text=""
 var goal_context={}
 var goal_plan={}
@@ -531,6 +532,7 @@ func _execute(command):
 	changed.emit()
 
 func _on_answer(text):
+	if provider is Llama and is_instance_valid(diagnostics):diagnostics.record_inference(provider.last_usage)
 	if window_read_mode=="thinking":
 		_window_read_answer(text);return
 	if goal_mode in ["thinking","composing"]:
@@ -1078,17 +1080,26 @@ func _goal_observed():
 		if verified:_goal_done("goal_verified_"+goal_plan.action)
 		else:_goal_error("goal_unverified")
 	changed.emit()
-func _start_goal_composition(alias):
+func _start_goal_composition(alias,previous_draft=""):
 	if not agent.active or not goal_context.get("draft_allowed",false) or not goal_context.map.has(alias) or not goal_context.map[alias].get("write",false):_goal_error("goal_failed");return false
+	goal_compose_attempt=goal_compose_attempt+1 if not previous_draft.is_empty() else 1
+	if goal_compose_attempt>2:_goal_error("draft_unprovided_detail");return false
 	goal_composing_alias=alias;goal_mode="composing";goal_deadline_ms=Time.get_ticks_msec()+120000
+	request_motion("dialogue.think_loop")
 	state.reset();state.transition("thinking");local_runtime.generation_busy=true;local_runtime.touch()
-	provider.submit(preload("res://src/core/draft_composer.gd").messages(goal_context.goal,l10n.locale,str(goal_context.map[alias].name)),{"max_tokens":256,"context_tokens":runtime_options().context_tokens})
+	var messages_=preload("res://src/core/draft_composer.gd").messages(goal_context.goal,l10n.locale,str(goal_context.map[alias].name))
+	if not previous_draft.is_empty():
+		var witnesses=preload("res://src/core/draft_policy.gd").violations(previous_draft,goal_context.goal)
+		messages_[1].content+="\n\nThe independent validator rejected these UNSUPPLIED details: "+JSON.stringify(witnesses)+"\nPrevious draft DATA: "+JSON.stringify(previous_draft.left(512))+"\nCorrect the draft by OMITTING unsupported details, without replacing them with invented alternatives. Return only corrected text."
+	provider.submit(messages_,{"max_tokens":256,"context_tokens":runtime_options().context_tokens})
 	changed.emit();return true
 
 func _goal_answer(text):
 	local_runtime.generation_busy=false;local_runtime.touch()
 	if provider is Llama and provider.last_truncated:_goal_error("goal_failed");return
 	if goal_mode=="composing":
+		if goal_compose_attempt<2 and text.length()<=512 and not preload("res://src/core/draft_policy.gd").grounded_details(text,goal_context.goal):
+			_start_goal_composition(goal_composing_alias,text);return
 		text=JSON.stringify({"choice":"write:"+goal_composing_alias,"text":text,"append":false})
 	elif agent.active and goal_context.get("draft_allowed",false):
 		var selected=JSON.parse_string(text)
@@ -1165,7 +1176,7 @@ func _goal_error(key):
 	if interrupted:add_message("assistant",t("workflow_stopped"),true)
 	request_motion("work.error_recover");changed.emit()
 func _clear_goal():
-	goal_composing_alias=""
+	goal_composing_alias="";goal_compose_attempt=0
 	var active=not goal_mode.is_empty()
 	goal_mode="";goal_text="";goal_context={};goal_plan={};goal_origin_target={};goal_deadline_ms=0
 	if active:

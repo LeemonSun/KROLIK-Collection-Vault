@@ -1,0 +1,16 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+REAL_COMPOSER017 {"draft":"Приглашаем вас на встречу завтра, чтобы обсудить важные вопросы.","goal":"Составь в поле Body короткое приглашение на встречу завтра, одним предложением.","locale":"ru","mode":"proposal","raw_draft":"Приглашаем вас на встречу завтра, чтобы обсудить важные вопросы.","usage":{"cache_n":0.0,"completion_tokens":16.0,"elapsed_ms":13834,"predicted_ms":3379.994,"predicted_n":16.0,"preflight_tokens":132,"prompt_ms":9414.637,"prompt_n":132.0,"prompt_tokens":132.0,"prompt_tokens_details":{"cached_tokens":0.0},"reasoning_budget":0,"template_ms":340,"tokenize_ms":837,"total_ms":15011,"total_tokens":148.0}}
+REAL_COMPOSER017 {"draft":"","goal":"Compose a one-sentence invitation for a meeting tomorrow in Body.","locale":"en","mode":"","raw_draft":"\"Please join us for a meeting tomorrow at 2 PM in Conference Room A.\"","usage":{"cache_n":0.0,"completion_tokens":18.0,"elapsed_ms":13671,"predicted_ms":5725.269,"predicted_n":18.0,"preflight_tokens":128,"prompt_ms":6899.081,"prompt_n":128.0,"prompt_tokens":128.0,"prompt_tokens_details":{"cached_tokens":0.0},"reasoning_budget":0,"template_ms":660,"tokenize_ms":833,"total_ms":15164,"total_tokens":146.0}}
+REAL_COMPOSER017 {"draft":"","goal":"请写一句邀请明天参加会议的话，填入Body。","locale":"zh-Hans","mode":"","raw_draft":"明天上午 10 点，请准时参加公司年度战略会议。","usage":{"cache_n":0.0,"completion_tokens":17.0,"elapsed_ms":9331,"predicted_ms":4639.649,"predicted_n":17.0,"preflight_tokens":127,"prompt_ms":3518.582,"prompt_n":127.0,"prompt_tokens":127.0,"prompt_tokens_details":{"cached_tokens":0.0},"reasoning_budget":0,"template_ms":661,"tokenize_ms":836,"total_ms":10828,"total_tokens":144.0}}
+COMPOSER_REAL017_TESTS: 16 checks, 2 failures; real pinned2B and App, synthetic Windows UIA only
+ERROR: Actual app receives a relevant composed proposal en
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://tests/test_composer_real017.gd:8)
+       [1] run (res://tests/test_composer_real017.gd:24)
+ERROR: Actual app receives a relevant composed proposal zh-Hans
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://tests/test_composer_real017.gd:8)
+       [1] run (res://tests/test_composer_real017.gd:24)

@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "model_sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "candidate": null,
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "cases": [
+    {
+      "id": "ru_logic",
+      "variant": "vendor",
+      "answer": "Согласно правилу бинарной логики (чтобы каждое утверждение было либо истинным, либо ложным), при условии предположения о её логической непротиворечивости и полноте, **предложение «Это предложение ложно» является стритологически тавтологическим**.\n\nЕсли оно истинно — тогда сам по себе факт его истинности означает, что высказанное в нём утверждение (о логической невозможности) ложно. Это создаёт парадокс, так как утверждение говорит о несовместим",
+      "reasoning_chars": 0,
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 128,
+        "prompt_tokens": 168,
+        "total_tokens": 296,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 9096.593,
+        "prompt_per_token_ms": 54.14638690476191,
+        "prompt_per_second": 18.468452969150096,
+        "predicted_n": 128,
+        "predicted_ms": 33169.676,
+        "predicted_per_token_ms": 261.17855118110236,
+        "predicted_per_second": 3.828798327725601
+      },
+      "wall_ms": 42290
+    },
+    {
+      "id": "en_logic",
+      "variant": "vendor",
+      "answer": "This statement **is false**. The premise itself is the claim you are judging, which creates a logical paradox (asserting that something is factually wrong without providing evidence), but within standard logic and semantics, a sentence stating \"this sentence is false\" is generally considered nonsensical or self-defeating because it lacks context.\n\nHowever, if interpreted as a test of **Russellian irony**:\n1.  **The Truth Value:** The object you are referring to (the sentence itself) exists and is true in its own right, so the assertion that it is false is incorrect about the *object*, even though the *statement",
+      "reasoning_chars": 0,
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 128,
+        "prompt_tokens": 164,
+        "total_tokens": 292,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 164,
+        "prompt_ms": 6797.566,
+        "prompt_per_token_ms": 41.448573170731706,
+        "prompt_per_second": 24.126282848890323,
+        "predicted_n": 128,
+        "predicted_ms": 28840.645,
+        "predicted_per_token_ms": 227.09169291338583,
+        "predicted_per_second": 4.403507619195063
+      },
+      "wall_ms": 36170
+    },
+    {
+      "id": "zh-Hans_logic",
+      "variant": "vendor",
+      "answer": "根据逻辑规则，“这句话是假的”这一命题本身**既不是真是假，而是为假**。\n\n推理如下：\n1. 前提 A：“这句话（指代‘这句话是假的’这个陈述）是真的。” —— 这是该命题隐含的、但未被断言的直接真值。\n2. 结论 B：“这句话（指代‘这句话是假的’这个陈述）是假的。” —— 这是一个新的陈述，意在挑战上述前提。\n\n若将“这句话是假的”作为整体对象来评估真假：\n*   如果该陈述为**真**，那么它的内容必须是事实。",
+      "reasoning_chars": 0,
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 128,
+        "prompt_tokens": 166,
+        "total_tokens": 294,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 166,
+        "prompt_ms": 9982.909,
+        "prompt_per_token_ms": 60.138006024096384,
+        "prompt_per_second": 16.62841963199304,
+        "predicted_n": 128,
+        "predicted_ms": 33802.175,
+        "predicted_per_token_ms": 266.15885826771654,
+        "predicted_per_second": 3.7571546801352276
+      },
+      "wall_ms": 44035
+    },
+    {
+      "id": "ru_draft",
+      "variant": "vendor",
+      "answer": "Поздравляю с началом встречи! 🎉 (Всего один предложное приветствие без сроков и мест).",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 27,
+        "prompt_tokens": 178,
+        "total_tokens": 205,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 40,
+        "prompt_ms": 2225.575,
+        "prompt_per_token_ms": 55.639374999999994,
+        "prompt_per_second": 17.972883412151916,
+        "predicted_n": 27,
+        "predicted_ms": 8039.556,
+        "predicted_per_token_ms": 309.21369230769227,
+        "predicted_per_second": 3.2340094403223265
+      },
+      "wall_ms": 10754
+    },
+    {
+      "id": "en_draft",
+      "variant": "vendor",
+      "answer": "Join us tomorrow for an important discussion on our shared goals, no further communication required beyond this message.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 21,
+        "prompt_tokens": 175,
+        "total_tokens": 196,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 37,
+        "prompt_ms": 3935.84,
+        "prompt_per_token_ms": 106.37405405405406,
+        "prompt_per_second": 9.400788649945119,
+        "predicted_n": 21,
+        "predicted_ms": 10027.722,
+        "predicted_per_token_ms": 501.3861,
+        "predicted_per_second": 1.994470927694246
+      },
+      "wall_ms": 14836
+    },
+    {
+      "id": "zh-Hans_draft",
+      "variant": "vendor",
+      "answer": "请明天下午三点参加我的会议，无需更改任何既定内容。 \n\n*(注：此回答基于您明确要求的“不添加其他信息”这一约束条件；由于我无法确认您的具体会议细节，因此仅能表达邀请意向而非提供实质性日程安排或执行 PC 操作以展示事实。)*",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 64,
+        "prompt_tokens": 169,
+        "total_tokens": 233,
+        "prompt_tokens_details": {
+          "cached_tokens": 140
+        }
+      },
+      "timings": {
+        "cache_n": 140,
+        "prompt_n": 29,
+        "prompt_ms": 2536.862,
+        "prompt_per_token_ms": 87.47800000000001,
+        "prompt_per_second": 11.431445620613182,
+        "predicted_n": 64,
+        "predicted_ms": 21658.084,
+        "predicted_per_token_ms": 343.7791111111111,
+        "predicted_per_second": 2.9088445681529356
+      },
+      "wall_ms": 24849
+    }
+  ],
+  "scope": "exploratory synthetic semantic cases; not Windows/product performance or statistical quality proof",
+  "startup_ms": 4776,
+  "worker_peak_rss_bytes": 2346201088,
+  "worker_cpu_seconds": 347.942356,
+  "rss_method": "Linux kernel RUSAGE_CHILDREN after owned worker exit; not Windows/app-total RSS"
+}

@@ -4,6 +4,8 @@
 
 | Проверка | Результат |
 | --- | --- |
+| diagnostics017 | PASS |
+| capability017 | PASS |
 | composer017 | PASS |
 | reasoning016 | PASS |
 | draft016 | PASS |

@@ -31,11 +31,11 @@
     {
       "id": "qwen35-4b",
       "role": "quality_comparison",
-      "status": "candidate",
+      "status": "dev_pilot_not_integrated",
       "declared_license": "Apache-2.0",
       "source": "https://huggingface.co/Qwen/Qwen3.5-4B",
       "resource_group": "shared_llm",
-      "integration_gate": "Not an obligatory base download; compare resource/quality"
+      "integration_gate": "Pilot showed partial semantic improvement only; no production replacement/default or Windows resource proof. Keep candidate outside distribution."
     },
     {
       "id": "llama-cpu",

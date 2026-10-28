@@ -9,7 +9,9 @@ static func unique_field(context):
 		if not node.get('enabled',false) or not node.get('write',false):continue
 		writable.append(alias)
 		var name=str(node.get('name','')).to_lower()
-		if name.length()>=2 and name in str(context.goal).to_lower():named.append(alias)
+		var rx=RegEx.new();var escaped=name
+		for character in ['\\','.','^','$','|','?','*','+','(',')','[',']','{','}']:escaped=escaped.replace(character,'\\'+character)
+		if rx.compile('(*UCP)\\b'+escaped+'\\b')==OK and name.length()>=2 and rx.search(str(context.goal).to_lower()):named.append(alias)
 	if named.size()==1:return named[0]
 	return writable[0] if writable.size()==1 else ''
 static func content_goal(goal,field_name):
@@ -24,7 +26,13 @@ static func content_goal(goal,field_name):
 static func messages(goal,locale,field_name=""):
 	goal=content_goal(goal,field_name)
 	var language={'ru':'Russian','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return [{'role':'system','content':'Write only the requested draft text in '+language+', unless another language is requested. The application handles field selection and typing after user review. Do not discuss UI actions, claim anything was done, output JSON or add a heading. Keep the draft natural and short, at most512characters. Use only supplied factual details: do not invent a time, place, name, date, duration, address or agreement. If a detail is missing, leave it unspecified. This is composition, not tool planning.'},{'role':'user','content':goal}]
+	var constraint={
+		'ru':'Верни только готовый короткий текст. Используй только явно указанные факты. Не добавляй неуказанные время, место, имена, дату, длительность или договорённости. Если детали нет, пропусти её. Без заголовка, JSON и описания работы с программой.',
+		'en':'Return only the short finished text. Use only explicitly supplied facts. Do not add an unspecified time, location, name, date, duration or agreement. Omit missing details. No heading, JSON or discussion of editing software.',
+		'zh-Hans':'只返回简短的成稿。仅使用明确提供的事实，不要添加未指定的时间、地点、人名、日期、时长或约定。缺少的信息请省略。不要标题、JSON或软件操作说明。'
+	}.get(locale,'Return only the draft; omit any unspecified factual details.')
+	return [{'role':'system','content':'Draft concise natural text in '+language+', unless another language is requested. The text is reviewed before use; no action is executed. At most512characters.'},{'role':'user','content':goal+'\n\n'+constraint}]
+
 static func selection(context):
 	var result=context.duplicate(true)
 	result.schema={'type':'object','additionalProperties':false,'properties':{'choice':{'type':'string','enum':context.choices}},'required':['choice']}

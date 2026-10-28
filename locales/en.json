@@ -326,7 +326,7 @@
   "file_status_backup_failed": "backup could not be verified",
   "file_status_write_failed": "file is locked or write access is unavailable",
   "file_status_unverified": "write could not be verified; inspect the file and backup",
-  "self_updates": "Added short composed drafts for supported fields of a selected application: review the complete text before approving entry. The agent re-observes after verified steps. Compact choices now bind each action to its supported element. Universal autopilot is not ready.",
+  "self_updates": "Field selection and text composition are now separate. Independent checks can request one repair of unsupported numeric/time details before preview. Supported-tool questions use the app registry. General reasoning of the small model is still limited.",
   "ai_memory_low": "Not enough available RAM to start the AI right now. Lightweight tools still work; free some memory and retry.",
   "queue_unavailable": "The queue is full or this task requires a separate start. Your text remains in the input.",
   "queue_pending": "queued: {count}",
@@ -432,11 +432,13 @@
   "metric_reasoning_budget": "Reasoning budget",
   "goal_status_composing": "Composing text",
   "cap_timer": "Yes. I can start a timer and notify you when it ends. For example: “timer for 5 minutes”.",
-  "cap_notes": "Yes. I can save a note and show it later. For example: “note: buy bread”.",
+  "cap_notes": "Yes. I can save a note and show it later. For example: “remember: buy bread”.",
   "cap_reminder": "Yes. I can save a reminder. Tell me what to remind you about and after how long.",
   "cap_math": "Yes. Arithmetic uses a separate calculator, without conversational inference. For example: “calculate (12 + 8) * 3”.",
   "cap_screen": "I can analyze one screenshot on request after vision is installed. I do not continuously watch the screen.",
   "cap_web": "I can read bounded excerpts from a public HTTPS page. Provide its address; login pages and complex JavaScript are not supported yet.",
   "cap_files": "I can propose changes to a selected supported file, with preview, approval and backup. Universal document editing is not ready.",
-  "cap_unavailable": "That capability is not connected yet. No action was performed."
+  "cap_unavailable": "That capability is not connected yet. No action was performed.",
+  "metrics_partial": "Process measurement is partial: some data is unavailable.",
+  "goal_status_repairing": "Correcting the draft"
 }

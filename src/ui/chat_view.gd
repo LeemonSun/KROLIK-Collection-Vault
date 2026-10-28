@@ -284,7 +284,7 @@ func refresh():
 	var voice_busy=app.speech_input.busy()
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
-	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
+	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_repairing" if app.goal_mode=="composing" and app.goal_compose_attempt>1 else "goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
 	if app.answer_reviewing:status_label.text=app.t("answer_reviewing")
 	if app.public_page.busy:status_label.text=app.t("web_stage_"+app.public_page.stage)

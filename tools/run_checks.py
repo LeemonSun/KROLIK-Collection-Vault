@@ -20,6 +20,7 @@ def main():
     env = dict(os.environ)
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("diagnostics017",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_diagnostics017.gd","--","--test-mode"]),
         ("capability017",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_capability017.gd","--","--test-mode"]),
         ("composer017",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_composer017.gd","--","--test-mode"]),
         ("reasoning016",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_reasoning016.gd","--","--test-mode"]),
@@ -81,11 +82,11 @@ def main():
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
-        "", "Leemon 0.15: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
+        "", "Leemon 0.17: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
         "Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.",
         "Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.",
         "Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.",
-        "Qwen3.5-2B Q4: прежние text/vision fixtures проверены отдельно; качество нового adaptive loop настоящей моделью не измерено; научная точность ограничена. Полный offline-пакет использует AI/ рядом с EXE, лёгкий пакет предлагает явную установку.",
+        "Qwen3.5-2B Q4: прежние text/vision fixtures проверены отдельно; узкий adaptive/draft pilot выполнен, его ошибки и ограничения см. WORKFLOWS_017.md; научная точность ограничена. Полный offline-пакет использует AI/ рядом с EXE, лёгкий пакет предлагает явную установку.",
         "ASR реализован через локальный Whisper. Разовый анализ экрана реализован; real fixture в vision_real.txt. Общие Windows UIA-действия и явное чтение доступного текста выбранного окна с выдержками реализованы, но Windows приёмка впереди. Собственный голос отсутствует; explicit public HTTPS excerpts reader имеет ограничения, см. WORKFLOWS_014.md. Каталог движений — план производства, а не готовые клипы.",
     ]
     (reports / "VALIDATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

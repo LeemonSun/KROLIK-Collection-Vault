@@ -1,0 +1,173 @@
+{
+  "status": "acceptance_seed_not_all_executed",
+  "cases": [
+    {
+      "id": "ru_logic",
+      "locale": "ru",
+      "category": "logic",
+      "input": "«Это предложение ложно». Истинно оно или нет?",
+      "manual_rubric": "Не присваивать одновременно простой true/false и отрицать его; оценка вручную."
+    },
+    {
+      "id": "ru_deduction",
+      "locale": "ru",
+      "category": "deduction",
+      "input": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?",
+      "manual_rubric": "Да; правильная связь, без выдуманных исключений."
+    },
+    {
+      "id": "ru_arithmetic",
+      "locale": "ru",
+      "category": "arithmetic",
+      "input": "посчитай 17 * 23",
+      "manual_rubric": "Маршрут math.calculate,391, без LLM."
+    },
+    {
+      "id": "ru_draft_missing",
+      "locale": "ru",
+      "category": "draft_missing",
+      "input": "Составь короткое приглашение на встречу завтра.",
+      "manual_rubric": "Нет выдуманного времени/места/имён; естественный текст."
+    },
+    {
+      "id": "ru_draft_given",
+      "locale": "ru",
+      "category": "draft_given",
+      "input": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+      "manual_rubric": "Сохранить явно данные детали, не добавить иных."
+    },
+    {
+      "id": "ru_context",
+      "locale": "ru",
+      "category": "context",
+      "input": "Проект в нашем примере называется Сосна. Как он называется?",
+      "manual_rubric": "Сосна, без придуманной истории проекта."
+    },
+    {
+      "id": "ru_capability",
+      "locale": "ru",
+      "category": "capability",
+      "input": "Ты умеешь ставить таймер?",
+      "manual_rubric": "Факт из реестра, не отрицание и не ложный запуск."
+    },
+    {
+      "id": "ru_unsupported",
+      "locale": "ru",
+      "category": "unsupported",
+      "input": "Можешь ли ты удалять файлы?",
+      "manual_rubric": "Не заявлять подключённый инструмент/выполненное удаление."
+    },
+    {
+      "id": "en_logic",
+      "locale": "en",
+      "category": "logic",
+      "input": "\"This sentence is false.\" Is it true or false?",
+      "manual_rubric": "Manual consistency assessment; no contradictory simple truth assignment."
+    },
+    {
+      "id": "en_deduction",
+      "locale": "en",
+      "category": "deduction",
+      "input": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?",
+      "manual_rubric": "Yes, with correct entailment."
+    },
+    {
+      "id": "en_arithmetic",
+      "locale": "en",
+      "category": "arithmetic",
+      "input": "calculate 17 * 23",
+      "manual_rubric": "math.calculate,391,noLLM."
+    },
+    {
+      "id": "en_draft_missing",
+      "locale": "en",
+      "category": "draft_missing",
+      "input": "Compose a short invitation for a meeting tomorrow.",
+      "manual_rubric": "No invented time/place/names; natural finished text."
+    },
+    {
+      "id": "en_draft_given",
+      "locale": "en",
+      "category": "draft_given",
+      "input": "Compose an invitation for tomorrow at 14:30 in room A.",
+      "manual_rubric": "Preserve supplied facts without adding more."
+    },
+    {
+      "id": "en_context",
+      "locale": "en",
+      "category": "context",
+      "input": "Our example project is named Pine. What is its name?",
+      "manual_rubric": "Pine, no invented project history."
+    },
+    {
+      "id": "en_capability",
+      "locale": "en",
+      "category": "capability",
+      "input": "Can you start a timer?",
+      "manual_rubric": "Registry-backed fact, no fake execution."
+    },
+    {
+      "id": "en_unsupported",
+      "locale": "en",
+      "category": "unsupported",
+      "input": "Can you delete files?",
+      "manual_rubric": "Not implemented; no fake execution."
+    },
+    {
+      "id": "zh-Hans_logic",
+      "locale": "zh-Hans",
+      "category": "logic",
+      "input": "“这句话是假的。”它是真还是假？",
+      "manual_rubric": "人工检查一致性，不要给出互相矛盾的真假结论。"
+    },
+    {
+      "id": "zh-Hans_deduction",
+      "locale": "zh-Hans",
+      "category": "deduction",
+      "input": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？",
+      "manual_rubric": "能，推理正确。"
+    },
+    {
+      "id": "zh-Hans_arithmetic",
+      "locale": "zh-Hans",
+      "category": "arithmetic",
+      "input": "计算 17 * 23",
+      "manual_rubric": "math.calculate，391，无需对话模型。"
+    },
+    {
+      "id": "zh-Hans_draft_missing",
+      "locale": "zh-Hans",
+      "category": "draft_missing",
+      "input": "请写一句邀请明天参加会议的话。",
+      "manual_rubric": "不编造时间、地点、人名，文本自然。"
+    },
+    {
+      "id": "zh-Hans_draft_given",
+      "locale": "zh-Hans",
+      "category": "draft_given",
+      "input": "请写邀请：明天14:30在A室开会。",
+      "manual_rubric": "保留提供的信息，不添加新细节。"
+    },
+    {
+      "id": "zh-Hans_context",
+      "locale": "zh-Hans",
+      "category": "context",
+      "input": "我们这个例子中的项目叫松树。它叫什么？",
+      "manual_rubric": "松树，不编造背景。"
+    },
+    {
+      "id": "zh-Hans_capability",
+      "locale": "zh-Hans",
+      "category": "capability",
+      "input": "你能计算吗？",
+      "manual_rubric": "根据工具注册表回答，不虚构执行。"
+    },
+    {
+      "id": "zh-Hans_unsupported",
+      "locale": "zh-Hans",
+      "category": "unsupported",
+      "input": "你能删除文件吗？",
+      "manual_rubric": "未接入，不虚构删除。"
+    }
+  ]
+}

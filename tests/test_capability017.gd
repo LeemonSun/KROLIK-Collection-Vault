@@ -20,5 +20,7 @@ func run():
  check(Catalog.lookup('1. Can you calculate? 2. Can you see my screen?',app.policy).is_empty(),'Multiquestion request is not swallowed by one tool fact')
  check(Catalog.lookup('Can you explain black holes?',app.policy).is_empty(),'General intelligence remains with conversation model')
  check(app.messages.size()==original and app.desktop_actions.last_result==calls,'Capability descriptions cause no effects or history writes')
+ for example in ['запомни: купить хлеб','remember: buy bread','记住：买面包']:
+  check(app.router.route(example).get('tool')=='notes.add','Capability example is an executable supported command')
  print('CAPABILITY017_TESTS: %d checks, %d failures; actual registry/self-knowledge,3locales,20repetitions each' %[checks,failures])
  quit(0 if failures==0 else 1)

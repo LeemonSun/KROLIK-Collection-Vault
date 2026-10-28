@@ -332,5 +332,7 @@
   ],
   "scope": "exploratory synthetic semantic cases; not Windows/product performance or statistical quality proof",
   "startup_ms": 3877,
-  "worker_peak_rss_bytes": 0
+  "worker_peak_rss_bytes": null,
+  "rss_measurement_valid": false,
+  "rss_caveat": "Initial procfs sampler could not reliably resolve owned process across namespace; discard reported values, do not treat as zero or small usage."
 }

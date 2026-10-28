@@ -32,9 +32,146 @@
         "predicted_per_second": 1.9614478006085856
       },
       "wall_ms": 73687
+    },
+    {
+      "id": "en_logic",
+      "variant": "baseline",
+      "answer": "The sentence \"This sentence is false\" is a classic paradox (the Liar Paradox). It cannot be consistently classified as either strictly true or strictly false without creating a logical contradiction.\n\n*   If the sentence is **true**, then what it states must hold, meaning it is **false**.\n*   If the sentence is **false**, then its negation is true, meaning the sentence is actually **true**.\n\nBecause it leads to an infinite loop of contradiction, it is logically incoherent rather than simply true or false.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 110,
+        "prompt_tokens": 164,
+        "total_tokens": 274,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 164,
+        "prompt_ms": 14418.392,
+        "prompt_per_token_ms": 87.9170243902439,
+        "prompt_per_second": 11.374361301870556,
+        "predicted_n": 110,
+        "predicted_ms": 67049.041,
+        "predicted_per_token_ms": 615.1288165137614,
+        "predicted_per_second": 1.6256757497844003
+      },
+      "wall_ms": 82952
+    },
+    {
+      "id": "zh-Hans_logic",
+      "variant": "baseline",
+      "answer": "这是一个逻辑悖论（说谎者悖论）。如果这句话是真的，那么它的内容（“它是假的”）就成立，导致它是假的；如果它是假的，那么它的内容就是假的，意味着它实际上是假的，这又导致它是真的。因此，在经典逻辑框架下，这句话既不能被定义为真，也不能被定义为假。",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 73,
+        "prompt_tokens": 166,
+        "total_tokens": 239,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 166,
+        "prompt_ms": 16906.837,
+        "prompt_per_token_ms": 101.8484156626506,
+        "prompt_per_second": 9.81851306663689,
+        "predicted_n": 73,
+        "predicted_ms": 40663.837,
+        "predicted_per_token_ms": 564.7755138888889,
+        "predicted_per_second": 1.7706150061539938
+      },
+      "wall_ms": 59818
+    },
+    {
+      "id": "ru_draft",
+      "variant": "baseline",
+      "answer": "Завтра встретимся.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 178,
+        "total_tokens": 186,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 40,
+        "prompt_ms": 6954.175,
+        "prompt_per_token_ms": 173.854375,
+        "prompt_per_second": 5.751940381137949,
+        "predicted_n": 8,
+        "predicted_ms": 3623.373,
+        "predicted_per_token_ms": 517.6247142857143,
+        "predicted_per_second": 1.9319015734786342
+      },
+      "wall_ms": 12475
+    },
+    {
+      "id": "en_draft",
+      "variant": "baseline",
+      "answer": "You are invited to the meeting tomorrow.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 175,
+        "total_tokens": 184,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 37,
+        "prompt_ms": 4692.682,
+        "prompt_per_token_ms": 126.82924324324324,
+        "prompt_per_second": 7.884616941868212,
+        "predicted_n": 9,
+        "predicted_ms": 4389.301,
+        "predicted_per_token_ms": 548.662625,
+        "predicted_per_second": 1.822613669010168
+      },
+      "wall_ms": 10200
+    },
+    {
+      "id": "zh-Hans_draft",
+      "variant": "baseline",
+      "answer": "明天请参加会议。",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 5,
+        "prompt_tokens": 169,
+        "total_tokens": 174,
+        "prompt_tokens_details": {
+          "cached_tokens": 140
+        }
+      },
+      "timings": {
+        "cache_n": 140,
+        "prompt_n": 29,
+        "prompt_ms": 3512.33,
+        "prompt_per_token_ms": 121.1148275862069,
+        "prompt_per_second": 8.256627367018476,
+        "predicted_n": 5,
+        "predicted_ms": 2061.833,
+        "predicted_per_token_ms": 515.45825,
+        "predicted_per_second": 1.940021330534529
+      },
+      "wall_ms": 6124
     }
   ],
   "scope": "exploratory synthetic semantic cases; not Windows/product performance or statistical quality proof",
   "startup_ms": 19368,
-  "worker_peak_rss_bytes": 2125824
+  "worker_peak_rss_bytes": null,
+  "rss_measurement_valid": false,
+  "rss_caveat": "Initial procfs sampler could not reliably resolve owned process across namespace; discard reported values, do not treat as zero or small usage."
 }

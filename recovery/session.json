@@ -1,13 +1,14 @@
 {
   "schema_version": 1,
   "app_version": "0.17.0-desktop-preview",
-  "checkpoint_status": "0.17_active_composition_and_metrics",
-  "current_task": "0.17 active: separated plain authoring from action planning and destination cleanup; registry-grounded capability questions; private numeric stage metrics in diagnostics; controlled bounded-reasoning pilot failed to fix2Blogic.4B dev comparison running.",
-  "next_action": "Collect4B benchmark session92197. Then real App composer rerun after destination cleanup (first017semantic trial failed). Finish acceptance/benchmark harness tests, final source/native checks, package and save artifacts. No new model default or automatic thinking enabled. Preserve all failed semantic evidence.",
+  "checkpoint_status": "0.17_final_build_and_regressions",
+  "current_task": "0.17 final code: separate field selection/plain authoring with destination cleanup; canonical temporal grounding and one witness-driven repair; capability registry answers; private numeric phase diagnostics retained after unload and partial process labels.2B/128thinking/vendor/4B pilots completed; no production model or sampler switch.",
+  "next_action": "Collect source36groups session71324 and final export43591. Run finalPCK headless newgroups+nativecomposer/general/copy, CRC. SaveZIP/report with fresh library-tools-017, update artifactIDs/RESUME/session and final GitHub checkpoint. General reasoning remains unsolved; real composer latest18checks/1failure plus manual RU invented office. No IQ success claim.",
   "read_next": [
     "docs/WORKFLOWS_017.md",
+    "reports/real_test_composer_real017.txt",
     "reports/benchmark017-ab.json",
-    "reports/real_test_composer_real017.txt"
+    "docs/WINDOWS_ACCEPTANCE_017.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
@@ -25,12 +26,11 @@
     "Real2B draft/reasoning trial failed: invented English meeting time and wrong liar paradox, even after one review. Experimental extra review is OFF by default; current model IQ not solved. Full15question test not validated."
   ],
   "validation": [
-    "33source groups PASS in fresh isolated profiles",
-    "Final exported PCK smoke+25adaptive+47draft/authority+21reasoning behavior+45copy/selfknowledge PASS",
-    "Final PCK real X11:31copy60messages+33draft review+156general checks PASS; ZIPCRC PASS",
-    "Actual pinned2B CPU1thread synthetic two-stage UIA6/6expected choices acrossRU/EN/zh; baseline5/6/intermediate4/6, caveats AGENT016_COMPARISON.json",
-    "Actual draft/reasoning quality trial FAILED2/13 assertions; manual inspection additionally confirmed wrong liar-paradox final after review despite broad keyword assertion. No semantic IQ success claimed. Extra review OFF by default; narrow numeric/address gate verified with failing observed2PM example.",
-    "Actual Windows/hardware acceptance and full15question semantic test not completed"
+    "Earlier36sourcegroups PASS; final36rerun pending after small last changes",
+    "Composer32+capability307+diagnostics12 deterministic checks PASS; HTTP33/context28 protocol checks PASS",
+    "Native new composing stage24checks PASS on X11; finalPCK/native regressions pending",
+    "Actual App2B latest17pilot18checks/1failure (zh meeting keyword absent); manual RU invented office remains. All3proposals required approval, no native Windows writes. Independent repair synthetic tests prove bounds/cancel, not universal semantic correctness.",
+    "2Bbaseline and128thinking sixfixed semantic cases each, vendor sixcases and4B sixcases retained. No reliable general logic fix or production model/sampler change. Earlier invalid RSS measurements discarded; vendor worker Linux kernelpeak2346201088bytes, not app-total/Windows or a quota."
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.16.0.zip",

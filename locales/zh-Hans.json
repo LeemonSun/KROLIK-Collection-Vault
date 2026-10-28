@@ -326,7 +326,7 @@
   "file_status_backup_failed": "无法验证备份",
   "file_status_write_failed": "文件被占用或无写入权限",
   "file_status_unverified": "无法验证写入，请检查文件和备份",
-  "self_updates": "新增为所选应用的受支持字段拟写短草稿：确认前完整预览文本。每个验证步骤后重新观察窗口。精简选择将动作与支持该动作的元素绑定，尚非通用自动驾驶。",
+  "self_updates": "已将字段选择和文本撰写分开。独立检查可在预览前要求修正一次未提供的数字或时间信息。工具能力问题根据应用注册表回答，小模型的通用推理仍有限。",
   "ai_memory_low": "当前可用内存不足，无法启动 AI。轻量工具仍可使用，请释放内存后重试。",
   "queue_unavailable": "队列已满，或此任务需要单独启动。输入框保留了文本。",
   "queue_pending": "排队：{count}",
@@ -431,12 +431,14 @@
   "metric_predicted_n": "已生成令牌",
   "metric_reasoning_budget": "推理预算",
   "goal_status_composing": "正在撰写文本",
-  "cap_timer": "可以设置计时器，到时提醒。例如：“计时5分钟”。",
-  "cap_notes": "可以保存并查看笔记，例如：“笔记：买面包”。",
+  "cap_timer": "可以设置计时器，到时提醒。例如：“/timer 300”表示5分钟。",
+  "cap_notes": "可以保存并查看笔记，例如：“记住：买面包”。",
   "cap_reminder": "可以保存提醒，请说明内容和多久后提醒。",
   "cap_math": "可以使用独立计算器进行算术计算，无需启动对话模型。例如：“计算 (12 + 8) * 3”。",
   "cap_screen": "安装视觉组件后，可以按请求分析一次截图，不会持续监视屏幕。",
   "cap_web": "可以读取公开HTTPS页面的有限摘录。请提供网址；暂不支持登录页面和复杂JavaScript。",
   "cap_files": "可以为所选受支持文件预览修改，确认后备份并写入，尚非通用文档编辑。",
-  "cap_unavailable": "此功能尚未接入，没有执行任何操作。"
+  "cap_unavailable": "此功能尚未接入，没有执行任何操作。",
+  "metrics_partial": "进程测量不完整：部分数据不可用。",
+  "goal_status_repairing": "正在修正草稿"
 }
