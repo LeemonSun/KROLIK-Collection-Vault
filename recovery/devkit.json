@@ -25,9 +25,10 @@
         "devtools/pwsh/pwsh"
       ],
       "sha256": {
-        "devtools/pwsh/pwsh": "c561baa659f1d0a5e9482684fc26e377b6fb8178b74f5e4fbb0ba0ea38f6a126"
+        "devtools/pwsh/pwsh": "d1f628127a6f1e93cee55c0304031519a2c6ae977e7b6bfd26dbd0f76e69182b"
       },
-      "archive_url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.9/powershell-7.6.9-linux-x64.tar.gz"
+      "archive_url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.0/powershell-7.6.0-linux-x64.tar.gz",
+      "archive_sha256": "04517472cf57d7f9cbd93897da9bed467c73ca6063c29d7655ebc20aa1d6023f"
     },
     "visual": {
       "present_paths": [

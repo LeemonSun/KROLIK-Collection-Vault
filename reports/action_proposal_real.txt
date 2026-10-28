@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+REAL_GOAL {"elapsed_ms":19167,"input":"Переключись на вкладку Insert","locale":"ru","output":"{\n  \"action\": \"select\",\n  \"append\": false,\n  \"element\": \"e0\",\n  \"text\": \"\"\n}","valid":true}
+REAL_GOAL {"elapsed_ms":16832,"input":"Write hello into the Search field","locale":"en","output":"{\n  \"action\": \"write\",\n  \"append\": false,\n  \"element\": \"e0\",\n  \"text\": \"hello\"\n}","valid":true}
+REAL_GOAL {"elapsed_ms":28228,"input":"切换到Insert标签","locale":"zh-Hans","output":"{\n  \"action\": \"select\",\n  \"append\": false,\n  \"element\": \"e1\",\n  \"text\": \"\"\n}","valid":true}
+ACTION_PROPOSAL_TESTS: 38 checks, 0 failures; real_model=true; Windows UI not executed

@@ -33,6 +33,7 @@ def main():
         ("persistence",[sys.executable,str(ROOT/"tools/test_persistence.py"),engine]),
         ("vision",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_vision.gd","--","--test-mode"]),
         ("bundle",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_bundle.gd","--","--test-mode"]),
+        ("action_proposal",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_action_proposal.gd","--","--test-mode"]),
         ("access",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_access.gd","--","--test-mode"]),
         ("voice",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_voice.gd","--","--test-mode"]),
         ("desktop060",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_desktop060.gd","--","--test-mode"]),

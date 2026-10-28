@@ -1,5 +1,6 @@
 extends "res://src/tools/desktop_actions.gd"
 ## Explicitly selected external window. No watcher, screenshots, shell or generated code.
+signal snapshot_ready
 signal changed
 signal notice(key,values)
 var windows=[]
@@ -8,6 +9,7 @@ var nodes=[]
 var observed_ms=0
 var pending={}
 var queued_action={}
+var quiet=false
 func _init():
 	helper_resource="res://native/accessibility_bridge.ps1"
 	support_directory="user://support/accessibility"
@@ -22,8 +24,9 @@ func bind(index):
 	changed.emit();return inspect()
 func clear_target():
 	cancel();windows=[];target={};nodes=[];pending={};queued_action={};observed_ms=0;changed.emit()
-func inspect():
+func inspect(silent=false):
 	if target.is_empty() or pid>0:notice.emit("access_choose",{});return false
+	quiet=silent
 	return _request(target.merged({"operation":"inspect","owner_pid":OS.get_process_id()}))
 func act(kind,name,text="",append=false):
 	pending={}
@@ -53,6 +56,9 @@ func _result(result):
 		windows=result.get("windows",[]);notice.emit("access_windows",{} )
 	elif status_=="inspected":
 		nodes=result.get("nodes",[]);observed_ms=Time.get_ticks_msec()
+		if result.get("title") is String:target["title"]=result.title
+		if quiet:
+			quiet=false;snapshot_ready.emit();changed.emit();return
 		if not queued_action.is_empty():
 			var action=queued_action;queued_action={}
 			if nodes.is_empty():notice.emit("access_unavailable",{});changed.emit();return
@@ -65,8 +71,9 @@ func _result(result):
 	else:
 		var acted_name=str(pending.get("element_name",""))
 		pending={}
-		notice.emit("access_"+status_ if status_ in ["invoked","selected","expanded","written","not_empty","write_unsupported","write_unverified","invoke_unsupported","stale","unsupported"] else "access_failed",{"name":acted_name})
+		if not quiet:notice.emit("access_"+status_ if status_ in ["invoked","selected","expanded","written","not_empty","write_unsupported","write_unverified","invoke_unsupported","stale","unsupported"] else "access_failed",{"name":acted_name})
 		if status_ in ["invoked","selected","expanded","written","stale"]:nodes=[];observed_ms=0
+	quiet=false
 	changed.emit()
 
 func adopt(identity):
@@ -75,8 +82,21 @@ func adopt(identity):
 		if not identity.has(key):return false
 	target=identity.duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;windows=[];changed.emit();return true
 func cancel_job():
-	cancel();pending={};queued_action={};changed.emit()
+	cancel();pending={};queued_action={};quiet=false;changed.emit()
 
 func _request(payload):
 	var accepted=super._request(payload)
 	changed.emit();return accepted
+
+func act_id(plan,confirmed=false):
+	if pid>0 or not plan.get("ok",false) or not confirmed:return false
+	if not preload("res://src/core/action_proposal.gd").same_target(plan.get("target",{}),target):return false
+	var matches=[]
+	for node in nodes:
+		if node.get("id")==plan.node.get("id") and node.get("name")==plan.node.get("name"):matches.append(node)
+	if matches.size()!=1:return false
+	var node=matches[0]
+	if not node.get("enabled",false) or not node.get(plan.action,false):return false
+	quiet=true;pending={}
+	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true})
+	return _request(payload)

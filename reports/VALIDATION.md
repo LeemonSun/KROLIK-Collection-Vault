@@ -12,6 +12,7 @@
 | persistence | PASS |
 | vision | PASS |
 | bundle | PASS |
+| action_proposal | PASS |
 | access | PASS |
 | voice | PASS |
 | desktop060 | PASS |

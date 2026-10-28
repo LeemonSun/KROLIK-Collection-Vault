@@ -33,6 +33,15 @@ func _run():
 			view.editor.text="x".repeat(2049)
 			view.submit_current()
 			check(view.editor.text.length()==2049,"Oversized paste retained")
+			app.goal_mode="proposal";app.goal_deadline_ms=Time.get_ticks_msec()+30000
+			app.goal_plan={"node":{"name":"Insert"}}
+			view.refresh()
+			await process_frame
+			check(view.confirmation_button.visible and bounds.encloses(view.confirmation_button.get_global_rect()),"Goal approval fits "+str(dimensions))
+			check(bounds.encloses(view.editor.get_global_rect()),"Goal review preserves visible composer "+str(dimensions))
+			view.editor.text="keep this draft";view.submit_current()
+			check(view.editor.text=="keep this draft","Busy goal never consumes an unsent draft")
+			app.goal_mode="";app.goal_plan={};app.goal_deadline_ms=0
 			view.queue_free()
 			await process_frame
 	root.size=Vector2i(800,600)

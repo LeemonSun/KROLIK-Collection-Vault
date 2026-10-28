@@ -30,6 +30,8 @@ func submit(messages, options = {}):
 	last_usage={}
 	last_truncated=false
 	busy=true
+	if options.has("response_schema") and auth_token.is_empty():
+		busy=false;request_messages=[];request_options={};failed.emit("goal_local_only");return false
 	if options.get("multimodal",false):
 		if auth_token.is_empty() or messages.size()!=2 or JSON.stringify(messages).length()>600000:
 			busy=false;failed.emit("vision_failed");return false
@@ -68,6 +70,8 @@ func _generate():
 		"min_p": 0.0,
 		"chat_template_kwargs": {"enable_thinking": false}
 	}
+	if request_options.get("response_schema") is Dictionary:
+		body["response_format"]={"type":"json_object","schema":request_options.response_schema}
 	return _post("/v1/chat/completions",body)
 
 func cancel():

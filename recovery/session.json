@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "app_version": "0.8.0-desktop-preview",
-  "checkpoint_status": "0.8_restored_and_revalidated_continuing_window_goal_planning",
-  "current_task": "Recovered exact 0.8 after workspace reverted to 0.1. Preserved previous workspace separately; all18 source groups pass again. Night app/AI package restored and hashes rechecked. Continuing next real block: semantic user goal -> observed accessible controls -> validated proposed step -> user approval -> scoped executor/result verification.",
-  "next_action": "Continue window goal proposal implementation and actual compact-model JSON tests. Do not restart foundation or re-upload unchanged0.8 artifacts. Preserve one heavy worker and explicit chosen window.",
+  "app_version": "0.9.0-desktop-preview",
+  "checkpoint_status": "grounded_goal_block_verified_packaging_in_progress",
+  "current_task": "Night0.8 recovered and preserved; new0.9 one-step semantic window goals implemented. Structured anyOf JSON schema, scoped capabilities, user approval, fresh preflight, selected/expanded state verification, verbatim write input; unrelated/negated goals and unsolicited button invocation filtered. Model3language fixture38checks PASS, unit37PASS. Native UI102checks reminder timing failure under investigation; packaging in progress.",
+  "next_action": "Finish source/native UI checks (bounded reminder wait), final9EXE/PCK export, update README and deliver app-only package over existing0.8AI folder. Preserve old artifact IDs and do not re-upload model bundle.",
   "read_next": [
-    "docs/HANDOFF.md",
+    "docs/GOAL_PROPOSALS.md",
     "docs/ROADMAP.md"
   ],
   "known_limits": [

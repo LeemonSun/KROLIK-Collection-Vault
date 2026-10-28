@@ -6,7 +6,7 @@ func check(ok,text):
 	checks+=1
 	if not ok:failures+=1;push_error(text)
 func _run():
-	check(ProjectSettings.get_setting("application/config/version")=="0.8.0-desktop-preview","Correct product version inside PCK")
+	check(ProjectSettings.get_setting("application/config/version")=="0.9.0-desktop-preview","Correct product version inside PCK")
 	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
 	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
 	var migration=JSON.parse_string(FileAccess.get_file_as_string("res://native/legacy_patch_files.json"))

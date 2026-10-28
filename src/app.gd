@@ -50,6 +50,13 @@ const ConversationMemory=preload("res://src/core/conversation_memory.gd")
 const ResponseGuard=preload("res://src/core/response_guard.gd")
 var desktop_actions
 var application_access
+var goal_mode=""
+var goal_text=""
+var goal_context={}
+var goal_plan={}
+var goal_origin_target={}
+var goal_deadline_ms=0
+var goal_planner=preload("res://src/core/action_proposal.gd").new()
 var diagnostics
 var cleanup_task=-1
 var cleanup_result={}
@@ -93,7 +100,9 @@ func _ready():
 	application_access=preload("res://src/tools/application_access.gd").new()
 	add_child(application_access)
 	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values)))
-	application_access.changed.connect(func():changed.emit())
+	application_access.changed.connect(_access_changed)
+	application_access.snapshot_ready.connect(_goal_observed)
+	application_access.completed.connect(_goal_access_completed)
 	desktop_actions=DesktopActions.new()
 	add_child(desktop_actions)
 	desktop_actions.completed.connect(_desktop_completed)
@@ -140,6 +149,7 @@ func t(key, values = {}):
 	return l10n.text(key, values)
 
 func _process(_delta):
+	if not goal_mode.is_empty() and Time.get_ticks_msec()>goal_deadline_ms:_goal_error("goal_expired")
 	var panel_visible=is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible
 	var chat_visible=is_instance_valid(chat_window) and chat_window.visible
 	var character_visible=is_instance_valid(desktop_companion) and desktop_companion.visible
@@ -215,11 +225,13 @@ func submit(text):
 	if paused:
 		add_message("assistant", t("paused_message"))
 		return
-	if state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()) or (is_instance_valid(application_access) and application_access.pid>0):
+	if not goal_mode.is_empty() or state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()) or (is_instance_valid(application_access) and application_access.pid>0):
 		add_message("assistant", t("busy_message"))
 		return
 	mark_active()
 	var command = router.route(text)
+	if not application_access.target.is_empty() and goal_planner.contextual_goal(text) and (command.kind=="chat" or command.get("tool","") in ["apps.open","browser.search"]):
+		command={"kind":"tool","tool":"access.goal","args":{"goal":text}}
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
@@ -286,6 +298,8 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool=="access.goal":
+		state.reset();begin_window_goal(command.args.goal);return
 	if command.tool.begins_with("access."):
 		state.reset()
 		match command.tool:
@@ -377,6 +391,8 @@ func _execute(command):
 	changed.emit()
 
 func _on_answer(text):
+	if goal_mode=="thinking":
+		_goal_answer(text);return
 	if state.current != "thinking":
 		return
 	if not translation_mode and guard.claims_action(text,pending_user_text):
@@ -409,6 +425,8 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	if not goal_mode.is_empty():
+		_goal_error(key);return
 	_forget_screen()
 	queued_chat_text=""
 	queued_translation=[]
@@ -424,6 +442,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	_clear_goal()
 	if is_instance_valid(application_access):application_access.cancel_job()
 	_forget_screen()
 	if is_instance_valid(speech_input):speech_input.cancel()
@@ -492,7 +511,7 @@ func install_local_ai():
 	return local_runtime.install()
 
 func start_local_ai():
-	if paused or speech_input.busy() or screen_mode:
+	if paused or speech_input.busy() or screen_mode or not goal_mode.is_empty():
 		return false
 	local_ai_enabled = true
 	_save_setting("local_ai_enabled", true)
@@ -513,6 +532,8 @@ func _runtime_ready(port, token):
 		return
 	_set_provider("local_worker")
 	provider.configure_local(port, token)
+	if goal_mode=="loading":
+		_goal_observe();return
 	if screen_mode:
 		_submit_screen()
 		return
@@ -527,7 +548,7 @@ func _runtime_ready(port, token):
 		_submit_model_text(text)
 
 func _runtime_changed():
-	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode):
+	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode or not goal_mode.is_empty()):
 		_on_failure(local_runtime.status)
 	# Installing only prepares files. Heavy weights wake on the next actual request.
 	changed.emit()
@@ -672,7 +693,7 @@ func _submit_translation(messages_):
 	changed.emit()
 
 func begin_dictation(editor):
-	if paused:return false
+	if paused or not goal_mode.is_empty():return false
 	if speech_input.state=="recording":speech_input.finish();return true
 	if speech_input.busy() or state.current!="idle" or not queued_chat_text.is_empty():return false
 	if not speech_input.installed():return false
@@ -696,7 +717,7 @@ func _dictation_ready(text):
 	changed.emit()
 
 func begin_screen(question=""):
-	if paused or state.current!="idle" or speech_input.busy() or not queued_chat_text.is_empty():return false
+	if paused or state.current!="idle" or speech_input.busy() or not queued_chat_text.is_empty() or not goal_mode.is_empty():return false
 	if not local_runtime.installed():add_message("assistant",t("vision_need_ai"));return false
 	if not vision_asset.installed():add_message("assistant",t("vision_install_hint"));return false
 	if local_runtime.manifest.model.get("sha256")!=vision_asset.manifest.get("compatible_model_sha256"):add_message("assistant",t("vision_failed"));return false
@@ -760,4 +781,94 @@ func _bundle_changed():
 		if key=="vision":engine.directory=entry.folder
 		else:engine.base_path=entry.folder
 		engine.status=("vision_installed" if key=="vision" else "ai_installed") if entry.ready else "ai_verifying"
+	changed.emit()
+
+func begin_window_goal(text):
+	if paused or state.current!="idle" or speech_input.busy() or not goal_mode.is_empty():return false
+	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
+	if not local_runtime.installed():add_message("assistant",t("goal_need_ai"));return false
+	if text.strip_edges().is_empty() or text.length()>800:add_message("assistant",t("goal_more_info"));return false
+	voice.stop();goal_text=text;goal_context={};goal_plan={};goal_origin_target=application_access.target.duplicate(true)
+	goal_deadline_ms=Time.get_ticks_msec()+120000
+	state.transition("executing")
+	local_ai_enabled=true
+	if local_runtime.status=="ai_ready" and provider_name=="local_worker":_goal_observe()
+	else:
+		goal_mode="loading"
+		if not local_runtime.start(profiles.config(profile_name)):_goal_error(local_runtime.status);return false
+	changed.emit();return true
+func _goal_observe():
+	goal_mode="observing"
+	if not application_access.inspect(true):_goal_error("goal_failed")
+	changed.emit()
+func _goal_observed():
+	if goal_mode=="observing":
+		goal_context=goal_planner.prepare(goal_text,application_access.target,application_access.nodes,application_access.observed_ms,l10n.locale)
+		if not goal_context.get("ok",false):_goal_error("goal_more_info");return
+		goal_mode="thinking";state.reset();state.transition("thinking")
+		local_runtime.generation_busy=true;local_runtime.touch()
+		request_motion("dialogue.think_loop")
+		provider.submit(goal_context.messages,{"max_tokens":256,"context_tokens":profiles.config(profile_name).context_tokens,"response_schema":goal_context.schema})
+	elif goal_mode=="confirming":
+		if not goal_planner.same_target(goal_plan.target,application_access.target) or str(goal_plan.target.get("title",""))!=str(application_access.target.get("title","")):_goal_error("goal_changed");return
+		goal_mode="executing";goal_deadline_ms=Time.get_ticks_msec()+20000
+		if not application_access.act_id(goal_plan,true):_goal_error("goal_changed")
+	elif goal_mode=="verifying":
+		var verified=false
+		if goal_planner.same_target(goal_plan.target,application_access.target):
+			for node in application_access.nodes:
+				if node.get("id")==goal_plan.node.id and node.get("name")==goal_plan.node.name:
+					verified=node.get("selected",false)==true if goal_plan.action=="select" else int(node.get("expansion",-1))==1
+		if verified:_goal_done("goal_verified_"+goal_plan.action)
+		else:_goal_error("goal_unverified")
+	changed.emit()
+func _goal_answer(text):
+	local_runtime.generation_busy=false;local_runtime.touch()
+	if provider is Llama and provider.last_truncated:_goal_error("goal_failed");return
+	goal_plan=goal_planner.validate(text,goal_context,application_access.target,Time.get_ticks_msec())
+	goal_context={}
+	if not goal_plan.get("ok",false):_goal_error("goal_failed");return
+	if goal_plan.action=="ask":_goal_error("goal_more_info");return
+	goal_mode="proposal";state.reset();goal_deadline_ms=Time.get_ticks_msec()+15000
+	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
+	var preview=t("goal_propose_append" if goal_plan.action=="write" and goal_plan.append else "goal_propose_"+goal_plan.action,values)
+	if goal_plan.action=="write":preview+="\n\n"+goal_plan.text
+	add_message("assistant",preview)
+	request_motion("dialogue.explain_small");changed.emit()
+func confirm_window_goal():
+	if goal_mode!="proposal" or paused:return false
+	if Time.get_ticks_msec()>goal_deadline_ms:_goal_error("goal_expired");return false
+	if not goal_planner.same_target(goal_plan.target,application_access.target):_goal_error("goal_changed");return false
+	goal_mode="confirming";state.transition("executing");goal_deadline_ms=Time.get_ticks_msec()+20000
+	if not application_access.inspect(true):_goal_error("goal_failed");return false
+	changed.emit();return true
+func _goal_access_completed(result):
+	if goal_mode.is_empty() or result.get("status")=="inspected":return
+	if goal_mode in ["observing","confirming","verifying"]:
+		_goal_error("goal_failed");return
+	if goal_mode!="executing":return
+	var status_=str(result.get("status","failed"))
+	if status_=="written":_goal_done("goal_written")
+	elif status_=="invoked":_goal_done("goal_invoked")
+	elif status_ in ["selected","expanded"]:
+		goal_mode="verifying";goal_deadline_ms=Time.get_ticks_msec()+20000
+		if not application_access.inspect(true):_goal_error("goal_unverified")
+	else:_goal_error("goal_unverified")
+func _goal_done(key):
+	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
+	_clear_goal();state.reset();add_message("assistant",t(key,values))
+	request_motion("work.note_saved");changed.emit()
+func _goal_error(key):
+	_clear_goal();state.reset();add_message("assistant",t(key))
+	request_motion("work.error_recover");changed.emit()
+func _clear_goal():
+	var active=not goal_mode.is_empty()
+	goal_mode="";goal_text="";goal_context={};goal_plan={};goal_origin_target={};goal_deadline_ms=0
+	if active:
+		if is_instance_valid(provider):provider.cancel()
+		if is_instance_valid(application_access):application_access.cancel_job()
+		if is_instance_valid(local_runtime):local_runtime.generation_busy=false;local_runtime.touch()
+
+func _access_changed():
+	if not goal_mode.is_empty() and not goal_planner.same_target(goal_origin_target,application_access.target):_goal_error("goal_changed")
 	changed.emit()

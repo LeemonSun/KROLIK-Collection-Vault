@@ -1,6 +1,7 @@
 extends RefCounted
 ## Trusted tool registry controls effects; model text is never executed.
 const TOOLS = {
+	"access.goal":{"implemented":true,"confirmation":false},
 	"access.inspect":{"implemented":true,"confirmation":false},
 	"access.invoke":{"implemented":true,"confirmation":false},
 	"access.write":{"implemented":true,"confirmation":false},

@@ -77,6 +77,17 @@ func _run():
 	check(view.window_picker.visible,"Application picker opens from the chat toolbar")
 	check(view.window_picker.size.x<=600 and view.window_picker.size.y<=450,"Long application list is bounded on screen")
 	view.window_picker.hide();app.application_access.windows=[]
+	app.application_access.adopt({"handle":"123","target_pid":1234,"started":"567","title":"Synthetic editor","app":"Test"})
+	app.goal_mode="proposal";app.goal_origin_target=app.application_access.target.duplicate(true);app.goal_deadline_ms=Time.get_ticks_msec()+30000
+	app.goal_plan={"node":{"name":"Insert"}};view.refresh();await frame()
+	check(view.confirmation_button.visible,"Proposed step approval is directly in native chat")
+	shot(app.chat_window,"goal-proposal")
+	for dimensions in [Vector2i(320,280),Vector2i(360,320),Vector2i(460,460)]:
+		app.chat_window.size=dimensions;await frame()
+		check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(view.editor.get_global_rect()),"Goal with pinned window preserves input "+str(dimensions))
+		check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(view.confirmation_button.get_global_rect()),"Goal approval visible at "+str(dimensions))
+	app.goal_mode="";app.goal_plan={};app.goal_origin_target={};app.goal_deadline_ms=0;app.application_access.clear_target()
+	app.chat_window.size=Vector2i(460,460);view.refresh()
 
 	for language in ["ru","en","zh-Hans"]:
 		app.set_locale(language)
@@ -200,7 +211,8 @@ func _run():
 	DisplayServer.clipboard_set("")
 	var reminder=app.store.add_reminder("SYNTHETIC_NATIVE_REMINDER_731",1)
 	app._schedule_reminders()
-	await create_timer(1.35).timeout
+	var reminder_deadline=Time.get_ticks_msec()+5000
+	while app.store.data.reminders.any(func(item):return item.id==reminder.item.id) and Time.get_ticks_msec()<reminder_deadline:await process_frame
 	check(reminder.ok and app.messages.count({"speaker":"assistant","text":app.t("reminder_due",{"text":"SYNTHETIC_NATIVE_REMINDER_731"})})==1,"Real reminder timer notifies once")
 	check(not app.store.data.reminders.any(func(item):return item.id==reminder.item.id),"Delivered reminder removed from persistent store")
 	main.open_panel("reminders")

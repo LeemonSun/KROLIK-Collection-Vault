@@ -1,3 +1,7 @@
+# Сейчас0.9: ночная0.8восстановлена, оконныецели добавлены
+
+Начать сrecovery/session.json иdocs/GOAL_PROPOSALS.md. Не восстанавливатьпроектзаново:0.8точно восстановлена из3aa27,18проверок прошли; новый0.9блокпроверенrealmodelна3языках,упаковкавпроцессе. Последнийheadв.resume-remote.json.
+
 # Leemon 0.8 — текущая точка
 
 Не восстанавливать проект заново. Сразу читать recovery/session.json, python3 tools/resume.py status, затем только нужные модули. GitHub LeemonSun/KROLIK-Collection-Vault main — хранилище, никаких Actions/remote build. Последний checkpoint до0.8: bcc22b8; свежий head смотреть .resume-remote.json. tools/resume_bridge.js checkpoint поддерживает capsule shards; сохранять после крупных блоков. Никаких субагентов без прямого разрешения.

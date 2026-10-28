@@ -20,6 +20,9 @@ func route(text):
 	if word_hit:
 		var body=text.strip_edges().substr(word_hit.get_start(1)) if word_hit.get_start(1)>=0 else ""
 		return {"kind":"tool","tool":"documents.create","args":{"text":body,"format":"docx"}}
+	rx.compile("(?i)^(?:(?:в этом окне|помоги в окне|in this window|help in this window)(?:\\s*[:：]\\s*|\\s+)|(?:在此窗口|帮我在窗口中)[:：]?\\s*)([\\s\\S]+)$")
+	var goal_hit=rx.search(text.strip_edges())
+	if goal_hit:return {"kind":"tool","tool":"access.goal","args":{"goal":goal_hit.get_string(1)}}
 	# This command creates a NEW file in Documents/Leemon; it never edits a focused window.
 	rx.compile("^(?:создай(?: мне)? (?:в (?:блокноте|блакноте) (?:новый )?файл|(?:новый )?файл в (?:блокноте|блакноте))|create (?:a )?(?:new )?(?:text )?file in notepad|在记事本中?新建(?:文本)?文件)(?:\\s*[:：]\\s*([\\s\\S]*))?[.!?。]?$" )
 	var document_hit=rx.search(normalized)

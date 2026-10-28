@@ -75,10 +75,12 @@ func _ready():
 	target_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	target_label.add_theme_font_size_override("font_size",11)
 	target_label.add_theme_color_override("font_color",VisualTheme.RED);target_row.add_child(target_label)
+	var plan_button=_button("✦",target_row,_prepare_goal)
+	plan_button.tooltip_text=app.t("goal_button");VisualTheme.quiet(plan_button)
 	var inspect_button=_button("↻",target_row,func():app.application_access.inspect())
 	inspect_button.tooltip_text=app.t("access_read");VisualTheme.quiet(inspect_button)
 	VisualTheme.quiet(_button("×",target_row,func():app.application_access.clear_target()))
-	confirmation_button=_button("",layout,func():app.application_access.confirm())
+	confirmation_button=_button("",layout,_confirm_current)
 	confirmation_button.clip_text=true;confirmation_button.visible=false
 
 	setup_hint=Label.new()
@@ -194,7 +196,7 @@ func submit_current():
 	if text.length()>2048:
 		status_label.text=app.t('input_too_long')
 		return
-	if app.paused or app.state.current!='idle' or not app.queued_chat_text.is_empty():
+	if app.paused or app.state.current!='idle' or not app.queued_chat_text.is_empty() or not app.goal_mode.is_empty():
 		status_label.text=app.t('paused_message' if app.paused else 'busy_message')
 		return
 	editor.clear()
@@ -229,8 +231,8 @@ func refresh():
 		_render_history()
 	target_row.visible=not app.application_access.target.is_empty() and size.y>=340
 	target_label.text=app.t("access_target",{"title":app.application_access.target.get("title","")})
-	confirmation_button.visible=not app.application_access.pending.is_empty() and app.application_access.last_result.get("status")=="confirmation_required"
-	confirmation_button.text=app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
+	confirmation_button.visible=app.goal_mode=="proposal" or (not app.application_access.pending.is_empty() and app.application_access.last_result.get("status")=="confirmation_required")
+	confirmation_button.text=app.t("goal_confirm") if app.goal_mode=="proposal" else app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
 	if choose_window and not app.application_access.windows.is_empty():
 		choose_window=false;window_picker.clear()
 		for index in range(app.application_access.windows.size()):
@@ -245,8 +247,9 @@ func refresh():
 	suggestions.visible=size.y>=400 and not confirmation_button.visible
 
 	var voice_busy=app.speech_input.busy()
-	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0
+	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
+	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
 	send_button.disabled=app.paused or busy
 	stop_button.disabled=not busy
@@ -299,3 +302,12 @@ func _windows():
 	choose_window=true
 	if not app.application_access.list_windows():choose_window=false
 	refresh()
+
+func _confirm_current():
+	if app.goal_mode=="proposal":app.confirm_window_goal()
+	else:app.application_access.confirm()
+
+func _prepare_goal():
+	var prefix=app.t("goal_prefix")
+	if not editor.text.begins_with(prefix):editor.text=prefix+editor.text
+	editor.grab_focus();editor.set_caret_line(editor.get_line_count()-1);editor.set_caret_column(editor.get_line(editor.get_line_count()-1).length())
