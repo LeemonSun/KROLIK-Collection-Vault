@@ -1,7 +1,9 @@
-# Продолжение Leemon0.18
+# Продолжение Leemon0.19
 
-Начать с RESUME.md, recovery/session.json и WORKFLOWS_018.md. Не восстанавливать старую companion-foundation. GitHub storageonly; source capsule/bootstrap via tools/resume_bridge.js. БезCI/remote builds/deploy/subagents. Артефакты/хеши/IDs вsession, текущийhead в.resume-remote.json.
+Начать с RESUME.md, recovery/session.json, WORKFLOWS_019.md. Каноническийкаталог leemon-013. GitHub storageonly; source capsule/bootstrap via tools/resume_bridge.js. БезCI/remote builds/deploy/subagents. Хеши/IDs/session; актуальныйhead .resume-remote.json.
 
-018: distance-driven quintic route/gait, task pose arbiter, reaction priorities/expiry, interruption and pause preference fixes, hidden rig suspension, exact envelope snapshot, bounded following speech bubbles. Same26procedural states, no new model/art. Tests use nativeX11synthetic tasks, not actualWindows actions/FPS.
+019: ancestors/role/AutomationId context, partial bounded traversal, strict native/Godot descriptor preflight, context-aware history, unique outcome-onlyreidentification, max3read-onlydelayedpostchecks. Neverretargetapprovedactions. UIAnotices/reviews ephemeral; receipt stripsduplicatenodes/title. 38context+36Appverification+17PowerShellsynthetictree+30nativeX11layoutchecks; finalsuite/packevidence insession.
 
-Общий адаптивный помощник остаётся целью. Следующее — Windows acceptance (добавки018вWORKFLOWS_018.md и WINDOWS_ACCEPTANCE_017.md),24case semantic seed and compact model/observation comparison.017failed semantic outputs сохранены, интеллект не решён. Новые тяжёлые модели не включать без сравнения. Никакого автоматическогоSend/overwrite/произвольного кода из ответов. Лицензии/историю/границы разрешений сохранять. ТолькоЛимон/одинстиль; retiredcharacters не возвращать.
+Следующее: актуальнаяWindowsприёмка и измерения, затем24casecompactinstruction/observationqualitycomparison. Общийинтеллектнеисправлен, новыйконтекстреальноймодельюнепроверен. Использоватьсуществующиепрограммы, не replacementOffice/perappmodels. Не подключатьтяжёлые модели без измерений. Контекстныеимена/IDмогутбытьнестабильны/усечены; строгийотказлучшеавтоматическогопереносаодобрения. Расширятьадаптациючерезновоенаблюдение/новыйreview.
+
+ОдинЛимон/одинстиль/26процедурныхсостояний. Лицензии/историю/границыдействийсохранять, некоммититьмодели/ключи/userdata/captures. АртефактывREADME/sessionпоследоставки. ActualWindowsnotexecuted.

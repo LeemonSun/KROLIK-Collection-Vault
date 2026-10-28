@@ -440,5 +440,7 @@
   "cap_files": "可以为所选受支持文件预览修改，确认后备份并写入，尚非通用文档编辑。",
   "cap_unavailable": "此功能尚未接入，没有执行任何操作。",
   "metrics_partial": "进程测量不完整：部分数据不可用。",
-  "goal_status_repairing": "正在修正草稿"
+  "goal_status_repairing": "正在修正草稿",
+  "goal_control_scope": "所在区域：{path}",
+  "goal_status_verify_wait": "等待窗口更新后再次检查…"
 }

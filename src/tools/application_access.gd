@@ -4,6 +4,8 @@ signal read_ready(snapshot)
 signal snapshot_ready
 signal changed
 signal notice(key,values)
+const Controls=preload("res://src/core/control_context.gd")
+var observation={}
 var windows=[]
 var target={}
 var nodes=[]
@@ -18,7 +20,7 @@ func _ready():
 	super._ready();completed.connect(_result)
 func read_content():
 	if target.is_empty() or pid>0:return false
-	pending={};queued_action={};nodes=[];observed_ms=0
+	pending={};queued_action={};nodes=[];observed_ms=0;observation={}
 	quiet=true
 	return _request(target.merged({"operation":"read","owner_pid":OS.get_process_id()}))
 func list_windows():
@@ -27,10 +29,10 @@ func list_windows():
 	return _request({"operation":"windows","owner_pid":OS.get_process_id()})
 func bind(index):
 	if index<0 or index>=windows.size() or pid>0:return false
-	target=windows[index].duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;windows=[]
+	target=windows[index].duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;observation={};windows=[]
 	changed.emit();return inspect()
 func clear_target():
-	cancel();windows=[];target={};nodes=[];pending={};queued_action={};observed_ms=0;changed.emit()
+	cancel();windows=[];target={};nodes=[];pending={};queued_action={};observed_ms=0;observation={};last_result={};changed.emit()
 func inspect(silent=false):
 	if target.is_empty() or pid>0:notice.emit("access_choose",{});return false
 	quiet=silent
@@ -47,7 +49,7 @@ func act(kind,name,text="",append=false):
 	if matches.size()!=1:notice.emit("access_ambiguous",{"name":name});return false
 	var node=matches[0]
 	if kind not in ["invoke","write"] or not node.get("enabled",false):notice.emit("access_unavailable",{});return false
-	var payload=target.merged({"operation":kind,"element_id":node.id,"element_name":node.name,"text":text.left(2000),"append":append,"owner_pid":OS.get_process_id()})
+	var payload=target.merged({"operation":kind,"element_id":node.id,"element_name":node.name,"text":text.left(2000),"append":append,"owner_pid":OS.get_process_id(),"element_descriptor":Controls.descriptor(node)})
 	pending=payload.duplicate(true)
 	return _request(payload)
 func confirm():
@@ -69,8 +71,10 @@ func _result(result):
 		windows=result.get("windows",[]);notice.emit("access_windows",{} )
 	elif status_=="inspected":
 		nodes=result.get("nodes",[]);observed_ms=Time.get_ticks_msec()
+		observation={"partial":bool(result.get("partial",true)),"visited":clampi(int(result.get("visited",0)),0,200),"elapsed_ms":clampi(int(result.get("elapsed_ms",0)),0,15000)}
 		if result.get("title") is String:target["title"]=result.title
 		if result.get("bounds") is Dictionary:target["bounds"]=result.bounds.duplicate(true)
+		result.erase("nodes");result.erase("title") # Retain one scoped snapshot, not a duplicate receipt.
 		if quiet:
 			quiet=false;snapshot_ready.emit();changed.emit();return
 		if not queued_action.is_empty():
@@ -86,7 +90,7 @@ func _result(result):
 		var acted_name=str(pending.get("element_name",""))
 		pending={}
 		if not quiet:notice.emit("access_"+status_ if status_ in ["invoked","selected","expanded","written","not_empty","write_unsupported","write_unverified","invoke_unsupported","stale","unsupported"] else "access_failed",{"name":acted_name})
-		if status_ in ["invoked","selected","expanded","written","stale"]:nodes=[];observed_ms=0
+		if status_ in ["invoked","selected","expanded","written","stale"]:nodes=[];observed_ms=0;observation={}
 	quiet=false
 	changed.emit()
 
@@ -94,7 +98,7 @@ func adopt(identity):
 	if pid>0 or not identity is Dictionary:return false
 	for key in ["handle","target_pid","started","title","app"]:
 		if not identity.has(key):return false
-	target=identity.duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;windows=[];changed.emit();return true
+	target=identity.duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;observation={};windows=[];changed.emit();return true
 func cancel_job():
 	cancel();pending={};queued_action={};quiet=false;changed.emit()
 
@@ -105,12 +109,9 @@ func _request(payload):
 func act_id(plan,confirmed=false):
 	if pid>0 or not plan.get("ok",false) or not confirmed:return false
 	if not preload("res://src/core/action_proposal.gd").same_target(plan.get("target",{}),target):return false
-	var matches=[]
-	for node in nodes:
-		if node.get("id")==plan.node.get("id") and node.get("name")==plan.node.get("name"):matches.append(node)
-	if matches.size()!=1:return false
-	var node=matches[0]
+	var node=Controls.resolve(plan.node,nodes)
+	if node.is_empty():return false
 	if not node.get("enabled",false) or not node.get(plan.action,false):return false
 	quiet=true;pending={}
-	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true})
+	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true,"element_descriptor":Controls.descriptor(node)})
 	return _request(payload)

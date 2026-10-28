@@ -14,7 +14,7 @@ static func activity(app):
 	if app.paused:return "sleep"
 	if app.speech_input.busy():return "listen"
 	if app.goal_mode=="proposal":return "wait"
-	if app.goal_mode in ["observing","verifying"] or app.window_read_mode=="observing":return "scan"
+	if app.goal_mode in ["observing","verifying","verify_wait"] or app.window_read_mode=="observing":return "scan"
 	if app.goal_mode in ["executing","confirming"]:return "point"
 	if not app.window_read_mode.is_empty():return "read"
 	if not app.goal_mode.is_empty() or not app.queued_chat_text.is_empty() or app.state.current=="thinking":return "thinking"

@@ -65,6 +65,8 @@ func _run():
 	check(access.requests.size()==count and not app.workflow.active,"Cancellation invalidates the pending next-step timer")
 	app.begin_window_goal("select Insert → write Search: hello");observe(access)
 	app.confirm_window_goal();observe(access);access._finish({"status":"selected"});observe(access,false)
+	await create_timer(0.35).timeout;observe(access,false)
+	await create_timer(0.7).timeout;observe(access,false)
 	check(not app.workflow.active and app.goal_mode.is_empty(),"Unverified selection stops remaining steps")
 	app.begin_window_goal("select Insert → write Search: hello");observe(access)
 	access.target.started="other";access.changed.emit()

@@ -19,28 +19,56 @@ function Get-WindowIdentity($window) {
 }
 function Get-ScopedNodes($rootElement) {
  $walker=[Windows.Automation.TreeWalker]::ControlViewWalker
- $queue=[Collections.Generic.Queue[object]]::new();$queue.Enqueue(@($rootElement,0));$nodes=[Collections.Generic.List[object]]::new()
- $visited=0
- while($queue.Count -and $visited -lt 200 -and $nodes.Count -lt 90) {
-  $pair=$queue.Dequeue();$element=$pair[0];$depth=[int]$pair[1];$visited++
+ $queue=[Collections.Generic.Queue[object]]::new()
+ $queue.Enqueue([pscustomobject]@{element=$rootElement;depth=0;ancestors=@()})
+ $nodes=[Collections.Generic.List[object]]::new();$visited=0;$bytes=0;$partial=$false
+ $clock=[Diagnostics.Stopwatch]::StartNew()
+ while($queue.Count -and $visited -lt 200 -and $clock.ElapsedMilliseconds -lt 2500) {
+  $frame=$queue.Dequeue();$element=$frame.element;$depth=[int]$frame.depth;$visited++
   try {
    $c=$element.Current
    if($c.IsPassword -or $c.IsOffscreen){continue}
    $name=Clip-Text $c.Name 160
+   $automationId=Clip-Text $c.AutomationId 64
    $value=$null;$invoke=$null;$select=$null;$expand=$null
    $writable=$element.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern,[ref]$value) -and -not $value.Current.IsReadOnly
    $canInvoke=$element.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern,[ref]$invoke)
    $canSelect=$element.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$select)
    $canExpand=$element.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)
-   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;enabled=$c.IsEnabled;write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
-   if($name -or $writable){$nodes.Add(@{record=$record;element=$element})}
+   $parents=@($frame.ancestors)
+   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
+   if($name -or $writable){
+    $recordBytes=[Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json -InputObject $record -Depth 6 -Compress))
+    if($nodes.Count -lt 90 -and $bytes+$recordBytes -lt 25000){$nodes.Add(@{record=$record;element=$element});$bytes+=$recordBytes+1}else{$partial=$true}
+   }
+   $crumb=[ordered]@{name=(Clip-Text $name 64);type=$c.ControlType.ProgrammaticName;automation_id=$automationId}
+   $nextParents=@($parents)+@($crumb)
+   if($nextParents.Count -gt 3){$nextParents=@($nextParents[($nextParents.Count-3)..($nextParents.Count-1)])}
    if($depth -lt 8){
     $child=$walker.GetFirstChild($element);$siblings=0
-    while($null -ne $child -and $siblings -lt 90 -and $queue.Count -lt 200){$queue.Enqueue(@($child,($depth+1)));$child=$walker.GetNextSibling($child);$siblings++}
-   }
-  } catch {}
+    while($null -ne $child -and $siblings -lt 90 -and $queue.Count -lt 200 -and $clock.ElapsedMilliseconds -lt 2500){
+     $queue.Enqueue([pscustomobject]@{element=$child;depth=($depth+1);ancestors=$nextParents})
+     $child=$walker.GetNextSibling($child);$siblings++
+    }
+    if($null -ne $child){$partial=$true}
+   }else{$partial=$true}
+  } catch {$partial=$true}
  }
+ if($queue.Count){$partial=$true}
+ $script:scopeMeta=@{partial=$partial;visited=$visited;elapsed_ms=[int]$clock.ElapsedMilliseconds}
  return $nodes.ToArray()
+}
+function Test-Descriptor($record,$expected) {
+ if($null -eq $expected -or $expected.type -isnot [string] -or $expected.automation_id -isnot [string]){return $false}
+ if([string]$record.type -cne [string]$expected.type -or [string]$record.automation_id -cne [string]$expected.automation_id){return $false}
+ $actualParents=@($record.ancestors);$expectedParents=@($expected.ancestors)
+ if($actualParents.Count -ne $expectedParents.Count -or $expectedParents.Count -gt 3){return $false}
+ for($i=0;$i -lt $actualParents.Count;$i++){
+  foreach($key in @('name','type','automation_id')){
+   if($expectedParents[$i].$key -isnot [string] -or [string]$actualParents[$i].$key -cne [string]$expectedParents[$i].$key){return $false}
+  }
+ }
+ return $true
 }
 function Is-Risky([string]$name) {
  return $name -match '(?i)send|submit|pay|buy|purchase|delete|remove|install|uninstall|format|reset|confirm|allow|sign.?in|log.?in|отправ|оплат|купить|удал|установ|сброс|формат|подтверд|разреш|войти|发送|提交|支付|购买|删除|安装|卸载|重置|确认|允许|登录'
@@ -137,10 +165,12 @@ public static class LeemonAccess {
   if($request.operation -eq 'inspect'){
    $r=$rootElement.Current.BoundingRectangle
    $reply.bounds=@{x=[int]$r.X;y=[int]$r.Y;width=[int]$r.Width;height=[int]$r.Height}
+   $null=Assert-Identity $request
    $reply.status='inspected';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.nodes=@($nodes | ForEach-Object {$_.record})
+   $reply.partial=$script:scopeMeta.partial;$reply.visited=$script:scopeMeta.visited;$reply.elapsed_ms=$script:scopeMeta.elapsed_ms
   }else{
    if([string]$request.element_id -notmatch '^-?\d+(,-?\d+){1,30}$' -or $request.element_name -isnot [string]){throw 'Invalid element'}
-   $matches=@($nodes | Where-Object {$_.record.id -ceq $request.element_id -and $_.record.name -ceq $request.element_name})
+   $matches=@($nodes | Where-Object {$_.record.id -ceq $request.element_id -and $_.record.name -ceq $request.element_name -and (Test-Descriptor $_.record $request.element_descriptor)})
    if($matches.Count -ne 1){$reply.status='stale'}else{
     $item=$matches[0];$element=$item.element;$record=$item.record
     $null=Assert-Identity $request
@@ -175,7 +205,7 @@ public static class LeemonAccess {
  }
  }
 } catch {$reply.status='failed'}
-$json=ConvertTo-Json -InputObject $reply -Depth 7 -Compress
+$json=ConvertTo-Json -InputObject $reply -Depth 10 -Compress
 if([Text.Encoding]::UTF8.GetByteCount($json) -gt 32000){$json=ConvertTo-Json @{nonce=$reply.nonce;status='too_large'} -Compress}
 [IO.File]::WriteAllText($ResultPath+'.tmp',$json,[Text.UTF8Encoding]::new($false))
 Move-Item -LiteralPath ($ResultPath+'.tmp') -Destination $ResultPath -Force

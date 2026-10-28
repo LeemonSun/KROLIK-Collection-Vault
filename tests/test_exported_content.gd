@@ -6,7 +6,8 @@ func check(ok,text):
 	checks+=1
 	if not ok:failures+=1;push_error(text)
 func _run():
-	check(ProjectSettings.get_setting("application/config/version")=="0.12.0-desktop-preview","Correct product version inside PCK")
+	var expected=OS.get_environment("LEEMON_EXPECT_VERSION")
+	check(not expected.is_empty() and ProjectSettings.get_setting("application/config/version")==expected,"Expected product version inside PCK")
 	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
 	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
 	check(FileAccess.get_sha256("res://native/accessibility_bridge.ps1")==OS.get_environment("COMPANION_ACCESS_HELPER_SHA"),"Exact scoped UIA/selected-state helper exported")

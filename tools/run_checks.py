@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--godot", required=True)
+    parser.add_argument("--pwsh")
     args = parser.parse_args()
     reports = ROOT / "reports"
     reports.mkdir(exist_ok=True)
@@ -20,6 +21,8 @@ def main():
     env = dict(os.environ)
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("control_context019",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_control_context019.gd","--","--test-mode"]),
+        ("verification019",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_verification019.gd","--","--test-mode"]),
         ("locomotion018",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_locomotion018.gd","--","--test-mode"]),
         ("diagnostics017",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_diagnostics017.gd","--","--test-mode"]),
         ("capability017",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_capability017.gd","--","--test-mode"]),
@@ -64,6 +67,8 @@ def main():
         ("ui", [engine, "--headless", "--path", str(ROOT), "--", "--ui-smoke", "--test-mode"]),
         ("release_gate_expected_block", [sys.executable, str(ROOT / "tools/release_gate.py"), "--expect-blocked"]),
     ]
+    if args.pwsh:
+        commands.append(("access_protocol019",[str(Path(args.pwsh).resolve()),"-NoLogo","-NoProfile","-NonInteractive","-File",str(ROOT/"tests/test_access_protocol019.ps1"),"-Helper",str(ROOT/"native/accessibility_bridge.ps1")]))
     outcomes = []
     for name, command in commands:
         with tempfile.TemporaryDirectory(prefix="leemon-check-"+name+"-") as profile:
@@ -83,7 +88,7 @@ def main():
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
-        "", "Leemon 0.18: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
+        "", "Leemon 0.19: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
         "Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.",
         "Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.",
         "Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.",

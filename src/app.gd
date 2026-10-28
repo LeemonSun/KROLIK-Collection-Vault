@@ -75,6 +75,8 @@ var goal_composing_alias=""
 var goal_compose_attempt=0
 var goal_text=""
 var goal_context={}
+var goal_verify_attempt=0
+var goal_verify_revision=0
 var goal_plan={}
 var goal_origin_target={}
 var goal_deadline_ms=0
@@ -122,7 +124,7 @@ func _ready():
 	speech_input.failed.connect(func(key):add_message("assistant",t(key));dictation_target=null)
 	application_access=preload("res://src/tools/application_access.gd").new()
 	add_child(application_access)
-	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values)))
+	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values),true))
 	application_access.changed.connect(_access_changed)
 	application_access.read_ready.connect(_window_read_observed)
 	application_access.snapshot_ready.connect(_goal_observed)
@@ -1018,7 +1020,9 @@ func _agent_finish(key):
 		if names.size()>=6:break
 	agent.clear();workflow.clear();_clear_goal();state.reset()
 	var reply=t(key)+"\n"+t("agent_receipts",{"count":receipts.size()})
-	for step in receipts:reply+="\n• "+t("agent_action_"+str(step.action))+": "+str(step.name)
+	for step in receipts:
+		var scope=preload("res://src/core/control_context.gd").label(step)
+		reply+="\n• "+t("agent_action_"+str(step.action))+": "+str(step.name)+( " — "+scope if not scope.is_empty() else "")
 	if not names.is_empty():reply+="\n\n"+t("agent_observed")+"\n"+" · ".join(PackedStringArray(names))
 	add_message("assistant",reply,true);changed.emit()
 
@@ -1055,7 +1059,7 @@ func _goal_observed():
 			goal_mode="loading";local_ai_enabled=true
 			if not local_runtime.start(runtime_options()):_goal_error(local_runtime.status)
 			changed.emit();return
-		goal_context=agent.prepare(application_access.target,application_access.nodes,application_access.observed_ms,Time.get_ticks_msec(),l10n.locale) if agent.active else goal_planner.prepare(goal_text,application_access.target,application_access.nodes,application_access.observed_ms,l10n.locale)
+		goal_context=agent.prepare(application_access.target,application_access.nodes,application_access.observed_ms,Time.get_ticks_msec(),l10n.locale,application_access.observation) if agent.active else goal_planner.prepare(goal_text,application_access.target,application_access.nodes,application_access.observed_ms,l10n.locale,false,application_access.observation)
 		if not goal_context.get("ok",false):
 			if agent.active:_agent_finish("agent_"+str(goal_context.get("reason","no_actions")))
 			else:_goal_error("goal_more_info")
@@ -1075,10 +1079,13 @@ func _goal_observed():
 	elif goal_mode=="verifying":
 		var verified=false
 		if goal_planner.same_target(goal_plan.target,application_access.target):
-			for node in application_access.nodes:
-				if node.get("id")==goal_plan.node.id and node.get("name")==goal_plan.node.name:
-					verified=node.get("selected",false)==true if goal_plan.action=="select" else int(node.get("expansion",-1))==1
+			# Reidentification is for observing an outcome only, never for retargeting a click.
+			var node=preload("res://src/core/control_context.gd").resolve(goal_plan.node,application_access.nodes,true)
+			if not node.is_empty():verified=node.get("selected",false)==true if goal_plan.action=="select" else int(node.get("expansion",-1))==1
 		if verified:_goal_done("goal_verified_"+goal_plan.action)
+		elif goal_verify_attempt<3:
+			goal_mode="verify_wait"
+			get_tree().create_timer(0.25 if goal_verify_attempt==1 else 0.6).timeout.connect(_retry_goal_verification.bind(goal_verify_revision))
 		else:_goal_error("goal_unverified")
 	changed.emit()
 func _start_goal_composition(alias,previous_draft=""):
@@ -1121,8 +1128,10 @@ func _show_goal_proposal():
 	goal_mode="proposal";state.reset();goal_deadline_ms=Time.get_ticks_msec()+(120000 if goal_plan.get("generated",false) else 30000)
 	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
 	var preview=t("goal_propose_draft" if goal_plan.get("generated",false) else ("goal_propose_append" if goal_plan.action=="write" and goal_plan.append else "goal_propose_"+goal_plan.action),values)
+	var scope=preload("res://src/core/control_context.gd").label(goal_plan.node)
+	if not scope.is_empty():preview+="\n"+t("goal_control_scope",{"path":scope})
 	if goal_plan.action=="write":preview+="\n\n"+goal_plan.text
-	add_message("assistant",preview,agent.active)
+	add_message("assistant",preview,true)
 	request_motion("dialogue.explain_small");changed.emit()
 func confirm_window_goal():
 	if goal_mode!="proposal" or paused:return false
@@ -1142,8 +1151,16 @@ func _goal_access_completed(result):
 	elif status_=="invoked":_goal_done("goal_invoked")
 	elif status_ in ["selected","expanded"]:
 		goal_mode="verifying";goal_deadline_ms=Time.get_ticks_msec()+20000
+		goal_verify_attempt=1;goal_verify_revision+=1
 		if not application_access.inspect(true):_goal_error("goal_unverified")
 	else:_goal_error("goal_unverified")
+func _retry_goal_verification(revision):
+	if revision!=goal_verify_revision or goal_mode!="verify_wait" or paused:return
+	if Time.get_ticks_msec()>goal_deadline_ms or not goal_planner.same_target(goal_plan.get("target",{}),application_access.target):_goal_error("goal_changed");return
+	goal_verify_attempt+=1;goal_mode="verifying"
+	if not application_access.inspect(true):_goal_error("goal_unverified")
+	changed.emit()
+
 func _goal_done(key):
 	if agent.active:
 		var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
@@ -1177,6 +1194,7 @@ func _goal_error(key):
 	if interrupted:add_message("assistant",t("workflow_stopped"),true)
 	request_motion("work.error_recover");changed.emit()
 func _clear_goal():
+	goal_verify_revision+=1;goal_verify_attempt=0
 	goal_composing_alias="";goal_compose_attempt=0
 	var active=not goal_mode.is_empty()
 	goal_mode="";goal_text="";goal_context={};goal_plan={};goal_origin_target={};goal_deadline_ms=0

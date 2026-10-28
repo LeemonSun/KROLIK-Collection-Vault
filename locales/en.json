@@ -440,5 +440,7 @@
   "cap_files": "I can propose changes to a selected supported file, with preview, approval and backup. Universal document editing is not ready.",
   "cap_unavailable": "That capability is not connected yet. No action was performed.",
   "metrics_partial": "Process measurement is partial: some data is unavailable.",
-  "goal_status_repairing": "Correcting the draft"
+  "goal_status_repairing": "Correcting the draft",
+  "goal_control_scope": "Section: {path}",
+  "goal_status_verify_wait": "Waiting for the window to update…"
 }

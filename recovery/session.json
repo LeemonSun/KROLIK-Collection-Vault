@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "app_version": "0.18.0-desktop-preview",
-  "checkpoint_status": "0.18_saved_task_aware_behavior_windows_acceptance_pending",
-  "current_task": "018 finished: bounded quintic distance-driven locomotion/gait, task pose arbitration, interruption/pause fixes, offscreen reduced-motion entrance fix, hidden rig suspension and following bounded speech bubbles. Built/validated and ZIP/report/demo saved.",
-  "next_action": "Real Windows/hardware acceptance of018 motion/transparency/DPI/alt-tab/tray/idle-work-game load; then24case compact instruction/observation comparison and general UIA adaptation. Model reasoning still unresolved; no new default weights or IQ claim.",
+  "app_version": "0.19.0-desktop-preview",
+  "checkpoint_status": "0.19_contextual_observation_implemented_validation_delivery_pending",
+  "current_task": "019 implemented: generic ancestor/role/AutomationId context, strict scoped preflight, contextual history, bounded read-only delayed verification, partial observation budgets and ephemeral UIA context. Final checks/build pending.",
+  "next_action": "Finish019 source/native/packed/PowerShell checks and delivery; real Windows/hardware acceptance and compact model quality remain necessary.",
   "read_next": [
-    "docs/WORKFLOWS_018.md",
+    "docs/WORKFLOWS_019.md",
     "docs/WINDOWS_ACCEPTANCE_017.md",
     "reports/real_test_composer_real017.txt"
   ],

@@ -1,0 +1,1 @@
+ACCESS_PROTOCOL019: 17 checks, 0 failures; real PowerShell with synthetic traversal types, not real Windows UIA
