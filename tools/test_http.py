@@ -36,6 +36,13 @@ class Fixture(BaseHTTPRequestHandler):
         if scenario == 'context_success':
             assert len(request['messages']) == 2, 'Old pair was not trimmed'
             body={'choices':[{'message':{'content':'short answer'},'finish_reason':'length'}],'usage':{'prompt_tokens':30,'completion_tokens':16}}
+        if scenario in ['timings_success','reasoning_protocol','invalid_budget']:
+            body={'choices':[{'message':{'content':'final only','reasoning_content':'PRIVATE TRACE'},'finish_reason':'stop'}],'usage':{'prompt_tokens':30,'completion_tokens':16},'timings':{'prompt_ms':12.5,'predicted_ms':21.0,'cache_n':7,'prompt_n':23,'predicted_n':16,'unsafe':'PRIVATE SOURCE'}}
+            if scenario=='reasoning_protocol':
+                assert request['chat_template_kwargs']['enable_thinking'] is True
+                assert request['reasoning_budget_tokens']==128 and request['max_tokens']==160
+                assert request['reasoning_format']=='deepseek'
+            else:assert request['chat_template_kwargs']['enable_thinking'] is False
         if 'overflow' in scenario: raise AssertionError('Overflow reached generation')
         if scenario == "invalid_json":
             body = b"{broken"
@@ -87,7 +94,7 @@ def main():
             raise AssertionError("Token budget was not bounded")
         if any("tools" in r or r.get("stream") is not False for r in requests):
             raise AssertionError("Foundation must not enable model tools or streaming")
-        if any(r.get("chat_template_kwargs", {}).get("enable_thinking") is not False or (r.get("temperature"), r.get("top_p"), r.get("top_k")) != ((0.55,0.85,20) if r["messages"][-1]["content"]=="dialogue_sampling" else (0.4,0.9,40)) for r in requests):
+        if any(r.get("chat_template_kwargs", {}).get("enable_thinking") is not (r["messages"][-1]["content"]=="reasoning_protocol") or (r.get("temperature"), r.get("top_p"), r.get("top_k")) != ((0.55,0.85,20) if r["messages"][-1]["content"]=="dialogue_sampling" else (0.4,0.9,40)) for r in requests):
             raise AssertionError("Non-thinking sampling contract missing")
         assert any(r.get("presence_penalty")==0.25 and r.get("repeat_penalty")==1.0 for r in requests), "Mild dialogue sampler missing"
         print(f"HTTP_FIXTURE_OK: {len(requests)} requests; proxies bypassed; payload bounded")

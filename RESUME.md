@@ -1,3 +1,7 @@
+# Leemon0.17 — active pass
+
+Read recovery/session.json, docs/WORKFLOWS_017.md. Source head .resume-remote.json. Current4B dev benchmark session92197; no parallel heavy model workers. Last delivered0.16IDs remain in session. Need actual composer rerun after stripping field references, final source/native/PCK checks and delivery. First017App+2B authoring trial failed semantically; do not claim fixed until rerun. Capability23? actual304tests, composer23PASS; provider HTTP33+context28PASS; earlier34sourcegroupsPASS before final additions. Metrics include total/template/tokenization/prompt/decode/cache, no traces. Current model2B default; explicit128thinking pilot did not fixparadox, not enabled.
+
 # Leemon0.16 — сохранено и выдано
 
 Начать с `python3 tools/resume.py status`, recovery/session.json и docs/WORKFLOWS_016.md. Canonical folder /workspace/scratch/deec6c1ed852/leemon-013 (historical name). Main head in .resume-remote.json. GitHub LeemonSun/KROLIK-Collection-Vault only storage: no CI/build/deploy. No subagents without authorization. Do not read stale companion-foundation0.1.

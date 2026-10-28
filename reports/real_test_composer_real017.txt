@@ -1,0 +1,11 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+REAL_COMPOSER017 {"draft":"«Сегодня вечером я приглашаю вас на встречу завтра, чтобы обсудить наши планы и решить важные вопросы».","goal":"Составь в поле Body короткое приглашение на встречу завтра, одним предложением.","locale":"ru","mode":"proposal","usage":{"cache_n":0.0,"completion_tokens":25.0,"elapsed_ms":38898,"predicted_ms":21316.436,"predicted_n":25.0,"preflight_tokens":135,"prompt_ms":16747.323,"prompt_n":135.0,"prompt_tokens":135.0,"prompt_tokens_details":{"cached_tokens":0.0},"reasoning_budget":0,"template_ms":343,"tokenize_ms":833,"total_ms":40074,"total_tokens":160.0}}
+REAL_COMPOSER017 {"draft":"Join us tomorrow in Body for our upcoming meeting.","goal":"Compose a one-sentence invitation for a meeting tomorrow in Body.","locale":"en","mode":"proposal","usage":{"cache_n":0.0,"completion_tokens":11.0,"elapsed_ms":39275,"predicted_ms":9754.394,"predicted_n":11.0,"preflight_tokens":130,"prompt_ms":26790.904,"prompt_n":130.0,"prompt_tokens":130.0,"prompt_tokens_details":{"cached_tokens":0.0},"reasoning_budget":0,"template_ms":637,"tokenize_ms":835,"total_ms":40747,"total_tokens":141.0}}
+REAL_COMPOSER017 {"draft":"","goal":"请写一句邀请明天参加会议的话，填入Body。","locale":"zh-Hans","mode":"","usage":{"cache_n":0.0,"completion_tokens":30.0,"elapsed_ms":21000,"predicted_ms":8240.872,"predicted_n":30.0,"preflight_tokens":130,"prompt_ms":10668.014,"prompt_n":130.0,"prompt_tokens":130.0,"prompt_tokens_details":{"cached_tokens":0.0},"reasoning_budget":0,"template_ms":652,"tokenize_ms":833,"total_ms":22485,"total_tokens":160.0}}
+COMPOSER_REAL017_TESTS: 17 checks, 1 failures; real pinned2B and App, synthetic Windows UIA only
+ERROR: Actual app receives a relevant composed proposal zh-Hans
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://tests/test_composer_real017.gd:7)
+       [1] run (res://tests/test_composer_real017.gd:23)

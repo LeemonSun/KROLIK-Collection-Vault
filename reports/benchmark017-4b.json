@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+  "candidate": "unsloth/Qwen3.5-4B-GGUF",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "cases": [
+    {
+      "id": "ru_logic",
+      "variant": "baseline",
+      "answer": "Это утверждение **ложно**.\n\n**Краткое объяснение:**\nЕсли предположить, что фраза «Это предложение ложно» истинна, то по её определению она должна быть ложной. Это создаёт логический парадокс (антарадиум), где невозможно определить истинность без противоречия. В классической логике такие предложения не имеют значения, так как они не могут быть ни истинными, ни ложными одновременно.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 104,
+        "prompt_tokens": 168,
+        "total_tokens": 272,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 21093.601,
+        "prompt_per_token_ms": 125.5571488095238,
+        "prompt_per_second": 7.964500703317561,
+        "predicted_n": 104,
+        "predicted_ms": 52512.231,
+        "predicted_per_token_ms": 509.8274854368932,
+        "predicted_per_second": 1.9614478006085856
+      },
+      "wall_ms": 73687
+    }
+  ],
+  "scope": "exploratory synthetic semantic cases; not Windows/product performance or statistical quality proof",
+  "startup_ms": 19368,
+  "worker_peak_rss_bytes": 2125824
+}

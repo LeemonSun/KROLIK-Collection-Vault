@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "model_sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "cases": [
+    {
+      "id": "ru_logic",
+      "variant": "baseline",
+      "answer": "Предложение «Это предложение ложно» является **логической тавтологией** (или самоподтверждающимся утверждением). Оно истинно.\n\nПочему:\n1. Если утверждение истинно, то его содержание (что это предложение ложно) неверно, что делает его ложным.\n2. Если утверждение ложно, то его содержание (что это предложение ложно) верно, что делает его истинным.\n\nВ обоих случаях утверждение оказывается **истинным**.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 107,
+        "prompt_tokens": 168,
+        "total_tokens": 275,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 5230.356,
+        "prompt_per_token_ms": 31.133071428571427,
+        "prompt_per_second": 32.12018455340325,
+        "predicted_n": 107,
+        "predicted_ms": 21232.349,
+        "predicted_per_token_ms": 200.305179245283,
+        "predicted_per_second": 4.992382142927285
+      },
+      "wall_ms": 26477
+    },
+    {
+      "id": "en_logic",
+      "variant": "baseline",
+      "answer": "The sentence \"This sentence is false\" is a **logical paradox** (specifically, a Liar Paradox).\n\n*   If the sentence is **true**, then the statement \"This sentence is false\" must be true, which means the sentence itself is true.\n*   If the sentence is **false**, then the statement \"This sentence is false\" must be false, which means the sentence is actually true.\n\nBecause it creates a contradiction (it cannot be both true and false simultaneously), the sentence is **false** in the sense that it is an unresolvable logical inconsistency.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 122,
+        "prompt_tokens": 164,
+        "total_tokens": 286,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 164,
+        "prompt_ms": 4587.813,
+        "prompt_per_token_ms": 27.97446951219512,
+        "prompt_per_second": 35.746879831414226,
+        "predicted_n": 122,
+        "predicted_ms": 26345.317,
+        "predicted_per_token_ms": 217.72989256198346,
+        "predicted_per_second": 4.592846614827219
+      },
+      "wall_ms": 31097
+    },
+    {
+      "id": "zh-Hans_logic",
+      "variant": "baseline",
+      "answer": "这句话是**假**的。\n\n因为说话者（AI）知道这句话的内容，所以它不可能为“假”。",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 166,
+        "total_tokens": 192,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 166,
+        "prompt_ms": 4305.998,
+        "prompt_per_token_ms": 25.939746987951803,
+        "prompt_per_second": 38.55087717179618,
+        "predicted_n": 26,
+        "predicted_ms": 4367.186,
+        "predicted_per_token_ms": 174.68743999999998,
+        "predicted_per_second": 5.724510016289666
+      },
+      "wall_ms": 8809
+    },
+    {
+      "id": "ru_draft",
+      "variant": "baseline",
+      "answer": "Приглашаем вас на встречу завтра.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 178,
+        "total_tokens": 187,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 40,
+        "prompt_ms": 1240.839,
+        "prompt_per_token_ms": 31.020975,
+        "prompt_per_second": 32.23625305136283,
+        "predicted_n": 9,
+        "predicted_ms": 1879.679,
+        "predicted_per_token_ms": 234.959875,
+        "predicted_per_second": 4.256045846125854
+      },
+      "wall_ms": 3251
+    },
+    {
+      "id": "en_draft",
+      "variant": "baseline",
+      "answer": "You are invited to a meeting tomorrow.",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 175,
+        "total_tokens": 184,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 37,
+        "prompt_ms": 1207.974,
+        "prompt_per_token_ms": 32.64794594594594,
+        "prompt_per_second": 30.62979832347385,
+        "predicted_n": 9,
+        "predicted_ms": 1582.597,
+        "predicted_per_token_ms": 197.824625,
+        "predicted_per_second": 5.054982411820571
+      },
+      "wall_ms": 2908
+    },
+    {
+      "id": "zh-Hans_draft",
+      "variant": "baseline",
+      "answer": "诚邀您于明天参加本次会议。",
+      "reasoning_chars": 0,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 169,
+        "total_tokens": 177,
+        "prompt_tokens_details": {
+          "cached_tokens": 140
+        }
+      },
+      "timings": {
+        "cache_n": 140,
+        "prompt_n": 29,
+        "prompt_ms": 981.959,
+        "prompt_per_token_ms": 33.86065517241379,
+        "prompt_per_second": 29.532801267670035,
+        "predicted_n": 8,
+        "predicted_ms": 1585.5,
+        "predicted_per_token_ms": 226.5,
+        "predicted_per_second": 4.415011037527593
+      },
+      "wall_ms": 2780
+    },
+    {
+      "id": "ru_logic",
+      "variant": "budget128",
+      "answer": "Предложение «Это предложение ложно» является **ложным**.\n\nВ логике это классическая парадоксальная конструкция (например, в форме «Это утверждение ложно»). Если оно истинно, то оно должно быть ложным, что противоречит его статусу истинности. Если оно ложно, то утверждение о его ложности должно быть истинным.\n\nВ данном случае, поскольку само предложение описывает свою собственную логическую структуру, оно не может быть одновременно истинным и ложным, но в контексте самоанализа оно само по",
+      "reasoning_chars": 547,
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 256,
+        "prompt_tokens": 166,
+        "total_tokens": 422,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 28,
+        "prompt_ms": 1324.917,
+        "prompt_per_token_ms": 47.318464285714285,
+        "prompt_per_second": 21.13339929972972,
+        "predicted_n": 256,
+        "predicted_ms": 105712.03,
+        "predicted_per_token_ms": 414.55698039215685,
+        "predicted_per_second": 2.412213633585506
+      },
+      "wall_ms": 107103
+    },
+    {
+      "id": "en_logic",
+      "variant": "budget128",
+      "answer": "The sentence is **true**.\n\nThe sentence claims that the sentence itself (\"This sentence is false\") is false. Since the sentence is indeed false, the statement accurately describes its status.",
+      "reasoning_chars": 521,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 168,
+        "prompt_tokens": 162,
+        "total_tokens": 330,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 24,
+        "prompt_ms": 1093.05,
+        "prompt_per_token_ms": 45.543749999999996,
+        "prompt_per_second": 21.95690956497873,
+        "predicted_n": 168,
+        "predicted_ms": 89532.469,
+        "predicted_per_token_ms": 536.1225688622754,
+        "predicted_per_second": 1.8652451101287064
+      },
+      "wall_ms": 90765
+    },
+    {
+      "id": "zh-Hans_logic",
+      "variant": "budget128",
+      "answer": "这句话是假的。\n\n因为这句话本身在逻辑上构成了“自我否定”悖论（即“这句话是假的”），如果它真，则它的内容为假，矛盾；如果它假，则它的内容为真，也矛盾。因此，从逻辑角度看，这是一个经典悖论，无法在真或假之间给出确定答案。",
+      "reasoning_chars": 503,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 205,
+        "prompt_tokens": 164,
+        "total_tokens": 369,
+        "prompt_tokens_details": {
+          "cached_tokens": 140
+        }
+      },
+      "timings": {
+        "cache_n": 140,
+        "prompt_n": 24,
+        "prompt_ms": 1044.809,
+        "prompt_per_token_ms": 43.53370833333333,
+        "prompt_per_second": 22.97070565050646,
+        "predicted_n": 205,
+        "predicted_ms": 83805.439,
+        "predicted_per_token_ms": 410.8109754901961,
+        "predicted_per_second": 2.4342095505280987
+      },
+      "wall_ms": 84974
+    },
+    {
+      "id": "ru_draft",
+      "variant": "budget128",
+      "answer": "Приглашение на встречу завтра: «Приглашаю вас на нашу встречу завтра».",
+      "reasoning_chars": 532,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 149,
+        "prompt_tokens": 176,
+        "total_tokens": 325,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 38,
+        "prompt_ms": 2175.635,
+        "prompt_per_token_ms": 57.253552631578955,
+        "prompt_per_second": 17.466165050663367,
+        "predicted_n": 149,
+        "predicted_ms": 48431.88,
+        "predicted_per_token_ms": 327.2424324324324,
+        "predicted_per_second": 3.0558384270856305
+      },
+      "wall_ms": 50824
+    },
+    {
+      "id": "en_draft",
+      "variant": "budget128",
+      "answer": "Please join me tomorrow for the meeting.",
+      "reasoning_chars": 502,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 139,
+        "prompt_tokens": 173,
+        "total_tokens": 312,
+        "prompt_tokens_details": {
+          "cached_tokens": 138
+        }
+      },
+      "timings": {
+        "cache_n": 138,
+        "prompt_n": 35,
+        "prompt_ms": 2465.656,
+        "prompt_per_token_ms": 70.44731428571428,
+        "prompt_per_second": 14.195005304876268,
+        "predicted_n": 139,
+        "predicted_ms": 38019.282,
+        "predicted_per_token_ms": 275.5020434782609,
+        "predicted_per_second": 3.629737142326886
+      },
+      "wall_ms": 40617
+    },
+    {
+      "id": "zh-Hans_draft",
+      "variant": "budget128",
+      "answer": "诚邀您明天参加会议。",
+      "reasoning_chars": 522,
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 137,
+        "prompt_tokens": 167,
+        "total_tokens": 304,
+        "prompt_tokens_details": {
+          "cached_tokens": 140
+        }
+      },
+      "timings": {
+        "cache_n": 140,
+        "prompt_n": 27,
+        "prompt_ms": 1272.398,
+        "prompt_per_token_ms": 47.12585185185185,
+        "prompt_per_second": 21.219775573366196,
+        "predicted_n": 137,
+        "predicted_ms": 163005.441,
+        "predicted_per_token_ms": 1198.569419117647,
+        "predicted_per_second": 0.8343279780458372
+      },
+      "wall_ms": 164698
+    }
+  ],
+  "scope": "exploratory synthetic semantic cases; not Windows/product performance or statistical quality proof",
+  "startup_ms": 3877,
+  "worker_peak_rss_bytes": 0
+}

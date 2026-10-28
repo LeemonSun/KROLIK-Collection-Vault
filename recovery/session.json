@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "app_version": "0.16.0-desktop-preview",
-  "checkpoint_status": "0.16_saved_semantic_quality_limits_documented",
-  "current_task": "0.16 packaged, validated and saved: reviewed composed field drafts with narrow grounding gate, compact bound choices/top-level schema, visited navigation, visible whole-chat copy, viewport layout fix, grounded persona. Unproven extra answer review OFF by default, advanced experiment only.",
-  "next_action": "Improve actual local model reasoning/content quality using measured RU/EN/zh semantic trials, e.g. budgeted reasoning mode/alternative small model, before claiming IQ gains. Do not default-enable failed same-model critic. Windows UIA/DPI/clipboard/mic/voice/resource acceptance still pending; user collecting tests. Existing general adaptive agent goal remains primary.",
+  "app_version": "0.17.0-desktop-preview",
+  "checkpoint_status": "0.17_active_composition_and_metrics",
+  "current_task": "0.17 active: separated plain authoring from action planning and destination cleanup; registry-grounded capability questions; private numeric stage metrics in diagnostics; controlled bounded-reasoning pilot failed to fix2Blogic.4B dev comparison running.",
+  "next_action": "Collect4B benchmark session92197. Then real App composer rerun after destination cleanup (first017semantic trial failed). Finish acceptance/benchmark harness tests, final source/native checks, package and save artifacts. No new model default or automatic thinking enabled. Preserve all failed semantic evidence.",
   "read_next": [
-    "docs/WORKFLOWS_016.md",
-    "reports/real_test_agent_real016.txt"
+    "docs/WORKFLOWS_017.md",
+    "reports/benchmark017-ab.json",
+    "reports/real_test_composer_real017.txt"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",

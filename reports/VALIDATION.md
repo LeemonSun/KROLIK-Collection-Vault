@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| composer017 | PASS |
 | reasoning016 | PASS |
 | draft016 | PASS |
 | adaptive015 | PASS |

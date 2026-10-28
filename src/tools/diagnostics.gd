@@ -1,4 +1,5 @@
 extends Node
+const LocalProvider=preload("res://src/providers/llama_http_provider.gd")
 signal sampled
 var active=false
 var elapsed=5.0
@@ -67,7 +68,14 @@ func _accept(items):
 func report():
 	var cpu="—" if not values.has("cpu_percent") else "%.1f%%" % values.cpu_percent
 	var memory="—" if int(values.get("process_count",0))==0 else "%.1f MiB" % (float(values.get("process_bytes",0))/1048576.0)
-	return app.t("diagnostics_report",{"fps":values.get("fps",0),"limit":values.get("fps_limit",0),"memory":memory,"cpu":cpu,"processes":values.get("process_count",0),"engine":"%.1f MiB" % (float(values.get("engine_bytes",0))/1048576.0)})
+	var text=app.t("diagnostics_report",{"fps":values.get("fps",0),"limit":values.get("fps_limit",0),"memory":memory,"cpu":cpu,"processes":values.get("process_count",0),"engine":"%.1f MiB" % (float(values.get("engine_bytes",0))/1048576.0)})
+	if is_instance_valid(app.provider) and app.provider is LocalProvider:
+		var metrics=app.provider.last_usage
+		if not metrics.is_empty():
+			text+="\n\n"+app.t("inference_metrics")+"\n"
+			for key in ["total_ms","template_ms","tokenize_ms","prompt_ms","predicted_ms","cache_n","prompt_n","predicted_n","reasoning_budget"]:
+				if metrics.has(key):text+=app.t("metric_"+key)+": "+str(metrics[key])+"\n"
+	return text
 
 func _proc_path(process_id):
 	if process_id==OS.get_process_id():return "/proc/self"

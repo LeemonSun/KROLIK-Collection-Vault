@@ -71,6 +71,7 @@ var window_reader=preload("res://src/core/window_reader.gd").new()
 var workflow=preload("res://src/core/window_workflow.gd").new()
 var agent=preload("res://src/core/adaptive_agent.gd").new()
 var goal_mode=""
+var goal_composing_alias=""
 var goal_text=""
 var goal_context={}
 var goal_plan={}
@@ -532,7 +533,7 @@ func _execute(command):
 func _on_answer(text):
 	if window_read_mode=="thinking":
 		_window_read_answer(text);return
-	if goal_mode=="thinking":
+	if goal_mode in ["thinking","composing"]:
 		_goal_answer(text);return
 	if state.current != "thinking":
 		return
@@ -1056,10 +1057,14 @@ func _goal_observed():
 			if agent.active:_agent_finish("agent_"+str(goal_context.get("reason","no_actions")))
 			else:_goal_error("goal_more_info")
 			return
+		if goal_context.get("draft_allowed",false):
+			var alias=preload("res://src/core/draft_composer.gd").unique_field(goal_context)
+			if not alias.is_empty():_start_goal_composition(alias);return
 		goal_mode="thinking";state.reset();state.transition("thinking")
 		local_runtime.generation_busy=true;local_runtime.touch()
 		request_motion("dialogue.think_loop")
-		provider.submit(goal_context.messages,{"max_tokens":384 if goal_context.get("draft_allowed",false) else 256,"context_tokens":runtime_options().context_tokens,"response_schema":goal_context.schema})
+		var selection=preload("res://src/core/draft_composer.gd").selection(goal_context) if goal_context.get("draft_allowed",false) else goal_context
+		provider.submit(selection.messages,{"max_tokens":64 if goal_context.get("draft_allowed",false) else 256,"context_tokens":runtime_options().context_tokens,"response_schema":selection.schema})
 	elif goal_mode=="confirming":
 		if not goal_planner.same_target(goal_plan.target,application_access.target) or str(goal_plan.target.get("title",""))!=str(application_access.target.get("title","")):_goal_error("goal_changed");return
 		goal_mode="executing";goal_deadline_ms=Time.get_ticks_msec()+20000
@@ -1073,9 +1078,24 @@ func _goal_observed():
 		if verified:_goal_done("goal_verified_"+goal_plan.action)
 		else:_goal_error("goal_unverified")
 	changed.emit()
+func _start_goal_composition(alias):
+	if not agent.active or not goal_context.get("draft_allowed",false) or not goal_context.map.has(alias) or not goal_context.map[alias].get("write",false):_goal_error("goal_failed");return false
+	goal_composing_alias=alias;goal_mode="composing";goal_deadline_ms=Time.get_ticks_msec()+120000
+	state.reset();state.transition("thinking");local_runtime.generation_busy=true;local_runtime.touch()
+	provider.submit(preload("res://src/core/draft_composer.gd").messages(goal_context.goal,l10n.locale,str(goal_context.map[alias].name)),{"max_tokens":256,"context_tokens":runtime_options().context_tokens})
+	changed.emit();return true
+
 func _goal_answer(text):
 	local_runtime.generation_busy=false;local_runtime.touch()
 	if provider is Llama and provider.last_truncated:_goal_error("goal_failed");return
+	if goal_mode=="composing":
+		text=JSON.stringify({"choice":"write:"+goal_composing_alias,"text":text,"append":false})
+	elif agent.active and goal_context.get("draft_allowed",false):
+		var selected=JSON.parse_string(text)
+		if selected is Dictionary and selected.size()==1 and selected.get("choice") is String:
+			var choice=str(selected.choice)
+			if choice in goal_context.get("choices",[]) and choice.begins_with("write:"):
+				_start_goal_composition(choice.trim_prefix("write:"));return
 	goal_plan=agent.validate(text,goal_context,application_access.target,Time.get_ticks_msec()) if agent.active else goal_planner.validate(text,goal_context,application_access.target,Time.get_ticks_msec())
 	goal_context={}
 	if not goal_plan.get("ok",false):_goal_error("draft_unprovided_detail" if goal_plan.get("reason")=="draft_unprovided_detail" else "goal_failed");return
@@ -1145,6 +1165,7 @@ func _goal_error(key):
 	if interrupted:add_message("assistant",t("workflow_stopped"),true)
 	request_motion("work.error_recover");changed.emit()
 func _clear_goal():
+	goal_composing_alias=""
 	var active=not goal_mode.is_empty()
 	goal_mode="";goal_text="";goal_context={};goal_plan={};goal_origin_target={};goal_deadline_ms=0
 	if active:

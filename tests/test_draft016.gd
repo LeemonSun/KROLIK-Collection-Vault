@@ -58,8 +58,8 @@ func run():
 	app.application_access=access;app.provider=provider;app.local_runtime=runtime;app.provider_name='local_worker'
 	check(app.begin_agent('Compose a friendly greeting for the Body field'),'Application accepts explicit composing goal')
 	access._finish({'status':'inspected','title':target().title,'nodes':nodes()})
-	check(provider.calls[-1].options.max_tokens==384,'Draft gets bounded generation budget')
-	app._goal_answer(raw('Welcome to the meeting!'))
+	check(provider.calls[-1].options.max_tokens==256 and not provider.calls[-1].options.has('response_schema'),'Plain authoring has bounded output without action JSON')
+	app._goal_answer('Welcome to the meeting!')
 	check(app.goal_mode=='proposal' and app.goal_plan.generated and access.requests.size()==1,'Generated draft cannot write before approval')
 	check('Welcome to the meeting!' in app.messages[-1].text and 'Nothing has been entered' in app.messages[-1].text,'Complete generated draft explicitly presented as unexecuted')
 	app.confirm_window_goal();access._finish({'status':'inspected','title':target().title,'nodes':nodes()})

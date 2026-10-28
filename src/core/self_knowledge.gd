@@ -27,6 +27,8 @@ func classify(raw):
 	if text.rstrip('.!? ') in ['привет','приветик','скажи что либо','скажи что-нибудь','скажи что нибудь','скажи что то','hello','hi','你好','您好']:return 'greeting'
 	return ''
 func answer(raw,app):
+	var capability=preload("res://src/core/capability_answers.gd").lookup(raw,app.policy)
+	if not capability.is_empty():return {"intent":"capability","text":app.t(capability.key)}
 	var intent=classify(raw)
 	if intent.is_empty():return {}
 	var key='self_'+intent

@@ -11,6 +11,11 @@ var request_options={}
 var last_usage={}
 var last_truncated=false
 var generation_started_ms=0
+var request_started_ms=0
+var preflight_tokens=0
+var template_ms=0
+var tokenize_ms=0
+var stage_started_ms=0
 
 func _ready():
 	http = HTTPRequest.new()
@@ -28,6 +33,7 @@ func submit(messages, options = {}):
 	request_messages=messages.duplicate(true)
 	request_options=options.duplicate(true)
 	last_usage={}
+	request_started_ms=Time.get_ticks_msec();preflight_tokens=0;template_ms=0;tokenize_ms=0
 	last_truncated=false
 	busy=true
 	if options.has("response_schema") and auth_token.is_empty():
@@ -52,9 +58,16 @@ func _post(path,payload):
 		return false
 	return true
 
+func reasoning_tokens():
+	if auth_token.is_empty() or request_options.has("response_schema") or request_options.get("multimodal",false):return 0
+	return 128 if request_options.get("reasoning_tokens",0)==128 else 0
+
+func total_output_tokens():
+	return clampi(int(request_options.get("max_tokens",128)),16,512-reasoning_tokens())+reasoning_tokens()
+
 func _apply_template():
-	phase="template"
-	return _post("/apply-template",{"messages":request_messages,"add_generation_prompt":true,"chat_template_kwargs":{"enable_thinking":false}})
+	phase="template";stage_started_ms=Time.get_ticks_msec()
+	return _post("/apply-template",{"messages":request_messages,"add_generation_prompt":true,"chat_template_kwargs":{"enable_thinking":reasoning_tokens()>0}})
 
 func _generate():
 	phase="generate"
@@ -63,13 +76,16 @@ func _generate():
 		"model": "companion",
 		"messages": request_messages,
 		"stream": false,
-		"max_tokens": clampi(int(request_options.get("max_tokens", 128)), 16, 512),
+		"max_tokens": total_output_tokens(),
 		"temperature": 0.4,
 		"top_p": 0.9,
 		"top_k": 40,
 		"min_p": 0.0,
-		"chat_template_kwargs": {"enable_thinking": false}
+		"chat_template_kwargs": {"enable_thinking": reasoning_tokens()>0}
 	}
+	if reasoning_tokens()>0:
+		body["reasoning_budget_tokens"]=reasoning_tokens()
+		body["reasoning_format"]="deepseek"
 	if request_options.get("companion_dialogue",false) and not auth_token.is_empty():
 		body["temperature"]=0.55;body["top_p"]=0.85;body["top_k"]=20
 		body["presence_penalty"]=0.25;body["repeat_penalty"]=1.0
@@ -105,15 +121,18 @@ func _on_completed(result, code, _headers, body):
 		_fail("model_invalid_response")
 		return
 	if phase=="template":
+		template_ms+=Time.get_ticks_msec()-stage_started_ms
 		if not parsed.get("prompt") is String:
 			busy=false;_fail("model_invalid_response");return
-		phase="tokenize"
+		phase="tokenize";stage_started_ms=Time.get_ticks_msec()
 		_post("/tokenize",{"content":parsed.prompt,"add_special":false,"parse_special":true})
 		return
 	if phase=="tokenize":
+		tokenize_ms+=Time.get_ticks_msec()-stage_started_ms
 		if not parsed.get("tokens") is Array:
 			busy=false;_fail("model_invalid_response");return
-		var needed=parsed.tokens.size()+clampi(int(request_options.get("max_tokens",128)),16,512)+64
+		preflight_tokens=parsed.tokens.size()
+		var needed=parsed.tokens.size()+total_output_tokens()+64
 		if needed>int(request_options.get("context_tokens",2048)):
 			if request_messages.size()>2:
 				request_messages.remove_at(1);request_messages.remove_at(1)
@@ -134,11 +153,20 @@ func _on_completed(result, code, _headers, body):
 	if content.is_empty() or content.length() > 16384:
 		_fail("model_invalid_response")
 		return
-	# tool_calls are deliberately ignored; no model-driven effects in v0.1.
+	# Model replies cannot bypass the separate proposal/approval executor.
 	last_truncated=choices[0].get("finish_reason")=="length"
 	var usage=parsed.get("usage",{})
 	last_usage=usage if usage is Dictionary else {}
 	last_usage["elapsed_ms"]=Time.get_ticks_msec()-generation_started_ms
+	last_usage["total_ms"]=Time.get_ticks_msec()-request_started_ms
+	last_usage["template_ms"]=template_ms;last_usage["tokenize_ms"]=tokenize_ms
+	last_usage["preflight_tokens"]=preflight_tokens
+	last_usage["reasoning_budget"]=reasoning_tokens()
+	var timings=parsed.get("timings",{})
+	if timings is Dictionary:
+		for key in ["prompt_n","prompt_ms","predicted_n","predicted_ms","cache_n"]:
+			var value=timings.get(key)
+			if (value is int or value is float) and is_finite(float(value)) and value>=0:last_usage[key]=value
 	request_messages=[]
 	request_options={}
 	completed.emit(content)
