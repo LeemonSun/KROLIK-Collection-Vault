@@ -4,6 +4,7 @@ signal close_requested
 signal settings_requested
 const VisualTheme=preload('res://src/ui/visual_theme.gd')
 const Handle=preload('res://src/ui/window_handle.gd')
+var layout
 var embedded=false
 var app
 var history
@@ -44,7 +45,7 @@ func _ready():
 	super._ready()
 	app=get_tree().root.get_node('App')
 	theme=VisualTheme.make()
-	var layout=VBoxContainer.new()
+	layout=VBoxContainer.new()
 	layout.add_theme_constant_override('separation',8)
 	add_child(layout)
 	var header=Handle.new()
@@ -246,6 +247,7 @@ func _render_history():
 func refresh():
 	if not is_inside_tree() or not is_instance_valid(status_label):return
 	var available_height=minf(size.y,get_viewport_rect().size.y)
+	layout.add_theme_constant_override("separation",4 if available_height<340 else 8)
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
 	copy_chat_button.text=app.t("chat_copy_short")
 	if last_locale!=app.l10n.locale:
@@ -284,8 +286,9 @@ func refresh():
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
+	if app.answer_reviewing:status_label.text=app.t("answer_reviewing")
 	if app.public_page.busy:status_label.text=app.t("web_stage_"+app.public_page.stage)
-	if app.agent.active:status_label.text=app.t("agent_step",{"step":mini(app.agent.history.size()+1,app.agent.MAX_STEPS),"total":app.agent.MAX_STEPS})+" · "+status_label.text
+	if app.agent.active:status_label.text=app.t("agent_step",{"step":mini(app.agent.history.size()+1,app.agent.MAX_STEPS),"total":app.agent.MAX_STEPS})+" · "+status_label.text+" · "+app.t("task_elapsed",{"seconds":maxi(0,(Time.get_ticks_msec()-app.agent.deadline+app.agent.MAX_MS)/1000)})
 	if app.workflow.active:status_label.text=app.t("workflow_step",{"step":app.workflow.index+1,"total":app.workflow.steps.size()})+" · "+status_label.text
 	if app.goal_mode=="proposal":status_label.text+=" · "+app.t("approval_remaining",{"seconds":maxi(0,ceili((app.goal_deadline_ms-Time.get_ticks_msec())/1000.0))})
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED

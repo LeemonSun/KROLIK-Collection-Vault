@@ -415,5 +415,6 @@
   "agent_action_select": "已选择",
   "agent_action_expand": "已展开",
   "agent_action_write": "已输入文本",
-  "model_reasoning_failed": "重新检查后回答仍有矛盾，请尝试单独提出一个问题。"
+  "model_reasoning_failed": "重新检查后回答仍有矛盾，请尝试单独提出一个问题。",
+  "answer_reviewing": "正在复核回答"
 }

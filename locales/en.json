@@ -415,5 +415,6 @@
   "agent_action_select": "Selected",
   "agent_action_expand": "Expanded",
   "agent_action_write": "Entered text",
-  "model_reasoning_failed": "The answer remained contradictory after one retry. Try asking one question separately."
+  "model_reasoning_failed": "The answer remained contradictory after one retry. Try asking one question separately.",
+  "answer_reviewing": "Reviewing the answer"
 }

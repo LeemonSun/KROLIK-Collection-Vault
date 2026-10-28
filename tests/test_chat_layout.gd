@@ -25,7 +25,7 @@ func _run():
 			await process_frame
 			var bounds=Rect2(Vector2.ZERO,Vector2(dimensions))
 			check(bounds.encloses(view.editor.get_global_rect()),"Composer inside %s %s actual=%s panel=%s viewport=%s minimum=%s" %[locale,dimensions,view.editor.get_global_rect(),view.get_global_rect(),root.get_visible_rect(),view.get_combined_minimum_size()])
-			check(bounds.encloses(view.send_button.get_global_rect()),"Send inside %s %s" %[locale,dimensions])
+			check(bounds.encloses(view.send_button.get_global_rect()),"Send inside %s %s rect=%s min=%s" %[locale,dimensions,view.send_button.get_global_rect(),view.get_combined_minimum_size()])
 			check(view.history.scroll_active and view.history.get_v_scroll_bar().max_value>view.history.size.y,"Long reply scrollable")
 			check(view.editor.editable,"Editable composer")
 			view.editor.text="unsubmitted draft"

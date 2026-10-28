@@ -75,7 +75,7 @@ func run():
 	app.confirm_window_goal();observe(access,1);access._finish({"status":"expanded"});observe(access,2)
 	check(app.agent.history.size()==2,'Second verified effect is recorded independently')
 	await create_timer(0.45).timeout;observe(access,2)
-	app._goal_answer(raw('ask',''))
+	if app.goal_mode=='thinking':app._goal_answer(raw('ask',''))
 	check(not app.agent.active and app.goal_mode.is_empty() and app.messages[-1].text.contains('Проверенных шагов: 2.'),'Model stop returns verified receipts, not invented business success')
 	check(app.messages[-1].get('ephemeral',false),'Window-derived receipt stays out of saved chat')
 	app.begin_agent('Покажи настройки шрифта');observe(access);app._goal_answer(raw('select',alias_for(app.goal_context,'Appearance')))

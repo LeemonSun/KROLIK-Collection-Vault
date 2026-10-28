@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.16.0-desktop-preview",
-  "checkpoint_status": "0.16_in_progress_real_model_and_delivery",
-  "current_task": "Reviewed composed field drafts, compact action+element enum schema, top-level llama json_schema, seen-navigation anti-backtrack, plain-language role/reasoning correction, visibly labeled whole-chat copy, viewport-based small-chat sizing.",
-  "next_action": "Complete real draft/reasoning fixture and final source/native checks; package0.16, save deliverables and update recovery. Current real planner six choices PASS across3locales; draft/reasoning fixture still running.",
+  "checkpoint_status": "0.16_pack_built_validation_finishing",
+  "current_task": "0.16 source33groups PASS; compiled Windows preview built. Reviewed generated field drafts, compact paired choices/top-level schema/visited navigation, selective one-pass answer review, clear whole-chat label+60message clipboard, small-window layout fix, plain-language receipts. Actual real draft/reasoning rerun and final packed regressions running.",
+  "next_action": "Collect owned real model fixture13592 and final pack tests36268; inspect all output. Save ZIP/report using fresh library-tools-016. Update session/RESUME/artifact IDs and final GitHub checkpoint. Do not claim complete15question test or universal agent.",
   "read_next": [
     "docs/WORKFLOWS_016.md",
     "reports/real_test_agent_real016.txt"
@@ -23,12 +23,12 @@
     "Adaptive loop is selected-window UIA only,4steps/240sec, each step approval; exact original-goal invoke/write authority. Model planning quality not yet measured. No persistent learned procedures."
   ],
   "validation": [
-    "31 source groups PASS",
-    "25 adaptive015 synthetic UIA/fake provider checks PASS",
-    "45 copy/selfknowledge/history checks PASS",
-    "31 native X11 clipboard/layout checks PASS across three locales/two sizes",
-    "Not actual Windows or actual2B agent quality; real model fixture downloaded for later testing only",
-    "Final PCK smoke+25adaptive+45copy/selfknowledge+31native X11 copy/layout PASS; ZIP CRC PASS"
+    "33source groups PASS",
+    "42draft/authority tests +20reasoning behavior tests PASS",
+    "Actual pinned2B CPU1thread synthetic selected-window planner6/6 correct expected steps acrossRU/EN/zh; failed baseline/intermediate samples retained in AGENT016_COMPARISON.json",
+    "Native source X11:156general+33draft review+31copy60messages PASS",
+    "Final pack smoke PASS; final focused packed checks pending",
+    "Actual Windows and hardware acceptance pending; real draft/logic quality rerun pending"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.15.0.zip",

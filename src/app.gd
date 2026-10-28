@@ -87,6 +87,7 @@ var control_panel
 var guard=ResponseGuard.new()
 var reminder_timer
 var response_retries=0
+var answer_reviewing=false
 var quality=preload("res://src/core/response_quality.gd").new()
 var pending_document={}
 var translation_mode=false
@@ -354,7 +355,7 @@ func _drain_queued_chat(revision):
 	_schedule_queued_chat()
 
 func _submit_model_text(text,retry=false,reasoning_retry=false):
-	if not retry:response_retries=0;chat_started_ms=Time.get_ticks_msec()
+	if not retry:response_retries=0;answer_reviewing=false;chat_started_ms=Time.get_ticks_msec()
 	pending_user_text=text
 	state.transition("thinking")
 	if local_runtime:
@@ -380,6 +381,13 @@ func _submit_model_text(text,retry=false,reasoning_retry=false):
 		return
 	pending_user_text = text
 	provider.submit(context.messages, options)
+
+func _review_model_answer(draft):
+	response_retries+=1;answer_reviewing=true
+	var messages_=[{"role":"system","content":quality.review_system(l10n.locale)},{"role":"user","content":"USER REQUEST:\n"+pending_user_text+"\n\nDRAFT DATA:\n"+draft}]
+	var options=runtime_options();options["max_tokens"]=384
+	changed.emit()
+	if not provider.submit(messages_,options):_on_failure("model_reasoning_failed")
 
 func _execute(command):
 	var permission = policy.evaluate(command.tool)
@@ -533,6 +541,9 @@ func _on_answer(text):
 		if response_retries<1:
 			response_retries+=1;_submit_model_text(pending_user_text,true,true);return
 		_on_failure("model_reasoning_failed");return
+	if not translation_mode and not screen_mode and response_retries==0 and quality.needs_review(pending_user_text):
+		_review_model_answer(text);return
+	answer_reviewing=false
 	if not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
 		if response_retries<1:
 			response_retries+=1
@@ -563,6 +574,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	answer_reviewing=false
 	chat_queue.clear()
 	if not window_read_mode.is_empty():
 		_window_read_error(key);return
@@ -583,6 +595,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	answer_reviewing=false
 	agent.clear()
 	if is_instance_valid(public_page):public_page.cancel()
 	chat_queue.clear();chat_started_ms=0
@@ -1070,7 +1083,7 @@ func _goal_answer(text):
 	_show_goal_proposal()
 func _show_goal_proposal():
 	goal_context={}
-	goal_mode="proposal";state.reset();goal_deadline_ms=Time.get_ticks_msec()+30000
+	goal_mode="proposal";state.reset();goal_deadline_ms=Time.get_ticks_msec()+(120000 if goal_plan.get("generated",false) else 30000)
 	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
 	var preview=t("goal_propose_draft" if goal_plan.get("generated",false) else ("goal_propose_append" if goal_plan.action=="write" and goal_plan.append else "goal_propose_"+goal_plan.action),values)
 	if goal_plan.action=="write":preview+="\n\n"+goal_plan.text

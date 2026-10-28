@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| reasoning016 | PASS |
 | draft016 | PASS |
 | adaptive015 | PASS |
 | copy_knowledge015 | PASS |

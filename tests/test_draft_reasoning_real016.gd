@@ -27,15 +27,19 @@ func run():
 		var plan=planner.validate(raw,context,target,Time.get_ticks_msec())
 		check(plan.get('ok',false) and plan.get('generated',false) and plan.get('action')=='write','Actual model composes valid reviewed draft '+spec[0])
 		var text=plan.get('text','').to_lower();var relevant=false
-		for word in ['встреч','meeting','会议']:if word in text:relevant=true
+		for word in ['встреч','встрет','meeting','会议']:if word in text:relevant=true
 		check(relevant and not text in spec[1],'Draft is new content related to the goal '+spec[0])
+		check(not 'я встретимся' in text and not '2 pm' in text and not 'conference room' in text,'No observed invented detail or malformed phrase '+spec[0])
 	# A representative combined logic/personality request, kept inside the current input budget.
 	var query='Ответь по пунктам кратко. 1. Объясни разницу между умным и мудрым. 2. Можешь ли ты ошибаться? Приведи пример возможной ошибки, не выдумывай свою биографию. 3. «Это предложение ложно» — истинно оно или нет? 4. Знать всё без возможности применить или уметь применять, зная мало — что выбрал бы в этом мысленном эксперименте и почему?'
 	var knowledge=preload('res://src/core/self_knowledge.gd').new()
 	await infer([{'role':'system','content':knowledge.factual_text('ru')},{'role':'user','content':query}],{'max_tokens':384,'context_tokens':2048})
+	var draft=reply
+	var quality=preload('res://src/core/response_quality.gd').new()
+	await infer([{'role':'system','content':quality.review_system('ru')},{'role':'user','content':'USER REQUEST:\n'+query+'\nDRAFT DATA:\n'+draft}],{'max_tokens':384,'context_tokens':2048})
 	var lower=reply.to_lower()
 	check(not reply.is_empty() and error.is_empty(),'Actual model answers combined reasoning request')
 	check(not 'я не могу ошибаться' in lower and not 'я не могу выполнить этот тест' in lower,'No false infallibility or blanket refusal')
-	check(('ошиб' in lower) and ('парадокс' in lower or 'противореч' in lower),'Actual answer addresses fallibility and paradox')
+	check(('ошиб' in lower) and ('парадокс' in lower or 'противореч' in lower) and not 'следовательно, само предложение истинно' in lower,'Reviewed answer addresses fallibility and avoids observed contradiction')
 	print('DRAFT_REASONING_REAL016_TESTS: %d checks, %d failures; actual pinned2B, synthetic editor, narrow reasoning sample' %[checks,failures])
 	quit(0 if failures==0 else 1)

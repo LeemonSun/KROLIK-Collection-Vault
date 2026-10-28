@@ -1,0 +1,68 @@
+{
+  "scope": "Six next-step choices in a synthetic UIA two-stage settings app; same pinned2B CPU1thread. Exploratory samples, no robust hardware or accuracy benchmark.",
+  "baseline015": {
+    "valid_expected_steps": 5,
+    "total": 6,
+    "completion_tokens": [
+      35,
+      36,
+      35,
+      35,
+      35,
+      36
+    ],
+    "elapsed_ms": [
+      34352,
+      19835,
+      28429,
+      20000,
+      38542,
+      24500
+    ]
+  },
+  "compact_intermediate": {
+    "valid_expected_steps": 4,
+    "total": 6,
+    "completion_tokens": [
+      12,
+      14,
+      12,
+      14,
+      14,
+      14
+    ],
+    "elapsed_ms": [
+      22156,
+      15167,
+      26695,
+      14500,
+      26614,
+      13167
+    ]
+  },
+  "final016": {
+    "valid_expected_steps": 6,
+    "total": 6,
+    "completion_tokens": [
+      12,
+      8,
+      12,
+      12,
+      12,
+      12
+    ],
+    "elapsed_ms": [
+      18644,
+      9167,
+      21667,
+      16608,
+      21166,
+      11001
+    ]
+  },
+  "caveats": [
+    "Final also excludes previously visited navigation states, changing candidate set; this is not an isolated schema ablation.",
+    "Timing includes prompt processing/generation as reported by provider, excluding model startup and preflight.",
+    "No real Windows controls were exercised."
+  ]
+}
