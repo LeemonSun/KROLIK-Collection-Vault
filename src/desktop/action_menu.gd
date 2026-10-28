@@ -18,7 +18,7 @@ func _ready():
 	transparent_bg=false
 	always_on_top=true
 	unresizable=true
-	size=Vector2i(306,264)
+	size=Vector2i(306,316)
 	min_size=size
 	var panel=Surface.new()
 	panel.theme=V.make()
@@ -46,13 +46,13 @@ func _ready():
 	grid.add_theme_constant_override('v_separation',8)
 	grid.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	layout.add_child(grid)
-	for index in range(6):
+	for index in range(7):
 		var button=Button.new()
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.custom_minimum_size=Vector2(132,48)
 		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.clip_text=true
-		button.icon=load('res://assets/ui/'+['chat','settings','dash','pause','hide','quit'][index]+'.svg')
+		button.icon=load('res://assets/ui/'+['chat','settings','dash','pause','hide','quit','note'][index]+'.svg')
 		button.expand_icon=true
 		button.add_theme_constant_override('icon_max_width',18)
 		button.add_theme_font_size_override('font_size',13)
@@ -65,7 +65,7 @@ func _ready():
 	window_input.connect(func(event):
 		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:hide())
 func open_at(point):
-	var keys=['talk','settings','menu_dash','resume' if app.paused else 'pause','menu_hide_short','menu_quit']
+	var keys=['talk','settings','menu_dash','resume' if app.paused else 'pause','menu_hide_short','menu_quit','file_patch_title']
 	caption.text=app.t('menu_caption')
 	for i in range(keys.size()):buttons[i].text=app.t(keys[i])
 	var screen=DisplayServer.get_screen_from_rect(Rect2i(point,Vector2i.ONE))

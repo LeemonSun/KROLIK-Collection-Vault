@@ -5,9 +5,8 @@ const ACTIONS=["select","expand","invoke","write","ask"]
 func prepare(goal,target,nodes,observed_ms,locale="en"):
 	if not goal is String or goal.strip_edges().is_empty() or goal.length()>800:return {"ok":false}
 	var lower=goal.to_lower().strip_edges()
-	var negative=RegEx.new();negative.compile("^(?:не\\s|do not\\s|don't\\s|不要|别)")
 	var ui_words=["вклад","раздел","кнопк","поле","меню","выбери","перейди","переключ","найди","раскрой","открой","нажми","впиши","вставь","введи","допиши","tab","field","button","menu","select","switch","expand","navigate","find","open","click","press","write","append","type","fill","enter","控件","标签","选项卡","按钮","输入","填写","填入","菜单","切换","选择","展开","点击"]
-	if negative.search(lower) or not mentions(lower,ui_words):return {"ok":false}
+	if negative_intent(goal) or not mentions(lower,ui_words):return {"ok":false}
 	var write_intent=mentions(lower,["впиши","вставь","введи","допиши","напиши","write","append","type","fill","enter","输入","填写","填入","追加"])
 	var select_intent=not write_intent or mentions(lower,["вклад","раздел","меню","выбери","перейди","переключ","раскрой","открой","tab","menu","select","switch","expand","navigate","open","标签","切换","选择","展开","菜单"])
 	var selected=[];var map={};var bytes=0
@@ -78,6 +77,31 @@ static func same_target(a,b):
 		if not a.has(key) or str(a[key])!=str(b.get(key,"")):return false
 	return true
 
+func direct(goal,target,nodes,observed_ms):
+	# Literal, unique observed targets need no inference. Still require approval/preflight.
+	var raw=goal.strip_edges();var lower=raw.to_lower();var rx=RegEx.new()
+	rx.compile("^(?:(?:select(?: tab)?|выбери(?: вкладку)?)\\s+|选择(?:标签)?\\s*)(.+)$")
+	var hit=rx.search(lower);var action="select";var name="";var text="";var append=false
+	if hit:name=raw.substr(hit.get_start(1),hit.get_end(1)-hit.get_start(1))
+	else:
+		rx.compile("^(?:(?:expand|раскрой)\\s+|展开\\s*)(.+)$");hit=rx.search(lower);action="expand"
+		if hit:name=raw.substr(hit.get_start(1),hit.get_end(1)-hit.get_start(1))
+		else:
+			rx.compile("^(впиши|допиши|write|append|输入|追加)\\s+(.+?)\\s*[:：]\\s*([\\s\\S]+)$");hit=rx.search(lower);action="write"
+			if not hit:return {"ok":false}
+			name=raw.substr(hit.get_start(2),hit.get_end(2)-hit.get_start(2));text=raw.substr(hit.get_start(3),hit.get_end(3)-hit.get_start(3));append=hit.get_string(1) in ["допиши","append","追加"]
+	name=name.strip_edges().trim_prefix('"').trim_suffix('"').trim_prefix('«').trim_suffix('»').trim_prefix('“').trim_suffix('”')
+	var matches=[]
+	for node in nodes:
+		if str(node.get("name","")).to_lower()==name.to_lower() and node.get("enabled",false) and node.get(action,false):matches.append(node)
+	if matches.size()!=1:return {"ok":false,"blocked":matches.size()>1}
+	var context=prepare(goal,target,nodes,observed_ms)
+	if not context.get("ok",false):return {"ok":false,"blocked":true}
+	for alias in context.map:
+		if context.map[alias].get("id")==matches[0].get("id"):
+			return validate(JSON.stringify({"action":action,"element":alias,"text":text,"append":append}),context,target,observed_ms)
+	return {"ok":false}
+
 static func mentions(text,words):
 	for word in words:
 		if word in text:return true
@@ -88,3 +112,11 @@ static func contextual_goal(raw):
 	if mentions(text,["в интернете","в гугле","в google","search the web","online","网页搜索"]):return false
 	var begin=RegEx.new();begin.compile("^(?:(?:найди|выбери|переключись|перейди|покажи|открой|раскрой|впиши|введи|допиши|select|switch|find|open|expand|write|fill|enter|append)(?:\\s|[:：])|选择|切换|查找|打开|展开|输入|填写|追加)")
 	return begin.search(text)!=null and mentions(text,["вклад","кнопк","поле","раздел","меню","tab","button","field","section","menu","标签","选项卡","按钮","输入框","菜单"])
+
+static func negative_intent(raw):
+	var text=raw.to_lower().strip_edges()
+	var write=RegEx.new();write.compile("^(?:впиши|допиши|write|append|输入|追加)\\s+[^:：]+[:：]")
+	var hit=write.search(text)
+	if hit:text=text.left(hit.get_end()) # The literal field payload is data, not an instruction.
+	var negative=RegEx.new();negative.compile("(?:^|\\s)(?:не\\s|do not\\s|don't\\s)|不要|别")
+	return negative.search(text)!=null

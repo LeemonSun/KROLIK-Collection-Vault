@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+REAL_CONVERSATION {"answer":"Добрый день! У меня всё в порядке, и я готов помочь.","locale":"ru","question":"У меня день прошёл нормально, все дела закончил. А у тебя?","usage":{"completion_tokens":17.0,"elapsed_ms":5833,"prompt_tokens":116.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":133.0}}
+REAL_CONVERSATION {"answer":"Я повторяюсь. Этот ответ не получился — попробуй сформулировать вопрос иначе.","locale":"ru","question":"У меня день прошёл нормально, все дела закончил. А у тебя?","usage":{"completion_tokens":17.0,"elapsed_ms":7167,"prompt_tokens":283.0,"prompt_tokens_details":{"cached_tokens":84.0},"total_tokens":300.0}}
+CONVERSATION_REAL_TESTS: 7 checks, 0 failures; actual 2B model, CPU2 threads; narrow quality sample

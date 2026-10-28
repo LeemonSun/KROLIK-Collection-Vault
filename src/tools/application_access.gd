@@ -75,6 +75,7 @@ func _result(result):
 	elif status_=="inspected":
 		nodes=result.get("nodes",[]);observed_ms=Time.get_ticks_msec()
 		if result.get("title") is String:target["title"]=result.title
+		if result.get("bounds") is Dictionary:target["bounds"]=result.bounds.duplicate(true)
 		if quiet:
 			quiet=false;snapshot_ready.emit();changed.emit();return
 		if not queued_action.is_empty():

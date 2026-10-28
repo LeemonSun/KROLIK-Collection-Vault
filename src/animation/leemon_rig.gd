@@ -2,7 +2,7 @@ extends Control
 ## One identity source, six articulated texture pieces, authored motion curves.
 ## No per-frame model inference or generated replacement faces.
 const SOURCE_SIZE=Vector2(1199,1312)
-const CLIPS=["idle","hello","thinking","talk","success","error","grab","walk","listen","stretch","settle","read","point","nod","shrug","rest"]
+const CLIPS=["idle","hello","thinking","talk","success","error","grab","walk","listen","stretch","settle","read","point","nod","shrug","rest","wait","scan","present","agree","disagree","celebrate","curious","sleep","turn","salute"]
 var texture:Texture2D
 var parts={}
 var pivots={}
@@ -12,7 +12,7 @@ var duration=0.0
 var elapsed=0.0
 var reduced=false
 var root_part:Node2D
-var installed_clips=16
+var installed_clips=CLIPS.size()
 var blend_from={}
 var blend_time=1.0
 func _ready():
@@ -44,7 +44,7 @@ func _fit():
 	if root_part:root_part.scale=size/SOURCE_SIZE
 func play(id,seconds=0.0):
 	if id not in CLIPS:return false
-	if clip==id and id in ["thinking","grab","walk","listen","stretch","settle"]:return true
+	if clip==id and id in ["thinking","grab","walk","listen","stretch","settle","wait","scan","read","sleep"]:return true
 	blend_from={}
 	if root_part:
 		blend_from["root"]=root_part.position
@@ -123,6 +123,46 @@ func _process(delta):
 		"rest":
 			parts.head.rotation=0.055*weight
 			parts.head.position.y+=5*weight;parts.arm_l.rotation=0.025*weight
+		"wait":
+			parts.arm_l.rotation=0.22*weight;parts.arm_r.rotation=-0.29*weight
+			parts.head.rotation=-0.035*weight+sin(clip_time*0.8)*0.006
+			parts.body.position.y-=2*weight
+		"scan":
+			parts.head.rotation=sin(clip_time*1.6)*0.045*weight
+			parts.head.position.x+=sin(clip_time*1.6)*5*weight
+			parts.arm_r.rotation=-0.12*weight;parts.arm_l.rotation=0.08*weight
+		"present":
+			parts.arm_l.rotation=(0.3+sin(clip_time*2.2)*0.05)*weight
+			parts.arm_r.rotation=(-0.35-sin(clip_time*2.2)*0.05)*weight
+			parts.head.rotation=-0.02*weight;parts.body.rotation=-0.008*weight
+		"agree":
+			parts.head.position.y+=sin(clip_time*6.5)*5*exp(-clip_time)*weight
+			parts.head.rotation=sin(clip_time*6.5)*0.035*exp(-clip_time)*weight
+			parts.arm_r.rotation=-0.12*weight
+		"disagree":
+			parts.head.rotation=sin(clip_time*7)*0.055*exp(-clip_time)*weight
+			parts.head.position.x+=sin(clip_time*7)*4*exp(-clip_time)*weight
+			parts.arm_l.rotation=0.12*weight
+		"celebrate":
+			var lift=pow(sin(clampf(clip_time/1.4,0,1)*PI),2)*weight
+			parts.arm_l.rotation=0.62*lift;parts.arm_r.rotation=-0.62*lift
+			root_part.position.y=-9*lift;parts.head.rotation=sin(clip_time*4)*0.02*lift
+		"curious":
+			parts.head.rotation=-0.065*weight
+			parts.head.position.x-=4*weight;parts.head.position.y-=2*weight
+			parts.arm_r.rotation=-0.17*weight
+		"sleep":
+			parts.head.rotation=0.075*weight;parts.head.position.y+=7*weight
+			parts.arm_l.rotation=0.025*weight;parts.arm_r.rotation=-0.02*weight
+			parts.body.scale.y=1+sin(clip_time*0.7)*0.003
+		"turn":
+			var turn=sin(clampf(clip_time/1.5,0,1)*PI)*weight
+			parts.head.position.x+=9*turn;parts.head.rotation=-0.04*turn
+			parts.body.scale.x=1-0.035*turn;parts.arm_r.rotation=-0.22*turn
+		"salute":
+			parts.arm_r.rotation=-0.52*weight;parts.arm_l.rotation=0.05*weight
+			parts.head.rotation=-0.025*weight
+			parts.body.position.y-=2*weight
 		"walk":
 			var step=sin(clip_time*10.5)*weight
 			parts.leg_l.rotation=step*0.095;parts.leg_r.rotation=-step*0.095

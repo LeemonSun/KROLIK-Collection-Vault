@@ -299,8 +299,16 @@ func _build_assistant_tools():
 	move_toggle.button_pressed = is_instance_valid(App.desktop_companion) and App.desktop_companion.auto_move
 	move_toggle.toggled.connect(func(value):
 		if App.show_desktop():
-			App.desktop_companion.auto_move = value)
+			App.desktop_companion.auto_move = value
+		App._save_setting("companion_roam",value))
 	content.add_child(move_toggle)
+	var bubbles=CheckButton.new()
+	bubbles.text=App.t("speech_bubbles")
+	bubbles.button_pressed=App.store.data.settings.get("speech_bubbles",true)
+	bubbles.toggled.connect(func(value):
+		App._save_setting("speech_bubbles",value)
+		if not value and is_instance_valid(App.speech_bubble):App.speech_bubble.dismiss())
+	content.add_child(bubbles)
 	var reduced_toggle = CheckButton.new()
 	reduced_toggle.text = App.t("reduced_motion")
 	reduced_toggle.button_pressed=App.motion.reduced_motion

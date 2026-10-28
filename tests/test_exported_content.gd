@@ -6,7 +6,7 @@ func check(ok,text):
 	checks+=1
 	if not ok:failures+=1;push_error(text)
 func _run():
-	check(ProjectSettings.get_setting("application/config/version")=="0.10.0-desktop-preview","Correct product version inside PCK")
+	check(ProjectSettings.get_setting("application/config/version")=="0.11.0-desktop-preview","Correct product version inside PCK")
 	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
 	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
 	check(FileAccess.get_sha256("res://native/accessibility_bridge.ps1")==OS.get_environment("COMPANION_ACCESS_HELPER_SHA"),"Exact scoped UIA/selected-state helper exported")

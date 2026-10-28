@@ -62,6 +62,7 @@ func open_near(anchor):
 	view.editor.grab_focus.call_deferred()
 
 func close_soft():
+	if is_instance_valid(app.desktop_companion):app.desktop_companion.return_home()
 	if app.speech_input.busy():app.cancel()
 	if transition:transition.kill()
 	if app.motion.reduced_motion or app.paused:

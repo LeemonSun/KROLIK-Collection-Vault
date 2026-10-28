@@ -61,7 +61,7 @@ func _run():
 	var runtime=FakeRuntime.new();app.add_child(runtime)
 	app.application_access=access;app.provider=provider;app.provider_name="local_worker";app.local_runtime=runtime
 	var original_turns=app.session_turns.duplicate(true)
-	check(app.begin_window_goal("select Insert"),"Real app goal controller starts a fresh observation")
+	check(app.begin_window_goal("найди вкладку для вставки"),"Real app goal controller starts a fresh observation")
 	access._finish({"status":"inspected","nodes":_nodes(),"title":"Demo"})
 	check(app.goal_mode=="thinking" and provider.requests.size()==1,"Observation passes to one constrained model request")
 	for key in app.goal_context.map:
@@ -77,7 +77,7 @@ func _run():
 	access._finish({"status":"inspected","nodes":after,"title":"Demo"})
 	check(app.goal_mode.is_empty() and app.messages[-1].text==app.t("goal_verified_select",{"name":"Insert"}),"Success requires selected state in the fresh observation")
 	check(app.goal_context.is_empty() and app.goal_plan.is_empty() and app.session_turns==original_turns,"Private UI context never enters dialogue memory")
-	app.begin_window_goal("select Insert");access._finish({"status":"inspected","nodes":_nodes(),"title":"Demo"})
+	app.begin_window_goal("найди вкладку для вставки");access._finish({"status":"inspected","nodes":_nodes(),"title":"Demo"})
 	for key in app.goal_context.map:
 		if app.goal_context.map[key].name=="Insert":alias=key
 	app._on_answer(_raw(alias));app.cancel()

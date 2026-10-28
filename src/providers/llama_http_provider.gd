@@ -70,6 +70,9 @@ func _generate():
 		"min_p": 0.0,
 		"chat_template_kwargs": {"enable_thinking": false}
 	}
+	if request_options.get("companion_dialogue",false) and not auth_token.is_empty():
+		body["temperature"]=0.55;body["top_p"]=0.85;body["top_k"]=20
+		body["presence_penalty"]=0.25;body["repeat_penalty"]=1.0
 	if request_options.get("response_schema") is Dictionary:
 		body["response_format"]={"type":"json_object","schema":request_options.response_schema}
 	return _post("/v1/chat/completions",body)

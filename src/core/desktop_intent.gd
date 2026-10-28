@@ -4,6 +4,13 @@ func route(text):
 	var read_command=preload("res://src/core/window_reader.gd").route(text)
 	if not read_command.is_empty():return read_command
 	var normalized = text.to_lower().strip_edges()
+	if normalized in ["редактировать файл","измени файл","edit a file","edit selected file","编辑文件"]:return {"kind":"tool","tool":"files.edit_selected","args":{}}
+	if normalized in ["мои факты","покажи факты","my facts","show facts","我的事实"]:return {"kind":"tool","tool":"facts.list","args":{}}
+	var fact=RegEx.new();fact.compile("^(?:запомни факт|remember fact|记住事实)\\s+([^:：]{1,96})[:：]\\s*(.+)$")
+	var fact_hit=fact.search(normalized)
+	if fact_hit:return {"kind":"tool","tool":"facts.set","args":{"key":text.strip_edges().substr(fact_hit.get_start(1),fact_hit.get_end(1)-fact_hit.get_start(1)),"value":text.strip_edges().substr(fact_hit.get_start(2))}}
+	fact.compile("^(?:забудь факт|forget fact|忘记事实)\\s+(.+)$");fact_hit=fact.search(normalized)
+	if fact_hit:return {"kind":"tool","tool":"facts.forget","args":{"key":fact_hit.get_string(1)}}
 	if normalized in ["который час", "сколько времени", "what time is it", "现在几点", "现在几点？"]:return {"kind":"tool","tool":"clock.now","args":{"city":"local"}}
 	if normalized in ["мои напоминания","напоминания","show reminders","my reminders","查看提醒","/reminders"]:return {"kind":"tool","tool":"reminders.list","args":{}}
 	if normalized in ["пройдись","прогуляйся","walk around","走一走"]:return {"kind":"tool","tool":"companion.walk","args":{}}

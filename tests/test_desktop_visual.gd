@@ -206,6 +206,21 @@ func _run():
 		await frame()
 		check(desktop.art.parts.size()==6 and desktop.art.parts.head.rotation!=0,"Articulated motion evaluates: "+clip)
 		shot(root,"rig-"+clip)
+	for clip in ["wait","scan","present","agree","disagree","celebrate","curious","sleep","turn","salute"]:
+		desktop.art.play(clip,1.8);await create_timer(0.55).timeout;await frame()
+		check(desktop.art.clip==clip and desktop.art.parts.size()==6,"New native motion remains stable: "+clip)
+		shot(root,"new-"+clip)
+	var region_count=desktop.region_updates
+	app.chat_window.hide()
+	check(app.say_companion("Проверка окна реплики: ответ остаётся рядом с Лимоном."),"A closed chat can show a short companion reply")
+	await frame()
+	check(app.speech_bubble.visible and app.speech_bubble.unfocusable and app.speech_bubble.mouse_passthrough,"Speech bubble cannot take keyboard or pointer input")
+	check(DisplayServer.screen_get_usable_rect().encloses(Rect2i(app.speech_bubble.position,app.speech_bubble.size)),"Speech bubble stays on screen")
+	shot(app.speech_bubble,"speech-bubble")
+	app.speech_bubble.dismiss();check(app.speech_bubble.body.text.is_empty(),"Dismissed speech text is cleared")
+	check(desktop.region_updates==region_count,"Speech does not rebuild the native character region")
+	app.show_chat();await create_timer(0.3).timeout
+	check(not app.speech_bubble.visible,"Opening chat dismisses duplicate speech")
 	desktop.art.set_reduced(true)
 	# Actual clipboard command with an injected owned provider and synthetic OS clipboard.
 	var original_provider=app.provider

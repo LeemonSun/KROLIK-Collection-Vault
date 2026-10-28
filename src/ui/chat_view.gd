@@ -175,7 +175,7 @@ func _ready():
 	var progress_timer=Timer.new();progress_timer.wait_time=0.25;progress_timer.autostart=true
 	add_child(progress_timer)
 	progress_timer.timeout.connect(func():
-		if is_visible_in_tree() and (app.speech_input.busy() or app.speech_input.installing() or app.local_runtime.downloading or app.vision_asset.installing()):refresh())
+		if is_visible_in_tree() and (app.speech_input.busy() or app.speech_input.installing() or app.local_runtime.downloading or app.vision_asset.installing() or app.goal_mode=="proposal"):refresh())
 func _button(text,parent,callback):
 	var button=Button.new()
 	button.text=text
@@ -259,6 +259,8 @@ func refresh():
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
+	if app.workflow.active:status_label.text=app.t("workflow_step",{"step":app.workflow.index+1,"total":app.workflow.steps.size()})+" · "+status_label.text
+	if app.goal_mode=="proposal":status_label.text+=" · "+app.t("approval_remaining",{"seconds":maxi(0,ceili((app.goal_deadline_ms-Time.get_ticks_msec())/1000.0))})
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
 	for button in [read_button,plan_button,inspect_button]:button.disabled=app.paused or busy
 	read_button.tooltip_text=app.t("window_read_button")

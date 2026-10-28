@@ -1,6 +1,7 @@
 extends Node
 ## The visible character uses the MAIN window. No invisible offscreen host.
 ## Articulated 2D companion; the native input region is stable between size changes.
+signal file_requested
 signal chat_requested
 signal settings_requested
 signal pause_requested
@@ -9,6 +10,7 @@ signal quit_requested
 const ActionMenu = preload("res://src/desktop/action_menu.gd")
 const VisualTheme = preload("res://src/ui/visual_theme.gd")
 const BODY_PATH = "res://assets/characters/leemon_01/master_v1.png"
+const Behavior=preload("res://src/desktop/companion_behavior.gd")
 const Rig=preload("res://src/animation/leemon_rig.gd")
 const BASE_SIZE=Vector2i(210,232)
 var user_scale=1.0
@@ -39,7 +41,15 @@ var original_position = Vector2i.ZERO
 var target_position = Vector2i.ZERO
 var phase = 0.0
 var elapsed = 0.0
-var auto_move = false
+var auto_move = true
+var home_position=Vector2i.ZERO
+var target_location_key=""
+var last_chat_rect=Rect2i()
+var park_delay=0.0
+var activity_key="idle"
+var activity_elapsed=0.0
+var fx_kind=""
+var fx_time=0.0
 var next_move = 20.0
 var last_tick_ms = 0
 var app
@@ -59,6 +69,20 @@ class Surface extends Control:
 	func _draw():
 		var w = owner_window
 		draw_set_transform(Vector2.ZERO,0,Vector2(w.size)/Vector2(330,500))
+		if w.fx_time>0 and not w.reduced_motion:
+			var progress=1.0-w.fx_time/0.85
+			var opacity=sin(progress*PI)*0.65
+			var tint=Color(1.0,0.77,0.25,opacity)
+			if w.fx_kind=="scan":
+				var y=80+progress*280
+				draw_line(Vector2(110,y),Vector2(225,y),tint,1.4,true)
+			elif w.fx_kind=="success":
+				for i in range(6):
+					var angle=float(i)*TAU/6.0
+					var p=Vector2(166,220)+Vector2(cos(angle),sin(angle))*(55+progress*35)
+					draw_line(p,p+Vector2(cos(angle),sin(angle))*7,tint,1.8,true)
+			else:
+				draw_arc(Vector2(166,440),45+progress*15,0,TAU,32,tint,1.3,true)
 		if w.effect_time > 0 and not w.reduced_motion:
 			var alpha = minf(1.0, w.effect_time / 0.15)
 			var sweep=1.0-w.effect_time/0.52
@@ -82,6 +106,7 @@ func _ready():
 	host.exclude_from_capture = false
 	host.disable_3d=true
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,host.get_window_id())
+	auto_move=bool(app.store.data.settings.get("companion_roam",true))
 	user_scale=clampf(float(app.store.data.settings.get("character_scale",1.0)),0.75,1.5)
 	var usable = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
 	var fit = minf(1.0,minf(float(usable.size.y)/float(BASE_SIZE.y*user_scale),float(usable.size.x)/float(BASE_SIZE.x*user_scale)))*user_scale
@@ -125,6 +150,7 @@ func _ready():
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
 	last_display_bounds=bounds
 	position = bounds.end - size - Vector2i(30, 0)
+	home_position=position
 	print("DESKTOP_READY main_window=", host.get_window_id(), " position=", position, " size=", size)
 	_setup_tray()
 	last_tick_ms = Time.get_ticks_msec()
@@ -142,6 +168,7 @@ func _input_event(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
+				if is_instance_valid(app.speech_bubble):app.speech_bubble.dismiss()
 				dragging = true
 				Input.use_accumulated_input=false
 				app.mark_active()
@@ -158,6 +185,7 @@ func _input_event(event):
 				Input.use_accumulated_input=true
 				if moved:
 					position=bounded(DisplayServer.mouse_get_position()-drag_offset)
+					home_position=position
 					effect_time = 0.25
 				else:
 					chat_requested.emit()
@@ -179,6 +207,7 @@ func _menu_action(id):
 		3: pause_requested.emit()
 		4: hide_requested.emit()
 		5: quit_requested.emit()
+		6: file_requested.emit()
 
 func bounded(candidate):
 	var screen = DisplayServer.get_screen_from_rect(Rect2i(candidate, size))
@@ -209,6 +238,8 @@ func set_reduced(value):
 	reduced_motion = value
 	effect_kind = ""
 	effect_time = 0
+	fx_time=0
+	if is_instance_valid(canvas):canvas.queue_redraw()
 	if art:
 		art.modulate.a = 1.0
 		art.set_reduced(value)
@@ -219,6 +250,24 @@ func _process(delta):
 	if dragging:
 		app.mark_active()
 		if moved:position=bounded(drag_mouse-drag_offset)
+	activity_elapsed+=delta
+	if activity_elapsed>=0.15 and not dragging and effect_kind not in ["walk","edge_enter","dash"]:
+		activity_elapsed=0
+		if is_instance_valid(app.chat_window) and app.chat_window.visible:
+			var anchor=Rect2i(app.chat_window.position,app.chat_window.size)
+			if anchor!=last_chat_rect:last_chat_rect=anchor;park_delay=0.45
+			elif park_delay>0:
+				park_delay-=0.15
+				if park_delay<=0:park_near(anchor)
+		var next=Behavior.activity(app)
+		if next!=activity_key:
+			activity_key=next
+			if next!="idle":
+				art.play(next)
+				if next in ["scan","read","wait"]:pulse("scan" if next!="wait" else "wait")
+			elif art.clip in ["thinking","read","scan","wait","listen","sleep"]:art.play("settle",0.7)
+	if fx_time>0:
+		fx_time=maxf(0,fx_time-delta);canvas.queue_redraw()
 	# The static effect surface redraws only during the short effect, not each idle frame.
 	if art.clip=="idle" and not reduced_motion and not dragging:
 		idle_variation-=delta
@@ -249,11 +298,6 @@ func _process(delta):
 	var lean = clampf(float(DisplayServer.mouse_get_position().x-press_position.x)*0.0005,-0.07,0.07) if dragging and moved else 0.0
 	art.rotation = lerp_angle(art.rotation,lean,minf(1.0,delta*12.0))
 	if reduced_motion: art.rotation=0.0
-	if auto_move and not dragging and effect_kind.is_empty():
-		next_move -= delta
-		if next_move <= 0:
-			next_move = randf_range(25.0, 50.0)
-			walk_random()
 	if effect_time > 0:
 		effect_time = maxf(0, effect_time-delta)
 		if effect_kind == "spawn":
@@ -393,20 +437,45 @@ func refresh_bounds(force=false):
 
 var walk_duration=1.8
 var mask_elapsed=0.0
+func focus_target(identity):
+	var rect=identity.get("bounds",{})
+	if not rect is Dictionary or not rect.has_all(["x","y","width","height"]):return false
+	var key=str(identity.get("handle",""))+":"+JSON.stringify(rect)
+	if key==target_location_key:return false
+	target_location_key=key
+	var anchor=Rect2i(int(rect.x),int(rect.y),int(rect.width),int(rect.height))
+	if anchor.size.x<=0 or anchor.size.y<=0:return false
+	return park_near(anchor)
+func park_near(anchor):
+	if not auto_move or dragging or app.paused or reduced_motion or not visible:return false
+	var bounds=DisplayServer.screen_get_usable_rect(current_screen)
+	var destination=Behavior.beside(anchor,bounds,size,position)
+	return walk_to(destination)
+func return_home():
+	if not auto_move or dragging or app.paused or reduced_motion or not visible:return false
+	return walk_to(bounded(home_position))
+func walk_to(destination):
+	if dragging or not visible or app.paused:return false
+	if Vector2(destination).distance_to(Vector2(position))<8:return false
+	original_position=position;target_position=bounded(destination)
+	if reduced_motion:position=target_position;return true
+	effect_kind="walk";phase=0
+	walk_duration=clampf(Vector2(target_position).distance_to(Vector2(original_position))/160.0,0.7,2.4)
+	art.play("walk");return true
+func pulse(kind):
+	if reduced_motion or app.paused:return
+	fx_kind=kind;fx_time=0.85
+	canvas.queue_redraw()
 func walk_random():
 	if dragging or not visible or app.paused:return
 	var distance=randf_range(80,160)*(1 if randf()>0.5 else -1)
-	original_position=position
-	target_position=bounded(position+Vector2i(int(distance),0))
-	if reduced_motion:position=target_position;return
-	effect_kind="walk";phase=0
-	walk_duration=maxf(1.2,absf(target_position.x-original_position.x)/85.0)
-	art.play("walk")
+	walk_to(position+Vector2i(int(distance),0))
 func react(event_id):
 	if not art or reduced_motion:return false
 	if event_id=="dialogue.think_loop":return art.play("thinking")
 	elif event_id=="dialogue.explain_small":return art.play("talk",2.8)
-	elif event_id in ["work.note_saved","work.timer_notice"]:return art.play("success",1.4)
+	elif event_id in ["work.note_saved","work.timer_notice"]:
+		pulse("success");return art.play("celebrate",1.4)
 	elif event_id in ["work.error_recover","work.model_missing"]:return art.play("error",1.8)
 	return false
 

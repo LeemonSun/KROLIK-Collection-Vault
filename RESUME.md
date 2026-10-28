@@ -1,3 +1,7 @@
+# Сейчас идёт 0.11, не возвращаться к 0.10
+
+Читать recovery/session.json и docs/WORKFLOWS_011.md. Основные новые модули уже написаны, идёт финальная проверка. Последняя выданная сборка ещё 0.10; 0.11 пока не публиковать как готовую. Source checkpoint после крупных изменений.
+
 # Leemon 0.10 — сохранено и выдано
 
 Начать с `python3 tools/resume.py status` и recovery/session.json. Следом docs/WINDOW_READING.md; для действий — docs/GOAL_PROPOSALS.md. Не перечитывать весь чат и не собирать фундамент заново. GitHub LeemonSun/KROLIK-Collection-Vault/main — только хранилище, без Actions/remote builds. Субагенты не разрешены без прямого запроса.

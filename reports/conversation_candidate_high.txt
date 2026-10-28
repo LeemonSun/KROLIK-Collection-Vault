@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+REAL_CONVERSATION {"answer":"Проект в нашей работе называется «Сосна», а не по имени пользователя, потому что это просто имён для демонстрации примера с кодом и файлами проекта.","locale":"ru","question":"В нашем примере проект называется Сосна. Ответь кратко.","usage":{"completion_tokens":38.0,"elapsed_ms":8834,"prompt_tokens":183.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":221.0}}
+REAL_CONVERSATION {"answer":"В рамках текущего демо-исследования название нашего проекта — «Сосна», так как мы используем его только в качестве временной метки для целей обучения, а не как часть вашей личной информации или имени пользователя.","locale":"ru","question":"Как называется наш проект?","usage":{"completion_tokens":45.0,"elapsed_ms":11483,"prompt_tokens":274.0,"prompt_tokens_details":{"cached_tokens":55.0},"total_tokens":319.0}}
+REAL_CONVERSATION {"answer":"В русском языке слово «сосняк» означает маленькую елочку. Если переводить дословно на английский: «сoas-tree», то звучит совсем не как ель, скорее как какой-то редкий тип дерева из леса Европы.","locale":"ru","question":"А по-английски это что за дерево?","usage":{"completion_tokens":54.0,"elapsed_ms":12000,"prompt_tokens":340.0,"prompt_tokens_details":{"cached_tokens":270.0},"total_tokens":394.0}}
+ERROR: Short follow-up resolves the previous subject ru
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://tests/test_conversation_real.gd:8)
+       [1] _run (res://tests/test_conversation_real.gd:38)
+       [2] ask (res://tests/test_conversation_real.gd:17)
+REAL_CONVERSATION {"answer":"Birch is your desktop companion project name within this conversation context.","locale":"en","question":"Our example project is called Birch. Answer briefly.","usage":{"completion_tokens":28.0,"elapsed_ms":7930,"prompt_tokens":176.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":204.0}}
+ERROR: User project is not filled with invented app-persona details
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://tests/test_conversation_real.gd:8)
+       [1] _run (res://tests/test_conversation_real.gd:34)
+       [2] ask (res://tests/test_conversation_real.gd:17)
+REAL_CONVERSATION {"answer":"Your project's name is Birch.","locale":"en","question":"What is its name?","usage":{"completion_tokens":8.0,"elapsed_ms":7841,"prompt_tokens":243.0,"prompt_tokens_details":{"cached_tokens":48.0},"total_tokens":251.0}}
+REAL_CONVERSATION {"answer":"It doesn't matter; the important thing is that you named it \"Birch. \" Whether it represents your thoughts about nature, creativity, or something else entirely—just keep calling it Birch and let's continue exploring. How about some coffee for now? ☕","locale":"en","question":"Is that a tree or an animal?","usage":{"completion_tokens":53.0,"elapsed_ms":13227,"prompt_tokens":268.0,"prompt_tokens_details":{"cached_tokens":239.0},"total_tokens":321.0}}
+ERROR: Short follow-up resolves the previous subject en
+   at: push_error (core/variant/variant_utility.cpp:1023)
+   GDScript backtrace (most recent call first):
+       [0] check (res://tests/test_conversation_real.gd:8)
+       [1] _run (res://tests/test_conversation_real.gd:38)
+       [2] ask (res://tests/test_conversation_real.gd:17)
+REAL_CONVERSATION {"answer":"明白，您提到的示例项目名称是“松树”。","locale":"zh-Hans","question":"我们这个对话中的示例项目叫松树。简短回答。","usage":{"completion_tokens":26.0,"elapsed_ms":7325,"prompt_tokens":179.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":205.0}}
+REAL_CONVERSATION {"answer":"您的项目名字就是“松树”，无需修改或添加其他名称。","locale":"zh-Hans","question":"这个项目叫什么？","usage":{"completion_tokens":15.0,"elapsed_ms":5833,"prompt_tokens":241.0,"prompt_tokens_details":{"cached_tokens":51.0},"total_tokens":256.0}}
+REAL_CONVERSATION {"answer":"松树属于植物。","locale":"zh-Hans","question":"它属于植物还是动物？","usage":{"completion_tokens":5.0,"elapsed_ms":2166,"prompt_tokens":271.0,"prompt_tokens_details":{"cached_tokens":237.0},"total_tokens":276.0}}
+REAL_CONVERSATION {"answer":"Мои дела тоже закончились в хорошем состоянии — всё было готово и без прокрастинации. Так держать! 🔥","locale":"ru","question":"У меня день прошёл нормально, все дела закончил. А у тебя?","usage":{"completion_tokens":27.0,"elapsed_ms":5500,"prompt_tokens":186.0,"prompt_tokens_details":{"cached_tokens":146.0},"total_tokens":213.0}}
+REAL_CONVERSATION {"answer":"Моду «Дело» полностью завершено: ни одной задержки с чатами и никаких споров о приоритетах. 🛡️","locale":"ru","question":"У меня день прошёл нормально, все дела закончил. А у тебя?","usage":{"completion_tokens":34.0,"elapsed_ms":7667,"prompt_tokens":277.0,"prompt_tokens_details":{"cached_tokens":146.0},"total_tokens":311.0}}
+CONVERSATION_REAL_TESTS: 26 checks, 3 failures; actual 2B model, CPU2 threads; narrow quality sample

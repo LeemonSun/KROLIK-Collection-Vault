@@ -135,6 +135,8 @@ public static class LeemonAccess {
   }else{
   $nodes=@(Get-ScopedNodes $rootElement)
   if($request.operation -eq 'inspect'){
+   $r=$rootElement.Current.BoundingRectangle
+   $reply.bounds=@{x=[int]$r.X;y=[int]$r.Y;width=[int]$r.Width;height=[int]$r.Height}
    $reply.status='inspected';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.nodes=@($nodes | ForEach-Object {$_.record})
   }else{
    if([string]$request.element_id -notmatch '^-?\d+(,-?\d+){1,30}$' -or $request.element_name -isnot [string]){throw 'Invalid element'}

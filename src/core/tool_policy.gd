@@ -1,6 +1,10 @@
 extends RefCounted
 ## Trusted tool registry controls effects; model text is never executed.
 const TOOLS = {
+	"files.edit_selected":{"implemented":true,"confirmation":false},
+	"facts.set":{"implemented":true,"confirmation":false},
+	"facts.forget":{"implemented":true,"confirmation":false},
+	"facts.list":{"implemented":true,"confirmation":false},
 	"access.read":{"implemented":true,"confirmation":false},
 	"access.goal":{"implemented":true,"confirmation":false},
 	"access.inspect":{"implemented":true,"confirmation":false},

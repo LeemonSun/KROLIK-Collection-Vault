@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "app_version": "0.10.0-desktop-preview",
-  "checkpoint_status": "0.10_saved_windows_acceptance_pending",
-  "current_task": "0.10 completed and saved: explicit read-only selected-window Q&A with host-sourced excerpts and ephemeral privacy; final app ZIP/report saved, source/native/exported/model checks PASS.",
-  "next_action": "Continue0.10 from docs/WINDOW_READING.md. Need actual Windows/UIA/Opera/Word/DPI/mic acceptance, broader read accuracy/injection corpus, then bounded multistep workflow. No autonomous website traversal yet.",
+  "app_version": "0.11.0-desktop-preview",
+  "checkpoint_status": "0.11_foundation_implemented_under_final_validation",
+  "current_task": "0.11 work in progress: bounded workflows+literal fast path;26 procedural poses+effects+speech bubble+task-aware movement;compact dialogue context/sampling; selected UTF8 patch preview/backup/restore;explicit fact memory and three-way conflict merge. Final0.11 artifact not delivered yet.",
+  "next_action": "Finish HTTP sampling tests, native file-review/bubble/workflow/animation QA, real-model smalltalk/science regression, build/export/archive/save0.11 ZIP+report+motion MP4. SteamCloud researched but not connected; SDK/AppID/accounts pending. Preserve0.10 native artifact andmodels.",
   "read_next": [
-    "docs/WINDOW_READING.md",
-    "docs/GOAL_PROPOSALS.md"
+    "docs/WORKFLOWS_011.md",
+    "docs/STEAM_CLOUD_PLAN.md",
+    "docs/WINDOW_READING.md"
   ],
   "known_limits": [
     "Actual Windows EXE/transparency/UIA/microphone not executed here",
