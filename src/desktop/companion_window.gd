@@ -245,6 +245,7 @@ func dash_to(candidate):
 
 func set_reduced(value):
 	_cancel_travel()
+	if is_instance_valid(host):position=bounded(position)
 	reduced_motion = value
 	effect_kind = ""
 	effect_time = 0

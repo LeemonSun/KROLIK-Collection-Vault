@@ -30,7 +30,7 @@ func run():
  check(not Policy.grounded_details('请明天下午三点参加会议','明天开会'),'Invented Chinese afternoon/word-number time blocked')
  check(Policy.grounded_details('Please join tomorrow','Пригласи на завтра'),'Equivalent relative day allowed across languages')
  check(Policy.grounded_details('明天请参加会议','Meeting tomorrow'),'Chinese day equivalent allowed')
- var app=root.get_node('App');var fixture=preload('res://tests/test_adaptive015.gd')
+ var app=root.get_node('App');var fixture=load(get_script().resource_path.get_base_dir().path_join('test_adaptive015.gd'))
  var old_access=app.application_access;var old_provider=app.provider;var old_runtime=app.local_runtime;var old_name=app.provider_name
  app.cancel();app.set_locale('en')
  var access=fixture.FakeAccess.new();app.add_child(access);access.target={'handle':'1','target_pid':2,'started':'3','title':'Synthetic editor','app':'editor'}

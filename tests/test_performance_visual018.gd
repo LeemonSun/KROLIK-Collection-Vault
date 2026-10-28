@@ -77,7 +77,13 @@ func _run():
 	desktop.set_reduced(true);stopped=desktop.position;desktop._process(2)
 	check(desktop.position==stopped and not desktop.locomotion.active,"Reduced motion freezes current location, no delayed teleport")
 	check(not desktop.art.is_processing(),"Reduced rig consumes no pose ticks")
+	desktop.set_reduced(false)
+	desktop.play_entrance()
+	check(not bounds.encloses(Rect2i(desktop.position,desktop.size)),"Entrance begins beyond the edge")
+	desktop.set_reduced(true)
+	check(bounds.encloses(Rect2i(desktop.position,desktop.size)) and desktop.art.modulate.a==1,"Disabling motion during entrance cannot freeze an offscreen invisible character")
 	desktop.set_reduced(false);desktop.art.set_process(false)
+	desktop.position=Vector2i(400,bounds.end.y-desktop.size.y)
 	check(app.say_companion("Тестовая реплика: готово. Полный ответ остаётся в чате."),"Companion reply opens without a chat")
 	await frame()
 	var old=app.speech_bubble.position

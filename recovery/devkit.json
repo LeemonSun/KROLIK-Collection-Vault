@@ -12,13 +12,14 @@
     },
     "export": {
       "present_paths": [
-        "devtools/templates/4.7.2.stable/windows_release_x86_64.exe"
+        "devtools/Companion017.exe"
       ],
       "sha256": {
-        "devtools/templates/4.7.2.stable/windows_release_x86_64.exe": "d34d36f3be1a6c49c56525ae86469b92e4f417ddf0b43cf00dd80c385c4b0562"
+        "devtools/Companion017.exe": "0fe6bf849f3daa0353f18ba45a9e3790657cf4e307143cd0011c19a528f7502c"
       },
       "archive_url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz",
-      "zip_member": "templates/windows_release_x86_64.exe"
+      "zip_member": "templates/windows_release_x86_64.exe",
+      "source_note": "Verified previous017LibraryZIP EXE, allowlisted build template; original upstream archive remains alternative."
     },
     "pwsh": {
       "present_paths": [
@@ -32,12 +33,14 @@
     },
     "visual": {
       "present_paths": [
-        "devtools/xvfb/usr/bin/Xvfb",
-        "devtools/xvfb/usr/bin/xkbcomp"
+        "devtools/xvfb018/usr/bin/Xvfb",
+        "devtools/xvfb018/usr/bin/xkbcomp",
+        "devtools/xvfb018/usr/lib/x86_64-linux-gnu/libxkbfile.so.1"
       ],
       "sha256": {
-        "devtools/xvfb/usr/bin/Xvfb": "c50687113cd5232844b8fa3a49276a48a022fa7fc4275b983ae8f88158efed72",
-        "devtools/xvfb/usr/bin/xkbcomp": "eca6986af7d15277394b8476b8ad85229ee1a1a879d43d2a526f106af3761550"
+        "devtools/xvfb018/usr/bin/Xvfb": "2c7f5a9534410fed5092d782a69ca7ffd9fce80e98b81ffe4944d703dd11d3b1",
+        "devtools/xvfb018/usr/bin/xkbcomp": "0967e7e7b03b077327cea74567726b265bd304b4fdf59f87bf7fdfe1074e7591",
+        "devtools/xvfb018/usr/lib/x86_64-linux-gnu/libxkbfile.so.1": "f502634e5b3af5244bd2d666aa87284b7bc836b8dd655cf66592985d8d47985a"
       }
     }
   }
