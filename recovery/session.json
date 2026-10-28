@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "app_version": "0.9.0-desktop-preview",
-  "checkpoint_status": "0.9_saved_after_recovery_windows_acceptance_pending",
-  "current_task": "Recovered all night0.8 source/artifacts and continued through0.9 grounded single-step window goals. App ZIP and user report saved.19 source groups,102 native exported UI,12 exported-content checks pass. Actual 2B plans tested RU/EN/zh; no Windows UI execution claimed.",
-  "next_action": "Continue from current0.9. Priorities: actual Windows/DPI/mic/UIA acceptance, reduce planner latency(17–28s CPU2threads here), expand adversarial/ambiguous-goal corpus, then bounded multistep goals and browser reading. Do not restore foundation again or re-download/re-upload unchanged0.8 model bundle.",
+  "app_version": "0.10.0-desktop-preview",
+  "checkpoint_status": "window_reading_implemented_under_validation",
+  "current_task": "Continue0.9 with explicit bounded read-only selected-window Q&A.41 reader tests and20 source groups PASS;11 synthetic native read-tree checks PASS.0.10 artifact not delivered yet.",
+  "next_action": "Finish real model RU/EN/zh read QA, native visual review and final export; save new0.10 ZIP/report, update session artifacts and checkpoint.0.9 ZIP recovered under recovered-09; do not redownload full offline parts.",
   "read_next": [
-    "docs/GOAL_PROPOSALS.md",
-    "docs/ROADMAP.md"
+    "docs/WINDOW_READING.md",
+    "docs/GOAL_PROPOSALS.md"
   ],
   "known_limits": [
     "Actual Windows EXE/transparency/UIA/microphone not executed here",

@@ -9,6 +9,9 @@ var app
 var history
 var editor
 var send_button
+var read_button
+var plan_button
+var inspect_button
 var stop_button
 var setup_button
 var status_label
@@ -75,9 +78,11 @@ func _ready():
 	target_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	target_label.add_theme_font_size_override("font_size",11)
 	target_label.add_theme_color_override("font_color",VisualTheme.RED);target_row.add_child(target_label)
-	var plan_button=_button("✦",target_row,_prepare_goal)
+	read_button=_button("≡",target_row,func():app.begin_window_read())
+	read_button.tooltip_text=app.t("window_read_button");VisualTheme.quiet(read_button)
+	plan_button=_button("✦",target_row,_prepare_goal)
 	plan_button.tooltip_text=app.t("goal_button");VisualTheme.quiet(plan_button)
-	var inspect_button=_button("↻",target_row,func():app.application_access.inspect())
+	inspect_button=_button("↻",target_row,func():app.application_access.inspect())
 	inspect_button.tooltip_text=app.t("access_read");VisualTheme.quiet(inspect_button)
 	VisualTheme.quiet(_button("×",target_row,func():app.application_access.clear_target()))
 	confirmation_button=_button("",layout,_confirm_current)
@@ -252,7 +257,12 @@ func refresh():
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
+	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
+	for button in [read_button,plan_button,inspect_button]:button.disabled=app.paused or busy
+	read_button.tooltip_text=app.t("window_read_button")
+	plan_button.tooltip_text=app.t("goal_button")
+	inspect_button.tooltip_text=app.t("access_read")
 	send_button.disabled=app.paused or busy
 	stop_button.disabled=not busy
 	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())

@@ -29,7 +29,7 @@ func load_history():
 	return true
 func save_history(source):
 	if not writable: return false
-	var recent=source.duplicate(true)
+	var recent=source.filter(func(message):return not message.get("ephemeral",false)).duplicate(true)
 	while recent.size()>100: recent.pop_front()
 	var text=JSON.stringify({"schema_version":1,"messages":recent})
 	while text.to_utf8_buffer().size()>MAX_BYTES and not recent.is_empty():

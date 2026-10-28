@@ -12,6 +12,7 @@ func check(ok,label):
 func _run():
 	var app=root.get_node("App")
 	var before=app.messages.duplicate(true)
+	app.application_access.adopt({"handle":"123","target_pid":234,"started":"345","title":"Synthetic selected window","app":"Test"})
 	app.messages=[{"speaker":"assistant","text":"Длинный ответ / 中文 / English. ".repeat(150)}]
 	for locale in ["ru","en","zh-Hans"]:
 		app.l10n.set_locale(locale)
@@ -42,8 +43,15 @@ func _run():
 			view.editor.text="keep this draft";view.submit_current()
 			check(view.editor.text=="keep this draft","Busy goal never consumes an unsent draft")
 			app.goal_mode="";app.goal_plan={};app.goal_deadline_ms=0
+			app.window_read_mode="thinking";app.window_read_deadline=Time.get_ticks_msec()+30000;app.state.transition("thinking")
+			view.refresh();await process_frame
+			check(view.read_button.disabled and view.inspect_button.disabled and view.plan_button.disabled,"No competing observations during read")
+			check(view.status_label.text==app.t("window_read_status_thinking"),"Localized read progress")
+			if view.target_row.visible:check(bounds.encloses(view.read_button.get_global_rect()),"Read toolbar stays inside pinned-window chat")
+			app.window_read_mode="";app.window_read_deadline=0;app.state.reset()
 			view.queue_free()
 			await process_frame
+	app.application_access.clear_target()
 	root.size=Vector2i(800,600)
 	var view=ChatView.new()
 	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

@@ -45,12 +45,59 @@ function Get-ScopedNodes($rootElement) {
 function Is-Risky([string]$name) {
  return $name -match '(?i)send|submit|pay|buy|purchase|delete|remove|install|uninstall|format|reset|confirm|allow|sign.?in|log.?in|отправ|оплат|купить|удал|установ|сброс|формат|подтверд|разреш|войти|发送|提交|支付|购买|删除|安装|卸载|重置|确认|允许|登录'
 }
+function Read-Eligible($current) {
+ # Do not read or descend into passwords or editable single-line fields.
+ return -not ($current.IsPassword -or $current.IsOffscreen -or $current.ControlType.ProgrammaticName -in @('ControlType.Edit','ControlType.ComboBox'))
+}
+function Add-ReadBlock($blocks,$seen,[string]$text,[string]$kind,$budget) {
+ $text=(Clip-Text $text 400).Trim()
+ if(-not $text -or $seen.ContainsKey($text)){return}
+ $size=[Text.Encoding]::UTF8.GetByteCount($text)
+ if(($kind -eq 'control' -and @($blocks | Where-Object {$_.kind -eq 'control'}).Count -ge 8) -or $blocks.Count -ge 48 -or $budget.bytes+$size -gt 8000){$budget.partial=$true;return}
+ $seen[$text]=$true;$budget.bytes+=$size
+ $blocks.Add(@{text=$text;kind=$kind})
+}
+function Get-ReadBlocks($rootElement) {
+ $walker=[Windows.Automation.TreeWalker]::ControlViewWalker
+ $queue=[Collections.Generic.Queue[object]]::new();$queue.Enqueue(@($rootElement,0))
+ $blocks=[Collections.Generic.List[object]]::new();$seen=@{};$budget=@{bytes=0;partial=$true}
+ $clock=[Diagnostics.Stopwatch]::StartNew();$visited=0
+ while($queue.Count -and $visited -lt 240 -and $blocks.Count -lt 48 -and $clock.ElapsedMilliseconds -lt 2500) {
+  $pair=$queue.Dequeue();$element=$pair[0];$depth=[int]$pair[1];$visited++
+  try {
+   $c=$element.Current
+   if(-not (Read-Eligible $c)){continue}
+   $kind=$c.ControlType.ProgrammaticName
+   $child=$walker.GetFirstChild($element)
+   if($kind -eq 'ControlType.Text') {Add-ReadBlock $blocks $seen $c.Name 'text' $budget}
+   elseif($kind -in @('ControlType.Button','ControlType.TabItem','ControlType.MenuItem','ControlType.CheckBox','ControlType.RadioButton','ControlType.Hyperlink')) {Add-ReadBlock $blocks $seen $c.Name 'control' $budget}
+   # Only leaf text containers: broad parent ranges could include protected descendants.
+   if($null -eq $child -and $kind -in @('ControlType.Document','ControlType.Text')) {
+    $pattern=$null
+    if($element.TryGetCurrentPattern([Windows.Automation.TextPattern]::Pattern,[ref]$pattern)) {
+     $count=0
+     foreach($range in $pattern.GetVisibleRanges()) {
+      if($count -ge 4){break};$count++
+      Add-ReadBlock $blocks $seen ($range.GetText(400)) 'text' $budget
+     }
+    }
+   }
+   if($depth -lt 10) {
+    $siblings=0
+    while($null -ne $child -and $siblings -lt 96 -and $queue.Count -lt 240) {
+     $queue.Enqueue(@($child,($depth+1)));$child=$walker.GetNextSibling($child);$siblings++
+    }
+   }
+  }catch{}
+ }
+ return $blocks.ToArray()
+}
 try {
  if((Get-Item -LiteralPath $RequestPath).Length -gt 16384){throw 'Request too large'}
  $request=Get-Content -LiteralPath $RequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
  if($request.nonce -notmatch '^[a-f0-9]{32}$'){throw 'Invalid nonce'}
  $reply.nonce=$request.nonce
- if($request.operation -notin @('windows','inspect','invoke','write')){throw 'Unknown operation'}
+ if($request.operation -notin @('windows','inspect','read','invoke','write')){throw 'Unknown operation'}
  if([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT){$reply.status='unsupported'}else{
  Add-Type -AssemblyName UIAutomationClient
  Add-Type -AssemblyName UIAutomationTypes
@@ -81,6 +128,11 @@ public static class LeemonAccess {
  }else{
   $window=Assert-Identity $request
   $rootElement=[Windows.Automation.AutomationElement]::FromHandle($window)
+  if($request.operation -eq 'read') {
+   $blocks=@(Get-ReadBlocks $rootElement)
+   $null=Assert-Identity $request
+   $reply.status='read';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.blocks=$blocks;$reply.partial=$true
+  }else{
   $nodes=@(Get-ScopedNodes $rootElement)
   if($request.operation -eq 'inspect'){
    $reply.status='inspected';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.nodes=@($nodes | ForEach-Object {$_.record})
@@ -116,6 +168,7 @@ public static class LeemonAccess {
      else{$reply.status='invoke_unsupported'}
     }
    }
+  }
   }
  }
  }

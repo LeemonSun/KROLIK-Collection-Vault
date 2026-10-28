@@ -89,7 +89,17 @@ func _run():
 		app.chat_window.size=dimensions;await frame()
 		check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(view.editor.get_global_rect()),"Goal with pinned window preserves input "+str(dimensions))
 		check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(view.confirmation_button.get_global_rect()),"Goal approval visible at "+str(dimensions))
-	app.goal_mode="";app.goal_plan={};app.goal_origin_target={};app.goal_deadline_ms=0;app.application_access.clear_target()
+	app.goal_mode="";app.goal_plan={};app.goal_origin_target={};app.goal_deadline_ms=0
+	app.chat_window.size=Vector2i(460,560)
+	app.window_read_mode="thinking";app.window_read_target=app.application_access.target.duplicate(true);app.window_read_deadline=Time.get_ticks_msec()+30000
+	app.state.reset();app.state.transition("thinking");view.refresh();await frame()
+	check(view.read_button.disabled and view.status_label.text==app.t("window_read_status_thinking"),"Native read progress and shared-worker lock")
+	app.window_read_mode="";app.window_read_target={};app.window_read_deadline=0;app.state.reset()
+	app.add_message("assistant",app.t("window_read_source",{"title":"Synthetic editor"})+"\n\nВстреча в пятницу, в 14:30.\n\n"+app.t("window_read_quotes")+"\n• The meeting is on Friday at 14:30.\n\n"+app.t("window_read_partial"),true)
+	view.history.follow_latest();view.refresh();await frame();await frame()
+	check(view.read_button.visible and not view.read_button.disabled,"Native read action available beside selected window")
+	shot(app.chat_window,"window-reading")
+	app.application_access.clear_target()
 	app.chat_window.size=Vector2i(460,460);view.refresh()
 
 	for language in ["ru","en","zh-Hans"]:

@@ -9,7 +9,7 @@ def main():
  template=a.template.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
  version=json.loads((ROOT/'config/product.json').read_text())['version'].split('-')[0]
  template_sha=hashlib.sha256(template.read_bytes()).hexdigest()
- if template_sha not in [TEMPLATE_SHA,'7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee','85331073ec1e95bf0f09dc9535c03887627f5bfd5b9484ba1bef58a5d696ecbd','83813377ae61e5cb02cec687a38da5ab83749964a59fefaabd20b3d40f5167e6']:raise SystemExit('Wrong export template hash')
+ if template_sha not in [TEMPLATE_SHA,'33c4fcdb4bf6d9c4452d881a9d57467125630719cbd5e7d231ffb7d16a6b9b1e','7a04fc118a389321d784af36ca24a3a9b99494a0aa2f6ad42c75a1fd4dc1adb8','9ddc4873118000f30e4c237607355847db4c2a15f25ec45d6c0f07547c818fee','85331073ec1e95bf0f09dc9535c03887627f5bfd5b9484ba1bef58a5d696ecbd','83813377ae61e5cb02cec687a38da5ab83749964a59fefaabd20b3d40f5167e6']:raise SystemExit('Wrong export template hash')
  preset=ROOT/'export_presets.cfg';original=preset.read_text()
  try:
   preset.write_text(original.replace('custom_template/release=""','custom_template/release="'+template.as_posix()+'"'))
@@ -26,7 +26,7 @@ def main():
  if not exe.exists() or exe.read_bytes()[:2]!=b'MZ':raise SystemExit('Missing PE executable')
  shutil.copytree(ROOT/'legal',out/'legal',dirs_exist_ok=True)
  (out/'START_HERE.txt').write_text((ROOT/'docs/PREVIEW_README.txt').read_text(encoding='utf-8').replace('{VERSION}',version),encoding='utf-8')
- metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':16,'local_voice':True,'explicit_screen_vision':True,'scoped_windows_uia':True,'one_step_goal_proposals':True,'optional_offline_bundle':True,'public_release_ready':False,'windows_executed_here':False}
+ metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':16,'local_voice':True,'explicit_screen_vision':True,'scoped_windows_uia':True,'one_step_goal_proposals':True,'explicit_window_reading':True,'optional_offline_bundle':True,'public_release_ready':False,'windows_executed_here':False}
  (out/'BUILD_INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
  archive=out.parent/('Companion_Preview_Windows_v'+version+'.zip')
  with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:

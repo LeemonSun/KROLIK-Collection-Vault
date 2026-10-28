@@ -31,10 +31,10 @@ func submit(messages, options = {}):
 	last_truncated=false
 	busy=true
 	if options.has("response_schema") and auth_token.is_empty():
-		busy=false;request_messages=[];request_options={};failed.emit("goal_local_only");return false
+		busy=false;request_messages=[];request_options={};_fail("goal_local_only");return false
 	if options.get("multimodal",false):
 		if auth_token.is_empty() or messages.size()!=2 or JSON.stringify(messages).length()>600000:
-			busy=false;failed.emit("vision_failed");return false
+			busy=false;_fail("vision_failed");return false
 		return _generate()
 	if not auth_token.is_empty():
 		return _apply_template()
@@ -48,7 +48,7 @@ func _post(path,payload):
 	if error!=OK:
 		busy=false
 		request_messages=[];request_options={}
-		failed.emit("model_connection_failed")
+		_fail("model_connection_failed")
 		return false
 	return true
 
@@ -88,47 +88,47 @@ func _on_completed(result, code, _headers, body):
 	if result != HTTPRequest.RESULT_SUCCESS or code != 200:
 		busy=false
 		request_messages=[];request_options={}
-		failed.emit("model_connection_failed")
+		_fail("model_connection_failed")
 		return
 	var parser = JSON.new()
 	if parser.parse(body.get_string_from_utf8()) != OK:
 		busy=false
-		failed.emit("model_invalid_response")
+		_fail("model_invalid_response")
 		return
 	var parsed = parser.data
 	if not (parsed is Dictionary):
 		busy=false
-		failed.emit("model_invalid_response")
+		_fail("model_invalid_response")
 		return
 	if phase=="template":
 		if not parsed.get("prompt") is String:
-			busy=false;failed.emit("model_invalid_response");return
+			busy=false;_fail("model_invalid_response");return
 		phase="tokenize"
 		_post("/tokenize",{"content":parsed.prompt,"add_special":false,"parse_special":true})
 		return
 	if phase=="tokenize":
 		if not parsed.get("tokens") is Array:
-			busy=false;failed.emit("model_invalid_response");return
+			busy=false;_fail("model_invalid_response");return
 		var needed=parsed.tokens.size()+clampi(int(request_options.get("max_tokens",128)),16,512)+64
 		if needed>int(request_options.get("context_tokens",2048)):
 			if request_messages.size()>2:
 				request_messages.remove_at(1);request_messages.remove_at(1)
 				_apply_template()
-			else:busy=false;failed.emit("model_context_full")
+			else:busy=false;_fail("model_context_full")
 		else:_generate()
 		return
 	busy=false
 	var choices = parsed.get("choices", [])
 	if not (choices is Array) or choices.is_empty() or not (choices[0] is Dictionary):
-		failed.emit("model_invalid_response")
+		_fail("model_invalid_response")
 		return
 	var message = choices[0].get("message", {})
 	if not (message is Dictionary) or not (message.get("content") is String):
-		failed.emit("model_invalid_response")
+		_fail("model_invalid_response")
 		return
 	var content = message.content.strip_edges()
 	if content.is_empty() or content.length() > 16384:
-		failed.emit("model_invalid_response")
+		_fail("model_invalid_response")
 		return
 	# tool_calls are deliberately ignored; no model-driven effects in v0.1.
 	last_truncated=choices[0].get("finish_reason")=="length"
@@ -150,3 +150,7 @@ func configure_local(port, token):
 	endpoint = "http://127.0.0.1:%s/v1/chat/completions" % port
 	auth_token = token
 	return true
+
+func _fail(key):
+	busy=false;phase="";request_messages=[];request_options={}
+	failed.emit(key)

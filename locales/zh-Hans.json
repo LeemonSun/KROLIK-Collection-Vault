@@ -149,7 +149,7 @@
   "self_load": "资源使用页面会测量本应用和其本地AI进程的内存及CPU。回答复杂度、硬件和其他应用会影响速度。",
   "self_motion": "我的2D角色可以分别活动头部、手臂和腿部，包含待机、问候、思考、交谈、成功、迟疑、拖动和行走。精细面部动画尚未完成。",
   "self_power": "电脑上的应用运行我，CPU 通过本地模型生成回答。模型文件保存在磁盘上，运行时加载到内存。",
-  "self_capabilities": "安装AI后可以在本机聊天、打开应用、查询时间、保存笔记和提醒。安装相应模块后，可用独立按钮识别语音或分析一张屏幕截图。操作结果以执行器返回为准。",
+  "self_capabilities": "可以在本机聊天、打开应用、查询时间、保存笔记或提醒。独立按钮可识别语音、分析一张屏幕截图，或读取所选窗口的可访问文本并附片段回答。简单的窗口操作会先提出步骤，由你检查确认。需要安装相应本地模块；不受支持的窗口可能无法读取。",
   "self_weather": "我没有实时天气数据。可以用 /search 加城市名称打开天气搜索，我不会编造温度。",
   "self_greeting": "嗨，我在。你怎么样？",
   "self_identity": "我是柠檬，你的桌面伙伴。柠檬是我的名字，不是你的。",
@@ -277,5 +277,18 @@
   "goal_approve_select": "选择“{name}”",
   "goal_approve_expand": "展开“{name}”",
   "goal_approve_invoke": "点击“{name}”",
-  "goal_approve_write": "向“{name}”输入文本"
+  "goal_approve_write": "向“{name}”输入文本",
+  "window_read_button": "读取所选窗口",
+  "window_read_default": "简要说明所选窗口中可见的内容。",
+  "window_read_prefix": "读取窗口：",
+  "window_read_status_loading": "正在准备本地 AI…",
+  "window_read_status_observing": "正在读取所选窗口…",
+  "window_read_status_thinking": "正在分析片段…",
+  "window_read_empty": "无法读取此窗口的可访问文本。可以另外使用截图按钮提供一张屏幕图片。",
+  "window_read_failed": "无法根据此窗口可靠地回答。请细化问题或重新读取。",
+  "window_read_expired": "读取已超时。请重新读取窗口。",
+  "window_read_insufficient": "读取的片段中没有答案。请细化问题或打开窗口的相关部分。",
+  "window_read_source": "来自窗口「{title}」",
+  "window_read_quotes": "依据以下片段：",
+  "window_read_partial": "仅包含请求时的部分可访问内容。此回答不会保存到聊天记录中。"
 }

@@ -50,6 +50,12 @@ const ConversationMemory=preload("res://src/core/conversation_memory.gd")
 const ResponseGuard=preload("res://src/core/response_guard.gd")
 var desktop_actions
 var application_access
+var window_read_mode=""
+var window_read_question=""
+var window_read_context={}
+var window_read_target={}
+var window_read_deadline=0
+var window_reader=preload("res://src/core/window_reader.gd").new()
 var goal_mode=""
 var goal_text=""
 var goal_context={}
@@ -101,6 +107,7 @@ func _ready():
 	add_child(application_access)
 	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values)))
 	application_access.changed.connect(_access_changed)
+	application_access.read_ready.connect(_window_read_observed)
 	application_access.snapshot_ready.connect(_goal_observed)
 	application_access.completed.connect(_goal_access_completed)
 	desktop_actions=DesktopActions.new()
@@ -149,6 +156,7 @@ func t(key, values = {}):
 	return l10n.text(key, values)
 
 func _process(_delta):
+	if not window_read_mode.is_empty() and Time.get_ticks_msec()>window_read_deadline:_window_read_error("window_read_expired")
 	if not goal_mode.is_empty() and Time.get_ticks_msec()>goal_deadline_ms:_goal_error("goal_expired")
 	var panel_visible=is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible
 	var chat_visible=is_instance_valid(chat_window) and chat_window.visible
@@ -214,8 +222,10 @@ func enable_developer_llama(enabled):
 	session_turns.clear()
 	changed.emit()
 
-func add_message(speaker, text):
-	messages.append({"speaker": speaker, "text": text})
+func add_message(speaker, text, ephemeral=false):
+	var message={"speaker":speaker,"text":text}
+	if ephemeral:message["ephemeral"]=true
+	messages.append(message)
 	if messages.size() > 100:
 		messages.pop_front()
 	message_added.emit(speaker, text)
@@ -235,7 +245,7 @@ func submit(text):
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text)
+	add_message("user", text, command.get("tool","")=="access.read")
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -298,6 +308,8 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool=="access.read":
+		state.reset();begin_window_read(command.args.question,false);return
 	if command.tool=="access.goal":
 		state.reset();begin_window_goal(command.args.goal);return
 	if command.tool.begins_with("access."):
@@ -391,6 +403,8 @@ func _execute(command):
 	changed.emit()
 
 func _on_answer(text):
+	if window_read_mode=="thinking":
+		_window_read_answer(text);return
 	if goal_mode=="thinking":
 		_goal_answer(text);return
 	if state.current != "thinking":
@@ -425,6 +439,8 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	if not window_read_mode.is_empty():
+		_window_read_error(key);return
 	if not goal_mode.is_empty():
 		_goal_error(key);return
 	_forget_screen()
@@ -442,6 +458,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	_clear_window_read()
 	_clear_goal()
 	if is_instance_valid(application_access):application_access.cancel_job()
 	_forget_screen()
@@ -511,7 +528,7 @@ func install_local_ai():
 	return local_runtime.install()
 
 func start_local_ai():
-	if paused or speech_input.busy() or screen_mode or not goal_mode.is_empty():
+	if paused or speech_input.busy() or screen_mode or not goal_mode.is_empty() or not window_read_mode.is_empty():
 		return false
 	local_ai_enabled = true
 	_save_setting("local_ai_enabled", true)
@@ -532,6 +549,8 @@ func _runtime_ready(port, token):
 		return
 	_set_provider("local_worker")
 	provider.configure_local(port, token)
+	if window_read_mode=="loading":
+		_window_read_observe();return
 	if goal_mode=="loading":
 		_goal_observe();return
 	if screen_mode:
@@ -548,7 +567,7 @@ func _runtime_ready(port, token):
 		_submit_model_text(text)
 
 func _runtime_changed():
-	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode or not goal_mode.is_empty()):
+	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode or not goal_mode.is_empty() or not window_read_mode.is_empty()):
 		_on_failure(local_runtime.status)
 	# Installing only prepares files. Heavy weights wake on the next actual request.
 	changed.emit()
@@ -843,6 +862,7 @@ func confirm_window_goal():
 	if not application_access.inspect(true):_goal_error("goal_failed");return false
 	changed.emit();return true
 func _goal_access_completed(result):
+	if window_read_mode=="observing" and result.get("status")!="read":_window_read_error("window_read_failed")
 	if goal_mode.is_empty() or result.get("status")=="inspected":return
 	if goal_mode in ["observing","confirming","verifying"]:
 		_goal_error("goal_failed");return
@@ -870,5 +890,58 @@ func _clear_goal():
 		if is_instance_valid(local_runtime):local_runtime.generation_busy=false;local_runtime.touch()
 
 func _access_changed():
+	if not window_read_mode.is_empty() and not goal_planner.same_target(window_read_target,application_access.target):_window_read_error("goal_changed")
 	if not goal_mode.is_empty() and not goal_planner.same_target(goal_origin_target,application_access.target):_goal_error("goal_changed")
 	changed.emit()
+
+
+func begin_window_read(question="",record_question=true):
+	if paused or state.current!="idle" or speech_input.busy() or application_access.pid>0 or not goal_mode.is_empty() or not window_read_mode.is_empty():return false
+	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
+	if not question is String or question.length()>600:add_message("assistant",t("input_too_long"));return false
+	if not local_runtime.installed():add_message("assistant",t("goal_need_ai"));return false
+	window_read_question=question.strip_edges() if not question.strip_edges().is_empty() else t("window_read_default")
+	if record_question:add_message("user",window_read_question,true)
+	voice.stop();window_read_context={};window_read_target=application_access.target.duplicate(true)
+	window_read_deadline=Time.get_ticks_msec()+120000
+	state.transition("executing");local_ai_enabled=true
+	if local_runtime.status=="ai_ready" and provider_name=="local_worker":_window_read_observe()
+	else:
+		window_read_mode="loading"
+		if not local_runtime.start(profiles.config(profile_name)):_window_read_error(local_runtime.status);return false
+	changed.emit();return true
+func _window_read_observe():
+	window_read_mode="observing"
+	if not application_access.read_content():_window_read_error("window_read_failed")
+	changed.emit()
+func _window_read_observed(snapshot):
+	if window_read_mode!="observing":return
+	if not goal_planner.same_target(window_read_target,snapshot.target) or window_read_target.get("title")!=snapshot.target.get("title"):_window_read_error("goal_changed");return
+	window_read_context=window_reader.prepare(window_read_question,snapshot.target,snapshot.blocks,snapshot.observed_ms,l10n.locale)
+	if not window_read_context.get("ok",false):_window_read_error("window_read_empty");return
+	window_read_mode="thinking";window_read_deadline=Time.get_ticks_msec()+90000
+	state.reset();state.transition("thinking");local_runtime.generation_busy=true;local_runtime.touch()
+	request_motion("dialogue.think_loop")
+	provider.submit(window_read_context.messages,{"max_tokens":256,"context_tokens":2048,"response_schema":window_read_context.schema})
+	changed.emit()
+func _window_read_answer(text):
+	if provider is Llama and provider.last_truncated:_window_read_error("window_read_failed");return
+	var result=window_reader.validate(text,window_read_context,application_access.target,Time.get_ticks_msec())
+	if not result.get("ok",false):_window_read_error("window_read_failed");return
+	if result.insufficient:_window_read_error("window_read_insufficient");return
+	var title=str(window_read_target.get("title",""))
+	_clear_window_read();state.reset()
+	var reply=t("window_read_source",{"title":title})+"\n\n"+result.answer+"\n\n"+t("window_read_quotes")
+	for quote in result.quotes:reply+="\n• "+quote
+	reply+="\n\n"+t("window_read_partial")
+	add_message("assistant",reply,true)
+	voice.speak(result.answer,l10n.locale);request_motion("dialogue.explain_small");changed.emit()
+func _window_read_error(key):
+	_clear_window_read();state.reset();add_message("assistant",t(key),true);changed.emit()
+func _clear_window_read():
+	var active=not window_read_mode.is_empty()
+	window_read_mode="";window_read_context={};window_read_question="";window_read_target={};window_read_deadline=0
+	if active:
+		if is_instance_valid(provider):provider.cancel()
+		if is_instance_valid(application_access):application_access.cancel_job()
+		if is_instance_valid(local_runtime):local_runtime.generation_busy=false;local_runtime.touch()

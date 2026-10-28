@@ -1,3 +1,7 @@
+# Leemon 0.10 — работа продолжается
+
+Читать recovery/session.json и `python3 tools/resume.py status`. Новый модуль: docs/WINDOW_READING.md. Последняя выданная сборка пока 0.9;0.10 реализована, идёт проверка. Не восстанавливать старую основу: в GitHub хранится актуальный capsule. GitHub — только хранилище, без Actions/remote builds.
+
 # Leemon0.9 — текущая сохранённая версия
 
 Начать сrecovery/session.json иpython3 tools/resume.py status. Дальшеdocs/GOAL_PROPOSALS.md по новому модулю. Не читать весьчат и не перезапускать проект. GitHub LeemonSun/KROLIK-Collection-Vault main толькохранилище; никаких Actions/remote build. Последнийheadв.resume-remote.json. tools/resume_bridge.js поддерживает shardcapsule/checkpoint. Безсубагентовбезпрямогоразрешения.

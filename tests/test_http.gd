@@ -34,7 +34,7 @@ func _run():
 		if not events.is_empty():
 			check(events[0][0] == ("ok" if scenario == "success" else "error"), "Response handled " + scenario)
 		check(not provider.busy, "Busy flag cleared " + scenario)
-		if scenario=="success":check(provider.request_messages.is_empty(),"Completed request releases source text")
+		check(provider.request_messages.is_empty() and provider.request_options.is_empty(),"Every response path releases private source text: "+scenario)
 	events.clear()
 	provider.submit([{"role":"user","content":"slow"}])
 	check(not provider.submit([]), "Concurrent request rejected")

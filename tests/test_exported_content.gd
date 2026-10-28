@@ -6,7 +6,7 @@ func check(ok,text):
 	checks+=1
 	if not ok:failures+=1;push_error(text)
 func _run():
-	check(ProjectSettings.get_setting("application/config/version")=="0.9.0-desktop-preview","Correct product version inside PCK")
+	check(ProjectSettings.get_setting("application/config/version")=="0.10.0-desktop-preview","Correct product version inside PCK")
 	check(ProjectSettings.get_setting("application/config/name")=="Companion Foundation","Existing AppData model/profile identity retained")
 	check(FileAccess.get_sha256("res://native/desktop_bridge.ps1")==OS.get_environment("COMPANION_HELPER_SHA"),"Exact reviewed Windows helper exported")
 	check(FileAccess.get_sha256("res://native/accessibility_bridge.ps1")==OS.get_environment("COMPANION_ACCESS_HELPER_SHA"),"Exact scoped UIA/selected-state helper exported")
@@ -28,5 +28,14 @@ func _run():
 	var helper=FileAccess.get_file_as_bytes("user://support/desktop_bridge.ps1")
 	check(helper.slice(0,3)==PackedByteArray([239,187,191]),"UTF-8 BOM supports Windows PowerShell 5.1 Cyrillic/CJK")
 	check(DirAccess.get_files_at("user://support/jobs").is_empty(),"No request/result litter after job completion")
+	var access=app.application_access
+	access.test_runner=true;access.runner=OS.get_environment("COMPANION_PWSH")
+	access.adopt({"handle":"123","target_pid":234,"started":"345","title":"Test","app":"Test"})
+	var replies=[];access.completed.connect(func(reply):replies.append(reply))
+	check(access.read_content(),"Exported read operation reaches actual helper")
+	deadline=Time.get_ticks_msec()+10000
+	while replies.is_empty() and Time.get_ticks_msec()<deadline:await process_frame
+	check(not replies.is_empty() and replies[0].get("operation")=="read" and replies[0].get("status")=="unsupported","Non-Windows helper refuses to simulate a read")
+	check(DirAccess.get_files_at("user://support/accessibility/jobs").is_empty(),"Read request IPC cleaned after actual helper completion")
 	print("EXPORTED_CONTENT_TESTS: %s checks, %s failures; actual helper round trip; Windows COM not exercised" % [checks,failures])
 	quit(0 if failures==0 else 1)
