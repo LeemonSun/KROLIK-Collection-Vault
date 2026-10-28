@@ -1,0 +1,9 @@
+# Primary sources and pinned development provenance —28Oct2026
+
+- Qwen/Qwen3.5-2B model card, revision15852e8c16360a2fea060d615a32b45270f8a8fc: https://huggingface.co/Qwen/Qwen3.5-2B/blob/15852e8c16360a2fea060d615a32b45270f8a8fc/README.md — post-trained model; intended prototyping/task-specific development;2Bthinking-loop warning. DeclaredApache2.0. Existing production UnslothGGUF remains pinned in config/local_worker.json.
+- Qwen/Qwen3-1.7B card, revision70d244cc86ccca08cf5af4e1e306ecf908b1ad5e: https://huggingface.co/Qwen/Qwen3-1.7B/blob/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e/README.md — text-only comparison, thinking disabled explicitly. Recommendations are hypotheses, not assumed quality proof.
+- ggml-org/Qwen3-1.7B-GGUF revisiondaeb8e2d528a760970442092f6bf1e55c3b659eb: https://huggingface.co/ggml-org/Qwen3-1.7B-GGUF/tree/daeb8e2d528a760970442092f6bf1e55c3b659eb — Q4_K_M1282439264bytes, SHAd2387ca2dbfee2ffabce7120d3770dadca0b293052bc2f0e138fdc940d9bc7b5. CarddeclaresApache2.0. Dev-only, not adopted/bundled; no vision support. This is not complete legal clearance.
+- llama.cppb11901 release: https://github.com/ggml-org/llama.cpp/releases/tag/b11901 — officialLinuxCPUarchive22496063bytes, SHA7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8. ExistingWindowsruntime remains unchanged.
+- Pinned server help and source: https://github.com/ggml-org/llama.cpp/blob/b11901/tools/server/README.md — additional RAM prompt-cache limit and context checkpoints. Actual pinned LinuxCLI help observed defaults8192MiB/32; these are allowed limits, not an assertion of immediate allocation. Test actual RSS and outputs, not just logs or upstream recommendations.
+
+Research JSONs/answers are synthetic. No userdocs/screens, secrets, raw private reasoning or modelweights in GitHub. Primary API metadata and exact hash verification used before local executions. Local downloads are not application network/Windows acceptance.

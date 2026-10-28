@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| chat_draft020 | PASS |
 | control_context019 | PASS |
 | verification019 | PASS |
 | locomotion018 | PASS |
@@ -47,16 +48,9 @@
 
 release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.
 
-Leemon 0.19: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.
+Leemon 0.20: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.
 Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.
 Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.
 Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.
 Qwen3.5-2B Q4: прежние text/vision fixtures проверены отдельно; узкий adaptive/draft pilot выполнен, его ошибки и ограничения см. WORKFLOWS_017.md; научная точность ограничена. Полный offline-пакет использует AI/ рядом с EXE, лёгкий пакет предлагает явную установку.
 ASR реализован через локальный Whisper. Разовый анализ экрана реализован; real fixture в vision_real.txt. Общие Windows UIA-действия и явное чтение доступного текста выбранного окна с выдержками реализованы, но Windows приёмка впереди. Собственный голос отсутствует; explicit public HTTPS excerpts reader имеет ограничения, см. WORKFLOWS_014.md. Каталог движений — план производства, а не готовые клипы.
-
-
-Дополнение0.19: финальныйPCK smoke+38context+36verification+25adaptive+32composer+42windowreader+17exportedcontent PASS.
-НативныйX11финальногоPCK:30agentlayout+156general+35motion PASS. PowerShellsynthetictraversal17,
-прежниеhelper16protocol+11read PASS; actualGodot→PowerShellnonce exchange проверен. ZIPCRC PASS.
-Windows UIA/PowerShell5.1/DPI/железо/реальнаямодельсновымконтекстомнепроверены.
-Recoverybridge: локальныйконтракт stale-refread+remotelease PASS; noforce.

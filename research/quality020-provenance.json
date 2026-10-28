@@ -1,0 +1,12 @@
+{
+  "runtime_version": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "current2b_sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "candidate_id": "ggml_org_qwen3_17b_q4km_dev_only",
+  "candidate_revision": "daeb8e2d528a760970442092f6bf1e55c3b659eb",
+  "candidate_sha256": "d2387ca2dbfee2ffabce7120d3770dadca0b293052bc2f0e138fdc940d9bc7b5",
+  "candidate_bytes": 1282439264,
+  "candidate_license_declared": "Apache-2.0",
+  "candidate_vision": false,
+  "production_default_changed": false
+}

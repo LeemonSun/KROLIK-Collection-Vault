@@ -442,5 +442,8 @@
   "metrics_partial": "Process measurement is partial: some data is unavailable.",
   "goal_status_repairing": "Correcting the draft",
   "goal_control_scope": "Section: {path}",
-  "goal_status_verify_wait": "Waiting for the window to update…"
+  "goal_status_verify_wait": "Waiting for the window to update…",
+  "chat_draft_heading": "Draft · not sent",
+  "chat_draft_repairing": "Correcting the draft…",
+  "chat_draft_unverified": "I could not produce a draft without unsupported details. Nothing was sent."
 }

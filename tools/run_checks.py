@@ -21,6 +21,7 @@ def main():
     env = dict(os.environ)
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("chat_draft020",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_chat_draft020.gd","--","--test-mode"]),
         ("control_context019",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_control_context019.gd","--","--test-mode"]),
         ("verification019",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_verification019.gd","--","--test-mode"]),
         ("locomotion018",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_locomotion018.gd","--","--test-mode"]),
@@ -88,7 +89,7 @@ def main():
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
-        "", "Leemon 0.19: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
+        "", "Leemon 0.20: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
         "Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.",
         "Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.",
         "Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.",

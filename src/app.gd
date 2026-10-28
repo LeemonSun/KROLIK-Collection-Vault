@@ -91,6 +91,8 @@ var control_panel
 var guard=ResponseGuard.new()
 var reminder_timer
 var response_retries=0
+var chat_draft_mode=false
+var chat_draft_attempt=0
 var answer_reviewing=false
 var quality=preload("res://src/core/response_quality.gd").new()
 var pending_document={}
@@ -367,6 +369,10 @@ func _submit_model_text(text,retry=false,reasoning_retry=false):
 		local_runtime.touch()
 	request_motion("dialogue.think_loop")
 	changed.emit()
+	if not retry and preload("res://src/core/chat_draft.gd").requested(text):
+		chat_draft_mode=true;chat_draft_attempt=1
+		_submit_chat_draft();return
+	chat_draft_mode=false;chat_draft_attempt=0
 	var factual=quality.factual(text)
 	var system_text=self_knowledge.factual_text(l10n.locale) if factual else self_knowledge.system_text(l10n.locale)
 	system_text+="\n"+quality.context_hint(text,session_turns)
@@ -385,6 +391,14 @@ func _submit_model_text(text,retry=false,reasoning_retry=false):
 		return
 	pending_user_text = text
 	provider.submit(context.messages, options)
+
+func _submit_chat_draft(previous=""):
+	var options=runtime_options().duplicate(true)
+	options["server_token_budget"]=provider_name=="local_worker"
+	options["max_tokens"]=mini(128,int(options.get("max_tokens",96)))
+	if local_runtime:local_runtime.generation_busy=true;local_runtime.touch()
+	if not provider.submit(preload("res://src/core/chat_draft.gd").messages(pending_user_text,l10n.locale,previous),options):_on_failure("model_connection_failed");return false
+	changed.emit();return true
 
 func answer_review_enabled():
 	return store.data.settings.get("experimental_answer_review",false) is bool and store.data.settings.get("experimental_answer_review",false)
@@ -541,18 +555,25 @@ func _on_answer(text):
 		_goal_answer(text);return
 	if state.current != "thinking":
 		return
-	if not translation_mode and not screen_mode:text=quality.clean(text,pending_user_text)
-	if not translation_mode and guard.claims_action(text,pending_user_text):
+	if chat_draft_mode:
+		var problems=preload("res://src/core/chat_draft.gd").problems(text,pending_user_text)
+		if provider is Llama and provider.last_truncated:problems.append("truncated")
+		if not problems.is_empty():
+			if chat_draft_attempt<2:
+				chat_draft_attempt+=1;_submit_chat_draft(text);return
+			_on_failure("chat_draft_unverified");return
+	if not chat_draft_mode and not translation_mode and not screen_mode:text=quality.clean(text,pending_user_text)
+	if not chat_draft_mode and not translation_mode and guard.claims_action(text,pending_user_text):
 		_on_failure("model_action_unverified")
 		return
-	if not translation_mode and not screen_mode and quality.impossible_infallibility(text,pending_user_text):
+	if not chat_draft_mode and not translation_mode and not screen_mode and quality.impossible_infallibility(text,pending_user_text):
 		if response_retries<1:
 			response_retries+=1;_submit_model_text(pending_user_text,true,true);return
 		_on_failure("model_reasoning_failed");return
-	if not translation_mode and not screen_mode and response_retries==0 and answer_review_enabled() and quality.needs_review(pending_user_text):
+	if not chat_draft_mode and not translation_mode and not screen_mode and response_retries==0 and answer_review_enabled() and quality.needs_review(pending_user_text):
 		_review_model_answer(text);return
 	answer_reviewing=false
-	if not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
+	if not chat_draft_mode and not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
 		if response_retries<1:
 			response_retries+=1
 			_submit_model_text(pending_user_text,true)
@@ -569,7 +590,8 @@ func _on_answer(text):
 	pending_user_text = ""
 	translation_mode=false
 	_forget_screen()
-	var display_text=text
+	var display_text=(t("chat_draft_heading")+"\n\n"+text) if chat_draft_mode else text
+	chat_draft_mode=false;chat_draft_attempt=0
 	if provider is Llama and provider.last_truncated:display_text+="\n\n"+t("reply_limit")
 	add_message("assistant", display_text)
 	voice.speak(text, l10n.locale)
@@ -582,6 +604,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	chat_draft_mode=false;chat_draft_attempt=0
 	answer_reviewing=false
 	chat_queue.clear()
 	if not window_read_mode.is_empty():
@@ -603,6 +626,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	chat_draft_mode=false;chat_draft_attempt=0
 	answer_reviewing=false
 	agent.clear()
 	if is_instance_valid(public_page):public_page.cancel()

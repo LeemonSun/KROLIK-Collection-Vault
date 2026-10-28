@@ -1,9 +1,3 @@
-# Leemon — состояние0.19
+# Leemon — состояние0.20
 
-Сначала RESUME.md и recovery/session.json; механизмы019—docs/WORKFLOWS_019.md. GitHub только хранилище.
-
-019развивает общий агент: контекст родителей/типов/AutomationId в частичном UIA-наблюдении, различение одинаковых названий в разных разделах, строгийdescriptorна свежей привязке до эффекта. До3read-onlyпроверок послеSelect/Expand позволяют дождаться отложенного состояния без повторного нажатия. Контекстные сообщения временные, дублиUIAвreceiptочищаются. Новыхвесов/навыковOffice/голоса/художественныхклиповнет;018поведениеЛимонасохранено.
-
-Контур ограничен выбранным окном,4шагами/240секундами и подтверждениями. Общийинтеллект2Bнеисправлен; semantic failures017сохранены. Строгие совпадения могут отвергать легитимные измененияUI; не ослаблять доname-onlyи не переносить одобрение на другойRuntimeId. Нельзя заявлятьуниверсальныйавтопилот/гарантиюбезопасности/правовойчистоты/минимальнойнагрузки.
-
-40sourcegroups и30nativeX11layout PASS; финальныеPCK/native/PowerShell/доставка вsession. РеальнаяWindows/UIA/DPI/железо впереди. Следующее:Windowsприёмка,24case compactmodel/observation comparison, затем общиеpatterns/sourcegrounding. ОдинЛимон/одинстиль/26процедурныхсостояний; retiredcharactersstayretired.
+020 adds measured extra RAM cache/checkpoint limits and guarded short practical chat drafts. Current2B/global prompts retained after compact prompt and1.7B candidate failed semantic comparisons. Same24case Linux worker peak2.34→1.82GiB (~22%); not Windows/app-total/hardquota. Bounded UIA proposals9/9 on narrow synthetic sample; actualApp drafts10delivered/2blocked, with remaining nonnumeric hallucinations. See docs/WORKFLOWS_020.md and reports/quality020-review.md. No IQ/realWindows/Steam release claims. OneLemon/one style/26procedural states. GitHub storage only. Follow RESUME.md and session for current checks/artifacts; preserve licenses and retired-character policy. Next: realWindows acceptance and broader source-grounded adaptive tasks.

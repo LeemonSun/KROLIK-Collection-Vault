@@ -1,3 +1,8 @@
+##0.20.0 private preview
+- Measured and disabled additional worker RAM prompt cache/context checkpoints; controlled Linux A/B retained.
+- Short standalone practical chat authoring, one bounded hidden repair, unsent draft label and narrow literal/action guards.
+- Actual pinned2B/candidate/compact-prompt/UIA/authoring evidence, including failures. No new default model or general-IQ claim.
+
 # 0.11.0 — действия, маскот, файлы и компактная память
 
 - До четырёх заданных пользователем шагов по выбранному окну; подтверждение/preflight/проверка результата каждого. Отмена остатка при ошибке, смене окна или неподтверждённом итоге.

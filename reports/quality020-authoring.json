@@ -1,0 +1,226 @@
+{
+  "schema": 1,
+  "model": "current2b",
+  "model_sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "runtime_version": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "seed": 42,
+  "cache_prompt": false,
+  "variants": [
+    "authoring"
+  ],
+  "cases": [
+    {
+      "id": "ru_draft_missing",
+      "locale": "ru",
+      "category": "draft_missing",
+      "input": "Составь короткое приглашение на встречу завтра.",
+      "execution": "model",
+      "manual_rubric": "Нет выдуманного времени/места/имён; естественный текст.",
+      "variant": "authoring",
+      "prompt_sha256": "9b063821ec997f2fa762ccceb70735c9ef130f76d8b0f13e2c45b52cda413737",
+      "preflight_tokens": 122,
+      "answer": "Приглашение на встречу завтра.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 122,
+        "total_tokens": 130,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 122,
+        "prompt_ms": 2225.212,
+        "prompt_per_token_ms": 18.23944262295082,
+        "prompt_per_second": 54.8262367810348,
+        "predicted_n": 8,
+        "predicted_ms": 408.312,
+        "predicted_per_token_ms": 58.330285714285715,
+        "predicted_per_second": 17.14375281647368
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2640
+    },
+    {
+      "id": "ru_draft_given",
+      "locale": "ru",
+      "category": "draft_given",
+      "input": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+      "execution": "model",
+      "manual_rubric": "Сохранить явно данные детали, не добавить иных.",
+      "variant": "authoring",
+      "prompt_sha256": "493cbd3458cc5601da3b1dbdfa9dc964fce032869c69b132afc434717ed3b6b1",
+      "preflight_tokens": 130,
+      "answer": "Приглашение на встречу завтра в 14:30 в комнате A.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 18,
+        "prompt_tokens": 130,
+        "total_tokens": 148,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 130,
+        "prompt_ms": 2294.8,
+        "prompt_per_token_ms": 17.652307692307694,
+        "prompt_per_second": 56.64981697751437,
+        "predicted_n": 18,
+        "predicted_ms": 1104.654,
+        "predicted_per_token_ms": 64.97964705882353,
+        "predicted_per_second": 15.389434157663848
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3439
+    },
+    {
+      "id": "en_draft_missing",
+      "locale": "en",
+      "category": "draft_missing",
+      "input": "Compose a short invitation for a meeting tomorrow.",
+      "execution": "model",
+      "manual_rubric": "No invented time/place/names; natural finished text.",
+      "variant": "authoring",
+      "prompt_sha256": "a44b80f5ae576787cad678e9b25286494ef0428a8a11f59c9d722632a27c93d2",
+      "preflight_tokens": 104,
+      "answer": "Tomorrow at 2 PM, the team will meet in the conference room.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 104,
+        "total_tokens": 120,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 104,
+        "prompt_ms": 1929.43,
+        "prompt_per_token_ms": 18.55221153846154,
+        "prompt_per_second": 53.901929585421605,
+        "predicted_n": 16,
+        "predicted_ms": 1005.941,
+        "predicted_per_token_ms": 67.06273333333334,
+        "predicted_per_second": 14.911411305434415
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2967
+    },
+    {
+      "id": "en_draft_given",
+      "locale": "en",
+      "category": "draft_given",
+      "input": "Compose an invitation for tomorrow at 14:30 in room A.",
+      "execution": "model",
+      "manual_rubric": "Preserve supplied facts without adding more.",
+      "variant": "authoring",
+      "prompt_sha256": "9bc96707f7dad5085f3ee8d2fa66b6391386742bfd2f5e40b121d0dde9475fcd",
+      "preflight_tokens": 111,
+      "answer": "Tomorrow at 14:30 in room A.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 111,
+        "total_tokens": 124,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 111,
+        "prompt_ms": 2059.686,
+        "prompt_per_token_ms": 18.55572972972973,
+        "prompt_per_second": 53.891709707207795,
+        "predicted_n": 13,
+        "predicted_ms": 783.044,
+        "predicted_per_token_ms": 65.25366666666666,
+        "predicted_per_second": 15.32480933383054
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2879
+    },
+    {
+      "id": "zh-Hans_draft_missing",
+      "locale": "zh-Hans",
+      "category": "draft_missing",
+      "input": "请写一句邀请明天参加会议的话。",
+      "execution": "model",
+      "manual_rubric": "不编造时间、地点、人名，文本自然。",
+      "variant": "authoring",
+      "prompt_sha256": "13fda46ffcd844d4da76a539124c8adb835610542ebbd3442afdf26b219582c5",
+      "preflight_tokens": 104,
+      "answer": "明天上午 10 点，会议室 A 召开部门会议，请准时参加。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 20,
+        "prompt_tokens": 104,
+        "total_tokens": 124,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 104,
+        "prompt_ms": 1924.013,
+        "prompt_per_token_ms": 18.500125,
+        "prompt_per_second": 54.05368882642685,
+        "predicted_n": 20,
+        "predicted_ms": 1113.365,
+        "predicted_per_token_ms": 58.59815789473684,
+        "predicted_per_second": 17.065382870846488
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3070
+    },
+    {
+      "id": "zh-Hans_draft_given",
+      "locale": "zh-Hans",
+      "category": "draft_given",
+      "input": "请写邀请：明天14:30在A室开会。",
+      "execution": "model",
+      "manual_rubric": "保留提供的信息，不添加新细节。",
+      "variant": "authoring",
+      "prompt_sha256": "3aca061253bfae16d175216e14b25fcad29684f932fae71babbb110eb935d3e5",
+      "preflight_tokens": 111,
+      "answer": "明天 14:30 在 A 室开会。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 15,
+        "prompt_tokens": 111,
+        "total_tokens": 126,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 111,
+        "prompt_ms": 1783.513,
+        "prompt_per_token_ms": 16.067684684684686,
+        "prompt_per_second": 62.23672045003317,
+        "predicted_n": 15,
+        "predicted_ms": 839.786,
+        "predicted_per_token_ms": 59.98471428571428,
+        "predicted_per_second": 16.670913780415486
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2656
+    }
+  ],
+  "scope": "synthetic exploratory CPU comparison; one seed, not Windows/app-total/statistical IQ proof; no private reasoning text",
+  "startup_ms": 1522,
+  "owned_worker_peak_rss_bytes": 2429677568,
+  "owned_worker_cpu_seconds": 36.957117,
+  "rss_method": "Linux RUSAGE_CHILDREN after sole owned worker exit; not Windows or app-total"
+}

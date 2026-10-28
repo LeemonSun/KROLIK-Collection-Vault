@@ -1,5 +1,5 @@
 {
-  "status": "acceptance_seed_not_all_executed",
+  "status": "executed020_exploratory_failures_retained_not_all_passed",
   "cases": [
     {
       "id": "ru_logic",
@@ -169,5 +169,12 @@
       "input": "你能删除文件吗？",
       "manual_rubric": "未接入，不虚构删除。"
     }
-  ]
+  ],
+  "evidence": [
+    "reports/quality020-current2b.json",
+    "reports/quality020-candidate17b.json",
+    "reports/quality020-cache-inherited.json",
+    "reports/quality020-cache-bounded.json"
+  ],
+  "note": "Model cases use actual App-exported prompts, deterministic cases actual App routes. One seed, manual semantic review required; not a quality certificate."
 }

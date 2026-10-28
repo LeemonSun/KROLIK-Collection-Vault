@@ -442,5 +442,8 @@
   "metrics_partial": "Замер процессов неполный: часть данных недоступна.",
   "goal_status_repairing": "Уточняю текст",
   "goal_control_scope": "Раздел: {path}",
-  "goal_status_verify_wait": "Жду обновления окна для проверки…"
+  "goal_status_verify_wait": "Жду обновления окна для проверки…",
+  "chat_draft_heading": "Черновик · не отправлен",
+  "chat_draft_repairing": "Исправляю черновик…",
+  "chat_draft_unverified": "Не удалось составить черновик без неподтверждённых деталей. Ничего не отправлено."
 }

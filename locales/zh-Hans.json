@@ -442,5 +442,8 @@
   "metrics_partial": "进程测量不完整：部分数据不可用。",
   "goal_status_repairing": "正在修正草稿",
   "goal_control_scope": "所在区域：{path}",
-  "goal_status_verify_wait": "等待窗口更新后再次检查…"
+  "goal_status_verify_wait": "等待窗口更新后再次检查…",
+  "chat_draft_heading": "草稿 · 未发送",
+  "chat_draft_repairing": "正在修改草稿…",
+  "chat_draft_unverified": "未能生成不含未经确认细节的草稿。没有发送任何内容。"
 }

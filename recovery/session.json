@@ -1,20 +1,20 @@
 {
   "schema_version": 1,
-  "app_version": "0.19.0-desktop-preview",
-  "checkpoint_status": "0.19_saved_contextual_observation_verification_windows_acceptance_pending",
-  "current_task": "019 finished: scoped ancestor/role/AutomationId observations, exact native/Godot preflight, contextual history, bounded3read-onlypostchecks, partial budgets, ephemeral UIA context and no duplicate receipts. Source/pack/native/realPSprotocol validated; ZIP/report saved.",
-  "next_action": "Actual Windows/UIA/PowerShell5.1/DPI/hardware acceptance; then24case compact instruction/observation semantic comparison. Evaluate candidate prioritization/incremental observation for controls omitted by bounded native snapshot. General agent remains primary; no IQ/universal app support claim.",
+  "app_version": "0.20.0-desktop-preview",
+  "checkpoint_status": "0.20_semantic_evidence_and_guarded_drafts_source_pass_delivery_pending",
+  "current_task": "020 source41groups PASS; bounded cache real-model and draft evidence retained; native/packed/build/delivery in progress",
+  "next_action": "Finish final020pack/native acceptance and deliver; retain all semantic failures",
   "read_next": [
-    "docs/WORKFLOWS_019.md",
-    "docs/WINDOWS_ACCEPTANCE_017.md",
-    "reports/real_test_composer_real017.txt"
+    "docs/WORKFLOWS_020.md",
+    "reports/quality020-review.md",
+    "docs/WINDOWS_ACCEPTANCE_017.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
     "Queue holds at most3 ordinary text messages and uses one model inference; no deferred OS/window/capture/voice/tools context",
     "OOXML ZIP<=256entries/8MiB expanded/2MiB per part; no signed/encrypted/ZIP64/.bin packages; bounded XML balance checks, not full schema validation",
     "SHA+rename/file backup guard is not complete adversarial Windows race/reparse protection",
-    "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and not remeasured",
+    "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and see020Linuxworkermeasurements;Windowsunmeasured",
     "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud",
     "Selected files <=1MiB; DOCX one plain paragraph across adjacent runs; XLSX existing cells text/number/Boolean, formula workbooks refused. Range summaries<=1024cells use approximate doubles/raw numeric values, not exact financial arithmetic.",
     "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured.",
@@ -25,7 +25,8 @@
     "Real2B draft/reasoning trial failed: invented English meeting time and wrong liar paradox, even after one review. Experimental extra review is OFF by default; current model IQ not solved. Full15question test not validated.",
     "0.17 authoring is still semantically weak: unsupported locations/names may pass narrow grounding. One repair may fail or invent different facts; full preview/approval remains essential. Only selected-window supported UIA fields.",
     "018 front-facing procedural locomotion, not full side-view hand-authored walk cycle; no window obstacle pathfinding. Small screens may have no nonoverlapping bubble position. Windows performance not measured.",
-    "019 context matching is bounded/truncated and can reject legitimate UI changes. Native snapshot90/200visited/8depth/25KiB may omit useful controls;2500ms budget is soft between UIA calls. Outcome-only contextual recreation is not persistent identity. Real model selection quality on new prompts unmeasured."
+    "019 context matching is bounded/truncated and can reject legitimate UI changes. Native snapshot90/200visited/8depth/25KiB may omit useful controls;2500ms budget is soft between UIA calls. Outcome-only contextual recreation is not persistent identity. Real model selection quality on new prompts unmeasured.",
+    "020 standalone draft literal/action gate misses nonnumeric semantic hallucinations;10/12delivered is not10semantic successes. Cache0/checkpoints0 reduces one Linux worker peak22%, not strictquota or Windows/vision/minRAM proof."
   ],
   "validation": [
     "40fresh-profile sourcegroups PASS including38context/36Appverification/17realPowerShellsynthetictree checks",

@@ -1,0 +1,679 @@
+{
+  "schema": 1,
+  "model": "current2b",
+  "model_sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "runtime_version": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "seed": 42,
+  "cache_prompt": false,
+  "variants": [
+    "production"
+  ],
+  "cache_mode": "inherited",
+  "worker_cache_ram_mib": 8192,
+  "ctx_checkpoints": 32,
+  "cases": [
+    {
+      "id": "ru_logic",
+      "locale": "ru",
+      "category": "logic",
+      "input": "«Это предложение ложно». Истинно оно или нет?",
+      "execution": "model",
+      "manual_rubric": "Не присваивать одновременно простой true/false и отрицать его; оценка вручную.",
+      "variant": "production",
+      "prompt_sha256": "0b3c15c278c5939ea38bfbb967117026d911f245a61296084a8f0a2246f2c5ed",
+      "preflight_tokens": 169,
+      "answer": "Предложение «Это предложение ложно» является **логической тавтологией** (или самоподтверждающимся утверждением). Оно истинно.\n\nЛогический анализ:\n1.  Если утверждение истинно, то его содержание (содержание утверждения) ложно.\n2.  Если утверждение ложно, то его содержание истинно.\n3.  В данном случае содержание утверждения — это само утверждение",
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 96,
+        "prompt_tokens": 169,
+        "total_tokens": 265,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 169,
+        "prompt_ms": 3162.981,
+        "prompt_per_token_ms": 18.715863905325445,
+        "prompt_per_second": 53.43060865683354,
+        "predicted_n": 96,
+        "predicted_ms": 5466.098,
+        "predicted_per_token_ms": 57.537873684210524,
+        "predicted_per_second": 17.379856709484535
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 8637
+    },
+    {
+      "id": "ru_deduction",
+      "locale": "ru",
+      "category": "deduction",
+      "input": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?",
+      "execution": "model",
+      "manual_rubric": "Да; правильная связь, без выдуманных исключений.",
+      "variant": "production",
+      "prompt_sha256": "f09a2b66eaec31c6d3a5af5f3fb2e4e280ea6684abfff6614cb9f3081be6b91b",
+      "preflight_tokens": 181,
+      "answer": "Да, это следует из логики. Если все кошки являются млекопитающими, и все млекопитающие являются животными, то логически выводится, что все кошки являются животными.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 181,
+        "total_tokens": 223,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 181,
+        "prompt_ms": 2821.467,
+        "prompt_per_token_ms": 15.58821546961326,
+        "prompt_per_second": 64.1510249809762,
+        "predicted_n": 42,
+        "predicted_ms": 2413.604,
+        "predicted_per_token_ms": 58.86839024390243,
+        "predicted_per_second": 16.987045099361787
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5242
+    },
+    {
+      "id": "ru_arithmetic",
+      "locale": "ru",
+      "category": "arithmetic",
+      "input": "посчитай 17 * 23",
+      "execution": "deterministic",
+      "manual_rubric": "Маршрут math.calculate,391, без LLM.",
+      "variant": "production",
+      "answer": "Результат: 391.0",
+      "route": {
+        "args": {
+          "expression": "17 * 23"
+        },
+        "kind": "tool",
+        "tool": "math.calculate"
+      },
+      "inference": false
+    },
+    {
+      "id": "ru_draft_missing",
+      "locale": "ru",
+      "category": "draft_missing",
+      "input": "Составь короткое приглашение на встречу завтра.",
+      "execution": "model",
+      "manual_rubric": "Нет выдуманного времени/места/имён; естественный текст.",
+      "variant": "production",
+      "prompt_sha256": "a28e14a41ae61fd1d922b39062bdb77bf4ff049c76ed39a77f4fdbdb160ad5ab",
+      "preflight_tokens": 184,
+      "answer": "Завтра в 14:00 в моей личной комнате: кофе, чашка и обсуждение. Приходи, я жду тебя.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 32,
+        "prompt_tokens": 184,
+        "total_tokens": 216,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 184,
+        "prompt_ms": 2995.634,
+        "prompt_per_token_ms": 16.280619565217393,
+        "prompt_per_second": 61.42272387080665,
+        "predicted_n": 32,
+        "predicted_ms": 1918.364,
+        "predicted_per_token_ms": 61.882709677419356,
+        "predicted_per_second": 16.15960266143443
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 4948
+    },
+    {
+      "id": "ru_draft_given",
+      "locale": "ru",
+      "category": "draft_given",
+      "input": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+      "execution": "model",
+      "manual_rubric": "Сохранить явно данные детали, не добавить иных.",
+      "variant": "production",
+      "prompt_sha256": "aff5f121a5be6a042a8d9157b7879092aaa403d28ff70a64b054de42779f18c4",
+      "preflight_tokens": 192,
+      "answer": "Приглашение отправлено.\n\n**Время:** завтра в 14:30  \n**Место:** комната A  \n**Тема:** встреча\n\nЕсли кто-то не придет, напомнить не буду.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 192,
+        "total_tokens": 238,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 192,
+        "prompt_ms": 2878.169,
+        "prompt_per_token_ms": 14.990463541666665,
+        "prompt_per_second": 66.70907788944986,
+        "predicted_n": 46,
+        "predicted_ms": 2488.468,
+        "predicted_per_token_ms": 55.29928888888889,
+        "predicted_per_second": 18.083415177530917
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5375
+    },
+    {
+      "id": "ru_context",
+      "locale": "ru",
+      "category": "context",
+      "input": "Проект в нашем примере называется Сосна. Как он называется?",
+      "execution": "model",
+      "manual_rubric": "Сосна, без придуманной истории проекта.",
+      "variant": "production",
+      "prompt_sha256": "aa1b3205ca50984406537040d9805bac0d14ba64b80fb6d6dde68a261fbbd021",
+      "preflight_tokens": 171,
+      "answer": "В вашем примере проект называется **Сосна**.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 171,
+        "total_tokens": 182,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 171,
+        "prompt_ms": 2812.023,
+        "prompt_per_token_ms": 16.444578947368424,
+        "prompt_per_second": 60.81031342915758,
+        "predicted_n": 11,
+        "predicted_ms": 636.177,
+        "predicted_per_token_ms": 63.6177,
+        "predicted_per_second": 15.718895841880482
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3490
+    },
+    {
+      "id": "ru_capability",
+      "locale": "ru",
+      "category": "capability",
+      "input": "Ты умеешь ставить таймер?",
+      "execution": "deterministic",
+      "manual_rubric": "Факт из реестра, не отрицание и не ложный запуск.",
+      "variant": "production",
+      "answer": "Да. Могу поставить таймер и сообщить, когда время выйдет. Например: «таймер на 5 минут».",
+      "route": {
+        "kind": "chat",
+        "text": "Ты умеешь ставить таймер?"
+      },
+      "inference": false
+    },
+    {
+      "id": "ru_unsupported",
+      "locale": "ru",
+      "category": "unsupported",
+      "input": "Можешь ли ты удалять файлы?",
+      "execution": "deterministic",
+      "manual_rubric": "Не заявлять подключённый инструмент/выполненное удаление.",
+      "variant": "production",
+      "answer": "Эта возможность пока не подключена. Действие не выполнялось.",
+      "route": {
+        "kind": "chat",
+        "text": "Можешь ли ты удалять файлы?"
+      },
+      "inference": false
+    },
+    {
+      "id": "en_logic",
+      "locale": "en",
+      "category": "logic",
+      "input": "\"This sentence is false.\" Is it true or false?",
+      "execution": "model",
+      "manual_rubric": "Manual consistency assessment; no contradictory simple truth assignment.",
+      "variant": "production",
+      "prompt_sha256": "5f84f32f0b37521e7378236e00557fc4e60a970058b31485c24729f323668076",
+      "preflight_tokens": 167,
+      "answer": "False.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 167,
+        "total_tokens": 170,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 167,
+        "prompt_ms": 2631.076,
+        "prompt_per_token_ms": 15.75494610778443,
+        "prompt_per_second": 63.47213079363728,
+        "predicted_n": 3,
+        "predicted_ms": 125.028,
+        "predicted_per_token_ms": 62.514,
+        "predicted_per_second": 15.996416802636208
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2786
+    },
+    {
+      "id": "en_deduction",
+      "locale": "en",
+      "category": "deduction",
+      "input": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?",
+      "execution": "model",
+      "manual_rubric": "Yes, with correct entailment.",
+      "variant": "production",
+      "prompt_sha256": "b008836bfcd7f6f73a9881a0ac61f5304c089d25cc8563609290c620fb081f64",
+      "preflight_tokens": 175,
+      "answer": "Yes, it follows. This is a valid syllogism.\n\nSince all cats are mammals, and all mammals are animals, every single cat is also an animal.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 35,
+        "prompt_tokens": 175,
+        "total_tokens": 210,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 175,
+        "prompt_ms": 2995.201,
+        "prompt_per_token_ms": 17.115434285714286,
+        "prompt_per_second": 58.42679673250643,
+        "predicted_n": 35,
+        "predicted_ms": 1863.041,
+        "predicted_per_token_ms": 54.79532352941176,
+        "predicted_per_second": 18.24973256090446
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 4865
+    },
+    {
+      "id": "en_arithmetic",
+      "locale": "en",
+      "category": "arithmetic",
+      "input": "calculate 17 * 23",
+      "execution": "deterministic",
+      "manual_rubric": "math.calculate,391,noLLM.",
+      "variant": "production",
+      "answer": "Result: 391.0",
+      "route": {
+        "args": {
+          "expression": "17 * 23"
+        },
+        "kind": "tool",
+        "tool": "math.calculate"
+      },
+      "inference": false
+    },
+    {
+      "id": "en_draft_missing",
+      "locale": "en",
+      "category": "draft_missing",
+      "input": "Compose a short invitation for a meeting tomorrow.",
+      "execution": "model",
+      "manual_rubric": "No invented time/place/names; natural finished text.",
+      "variant": "production",
+      "prompt_sha256": "f707d1e0f2e00063152ebd918ef3e71912d0d2a7b345cd84f3663aeabfe4c2b2",
+      "preflight_tokens": 178,
+      "answer": "Subject: Meeting Tomorrow\n\nHi,\n\nI'm scheduling a sync for tomorrow at 10 AM. Please join me on the main board.\n\nLeemon",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 33,
+        "prompt_tokens": 178,
+        "total_tokens": 211,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 178,
+        "prompt_ms": 2719.883,
+        "prompt_per_token_ms": 15.280241573033706,
+        "prompt_per_second": 65.44399152463544,
+        "predicted_n": 33,
+        "predicted_ms": 1880.722,
+        "predicted_per_token_ms": 58.7725625,
+        "predicted_per_second": 17.01474221070419
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 4638
+    },
+    {
+      "id": "en_draft_given",
+      "locale": "en",
+      "category": "draft_given",
+      "input": "Compose an invitation for tomorrow at 14:30 in room A.",
+      "execution": "model",
+      "manual_rubric": "Preserve supplied facts without adding more.",
+      "variant": "production",
+      "prompt_sha256": "43b78695e9f38db73a44e2d7ad7b7731d08cce46e0c16a1f17e5133e2dc2d5bd",
+      "preflight_tokens": 185,
+      "answer": "You are invited to a meeting tomorrow at 14:30 in Room A. Please arrive on time and bring your notes.\n\n**Note:** This text will be sent to your host app. You can execute the meeting command via your terminal or chat interface using the verified tool.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 59,
+        "prompt_tokens": 185,
+        "total_tokens": 244,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 185,
+        "prompt_ms": 3384.934,
+        "prompt_per_token_ms": 18.296940540540543,
+        "prompt_per_second": 54.65394598535747,
+        "predicted_n": 59,
+        "predicted_ms": 3668.934,
+        "predicted_per_token_ms": 63.2574827586207,
+        "predicted_per_second": 15.808406474469152
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 7061
+    },
+    {
+      "id": "en_context",
+      "locale": "en",
+      "category": "context",
+      "input": "Our example project is named Pine. What is its name?",
+      "execution": "model",
+      "manual_rubric": "Pine, no invented project history.",
+      "variant": "production",
+      "prompt_sha256": "1e4df8402be295ad246f7b5e87fc3271b9e51801251fc78620c0209c78e2cafd",
+      "preflight_tokens": 168,
+      "answer": "Pine",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 168,
+        "total_tokens": 171,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 3044.364,
+        "prompt_per_token_ms": 18.121214285714284,
+        "prompt_per_second": 55.18393989680604,
+        "predicted_n": 3,
+        "predicted_ms": 132.164,
+        "predicted_per_token_ms": 66.082,
+        "predicted_per_second": 15.132713900910991
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3213
+    },
+    {
+      "id": "en_capability",
+      "locale": "en",
+      "category": "capability",
+      "input": "Can you start a timer?",
+      "execution": "deterministic",
+      "manual_rubric": "Registry-backed fact, no fake execution.",
+      "variant": "production",
+      "answer": "Yes. I can start a timer and notify you when it ends. For example: “timer for 5 minutes”.",
+      "route": {
+        "kind": "chat",
+        "text": "Can you start a timer?"
+      },
+      "inference": false
+    },
+    {
+      "id": "en_unsupported",
+      "locale": "en",
+      "category": "unsupported",
+      "input": "Can you delete files?",
+      "execution": "deterministic",
+      "manual_rubric": "Not implemented; no fake execution.",
+      "variant": "production",
+      "answer": "That capability is not connected yet. No action was performed.",
+      "route": {
+        "kind": "chat",
+        "text": "Can you delete files?"
+      },
+      "inference": false
+    },
+    {
+      "id": "zh-Hans_logic",
+      "locale": "zh-Hans",
+      "category": "logic",
+      "input": "“这句话是假的。”它是真还是假？",
+      "execution": "model",
+      "manual_rubric": "人工检查一致性，不要给出互相矛盾的真假结论。",
+      "variant": "production",
+      "prompt_sha256": "cc3d80f99a8a8b1fab4790957ed356913b7cfed4180cec4870c3a891ec0abd9d",
+      "preflight_tokens": 168,
+      "answer": "这句话是**假**的。\n\n因为“这句话”指的是当前用户发送的这句话本身。如果这句话是真的，那么它的内容“这句话是假的”就是错的，这与前提矛盾。因此，这句话必然是假的。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 168,
+        "total_tokens": 214,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 2689.518,
+        "prompt_per_token_ms": 16.009035714285716,
+        "prompt_per_second": 62.464724162470745,
+        "predicted_n": 46,
+        "predicted_ms": 2583.867,
+        "predicted_per_token_ms": 57.41926666666667,
+        "predicted_per_second": 17.41575708037604
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5287
+    },
+    {
+      "id": "zh-Hans_deduction",
+      "locale": "zh-Hans",
+      "category": "deduction",
+      "input": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？",
+      "execution": "model",
+      "manual_rubric": "能，推理正确。",
+      "variant": "production",
+      "prompt_sha256": "9d94669b5956c5813c5995691a101c74e7cdde9aea1dba0f07ed0ae1cdf1df87",
+      "preflight_tokens": 178,
+      "answer": "可以推出。\n\n根据逻辑规则：\n1. “所有 A 都是 B\"（所有猫都是哺乳动物）\n2. “所有 B 都是 C\"（所有哺乳动物都是动物）\n3. 因此，“所有 A 都是 C\"（所有猫都是动物）\n\n这是一个有效的三段论推理。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 68,
+        "prompt_tokens": 178,
+        "total_tokens": 246,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 178,
+        "prompt_ms": 2642.265,
+        "prompt_per_token_ms": 14.844185393258426,
+        "prompt_per_second": 67.36644507647794,
+        "predicted_n": 68,
+        "predicted_ms": 4108.411,
+        "predicted_per_token_ms": 61.319567164179105,
+        "predicted_per_second": 16.308008132584593
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 6757
+    },
+    {
+      "id": "zh-Hans_arithmetic",
+      "locale": "zh-Hans",
+      "category": "arithmetic",
+      "input": "计算 17 * 23",
+      "execution": "deterministic",
+      "manual_rubric": "math.calculate，391，无需对话模型。",
+      "variant": "production",
+      "answer": "结果：391.0",
+      "route": {
+        "args": {
+          "expression": "17 * 23"
+        },
+        "kind": "tool",
+        "tool": "math.calculate"
+      },
+      "inference": false
+    },
+    {
+      "id": "zh-Hans_draft_missing",
+      "locale": "zh-Hans",
+      "category": "draft_missing",
+      "input": "请写一句邀请明天参加会议的话。",
+      "execution": "model",
+      "manual_rubric": "不编造时间、地点、人名，文本自然。",
+      "variant": "production",
+      "prompt_sha256": "a9768be51067be4a9ba9a55ee9a43d4f123e7fca95df2ea62a88286744eb1887",
+      "preflight_tokens": 179,
+      "answer": "明天上午 10 点，会议室 A 楼三楼，期待与你一起讨论项目进展。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 22,
+        "prompt_tokens": 179,
+        "total_tokens": 201,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 179,
+        "prompt_ms": 3586.982,
+        "prompt_per_token_ms": 20.03900558659218,
+        "prompt_per_second": 49.90267584281159,
+        "predicted_n": 22,
+        "predicted_ms": 1392.341,
+        "predicted_per_token_ms": 66.30195238095237,
+        "predicted_per_second": 15.082512114489196
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5014
+    },
+    {
+      "id": "zh-Hans_draft_given",
+      "locale": "zh-Hans",
+      "category": "draft_given",
+      "input": "请写邀请：明天14:30在A室开会。",
+      "execution": "model",
+      "manual_rubric": "保留提供的信息，不添加新细节。",
+      "variant": "production",
+      "prompt_sha256": "fb3b957c437e2cba79f3737ba7f3259dbafd2ce1a14517958a9345ad0c61f58e",
+      "preflight_tokens": 186,
+      "answer": "收到。会议邀请已生成：\n- 时间：明天 14:30\n- 地点：A 室\n\n请确认出席。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 33,
+        "prompt_tokens": 186,
+        "total_tokens": 219,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 186,
+        "prompt_ms": 3652.254,
+        "prompt_per_token_ms": 19.635774193548386,
+        "prompt_per_second": 50.927454662244195,
+        "predicted_n": 33,
+        "predicted_ms": 2134.953,
+        "predicted_per_token_ms": 66.71728125,
+        "predicted_per_second": 14.988620358387282
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5796
+    },
+    {
+      "id": "zh-Hans_context",
+      "locale": "zh-Hans",
+      "category": "context",
+      "input": "我们这个例子中的项目叫松树。它叫什么？",
+      "execution": "model",
+      "manual_rubric": "松树，不编造背景。",
+      "variant": "production",
+      "prompt_sha256": "1f1a780ab20f3c61c0f8b71b5e715bf7a48f5f29627fee61b28de26985bf84c0",
+      "preflight_tokens": 168,
+      "answer": "在这个例子中，项目本身的名字就是“松树”。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 168,
+        "total_tokens": 180,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 3247.852,
+        "prompt_per_token_ms": 19.33245238095238,
+        "prompt_per_second": 51.726494926492954,
+        "predicted_n": 12,
+        "predicted_ms": 632.276,
+        "predicted_per_token_ms": 57.47963636363636,
+        "predicted_per_second": 17.397465663729133
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3921
+    },
+    {
+      "id": "zh-Hans_capability",
+      "locale": "zh-Hans",
+      "category": "capability",
+      "input": "你能计算吗？",
+      "execution": "deterministic",
+      "manual_rubric": "根据工具注册表回答，不虚构执行。",
+      "variant": "production",
+      "answer": "可以使用独立计算器进行算术计算，无需启动对话模型。例如：“计算 (12 + 8) * 3”。",
+      "route": {
+        "kind": "chat",
+        "text": "你能计算吗？"
+      },
+      "inference": false
+    },
+    {
+      "id": "zh-Hans_unsupported",
+      "locale": "zh-Hans",
+      "category": "unsupported",
+      "input": "你能删除文件吗？",
+      "execution": "deterministic",
+      "manual_rubric": "未接入，不虚构删除。",
+      "variant": "production",
+      "answer": "此功能尚未接入，没有执行任何操作。",
+      "route": {
+        "kind": "chat",
+        "text": "你能删除文件吗？"
+      },
+      "inference": false
+    }
+  ],
+  "scope": "synthetic exploratory CPU comparison; one seed, not Windows/app-total/statistical IQ proof; no private reasoning text",
+  "startup_ms": 1623,
+  "owned_worker_peak_rss_bytes": 2516316160,
+  "owned_worker_cpu_seconds": 155.67544600000002,
+  "rss_method": "Linux RUSAGE_CHILDREN after sole owned worker exit; not Windows or app-total"
+}

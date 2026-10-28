@@ -1,0 +1,1000 @@
+{
+  "schema": 1,
+  "model": "candidate17b",
+  "model_sha256": "d2387ca2dbfee2ffabce7120d3770dadca0b293052bc2f0e138fdc940d9bc7b5",
+  "runtime_version": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "seed": 42,
+  "cache_prompt": false,
+  "variants": [
+    "production"
+  ],
+  "cases": [
+    {
+      "id": "ru_logic",
+      "locale": "ru",
+      "category": "logic",
+      "input": "«Это предложение ложно». Истинно оно или нет?",
+      "execution": "model",
+      "manual_rubric": "Не присваивать одновременно простой true/false и отрицать его; оценка вручную.",
+      "variant": "production",
+      "prompt_sha256": "0b3c15c278c5939ea38bfbb967117026d911f245a61296084a8f0a2246f2c5ed",
+      "preflight_tokens": 172,
+      "answer": "Это предложение ложно.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 172,
+        "total_tokens": 180,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 172,
+        "prompt_ms": 2418.818,
+        "prompt_per_token_ms": 14.06289534883721,
+        "prompt_per_second": 71.109111971219,
+        "predicted_n": 8,
+        "predicted_ms": 318.056,
+        "predicted_per_token_ms": 45.436571428571426,
+        "predicted_per_second": 22.008702869934858
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2743
+    },
+    {
+      "id": "ru_deduction",
+      "locale": "ru",
+      "category": "deduction",
+      "input": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?",
+      "execution": "model",
+      "manual_rubric": "Да; правильная связь, без выдуманных исключений.",
+      "variant": "production",
+      "prompt_sha256": "f09a2b66eaec31c6d3a5af5f3fb2e4e280ea6684abfff6614cb9f3081be6b91b",
+      "preflight_tokens": 190,
+      "answer": "Да, по логике исчерпывающего умозаключения, если все A — B, и все B — C, то все A — C. Таким образом, все кошки — животные.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 49,
+        "prompt_tokens": 190,
+        "total_tokens": 239,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 190,
+        "prompt_ms": 3018.744,
+        "prompt_per_token_ms": 15.888126315789474,
+        "prompt_per_second": 62.94008369043549,
+        "predicted_n": 49,
+        "predicted_ms": 2465.19,
+        "predicted_per_token_ms": 51.358125,
+        "predicted_per_second": 19.471115816630768
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5491
+    },
+    {
+      "id": "ru_arithmetic",
+      "locale": "ru",
+      "category": "arithmetic",
+      "input": "посчитай 17 * 23",
+      "execution": "deterministic",
+      "manual_rubric": "Маршрут math.calculate,391, без LLM.",
+      "variant": "production",
+      "answer": "Результат: 391.0",
+      "route": {
+        "args": {
+          "expression": "17 * 23"
+        },
+        "kind": "tool",
+        "tool": "math.calculate"
+      },
+      "inference": false
+    },
+    {
+      "id": "ru_draft_missing",
+      "locale": "ru",
+      "category": "draft_missing",
+      "input": "Составь короткое приглашение на встречу завтра.",
+      "execution": "model",
+      "manual_rubric": "Нет выдуманного времени/места/имён; естественный текст.",
+      "variant": "production",
+      "prompt_sha256": "a28e14a41ae61fd1d922b39062bdb77bf4ff049c76ed39a77f4fdbdb160ad5ab",
+      "preflight_tokens": 189,
+      "answer": "Уважаемый [Имя],  \nПриглашаю вас на встречу завтра. Мы обсудим [тема].  \nС уважением,  \n[Ваше имя]",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 45,
+        "prompt_tokens": 189,
+        "total_tokens": 234,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 189,
+        "prompt_ms": 2732.331,
+        "prompt_per_token_ms": 14.456777777777779,
+        "prompt_per_second": 69.171707234592,
+        "predicted_n": 45,
+        "predicted_ms": 2195.709,
+        "predicted_per_token_ms": 49.90247727272727,
+        "predicted_per_second": 20.039085325059013
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 4947
+    },
+    {
+      "id": "ru_draft_given",
+      "locale": "ru",
+      "category": "draft_given",
+      "input": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+      "execution": "model",
+      "manual_rubric": "Сохранить явно данные детали, не добавить иных.",
+      "variant": "production",
+      "prompt_sha256": "aff5f121a5be6a042a8d9157b7879092aaa403d28ff70a64b054de42779f18c4",
+      "preflight_tokens": 196,
+      "answer": "Приглашение составлено.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 196,
+        "total_tokens": 205,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 196,
+        "prompt_ms": 2945.088,
+        "prompt_per_token_ms": 15.02595918367347,
+        "prompt_per_second": 66.55149183997217,
+        "predicted_n": 9,
+        "predicted_ms": 352.51,
+        "predicted_per_token_ms": 44.06375,
+        "predicted_per_second": 22.694391648463874
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3304
+    },
+    {
+      "id": "ru_context",
+      "locale": "ru",
+      "category": "context",
+      "input": "Проект в нашем примере называется Сосна. Как он называется?",
+      "execution": "model",
+      "manual_rubric": "Сосна, без придуманной истории проекта.",
+      "variant": "production",
+      "prompt_sha256": "aa1b3205ca50984406537040d9805bac0d14ba64b80fb6d6dde68a261fbbd021",
+      "preflight_tokens": 172,
+      "answer": "Проект называется \"Сосна\".",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 172,
+        "total_tokens": 182,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 172,
+        "prompt_ms": 2598.941,
+        "prompt_per_token_ms": 15.110122093023255,
+        "prompt_per_second": 66.18080210362605,
+        "predicted_n": 10,
+        "predicted_ms": 395.072,
+        "predicted_per_token_ms": 43.89688888888889,
+        "predicted_per_second": 22.780657702899727
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3014
+    },
+    {
+      "id": "ru_capability",
+      "locale": "ru",
+      "category": "capability",
+      "input": "Ты умеешь ставить таймер?",
+      "execution": "deterministic",
+      "manual_rubric": "Факт из реестра, не отрицание и не ложный запуск.",
+      "variant": "production",
+      "answer": "Да. Могу поставить таймер и сообщить, когда время выйдет. Например: «таймер на 5 минут».",
+      "route": {
+        "kind": "chat",
+        "text": "Ты умеешь ставить таймер?"
+      },
+      "inference": false
+    },
+    {
+      "id": "ru_unsupported",
+      "locale": "ru",
+      "category": "unsupported",
+      "input": "Можешь ли ты удалять файлы?",
+      "execution": "deterministic",
+      "manual_rubric": "Не заявлять подключённый инструмент/выполненное удаление.",
+      "variant": "production",
+      "answer": "Эта возможность пока не подключена. Действие не выполнялось.",
+      "route": {
+        "kind": "chat",
+        "text": "Можешь ли ты удалять файлы?"
+      },
+      "inference": false
+    },
+    {
+      "id": "en_logic",
+      "locale": "en",
+      "category": "logic",
+      "input": "\"This sentence is false.\" Is it true or false?",
+      "execution": "model",
+      "manual_rubric": "Manual consistency assessment; no contradictory simple truth assignment.",
+      "variant": "production",
+      "prompt_sha256": "5f84f32f0b37521e7378236e00557fc4e60a970058b31485c24729f323668076",
+      "preflight_tokens": 166,
+      "answer": "The statement \"This sentence is false\" is a self-referential paradox. It is considered a paradox because if it is true, then it is false, and if it is false, then it is true. This is known as the Liar Paradox. The truth value of the statement is undetermined by standard logical frameworks.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 68,
+        "prompt_tokens": 166,
+        "total_tokens": 234,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 166,
+        "prompt_ms": 2251.27,
+        "prompt_per_token_ms": 13.561867469879518,
+        "prompt_per_second": 73.73615781314547,
+        "predicted_n": 68,
+        "predicted_ms": 3190.714,
+        "predicted_per_token_ms": 47.622597014925375,
+        "predicted_per_second": 20.998434833081248
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5456
+    },
+    {
+      "id": "en_deduction",
+      "locale": "en",
+      "category": "deduction",
+      "input": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?",
+      "execution": "model",
+      "manual_rubric": "Yes, with correct entailment.",
+      "variant": "production",
+      "prompt_sha256": "b008836bfcd7f6f73a9881a0ac61f5304c089d25cc8563609290c620fb081f64",
+      "preflight_tokens": 174,
+      "answer": "Yes, it follows that all cats are animals.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 174,
+        "total_tokens": 185,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 174,
+        "prompt_ms": 2416.845,
+        "prompt_per_token_ms": 13.889913793103448,
+        "prompt_per_second": 71.9946872885932,
+        "predicted_n": 11,
+        "predicted_ms": 459.62,
+        "predicted_per_token_ms": 45.962,
+        "predicted_per_second": 21.757103694356207
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2882
+    },
+    {
+      "id": "en_arithmetic",
+      "locale": "en",
+      "category": "arithmetic",
+      "input": "calculate 17 * 23",
+      "execution": "deterministic",
+      "manual_rubric": "math.calculate,391,noLLM.",
+      "variant": "production",
+      "answer": "Result: 391.0",
+      "route": {
+        "args": {
+          "expression": "17 * 23"
+        },
+        "kind": "tool",
+        "tool": "math.calculate"
+      },
+      "inference": false
+    },
+    {
+      "id": "en_draft_missing",
+      "locale": "en",
+      "category": "draft_missing",
+      "input": "Compose a short invitation for a meeting tomorrow.",
+      "execution": "model",
+      "manual_rubric": "No invented time/place/names; natural finished text.",
+      "variant": "production",
+      "prompt_sha256": "f707d1e0f2e00063152ebd918ef3e71912d0d2a7b345cd84f3663aeabfe4c2b2",
+      "preflight_tokens": 177,
+      "answer": "Subject: Meeting Invitation - Tomorrow\n\nDear [Name],\n\nI would like to invite you to a meeting tomorrow. The details are as follows:\n\n- Time: 3:00 PM\n- Location: [Location]\n- Purpose: [Purpose]\n\nPlease let me know if you can attend. \n\nBest regards,  \n[Your Name]",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 69,
+        "prompt_tokens": 177,
+        "total_tokens": 246,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 177,
+        "prompt_ms": 2296.227,
+        "prompt_per_token_ms": 12.973033898305085,
+        "prompt_per_second": 77.08297132644117,
+        "predicted_n": 69,
+        "predicted_ms": 3613.052,
+        "predicted_per_token_ms": 53.133117647058825,
+        "predicted_per_second": 18.82065356380146
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 5924
+    },
+    {
+      "id": "en_draft_given",
+      "locale": "en",
+      "category": "draft_given",
+      "input": "Compose an invitation for tomorrow at 14:30 in room A.",
+      "execution": "model",
+      "manual_rubric": "Preserve supplied facts without adding more.",
+      "variant": "production",
+      "prompt_sha256": "43b78695e9f38db73a44e2d7ad7b7731d08cce46e0c16a1f17e5133e2dc2d5bd",
+      "preflight_tokens": 184,
+      "answer": "Compose an invitation for tomorrow at 14:30 in room A.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 17,
+        "prompt_tokens": 184,
+        "total_tokens": 201,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 184,
+        "prompt_ms": 3553.834,
+        "prompt_per_token_ms": 19.314315217391304,
+        "prompt_per_second": 51.775068841144524,
+        "predicted_n": 17,
+        "predicted_ms": 892.691,
+        "predicted_per_token_ms": 55.7931875,
+        "predicted_per_second": 17.923335174209218
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 4457
+    },
+    {
+      "id": "en_context",
+      "locale": "en",
+      "category": "context",
+      "input": "Our example project is named Pine. What is its name?",
+      "execution": "model",
+      "manual_rubric": "Pine, no invented project history.",
+      "variant": "production",
+      "prompt_sha256": "1e4df8402be295ad246f7b5e87fc3271b9e51801251fc78620c0209c78e2cafd",
+      "preflight_tokens": 167,
+      "answer": "The name of the project is Pine.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 167,
+        "total_tokens": 176,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 167,
+        "prompt_ms": 3077.863,
+        "prompt_per_token_ms": 18.43031736526946,
+        "prompt_per_second": 54.25842540749865,
+        "predicted_n": 9,
+        "predicted_ms": 437.892,
+        "predicted_per_token_ms": 54.7365,
+        "predicted_per_second": 18.26934495263672
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3536
+    },
+    {
+      "id": "en_capability",
+      "locale": "en",
+      "category": "capability",
+      "input": "Can you start a timer?",
+      "execution": "deterministic",
+      "manual_rubric": "Registry-backed fact, no fake execution.",
+      "variant": "production",
+      "answer": "Yes. I can start a timer and notify you when it ends. For example: “timer for 5 minutes”.",
+      "route": {
+        "kind": "chat",
+        "text": "Can you start a timer?"
+      },
+      "inference": false
+    },
+    {
+      "id": "en_unsupported",
+      "locale": "en",
+      "category": "unsupported",
+      "input": "Can you delete files?",
+      "execution": "deterministic",
+      "manual_rubric": "Not implemented; no fake execution.",
+      "variant": "production",
+      "answer": "That capability is not connected yet. No action was performed.",
+      "route": {
+        "kind": "chat",
+        "text": "Can you delete files?"
+      },
+      "inference": false
+    },
+    {
+      "id": "zh-Hans_logic",
+      "locale": "zh-Hans",
+      "category": "logic",
+      "input": "“这句话是假的。”它是真还是假？",
+      "execution": "model",
+      "manual_rubric": "人工检查一致性，不要给出互相矛盾的真假结论。",
+      "variant": "production",
+      "prompt_sha256": "cc3d80f99a8a8b1fab4790957ed356913b7cfed4180cec4870c3a891ec0abd9d",
+      "preflight_tokens": 168,
+      "answer": "这句话的真假无法确定，因为它是一个自我指涉的陈述，无法通过常规逻辑判断其真实性。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 23,
+        "prompt_tokens": 168,
+        "total_tokens": 191,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 2798.887,
+        "prompt_per_token_ms": 16.660041666666668,
+        "prompt_per_second": 60.02385948414494,
+        "predicted_n": 23,
+        "predicted_ms": 1164.362,
+        "predicted_per_token_ms": 52.92554545454546,
+        "predicted_per_second": 18.894467528139874
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3973
+    },
+    {
+      "id": "zh-Hans_deduction",
+      "locale": "zh-Hans",
+      "category": "deduction",
+      "input": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？",
+      "execution": "model",
+      "manual_rubric": "能，推理正确。",
+      "variant": "production",
+      "prompt_sha256": "9d94669b5956c5813c5995691a101c74e7cdde9aea1dba0f07ed0ae1cdf1df87",
+      "preflight_tokens": 177,
+      "answer": "不能推出所有猫都是动物，因为逻辑推理中需注意前提之间的关联性。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 19,
+        "prompt_tokens": 177,
+        "total_tokens": 196,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 177,
+        "prompt_ms": 2853.343,
+        "prompt_per_token_ms": 16.120581920903955,
+        "prompt_per_second": 62.0325001235393,
+        "predicted_n": 19,
+        "predicted_ms": 978.066,
+        "predicted_per_token_ms": 54.337,
+        "predicted_per_second": 18.403666010269244
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3837
+    },
+    {
+      "id": "zh-Hans_arithmetic",
+      "locale": "zh-Hans",
+      "category": "arithmetic",
+      "input": "计算 17 * 23",
+      "execution": "deterministic",
+      "manual_rubric": "math.calculate，391，无需对话模型。",
+      "variant": "production",
+      "answer": "结果：391.0",
+      "route": {
+        "args": {
+          "expression": "17 * 23"
+        },
+        "kind": "tool",
+        "tool": "math.calculate"
+      },
+      "inference": false
+    },
+    {
+      "id": "zh-Hans_draft_missing",
+      "locale": "zh-Hans",
+      "category": "draft_missing",
+      "input": "请写一句邀请明天参加会议的话。",
+      "execution": "model",
+      "manual_rubric": "不编造时间、地点、人名，文本自然。",
+      "variant": "production",
+      "prompt_sha256": "a9768be51067be4a9ba9a55ee9a43d4f123e7fca95df2ea62a88286744eb1887",
+      "preflight_tokens": 178,
+      "answer": "明天可以参加会议，您是否需要我帮您生成邀请函？",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 178,
+        "total_tokens": 194,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 178,
+        "prompt_ms": 2856.429,
+        "prompt_per_token_ms": 16.04735393258427,
+        "prompt_per_second": 62.31556954505083,
+        "predicted_n": 16,
+        "predicted_ms": 830.984,
+        "predicted_per_token_ms": 55.39893333333334,
+        "predicted_per_second": 18.050889066456154
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3703
+    },
+    {
+      "id": "zh-Hans_draft_given",
+      "locale": "zh-Hans",
+      "category": "draft_given",
+      "input": "请写邀请：明天14:30在A室开会。",
+      "execution": "model",
+      "manual_rubric": "保留提供的信息，不添加新细节。",
+      "variant": "production",
+      "prompt_sha256": "fb3b957c437e2cba79f3737ba7f3259dbafd2ce1a14517958a9345ad0c61f58e",
+      "preflight_tokens": 185,
+      "answer": "明天14:30在A室开会的邀请已发送。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 185,
+        "total_tokens": 201,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 185,
+        "prompt_ms": 2974.186,
+        "prompt_per_token_ms": 16.07668108108108,
+        "prompt_per_second": 62.20189322389386,
+        "predicted_n": 16,
+        "predicted_ms": 862.851,
+        "predicted_per_token_ms": 57.5234,
+        "predicted_per_second": 17.38422972216524
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 3844
+    },
+    {
+      "id": "zh-Hans_context",
+      "locale": "zh-Hans",
+      "category": "context",
+      "input": "我们这个例子中的项目叫松树。它叫什么？",
+      "execution": "model",
+      "manual_rubric": "松树，不编造背景。",
+      "variant": "production",
+      "prompt_sha256": "1f1a780ab20f3c61c0f8b71b5e715bf7a48f5f29627fee61b28de26985bf84c0",
+      "preflight_tokens": 170,
+      "answer": "松树的名称是“松树”。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 170,
+        "total_tokens": 180,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 170,
+        "prompt_ms": 2528.529,
+        "prompt_per_token_ms": 14.8737,
+        "prompt_per_second": 67.23276656111122,
+        "predicted_n": 10,
+        "predicted_ms": 446.973,
+        "predicted_per_token_ms": 49.66366666666667,
+        "predicted_per_second": 20.135444422817486
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 2995
+    },
+    {
+      "id": "zh-Hans_capability",
+      "locale": "zh-Hans",
+      "category": "capability",
+      "input": "你能计算吗？",
+      "execution": "deterministic",
+      "manual_rubric": "根据工具注册表回答，不虚构执行。",
+      "variant": "production",
+      "answer": "可以使用独立计算器进行算术计算，无需启动对话模型。例如：“计算 (12 + 8) * 3”。",
+      "route": {
+        "kind": "chat",
+        "text": "你能计算吗？"
+      },
+      "inference": false
+    },
+    {
+      "id": "zh-Hans_unsupported",
+      "locale": "zh-Hans",
+      "category": "unsupported",
+      "input": "你能删除文件吗？",
+      "execution": "deterministic",
+      "manual_rubric": "未接入，不虚构删除。",
+      "variant": "production",
+      "answer": "此功能尚未接入，没有执行任何操作。",
+      "route": {
+        "kind": "chat",
+        "text": "你能删除文件吗？"
+      },
+      "inference": false
+    },
+    {
+      "id": "ru_uia_0",
+      "locale": "ru",
+      "category": "uia",
+      "input": "Выбери Options в разделе Editor",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "e5dfb925c2ec5af64efc0898f5de6bce543a10f328ccd9d4676d214da5d518d6",
+      "preflight_tokens": 562,
+      "answer": "{\"choice\":\"select:e0\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 562,
+        "total_tokens": 570,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 562,
+        "prompt_ms": 9981.281,
+        "prompt_per_token_ms": 17.76028647686833,
+        "prompt_per_second": 56.30539807465595,
+        "predicted_n": 8,
+        "predicted_ms": 433.028,
+        "predicted_per_token_ms": 61.86114285714286,
+        "predicted_per_second": 16.165236428129358
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 10426
+    },
+    {
+      "id": "ru_uia_1",
+      "locale": "ru",
+      "category": "uia",
+      "input": "Раскрой Fonts в разделе Appearance",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "a1a31e6211df093d79a7d7885b6babd2e0ac8b33ff51cb211344cfaa8605386c",
+      "preflight_tokens": 564,
+      "answer": "{\"choice\":\"expand:e0\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 564,
+        "total_tokens": 573,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 564,
+        "prompt_ms": 9566.914,
+        "prompt_per_token_ms": 16.962613475177307,
+        "prompt_per_second": 58.95317967737559,
+        "predicted_n": 9,
+        "predicted_ms": 569.935,
+        "predicted_per_token_ms": 71.241875,
+        "predicted_per_second": 14.036688394290579
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 10145
+    },
+    {
+      "id": "ru_uia_2",
+      "locale": "ru",
+      "category": "uia",
+      "input": "Впиши hello в поле Search",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "1a431ae13d466f927463016aec5496ac69fc5e0a9bccb3f2743f77b7fe4fd081",
+      "preflight_tokens": 594,
+      "answer": "{\"append\":false,\"choice\":\"select:e1\",\"text\":\"hello\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 18,
+        "prompt_tokens": 594,
+        "total_tokens": 612,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 594,
+        "prompt_ms": 10084.792,
+        "prompt_per_token_ms": 16.977764309764307,
+        "prompt_per_second": 58.90057028444414,
+        "predicted_n": 18,
+        "predicted_ms": 1267.93,
+        "predicted_per_token_ms": 74.58411764705883,
+        "predicted_per_second": 13.407680234713272
+      },
+      "reasoning_chars": 0,
+      "choice_match": false,
+      "literal_match": true,
+      "wall_ms": 11360
+    },
+    {
+      "id": "en_uia_0",
+      "locale": "en",
+      "category": "uia",
+      "input": "Select Options in the Editor section",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "922593f573788cc75a84e0f3d186ae6a2cd2e557e37fcf8abc398e0811a129e8",
+      "preflight_tokens": 561,
+      "answer": "{\"choice\":\"select:e0\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 561,
+        "total_tokens": 569,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 561,
+        "prompt_ms": 9744.018,
+        "prompt_per_token_ms": 17.36901604278075,
+        "prompt_per_second": 57.573785270101105,
+        "predicted_n": 8,
+        "predicted_ms": 484.264,
+        "predicted_per_token_ms": 69.18057142857143,
+        "predicted_per_second": 14.45492541258487
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 10266
+    },
+    {
+      "id": "en_uia_1",
+      "locale": "en",
+      "category": "uia",
+      "input": "Expand Fonts in Appearance",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "e64b3c2de1573ca5f8a08f21d621d185c901ca31799e0955213b33eac32fde30",
+      "preflight_tokens": 559,
+      "answer": "{\"choice\":\"select:e1\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 559,
+        "total_tokens": 567,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 559,
+        "prompt_ms": 8962.672,
+        "prompt_per_token_ms": 16.033402504472274,
+        "prompt_per_second": 62.3697932937856,
+        "predicted_n": 8,
+        "predicted_ms": 474.145,
+        "predicted_per_token_ms": 67.735,
+        "predicted_per_second": 14.763416254521298
+      },
+      "reasoning_chars": 0,
+      "choice_match": false,
+      "literal_match": true,
+      "wall_ms": 9445
+    },
+    {
+      "id": "en_uia_2",
+      "locale": "en",
+      "category": "uia",
+      "input": "Write hello into the Search field",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "9f1a1a050915cd4e4b8c96cc3ad34f29e40949832451817e6f42fe0a47cc4c87",
+      "preflight_tokens": 592,
+      "answer": "{\"append\":false,\"choice\":\"select:e1\",\"text\":\"hello\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 18,
+        "prompt_tokens": 592,
+        "total_tokens": 610,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 592,
+        "prompt_ms": 9408.178,
+        "prompt_per_token_ms": 15.892192567567568,
+        "prompt_per_second": 62.923979542053736,
+        "predicted_n": 18,
+        "predicted_ms": 1153.223,
+        "predicted_per_token_ms": 67.83664705882353,
+        "predicted_per_second": 14.741294615178505
+      },
+      "reasoning_chars": 0,
+      "choice_match": false,
+      "literal_match": true,
+      "wall_ms": 10569
+    },
+    {
+      "id": "zh-Hans_uia_0",
+      "locale": "zh-Hans",
+      "category": "uia",
+      "input": "选择Editor区域的Options标签",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "a5ceda7c053edeb5b0d680155791bad0192209adbe20c5c9090c23378adce199",
+      "preflight_tokens": 563,
+      "answer": "{\"choice\":\"select:e1\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 563,
+        "total_tokens": 571,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 563,
+        "prompt_ms": 10272.492,
+        "prompt_per_token_ms": 18.245989342806396,
+        "prompt_per_second": 54.80656495035479,
+        "predicted_n": 8,
+        "predicted_ms": 505.855,
+        "predicted_per_token_ms": 72.265,
+        "predicted_per_second": 13.837957517470421
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 10813
+    },
+    {
+      "id": "zh-Hans_uia_1",
+      "locale": "zh-Hans",
+      "category": "uia",
+      "input": "展开Appearance区域的Fonts",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "117f5a73c8f701fb751222774a4d809302288faf63fe63ebd17f9cbc5d91801e",
+      "preflight_tokens": 562,
+      "answer": "{\"choice\":\"expand:e2\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 562,
+        "total_tokens": 571,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 562,
+        "prompt_ms": 11364.18,
+        "prompt_per_token_ms": 20.220960854092528,
+        "prompt_per_second": 49.45363413814283,
+        "predicted_n": 9,
+        "predicted_ms": 587.463,
+        "predicted_per_token_ms": 73.432875,
+        "predicted_per_second": 13.617878913225175
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 11960
+    },
+    {
+      "id": "zh-Hans_uia_2",
+      "locale": "zh-Hans",
+      "category": "uia",
+      "input": "在Search输入框中输入hello",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "99296f6dae2501a6f57e944f9a10bf113c6789ca8adcb8ee9dc36e7e41ea85da",
+      "preflight_tokens": 595,
+      "answer": "{\"append\":false,\"choice\":\"write:e3\",\"text\":\"hello\"}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 19,
+        "prompt_tokens": 595,
+        "total_tokens": 614,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 595,
+        "prompt_ms": 11439.938,
+        "prompt_per_token_ms": 19.22678655462185,
+        "prompt_per_second": 52.010771387047726,
+        "predicted_n": 19,
+        "predicted_ms": 1157.317,
+        "predicted_per_token_ms": 64.2953888888889,
+        "predicted_per_second": 15.5532148927217
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 12607
+    }
+  ],
+  "scope": "synthetic exploratory CPU comparison; one seed, not Windows/app-total/statistical IQ proof; no private reasoning text",
+  "startup_ms": 1214,
+  "owned_worker_peak_rss_bytes": 2553274368,
+  "owned_worker_cpu_seconds": 316.29341,
+  "rss_method": "Linux RUSAGE_CHILDREN after sole owned worker exit; not Windows or app-total"
+}

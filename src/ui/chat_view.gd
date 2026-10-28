@@ -286,6 +286,7 @@ func refresh():
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_repairing" if app.goal_mode=="composing" and app.goal_compose_attempt>1 else "goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
+	if app.chat_draft_mode and app.chat_draft_attempt>1:status_label.text=app.t("chat_draft_repairing")
 	if app.answer_reviewing:status_label.text=app.t("answer_reviewing")
 	if app.public_page.busy:status_label.text=app.t("web_stage_"+app.public_page.stage)
 	if app.agent.active:status_label.text=app.t("agent_step",{"step":mini(app.agent.history.size()+1,app.agent.MAX_STEPS),"total":app.agent.MAX_STEPS})+" · "+status_label.text+" · "+app.t("task_elapsed",{"seconds":maxi(0,(Time.get_ticks_msec()-app.agent.deadline+app.agent.MAX_MS)/1000)})

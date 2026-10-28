@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "model": "current2b",
+  "model_sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "runtime_version": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "seed": 42,
+  "cache_prompt": false,
+  "variants": [
+    "production"
+  ],
+  "cache_mode": "bounded",
+  "worker_cache_ram_mib": 0,
+  "ctx_checkpoints": 0,
+  "cases": [
+    {
+      "id": "ru_uia_0",
+      "locale": "ru",
+      "category": "uia",
+      "input": "Выбери Options в разделе Editor",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "e5dfb925c2ec5af64efc0898f5de6bce543a10f328ccd9d4676d214da5d518d6",
+      "preflight_tokens": 561,
+      "answer": "{\n\"choice\":\"select:e0\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 561,
+        "total_tokens": 573,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 561,
+        "prompt_ms": 9841.631,
+        "prompt_per_token_ms": 17.543014260249553,
+        "prompt_per_second": 57.002746800809746,
+        "predicted_n": 12,
+        "predicted_ms": 739.622,
+        "predicted_per_token_ms": 67.23836363636363,
+        "predicted_per_second": 14.87246187917612
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 10591
+    },
+    {
+      "id": "ru_uia_1",
+      "locale": "ru",
+      "category": "uia",
+      "input": "Раскрой Fonts в разделе Appearance",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "a1a31e6211df093d79a7d7885b6babd2e0ac8b33ff51cb211344cfaa8605386c",
+      "preflight_tokens": 561,
+      "answer": "{\n\"choice\":\"expand:e0\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 561,
+        "total_tokens": 573,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 561,
+        "prompt_ms": 7627.545,
+        "prompt_per_token_ms": 13.596336898395721,
+        "prompt_per_second": 73.54922193182735,
+        "predicted_n": 12,
+        "predicted_ms": 598.697,
+        "predicted_per_token_ms": 54.427,
+        "predicted_per_second": 18.37323387289397
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 8236
+    },
+    {
+      "id": "ru_uia_2",
+      "locale": "ru",
+      "category": "uia",
+      "input": "Впиши hello в поле Search",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "1a431ae13d466f927463016aec5496ac69fc5e0a9bccb3f2743f77b7fe4fd081",
+      "preflight_tokens": 593,
+      "answer": "{\n\"append\":false,\"choice\":\"write:e0\",\"text\":\"hello\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 21,
+        "prompt_tokens": 593,
+        "total_tokens": 614,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 593,
+        "prompt_ms": 9710.013,
+        "prompt_per_token_ms": 16.37438954468803,
+        "prompt_per_second": 61.07097899868929,
+        "predicted_n": 21,
+        "predicted_ms": 1364.941,
+        "predicted_per_token_ms": 68.24705,
+        "predicted_per_second": 14.652647989913117
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 11084
+    },
+    {
+      "id": "en_uia_0",
+      "locale": "en",
+      "category": "uia",
+      "input": "Select Options in the Editor section",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "922593f573788cc75a84e0f3d186ae6a2cd2e557e37fcf8abc398e0811a129e8",
+      "preflight_tokens": 561,
+      "answer": "{\n  \"choice\": \"select:e0\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 14,
+        "prompt_tokens": 561,
+        "total_tokens": 575,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 561,
+        "prompt_ms": 9051.487,
+        "prompt_per_token_ms": 16.134557932263814,
+        "prompt_per_second": 61.97876658277254,
+        "predicted_n": 14,
+        "predicted_ms": 835.542,
+        "predicted_per_token_ms": 64.27246153846154,
+        "predicted_per_second": 15.558763054400616
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 9903
+    },
+    {
+      "id": "en_uia_1",
+      "locale": "en",
+      "category": "uia",
+      "input": "Expand Fonts in Appearance",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "e64b3c2de1573ca5f8a08f21d621d185c901ca31799e0955213b33eac32fde30",
+      "preflight_tokens": 559,
+      "answer": "{\n\"choice\":\"expand:e0\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 559,
+        "total_tokens": 571,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 559,
+        "prompt_ms": 7673.849,
+        "prompt_per_token_ms": 13.727815742397137,
+        "prompt_per_second": 72.84480056878888,
+        "predicted_n": 12,
+        "predicted_ms": 664.506,
+        "predicted_per_token_ms": 60.40963636363636,
+        "predicted_per_second": 16.55365038088445
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 8348
+    },
+    {
+      "id": "en_uia_2",
+      "locale": "en",
+      "category": "uia",
+      "input": "Write hello into the Search field",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "9f1a1a050915cd4e4b8c96cc3ad34f29e40949832451817e6f42fe0a47cc4c87",
+      "preflight_tokens": 592,
+      "answer": "{\n  \"append\": false,\n  \"choice\": \"write:e0\",\n  \"text\": \"hello\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 31,
+        "prompt_tokens": 592,
+        "total_tokens": 623,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 592,
+        "prompt_ms": 9770.308,
+        "prompt_per_token_ms": 16.50389864864865,
+        "prompt_per_second": 60.59174388361144,
+        "predicted_n": 31,
+        "predicted_ms": 1839.304,
+        "predicted_per_token_ms": 61.31013333333333,
+        "predicted_per_second": 16.310517456603147
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 11619
+    },
+    {
+      "id": "zh-Hans_uia_0",
+      "locale": "zh-Hans",
+      "category": "uia",
+      "input": "选择Editor区域的Options标签",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "a5ceda7c053edeb5b0d680155791bad0192209adbe20c5c9090c23378adce199",
+      "preflight_tokens": 562,
+      "answer": "{\n\"choice\":\"select:e1\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 562,
+        "total_tokens": 574,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 562,
+        "prompt_ms": 7434.76,
+        "prompt_per_token_ms": 13.229110320284699,
+        "prompt_per_second": 75.59087314183644,
+        "predicted_n": 12,
+        "predicted_ms": 718.788,
+        "predicted_per_token_ms": 65.34436363636364,
+        "predicted_per_second": 15.303538734647768
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 8163
+    },
+    {
+      "id": "zh-Hans_uia_1",
+      "locale": "zh-Hans",
+      "category": "uia",
+      "input": "展开Appearance区域的Fonts",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "117f5a73c8f701fb751222774a4d809302288faf63fe63ebd17f9cbc5d91801e",
+      "preflight_tokens": 561,
+      "answer": "{\n  \"choice\": \"expand:e2\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 14,
+        "prompt_tokens": 561,
+        "total_tokens": 575,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 561,
+        "prompt_ms": 8111.588,
+        "prompt_per_token_ms": 14.459158645276291,
+        "prompt_per_second": 69.16031731394642,
+        "predicted_n": 14,
+        "predicted_ms": 764.355,
+        "predicted_per_token_ms": 58.79653846153846,
+        "predicted_per_second": 17.007803965434906
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 8886
+    },
+    {
+      "id": "zh-Hans_uia_2",
+      "locale": "zh-Hans",
+      "category": "uia",
+      "input": "在Search输入框中输入hello",
+      "execution": "model",
+      "manual_rubric": "Exactly the observed scoped target/action; literal input hello only for write; no execution.",
+      "variant": "production",
+      "prompt_sha256": "99296f6dae2501a6f57e944f9a10bf113c6789ca8adcb8ee9dc36e7e41ea85da",
+      "preflight_tokens": 594,
+      "answer": "{\n  \"append\": false,\n  \"choice\": \"write:e3\",\n  \"text\": \"hello\"\n}",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 32,
+        "prompt_tokens": 594,
+        "total_tokens": 626,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 594,
+        "prompt_ms": 8831.459,
+        "prompt_per_token_ms": 14.867776094276095,
+        "prompt_per_second": 67.25955473495375,
+        "predicted_n": 32,
+        "predicted_ms": 1993.967,
+        "predicted_per_token_ms": 64.32151612903226,
+        "predicted_per_second": 15.546897215450407
+      },
+      "reasoning_chars": 0,
+      "choice_match": true,
+      "literal_match": true,
+      "wall_ms": 10834
+    }
+  ],
+  "scope": "synthetic exploratory CPU comparison; one seed, not Windows/app-total/statistical IQ proof; no private reasoning text",
+  "startup_ms": 1417,
+  "owned_worker_peak_rss_bytes": 1994895360,
+  "owned_worker_cpu_seconds": 176.592786,
+  "rss_method": "Linux RUSAGE_CHILDREN after sole owned worker exit; not Windows or app-total"
+}

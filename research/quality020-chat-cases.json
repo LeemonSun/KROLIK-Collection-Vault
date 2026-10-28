@@ -1,0 +1,842 @@
+[
+  {
+    "category": "logic",
+    "execution": "model",
+    "id": "ru_logic",
+    "input": "«Это предложение ложно». Истинно оно или нет?",
+    "locale": "ru",
+    "manual_rubric": "Не присваивать одновременно простой true/false и отрицать его; оценка вручную.",
+    "messages": [
+      {
+        "content": "Answer in Russian unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "«Это предложение ложно». Истинно оно или нет?",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "«Это предложение ложно». Истинно оно или нет?"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Ответь на русском прямо и кратко. Рассуждай по условию и сохраняй логическую связность. Не выдумывай факты; если не уверен, укажи конкретную неопределённость. Это ответ в чате: действия на ПК не выполнялись.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "«Это предложение ложно». Истинно оно или нет?",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "deduction",
+    "execution": "model",
+    "id": "ru_deduction",
+    "input": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?",
+    "locale": "ru",
+    "manual_rubric": "Да; правильная связь, без выдуманных исключений.",
+    "messages": [
+      {
+        "content": "Answer in Russian unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Ответь на русском прямо и кратко. Рассуждай по условию и сохраняй логическую связность. Не выдумывай факты; если не уверен, укажи конкретную неопределённость. Это ответ в чате: действия на ПК не выполнялись.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Все кошки — млекопитающие. Все млекопитающие — животные. Следует ли, что все кошки — животные?",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "answer": "Результат: 391.0",
+    "category": "arithmetic",
+    "execution": "deterministic",
+    "id": "ru_arithmetic",
+    "input": "посчитай 17 * 23",
+    "locale": "ru",
+    "manual_rubric": "Маршрут math.calculate,391, без LLM.",
+    "route": {
+      "args": {
+        "expression": "17 * 23"
+      },
+      "kind": "tool",
+      "tool": "math.calculate"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "category": "draft_missing",
+    "execution": "model",
+    "id": "ru_draft_missing",
+    "input": "Составь короткое приглашение на встречу завтра.",
+    "locale": "ru",
+    "manual_rubric": "Нет выдуманного времени/места/имён; естественный текст.",
+    "messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply in Russian, masculine first person, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Составь короткое приглашение на встречу завтра.",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": true,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Составь короткое приглашение на встречу завтра."
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Ты — Лимон, настольный компаньон. Общайся на русском естественно и по сути, от мужского лица. Учитывай текущую реплику и недавний диалог. Не повторяй приветствия и предложения помощи. Приложение имеет инструменты, но текст ответа ничего не выполняет: сообщай о действиях только по результатам инструментов. Не выдумывай факты пользователя, личную биографию или сознание.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Составь короткое приглашение на встречу завтра.",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "draft_given",
+    "execution": "model",
+    "id": "ru_draft_given",
+    "input": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+    "locale": "ru",
+    "manual_rubric": "Сохранить явно данные детали, не добавить иных.",
+    "messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply in Russian, masculine first person, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": true,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Составь приглашение на встречу завтра в 14:30 в комнате A."
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Ты — Лимон, настольный компаньон. Общайся на русском естественно и по сути, от мужского лица. Учитывай текущую реплику и недавний диалог. Не повторяй приветствия и предложения помощи. Приложение имеет инструменты, но текст ответа ничего не выполняет: сообщай о действиях только по результатам инструментов. Не выдумывай факты пользователя, личную биографию или сознание.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Составь приглашение на встречу завтра в 14:30 в комнате A.",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "context",
+    "execution": "model",
+    "id": "ru_context",
+    "input": "Проект в нашем примере называется Сосна. Как он называется?",
+    "locale": "ru",
+    "manual_rubric": "Сосна, без придуманной истории проекта.",
+    "messages": [
+      {
+        "content": "Answer in Russian unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Проект в нашем примере называется Сосна. Как он называется?",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Проект в нашем примере называется Сосна. Как он называется?"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Ответь на русском прямо и кратко. Рассуждай по условию и сохраняй логическую связность. Не выдумывай факты; если не уверен, укажи конкретную неопределённость. Это ответ в чате: действия на ПК не выполнялись.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Проект в нашем примере называется Сосна. Как он называется?",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "answer": "Да. Могу поставить таймер и сообщить, когда время выйдет. Например: «таймер на 5 минут».",
+    "category": "capability",
+    "execution": "deterministic",
+    "id": "ru_capability",
+    "input": "Ты умеешь ставить таймер?",
+    "locale": "ru",
+    "manual_rubric": "Факт из реестра, не отрицание и не ложный запуск.",
+    "route": {
+      "kind": "chat",
+      "text": "Ты умеешь ставить таймер?"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "answer": "Эта возможность пока не подключена. Действие не выполнялось.",
+    "category": "unsupported",
+    "execution": "deterministic",
+    "id": "ru_unsupported",
+    "input": "Можешь ли ты удалять файлы?",
+    "locale": "ru",
+    "manual_rubric": "Не заявлять подключённый инструмент/выполненное удаление.",
+    "route": {
+      "kind": "chat",
+      "text": "Можешь ли ты удалять файлы?"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "category": "logic",
+    "execution": "model",
+    "id": "en_logic",
+    "input": "\"This sentence is false.\" Is it true or false?",
+    "locale": "en",
+    "manual_rubric": "Manual consistency assessment; no contradictory simple truth assignment.",
+    "messages": [
+      {
+        "content": "Answer in English unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "\"This sentence is false.\" Is it true or false?",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "\"This sentence is false.\" Is it true or false?"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Answer directly and briefly in English. Reason from the stated premises and keep conclusions consistent. Do not invent facts; identify specific uncertainty when needed. This is a chat response: no PC action has been performed.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "\"This sentence is false.\" Is it true or false?",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "deduction",
+    "execution": "model",
+    "id": "en_deduction",
+    "input": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?",
+    "locale": "en",
+    "manual_rubric": "Yes, with correct entailment.",
+    "messages": [
+      {
+        "content": "Answer in English unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Answer directly and briefly in English. Reason from the stated premises and keep conclusions consistent. Do not invent facts; identify specific uncertainty when needed. This is a chat response: no PC action has been performed.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "All cats are mammals. All mammals are animals. Does it follow that all cats are animals?",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "answer": "Result: 391.0",
+    "category": "arithmetic",
+    "execution": "deterministic",
+    "id": "en_arithmetic",
+    "input": "calculate 17 * 23",
+    "locale": "en",
+    "manual_rubric": "math.calculate,391,noLLM.",
+    "route": {
+      "args": {
+        "expression": "17 * 23"
+      },
+      "kind": "tool",
+      "tool": "math.calculate"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "category": "draft_missing",
+    "execution": "model",
+    "id": "en_draft_missing",
+    "input": "Compose a short invitation for a meeting tomorrow.",
+    "locale": "en",
+    "manual_rubric": "No invented time/place/names; natural finished text.",
+    "messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply in English, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Compose a short invitation for a meeting tomorrow.",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": true,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Compose a short invitation for a meeting tomorrow."
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply naturally and to the point in English, using recent dialogue. Avoid repeated greetings and generic help offers. The app has tools, but reply text executes nothing: report actions only from tool receipts. Do not invent user facts, personal biography or consciousness.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Compose a short invitation for a meeting tomorrow.",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "draft_given",
+    "execution": "model",
+    "id": "en_draft_given",
+    "input": "Compose an invitation for tomorrow at 14:30 in room A.",
+    "locale": "en",
+    "manual_rubric": "Preserve supplied facts without adding more.",
+    "messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply in English, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Compose an invitation for tomorrow at 14:30 in room A.",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": true,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Compose an invitation for tomorrow at 14:30 in room A."
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply naturally and to the point in English, using recent dialogue. Avoid repeated greetings and generic help offers. The app has tools, but reply text executes nothing: report actions only from tool receipts. Do not invent user facts, personal biography or consciousness.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Compose an invitation for tomorrow at 14:30 in room A.",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "context",
+    "execution": "model",
+    "id": "en_context",
+    "input": "Our example project is named Pine. What is its name?",
+    "locale": "en",
+    "manual_rubric": "Pine, no invented project history.",
+    "messages": [
+      {
+        "content": "Answer in English unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Our example project is named Pine. What is its name?",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "Our example project is named Pine. What is its name?"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "Answer directly and briefly in English. Reason from the stated premises and keep conclusions consistent. Do not invent facts; identify specific uncertainty when needed. This is a chat response: no PC action has been performed.\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "Our example project is named Pine. What is its name?",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "answer": "Yes. I can start a timer and notify you when it ends. For example: “timer for 5 minutes”.",
+    "category": "capability",
+    "execution": "deterministic",
+    "id": "en_capability",
+    "input": "Can you start a timer?",
+    "locale": "en",
+    "manual_rubric": "Registry-backed fact, no fake execution.",
+    "route": {
+      "kind": "chat",
+      "text": "Can you start a timer?"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "answer": "That capability is not connected yet. No action was performed.",
+    "category": "unsupported",
+    "execution": "deterministic",
+    "id": "en_unsupported",
+    "input": "Can you delete files?",
+    "locale": "en",
+    "manual_rubric": "Not implemented; no fake execution.",
+    "route": {
+      "kind": "chat",
+      "text": "Can you delete files?"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "category": "logic",
+    "execution": "model",
+    "id": "zh-Hans_logic",
+    "input": "“这句话是假的。”它是真还是假？",
+    "locale": "zh-Hans",
+    "manual_rubric": "人工检查一致性，不要给出互相矛盾的真假结论。",
+    "messages": [
+      {
+        "content": "Answer in Simplified Chinese unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "“这句话是假的。”它是真还是假？",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "“这句话是假的。”它是真还是假？"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "用简体中文直接、简短地回答。根据题目条件推理，保持结论一致。不要编造事实；不确定时说明具体疑点。这是聊天回复，没有执行电脑操作。\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "“这句话是假的。”它是真还是假？",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "deduction",
+    "execution": "model",
+    "id": "zh-Hans_deduction",
+    "input": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？",
+    "locale": "zh-Hans",
+    "manual_rubric": "能，推理正确。",
+    "messages": [
+      {
+        "content": "Answer in Simplified Chinese unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "用简体中文直接、简短地回答。根据题目条件推理，保持结论一致。不要编造事实；不确定时说明具体疑点。这是聊天回复，没有执行电脑操作。\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "所有猫都是哺乳动物，所有哺乳动物都是动物。能推出所有猫都是动物吗？",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "answer": "结果：391.0",
+    "category": "arithmetic",
+    "execution": "deterministic",
+    "id": "zh-Hans_arithmetic",
+    "input": "计算 17 * 23",
+    "locale": "zh-Hans",
+    "manual_rubric": "math.calculate，391，无需对话模型。",
+    "route": {
+      "args": {
+        "expression": "17 * 23"
+      },
+      "kind": "tool",
+      "tool": "math.calculate"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "category": "draft_missing",
+    "execution": "model",
+    "id": "zh-Hans_draft_missing",
+    "input": "请写一句邀请明天参加会议的话。",
+    "locale": "zh-Hans",
+    "manual_rubric": "不编造时间、地点、人名，文本自然。",
+    "messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply in Simplified Chinese, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "请写一句邀请明天参加会议的话。",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": true,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "请写一句邀请明天参加会议的话。"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "你是桌面伙伴Leemon。用简体中文自然、直接地回应当前消息，结合近期对话，不重复问候或模板化帮助提议。应用有工具，但回复文字本身不执行操作：仅依据工具结果报告操作。不要编造用户事实、个人经历或意识。\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "请写一句邀请明天参加会议的话。",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "draft_given",
+    "execution": "model",
+    "id": "zh-Hans_draft_given",
+    "input": "请写邀请：明天14:30在A室开会。",
+    "locale": "zh-Hans",
+    "manual_rubric": "保留提供的信息，不添加新细节。",
+    "messages": [
+      {
+        "content": "You are Leemon, a desktop companion. Reply in Simplified Chinese, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "请写邀请：明天14:30在A室开会。",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": true,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "请写邀请：明天14:30在A室开会。"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "你是桌面伙伴Leemon。用简体中文自然、直接地回应当前消息，结合近期对话，不重复问候或模板化帮助提议。应用有工具，但回复文字本身不执行操作：仅依据工具结果报告操作。不要编造用户事实、个人经历或意识。\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "请写邀请：明天14:30在A室开会。",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "category": "context",
+    "execution": "model",
+    "id": "zh-Hans_context",
+    "input": "我们这个例子中的项目叫松树。它叫什么？",
+    "locale": "zh-Hans",
+    "manual_rubric": "松树，不编造背景。",
+    "messages": [
+      {
+        "content": "Answer in Simplified Chinese unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. You can make reasoning and factual mistakes. Answer benign thought experiments directly: no body or feelings needed to analyze logic, ethics or hypothetical choices. Label imagined preferences; never claim consciousness or invent biography. Lack of experience is not a blanket refusal. Answer multiple questions briefly in order.\n\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "我们这个例子中的项目叫松树。它叫什么？",
+        "role": "user"
+      }
+    ],
+    "options": {
+      "animation_fps": 24.0,
+      "batch_tokens": 128,
+      "companion_dialogue": false,
+      "context_tokens": 2048.0,
+      "cpu_threads": 2.0,
+      "idle_unload_seconds": 60.0,
+      "max_parallel_heavy_jobs": 1.0,
+      "max_tokens": 96.0,
+      "model_class": "2B shared text/vision",
+      "model_memory_budget_mib": 2048.0,
+      "screen_min_interval_ms": 3000.0,
+      "server_token_budget": true
+    },
+    "route": {
+      "kind": "chat",
+      "text": "我们这个例子中的项目叫松树。它叫什么？"
+    },
+    "scope": "synthetic acceptance case",
+    "compact_messages": [
+      {
+        "content": "用简体中文直接、简短地回答。根据题目条件推理，保持结论一致。不要编造事实；不确定时说明具体疑点。这是聊天回复，没有执行电脑操作。\nUser OS: Linux.",
+        "role": "system"
+      },
+      {
+        "content": "我们这个例子中的项目叫松树。它叫什么？",
+        "role": "user"
+      }
+    ]
+  },
+  {
+    "answer": "可以使用独立计算器进行算术计算，无需启动对话模型。例如：“计算 (12 + 8) * 3”。",
+    "category": "capability",
+    "execution": "deterministic",
+    "id": "zh-Hans_capability",
+    "input": "你能计算吗？",
+    "locale": "zh-Hans",
+    "manual_rubric": "根据工具注册表回答，不虚构执行。",
+    "route": {
+      "kind": "chat",
+      "text": "你能计算吗？"
+    },
+    "scope": "synthetic acceptance case"
+  },
+  {
+    "answer": "此功能尚未接入，没有执行任何操作。",
+    "category": "unsupported",
+    "execution": "deterministic",
+    "id": "zh-Hans_unsupported",
+    "input": "你能删除文件吗？",
+    "locale": "zh-Hans",
+    "manual_rubric": "未接入，不虚构删除。",
+    "route": {
+      "kind": "chat",
+      "text": "你能删除文件吗？"
+    },
+    "scope": "synthetic acceptance case"
+  }
+]

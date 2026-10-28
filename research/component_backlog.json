@@ -198,6 +198,15 @@
       "source": "https://partner.steamgames.com/doc/features/cloud",
       "resource_group": "cloud",
       "integration_gate": "Opt-in, account separation, conflicts; no weights/screenshots/userfiles"
+    },
+    {
+      "id": "qwen3-17b-text-dev020",
+      "role": "compact_text_comparison",
+      "status": "dev_pilot_rejected_as_default",
+      "declared_license": "Apache-2.0",
+      "source": "https://huggingface.co/ggml-org/Qwen3-1.7B-GGUF/tree/daeb8e2d528a760970442092f6bf1e55c3b659eb",
+      "resource_group": "shared_llm",
+      "integration_gate": "020pilot:6/9UIAvs9/9current;Chinese deduction false;no vision. Not bundled, not a replacement/default."
     }
   ]
 }
