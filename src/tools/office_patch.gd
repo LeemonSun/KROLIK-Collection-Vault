@@ -20,7 +20,10 @@ func _read(path):
 	var file=FileAccess.open(path,FileAccess.READ)
 	if not file or file.get_length()>MAX_BYTES:return {"ok":false,"status":"unreadable"}
 	var bytes=file.get_buffer(file.get_length());file.close()
-	return {"ok":true,"bytes":bytes,"text":"[OOXML package]","bom":false,"sha":digest(bytes)}
+	return {"ok":true,"bytes":bytes,"text":"SHA-256: "+digest(bytes),"bom":false,"sha":digest(bytes)}
+func _restore_preview(bytes):
+	if last_backup.get("path","").get_extension().to_lower() in ["docx","xlsx"]:return "SHA-256: "+digest(bytes)
+	return super._restore_preview(bytes)
 static func inventory(bytes):
 	# Validate the central directory BEFORE ZIPReader allocates decompressed data.
 	if bytes.size()<22:return {}

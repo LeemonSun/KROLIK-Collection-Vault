@@ -112,7 +112,8 @@ func prepare_restore():
 	var source=_read(last_backup.path)
 	if not source.ok:return source
 	var old=FileAccess.get_file_as_bytes(last_backup.backup)
-	return _plan(last_backup.path,source,old,source.text.left(1200),old.get_string_from_utf8().left(1200),1)
+	return _plan(last_backup.path,source,old,source.text.left(1200),_restore_preview(old).left(1200),1)
+func _restore_preview(bytes):return bytes.get_string_from_utf8()
 func cancel():pending={}
 
 func load_backup(path):

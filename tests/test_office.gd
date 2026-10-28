@@ -18,6 +18,7 @@ func _run():
 	check(not patch.prepare(path,"split across","new").ok,"Cross-run text is refused rather than damaging formatting")
 	check(not patch.prepare(path,"repeat","new").ok,"Repeated document text is ambiguous")
 	var edited=FileAccess.get_file_as_bytes(path);plan=patch.prepare_restore()
+	check(plan.ok and plan.after=="SHA-256: "+Office.digest(original) and plan.before=="SHA-256: "+Office.digest(edited),"Binary Office restore preview shows exact before/after hashes rather than ZIP bytes")
 	check(plan.ok and patch.commit(plan.token).ok and FileAccess.get_file_as_bytes(path)==original,"OOXML restore preserves exact original archive")
 	var output=FileAccess.open(path,FileAccess.WRITE);output.store_buffer(edited);output.close()
 	path=folder.path_join("sample.xlsx");original=FileAccess.get_file_as_bytes(path)
