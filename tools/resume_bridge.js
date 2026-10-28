@@ -140,8 +140,11 @@ print(json.dumps({'summary':summary,'entries':{name:{'bytes':len(data),'sha':res
     const nextTree=check(await tools.mcp__codex_apps__github_create_tree({repository_full_name:repo,base_tree_sha:commit.tree.sha,tree_elements:elements}));
     const next=check(await tools.mcp__codex_apps__github_create_commit({repository_full_name:repo,parent_sha:head,tree_sha:nextTree.sha,message:options.message||'Store local development checkpoint [skip ci]'}));
     check(await tools.mcp__codex_apps__github_update_ref({repository_full_name:repo,branch_name:'main',expected_sha:head,sha:next.sha,force:false}));
-    const verified=(await get(api+'/git/ref/heads/main')).object.sha;
-    if(verified!==next.sha)throw Error('Checkpoint head verification failed');
+    let verified=(await get(api+'/git/ref/heads/main')).object.sha;
+    // A cached read can briefly return the old head after a successful CAS.
+    // Re-read only that known-old value; never overwrite an unrelated new head.
+    if(verified===head)verified=(await get(api+'/git/ref/heads/main?leemon_verify='+next.sha)).object.sha;
+    if(verified!==next.sha)throw Error('Checkpoint head verification failed; created '+next.sha+', observed '+verified+'; inspect before retry');
     await py("(root/'.resume-remote.json').write_text(json.dumps({'head':p['head']})+'\\n')\nprint(json.dumps({'saved':True}))",{head:next.sha});
     return {head:next.sha,changed:changed.length,deleted:removed.length,...payload.summary};
   }

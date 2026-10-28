@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.19.0-desktop-preview",
-  "checkpoint_status": "0.19_contextual_observation_implemented_validation_delivery_pending",
-  "current_task": "019 implemented: generic ancestor/role/AutomationId context, strict scoped preflight, contextual history, bounded read-only delayed verification, partial observation budgets and ephemeral UIA context. Final checks/build pending.",
-  "next_action": "Finish019 source/native/packed/PowerShell checks and delivery; real Windows/hardware acceptance and compact model quality remain necessary.",
+  "checkpoint_status": "0.19_saved_contextual_observation_verification_windows_acceptance_pending",
+  "current_task": "019 finished: scoped ancestor/role/AutomationId observations, exact native/Godot preflight, contextual history, bounded3read-onlypostchecks, partial budgets, ephemeral UIA context and no duplicate receipts. Source/pack/native/realPSprotocol validated; ZIP/report saved.",
+  "next_action": "Actual Windows/UIA/PowerShell5.1/DPI/hardware acceptance; then24case compact instruction/observation semantic comparison. Evaluate candidate prioritization/incremental observation for controls omitted by bounded native snapshot. General agent remains primary; no IQ/universal app support claim.",
   "read_next": [
     "docs/WORKFLOWS_019.md",
     "docs/WINDOWS_ACCEPTANCE_017.md",
@@ -19,32 +19,33 @@
     "Selected files <=1MiB; DOCX one plain paragraph across adjacent runs; XLSX existing cells text/number/Boolean, formula workbooks refused. Range summaries<=1024cells use approximate doubles/raw numeric values, not exact financial arithmetic.",
     "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured.",
     "New reader returns bounded source excerpts only, not automatic Q&A/search/guide execution. Only explicit public HTTPS, no redirects/login/JS/cookies, UTF-8 identity HTML/plain<=256KiB and20s.",
-    "Public DNS unavailable in this environment (Godot and Python getaddrinfo failed). Real local TLS fixture passed; public websites/proxies/Windows remain unverified.",
+    "Public page reader has localTLS/protocol evidence from014; current Windows/public-network/proxy behavior not accepted. Development downloads via proxy do not prove app-network support.",
     "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window.",
     "Adaptive loop is selected-window UIA only,4steps/240sec, each step approval. Reviewed drafts512chars can be generated under explicit compose intent; numeric/address literal gate is not complete semantic grounding. No universal editing or learned procedures.",
     "Real2B draft/reasoning trial failed: invented English meeting time and wrong liar paradox, even after one review. Experimental extra review is OFF by default; current model IQ not solved. Full15question test not validated.",
     "0.17 authoring is still semantically weak: unsupported locations/names may pass narrow grounding. One repair may fail or invent different facts; full preview/approval remains essential. Only selected-window supported UIA fields.",
-    "018 front-facing procedural locomotion, not full side-view hand-authored walk cycle; no window obstacle pathfinding. Small screens may have no nonoverlapping bubble position. Windows performance not measured."
+    "018 front-facing procedural locomotion, not full side-view hand-authored walk cycle; no window obstacle pathfinding. Small screens may have no nonoverlapping bubble position. Windows performance not measured.",
+    "019 context matching is bounded/truncated and can reject legitimate UI changes. Native snapshot90/200visited/8depth/25KiB may omit useful controls;2500ms budget is soft between UIA calls. Outcome-only contextual recreation is not persistent identity. Real model selection quality on new prompts unmeasured."
   ],
   "validation": [
-    "37fresh-profile sourcegroups PASS; final relevant reruns after entrance/envelope changes PASS",
-    "Final PCK smoke+76motion+32composer+12diagnostics+25adaptive+45copy PASS",
-    "Final PCK X11:35behavior+156general PASS; ZIPCRC PASS",
-    "Video180actual-renderer frames composed20fps; scripted synthetic task stages, not OS/model/FPS evidence",
-    "017failed semantic pilots remain preserved; no intelligence/model/sampler improvement claim. Actual Windows and target hardware unverified."
+    "40fresh-profile sourcegroups PASS including38context/36Appverification/17realPowerShellsynthetictree checks",
+    "Final PCK smoke+38context+36verification+25adaptive+32composer+42windowreader+17exportedcontent/realGodotPowerShellnonce roundtrip PASS",
+    "Final PCK X11:30agentlayout+156general+35motion PASS; ZIPCRC PASS",
+    "Real PowerShell7.6 oldhelper16protocol+11read PASS; local recoverybridge stale-ref/remotelease contract PASS",
+    "No actual Windows UIA/PowerShell5.1/DPI/hardware or actual model inference on new contextual prompts;017semantic failures remain unresolved."
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.18.0.zip",
-    "bytes": 53929819,
-    "sha256": "fd7391045c0c7393dda8b7ccab8a0b42010480f13243bb188b82632e4df3292b",
-    "library_file_id": "libfile_dbbf4ea17f648191aab1dbb8a64944d3",
-    "file_id": "file_00000000e0fc820db8b54cbd0886fd50",
-    "version": 1,
+    "full": "Companion_Preview_Windows_v0.19.0.zip",
+    "bytes": 53934940,
+    "sha256": "f830cb43bb9fbfae33536dc969e7039124c9929378ee26dbcdaa7ac3ad6f2c79",
+    "library_file_id": "libfile_a4d009a4915c81918bfd7e142ec8e89a",
+    "file_id": "file_00000000c9b081f9967bfe828906bd51",
+    "version": 0,
     "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
   },
-  "previous_checkpoint": "c25ff899262590cc6336dd4019cb66a10a7dacb5",
-  "shipped_version": "0.18.0-desktop-preview",
-  "shipped_app_pack_sha256": "127619eef86eb6583ef29df3da2e10fadf0b6b71895dafde90fb7afb6622cef3",
+  "previous_checkpoint": "c41362cdf081111085d4522f5a0a5d7004945e41",
+  "shipped_version": "0.19.0-desktop-preview",
+  "shipped_app_pack_sha256": "4989ff3495b6a639e76083ea97c149288cb6842edb62653ca9f7446e4feb7ade",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -79,9 +80,9 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_e5c501dc661c8191bce9b506c1185e4e",
+  "report_library_file_id": "libfile_59f4253447f48191b0752c56c4c80d19",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
-  "report_version": 1,
+  "report_version": 0,
   "recovery_event": {
     "date_moscow": "2026-10-28",
     "source_head": "fb9c8195099ed1503c1c89e459fc510c8056da7f",
@@ -92,6 +93,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.18.0.zip",
+      "bytes": 53929819,
+      "sha256": "fd7391045c0c7393dda8b7ccab8a0b42010480f13243bb188b82632e4df3292b",
+      "library_file_id": "libfile_dbbf4ea17f648191aab1dbb8a64944d3",
+      "file_id": "file_00000000e0fc820db8b54cbd0886fd50",
+      "version": 1,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.17.0.zip",
       "bytes": 53925224,
@@ -179,7 +189,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000d08c81f5b3b38c22bc7f5d98",
+  "report_file_id": "file_00000000064081f5a226ab43c2bc28f4",
   "motion_artifact": {
     "filename": "Leemon_0.18_Behavior_Demo.mp4",
     "bytes": 145196,
@@ -191,9 +201,9 @@
     "sha256": "70301f1c1ad2c02285eb06b784bfa14e734959da878cafb2e7b3618023f6ebfa",
     "version_label": "018_synthetic_scripted_renderer_demo_no_OS_actions_no_model_no_FPS_benchmark"
   },
-  "shipped_exe_sha256": "344e14c03b038a9193b0e327ef7e2d061953b4615d5d1631aaa89aabb8566652",
+  "shipped_exe_sha256": "ded4e39d97ea7a4f21f49fc21f8cfb6b545b0f433dad6f297963daa9a91f9663",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Cancelled travel cannot resume on mouse pickup/pause/minimize/reduced/resize/restore. Reduced motion during edge entrance clamps mascot visible. Idle gestures cannot strand work poses; pause restores roam preference. Tests portable outsidePCK, mandatory notices preserved.",
+  "final_fix": "Selected elements carry bounded parent context; exact scoped descriptor rechecked before effects; no stale approval retargeting. Max3read-onlyverification snapshots with cancelled timers; UIA notices/reviews ephemeral; receipts stripped. Restore helper tolerates known-old cached ref read without overwriting unrelated heads.",
   "product_direction": {
     "primary": "general_adaptive_desktop_agent",
     "loop": [
