@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PUBLIC_TLS014_TESTS: 7 checks, 0 failures; actual local TLS server, test-only socket adapter; public DNS/live websites not verified
+
+INDEPENDENT_HTTPS_REQUESTS: PASS; expected paths/Host, no credentials, no redirected request, private key removed

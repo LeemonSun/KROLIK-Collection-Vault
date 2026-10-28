@@ -380,7 +380,9 @@ func _execute(command):
 	if command.tool in ["math.calculate","math.convert"]:
 		var result=preload("res://src/tools/calculator.gd").new().evaluate(command.args.expression) if command.tool=="math.calculate" else preload("res://src/tools/unit_converter.gd").convert(command.args.number,command.args.from,command.args.to)
 		if result.ok:
-			add_message("assistant",t("math_result",{"value":result.text})+(" "+result.to if command.tool=="math.convert" else "")+"\n"+t("math_precision"))
+			var answer=t("math_result",{"value":result.text})+(" "+result.to if command.tool=="math.convert" else "")
+			if command.tool=="math.calculate" and ("%" in command.args.expression or "sin" in command.args.expression.to_lower() or "cos" in command.args.expression.to_lower()):answer+="\n"+t("math_conventions")
+			add_message("assistant",answer)
 			request_motion("dialogue.explain_small")
 		else:add_message("assistant",t("math_"+str(result.status)))
 		state.reset();changed.emit();return

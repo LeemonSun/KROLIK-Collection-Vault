@@ -1,39 +1,31 @@
-# Leemon 0.14 — исходники проверены, финальная сборка готовится
+# Leemon 0.14 — сохранено и выдано
 
-Начать с recovery/session.json и docs/WORKFLOWS_014.md. Копилка: research/component_backlog.json (21 запись), docs/TECH_STACK_013.md. Не скачивать кандидатов автоматически. GitHub только хранилище, без CI/remote builds/deployment. Без субагентов без прямого разрешения. Рабочая папка по-прежнему /workspace/scratch/deec6c1ed852/leemon-013; старая companion-foundation может быть0.1.
+Начать с `python3 tools/resume.py status`, recovery/session.json и docs/WORKFLOWS_014.md. Копилка — research/component_backlog.json (21 запись) и TECH_STACK_013.md. GitHub LeemonSun/KROLIK-Collection-Vault/main только хранилище, без Actions/CI/remote builds/deployment. Без субагентов без прямого разрешения. Текущий head — .resume-remote.json.
 
-0.14: tools/calculator.gd (ограниченная грамматика, неeval), unit_converter.gd (явные размерности/affine temperature), windows_settings.gd (fixedURI handoff, не изменение настройки), public_page.gd (explicitHTTPS, asyncDNS/allIPschecked/pinnedIP/TLSoriginalhost, GET/no credentials/no redirects, bounded inert UTF8 excerpts, ephemeral/noLLM). Router/ToolPolicy/App интегрированы; tools не ставятся в chat queue. Стоп очищает reader. UI показывает этапы. Исправляется follow-to-latest после синхронных tool replies.
+## Главное решение пользователя
 
-29 source groups PASS;112utilities,16fakeHTTPtransport,7real localTLS+independentPythonrequests PASS. ВнешнийDNS недоступен и вGodot, и вPython; успешного публичногоwebfetch не заявлять. Это не автономный поиск/Q&A/исполнение гайдов. Windows-settings значения не меняет. Double не exact money/CAS. Новые модели/runtime не добавлены. Новые нативные проверки/экспорт ещё pending в этом checkpoint.
+Общий адаптивный агент — главный следующий этап, а не бесконечное добавление ручных команд. Контур: наблюдать UIA/экран → понять свободную цель → ограниченный план → shared tools в существующих приложениях → повторное наблюдение/проверка → адаптация либо остановка. Не обучать отдельную модель под каждую программу/версию и не создавать свою замену Office/виртуальную пользовательскую среду. Адаптация через контекст, наблюдение и память о проверенных успешных способах; постоянное обучение весов не реализовано. Сайты/файлы не назначают себе права. Текущие authority/preflight/verification gates сохранять; не ослаблять их вслепую ради автономности.
 
-Ключевые проверки: test_utilities014.gd, test_public_transport014.gd, test_public_tls014.gd + tools/test_public_tls.py; тестовый localhost adapter/ключи не входят в export. Следом test_utilities_visual014.gd и pack014. Сохранить AI/ и AppData; модели0.8–0.13совместимы. Last shipped0.13 IDs вsession.previous_artifacts. До финала собрать0.14, проверитьPCK/ZIP, сохранить Library и обновитьsession/README/shippedversion.
+0.14 — инструменты этого контура, не готовый универсальный агент. CPU/память/ошибки неизвестного интерфейса нужно измерять, не обещать любой ПК/любую задачу/абсолютную безопасность.
 
-Предыдущая основа0.13 (для reference):
+## Что сделано
 
-# Leemon 0.13 — сохранено и выдано
+- calculator.gd: собственная ограниченная грамматика, не eval; +−*/^%, скобки, sqrt/abs/sin/cos/ln/log10, pi/e, пределы/ошибки. Double приблизительный, не CAS/финансовая точность. sin/cos радианы; % = /100.
+- unit_converter.gd: явные единицы/размерности, affine temperatures, MBvsMiB, нет валютных курсов.
+- windows_settings.gd: fixed ms-settings URI handoff. Не меняет значения и не проверяет появление окна; Windows acceptance pending.
+- public_page.gd: explicit public HTTPS, async DNS, всеIP проверяются, выбранныйIP фиксируется, TLSOptions.client проверяет исходный hostname. GET, без browser cookies/auth/JS/forms/redirects. UTF8 HTML/plain identity, Content-Length/chunked, body<=256KiB/20s,12×300 excerpt cap. URL/текст ephemeral, без сохранения в model turns и без права выполнять команды. Публичные DNS/live websites здесь не проверены успешно; локальный realTLS fixture работает. Conservative special IP checks, IPv4 preferred. Proxy support не заявлен.
+- Router/ToolPolicy/App + native chat statuses/stop. Новые tools не входят в chat queue, не запускают inference. Явный follow после синхронного reply +3-frame settle исправляет скрытый последний ответ. Не повторять технические подсказки в каждом простом ответе.
 
-Начать с `python3 tools/resume.py status`, recovery/session.json и docs/WORKFLOWS_013.md. Выбор инструментов/лицензий: docs/TECH_STACK_013.md. Не перечитывать весь чат и не перезапускать фундамент. GitHub LeemonSun/KROLIK-Collection-Vault/main — только хранилище, без Actions/remote builds/deployment. Без субагентов без прямого разрешения. Текущий head — .resume-remote.json.
+Сохранены0.13: profile.effective quiet(1thread/batch32/idle30) с ASRcap; DOCX across plain styled runs; typed existing XLSX; approximate range summaries<=1024; pinned review/backup/restore. 0.12 queue3ordinary; facts1024/512KB;4user-authored-step workflow; selected-window UIA/read; one heavy worker, lazyload/idleunload. Формулы/новые ячейки/полный Office и universal planning пока отсутствуют. Только Лимон, один стиль,26процедурных состояний, не тысячи клипов. Retired assets не восстанавливать, notices сохранять.
 
-Единственный персонаж — Лимон. Retired concepts не восстанавливать; retirement guards и обязательные notices сохранять. Основа прохода 0.12: 5523ff1085818bdf3a9cfbf9e74bdd19e23ad834. Промежуточное сохранение 0.13: f47afc5d1b9f467587409ad8a78491f15a4edf27.
+## Проверки и доставка
 
-## Реализация
+29 source groups PASS в отдельных временных профилях. ФинальныйPCK:9composition+112utilities+16fakeHTTPpolling+7realLocalTLS/independentPythonrequests+33Office/independentreadback+156generalNative+34OfficeNative+25utilitiesNative checks PASS. ZIPCRC PASS. Linux/X11,неWindows. Actual public DNS failed вGodot иPython; не заявлять успешное чтение реального сайта. Windows UIA/DPI/filelocks/nativepicker/mic/TTS, real2Bquality/throughput/resource benchmark ещё нужны. TLS fixture adapter только вtests; временные keys не сохранены и не входят в export.
 
-- profile.effective и App.runtime_options: default quiet (1 thread / batch32 / idle30), standard — прежний профиль. Все owned text/vision starts получают effective budget, ASR получает thread cap. Переключение отменяет задачу/очередь и останавливает worker. Не строгая CPU/RSS квота.
-- docx_text.gd: единственный literal span в одном обычном абзаце через соседние styled runs. Новый текст получает первый affected run style. Неподдерживаемые fields/bookmarks/hyperlinks/hidden runs/paragraph boundaries/protection отклоняются.
-- office_patch.gd: существующие ячейки XLSX — текст, число (до 15 значащих цифр), Boolean (true/false). Книги с формулами запрещены. inspect_range до 1024 ячеек: одно чтение пакета, приблизительная double-статистика без LLM/записи. Форматы дат/процентов не интерпретируются.
-- file_edit_window.gd: закреплённый preview/result вне центральной прокрутки; range controls/type picker, RU/EN/zh. Preview/backup/fresh SHA/posthash/restore сохранены.
-- run_checks создаёт отдельный временный профиль для каждой группы: устраняет перенос сохранённого языка и fixtures между проверками.
+ZIP0.14/report сохранены, IDs/SHA вsession/README. Report version1 учитывает уточнение про общего агента. AI/ иAppData сохранять,0.8–0.13модели совместимы; EXE/PCK заменять вместе. Новые веса/runtime не добавлены; нет pruning/fine-tuning. Полныйoffline1.9GB повторно не нужен. SteamCloud отсутствует, ownAppID нужен.
 
-Сохранены queue3 ordinary messages, explicit facts 1024/512KB, selected-window UIA и чтение с выдержками, workflow до 4 user-authored steps, один heavy worker, lazy load и idle unload. Не ослаблять target identity/capability/verbatim write/preflight/approval gates. Invoke не доказывает бизнес-результат. Сайт/документ не может выдать себе разрешение на действие.
+## Среда и продолжение
 
-## Проверки и артефакты
+Рабочая папка: /workspace/scratch/deec6c1ed852/leemon-013 (имя папки историческое; версия0.14). Старая companion-foundation может быть0.1! Godot: /workspace/scratch/deec6c1ed852/devtools/Godot_v4.7.2-stable_linux.x86_64. Xvfb: /workspace/scratch/deec6c1ed852/devtools/xvfb014 (локально восстановлен из подписанного Ubuntu noble apt, без system install). Template: /workspace/scratch/aeddae26cfed/windows-template/Companion.exe SHA49bdb7a55e668a3a5e8f88f374ac502b84454d23bde9561bf3b9d8e38bab2538. Final output: preview-windows-v0.14.0; EXESHA55166cfe1374c1e8bd24741f56e5116d40b0ba8a72f0c27926431ba886fbb08c добавлен в build_preview allowlist. Пути непереносимы.
 
-26 source groups PASS. Финальный PCK: 9 composition + 44 technical + 33 real Office/independent python-docx/openpyxl readback + 156 general native + 34 technical native X11 checks; ZIP CRC PASS. Windows EXE/UIA/DPI/file locks/native picker/mic/TTS здесь не выполнялись. Реальная производительность и качество текущей 2B-модели не переизмерялись. Нет новых весов, runtime, pruning или обучения. TECH_STACK_013 — кандидаты, не установленный стек.
-
-ZIP 0.13 и отчёт сохранены, IDs/SHA в session и README. AI/ и AppData сохранять; модели 0.8–0.12 совместимы. Для обновления заменять EXE и PCK вместе. Полный offline-пакет повторно не нужен. Steam Cloud отсутствует; нужен собственный AppID. Не обещать все ПК, абсолютную безопасность, полноценный Office/браузер, тысячи клипов или Steam 1.0.
-
-## Среда и следующий шаг
-
-Рабочая папка этого прохода: /workspace/scratch/deec6c1ed852/leemon-013. Старая companion-foundation может содержать 0.1! Godot: /workspace/scratch/deec6c1ed852/devtools/Godot_v4.7.2-stable_linux.x86_64. Xvfb: /workspace/scratch/758adf0ad683/work/runtime. Verified template: /workspace/scratch/aeddae26cfed/windows-template/Companion.exe SHA49bdb7a55e668a3a5e8f88f374ac502b84454d23bde9561bf3b9d8e38bab2538. Final package: preview-windows-v0.13.0. Эти пути непереносимы.
-
-При сбросе: свежий tools/resume_bridge.js из GitHub, bootstrap в новую соседнюю папку, assets runtime. Не скачивать веса ради обычного патча. Следующий этап: настоящая Windows-приёмка и hardware measurements; общие browser/document tools, source evidence и bounded model-authored planning; сравнение лёгких моделей RU/EN/zh перед сменой. Художественный редизайн позже. Перед паузой обновить session и checkpoint.
+При сбросе: свежий tools/resume_bridge.js изGitHub → bootstrap в новую соседнюю папку → assets runtime. Не скачивать модели ради кода/экспорта; достаточно текущего lightZIP дляtemplate. Главный следующий проход — общий агент с bounded model-authored planning и наблюдением после каждого шага, используя имеющуюсяUIA/vision/tool основу. Параллельно Windows/live web/hardware acceptance. Художественныйредизайн позже. Перед паузой session+checkpoint.

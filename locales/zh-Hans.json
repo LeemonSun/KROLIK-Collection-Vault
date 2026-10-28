@@ -22,7 +22,7 @@
   "model_connection_failed": "本地模型不可用。请检查开发进程或停止请求。",
   "model_invalid_response": "本地模型返回了无法读取的响应。",
   "module_unavailable": "此模块尚未接入。",
-  "help_text": "例如：打开记事本；北京几点；5分钟后提醒我检查下载；翻译剪贴板为英文；走一走。/notes查看笔记，/reminders查看提醒。\n修改文件：“编辑文件”。记忆：“记住事实 颜色：绿色”、“我的事实”、“忘记事实 颜色”。流程：“在此窗口：select Insert → write Search: hello”。\n计算：/calc sqrt(81) + 2^3\n换算：换算 2.5 千米 到 米\n设置：打开设置 声音\n网页：读取网页 https://example.com/",
+  "help_text": "例如：打开记事本；北京几点；5分钟后提醒我检查下载；翻译剪贴板为英文；走一走。/notes查看笔记，/reminders查看提醒。\n修改文件：“编辑文件”。记忆：“记住事实 颜色：绿色”、“我的事实”、“忘记事实 颜色”。流程：“在此窗口：select Insert → write Search: hello”。\n计算：/calc sqrt(81) + 2^3\n换算：换算 2.5 千米 到 米\n设置：打开设置 声音\n网页：读取网页 https://example.com/\n不使用AI，采用双精度近似计算。sin/cos使用弧度；%始终将数字除以100。",
   "empty_input": "请输入消息。",
   "input_too_long": "每条消息最多 2048 个字符。",
   "timer_invalid": "请在 /timer 后输入 1 到 86400 之间的整数秒数。",
@@ -389,5 +389,6 @@
   "web_partial": "这里只是有限摘录，并非完整浏览器视图，也未核实网站内容。未执行JavaScript、表单或网页指令。网址和摘录不会写入保存的聊天记录。",
   "web_stage_resolving": "正在检查网站地址…",
   "web_stage_connecting": "正在建立HTTPS连接…",
-  "web_stage_reading": "正在读取网页文本…"
+  "web_stage_reading": "正在读取网页文本…",
+  "math_conventions": "sin/cos使用弧度；%始终将数字除以100。"
 }

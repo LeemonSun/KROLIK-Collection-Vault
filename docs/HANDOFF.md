@@ -1,7 +1,7 @@
-# Продолжение Leemon 0.13
+# Продолжение Leemon 0.14
 
-Читайте RESUME.md, recovery/session.json, WORKFLOWS_013.md и TECH_STACK_013.md. Исходная 0.12 сохранена в истории; фундамент не перезапускать. Только Лимон. GitHub — хранилище, не CI. Модели и данные пользователя не коммитить.
+Читайте RESUME.md, recovery/session.json, WORKFLOWS_014.md и component_backlog.json. Пользователь подтвердил основной приоритет: общий адаптивный агент, который видит интерфейс/экран, понимает свободную цель, планирует, использует инструменты в существующих приложениях и проверяет/адаптирует шаги. Инструменты не заменяют этот контур. Отдельная модель на приложение и новая виртуальная пользовательская среда не нужны.
 
-Основные изменения: core/profile.gd effective; App.runtime_options/set_resource_mode; runtime/local_runtime.gd batch budget; whisper_transcriber thread cap; tools/docx_text.gd; office_patch.gd typed values/range summaries; ui/file_edit_window.gd pinned preview/range controls/type picker.
+0.14: calculator, unit_converter, windows_settings (только открытие), public_page (bounded HTTPS excerpts), utility_intent + Router/Policy/App; исправлен follow-to-latest для синхронных ответов. Архитектура/ограничения в WORKFLOWS_014. Источники стека в TECH_STACK_013. Модели прежние, новые кандидаты не установлены.
 
-Проверки: technical013, technical_visual013, Office с независимым Python-чтением, run_checks с отдельными временными профилями. Итоги, ограничения и артефакты — в session. Python нужен только для разработки, не пользователю.
+Проверки: run_checks29groups, utilities014, public_transport014, independent localTLS, Office и native215изPCK. Нужны настоящий Windows, publicweb/proxy и замеры модели. Сохранять authority gates, privacy и resource budget. GitHub только хранилище. Перед паузой обновить session и checkpoint.

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.14.0-desktop-preview",
-  "checkpoint_status": "0.14_source_checked_export_pending",
-  "current_task": "0.14 utilities implemented: bounded arithmetic, dimensional unit conversion, fixed Windows Settings handoff, explicit HTTPS public-page reader with pinned public DNS/TLS and ephemeral inert excerpts.21-entry component backlog saved. Final UI/pack/export pending.",
-  "next_action": "Finish UI follow-to-latest check and final export/PCK/native checks, then save artifacts. Public DNS in this environment unavailable; local real TLS fixture passes, actual public websites/Windows pending.",
+  "checkpoint_status": "0.14_saved_windows_acceptance_pending",
+  "current_task": "0.14 completed and saved: local bounded calculator, unit conversion, fixed Windows Settings page handoff, explicit public HTTPS excerpts reader,21-entry component backlog; visible synchronous replies. General adaptive desktop agent is the primary next milestone.",
+  "next_action": "Prioritize general observe(UIA/screen)->bounded model-authored plan->shared tools in existing apps->reobserve/verify/adapt loop. Deterministic helpers are execution tools, not replacement for general intelligence. Preserve authority gates and resource budgets. In parallel do Windows/live public web/hardware acceptance; no per-app model training or replacement Office/virtual environment.",
   "read_next": [
     "docs/WORKFLOWS_014.md",
     "research/component_backlog.json",
@@ -24,16 +24,26 @@
     "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window."
   ],
   "validation": [
-    "29 source check groups PASS, each in fresh profile",
-    "112 utilities014 checks PASS (after global IPv6 refinement)",
-    "16 public transport state-machine checks PASS (fake network)",
-    "7 real local TLS checks plus independent server request assertions PASS; no public DNS/live-site success",
-    "24 native utility UI source checks PASS before latest follow-scroll fix; final repeat pending"
+    "29 source check groups PASS in separate fresh profiles",
+    "Final PCK:9 composition/version,112utilities,16fake-network polling/authority,7real local TLS plus independent server request assertions PASS",
+    "Final PCK:33real Office checks plus independent python-docx/openpyxl readback/CRC/untouched parts PASS",
+    "Final PCK native X11:156general+34Office+25utilities checks PASS;3locales and chat size/last-reply visibility/source inert markup",
+    "Final ZIP CRC PASS; no new weights/runtime required",
+    "Actual public DNS/live websites not verified: Godot and independent Python DNS unavailable in this environment. Local test-only socket adapter verified real TLS protocol; no proxy support claimed.",
+    "Windows EXE/UIA/DPI/locks/mic/TTS and actual2Bquality/performance remain unverified or not remeasured"
   ],
-  "artifact": null,
-  "previous_checkpoint": "7994982c3545a29004bbfd1d41d597e6a2654730",
-  "shipped_version": "0.13.0-desktop-preview",
-  "shipped_app_pack_sha256": "c9dd1699e2836560df4b5eb6c9e5d85907b923dd859d085c5367ad20e19a8744",
+  "artifact": {
+    "full": "Companion_Preview_Windows_v0.14.0.zip",
+    "bytes": 53896552,
+    "sha256": "e468edfb163f568abfcd25ec6c706e898a8bbf5336a9b7b810cf73cdf1b231bb",
+    "library_file_id": "libfile_1f130b15d4b481919b3a2baab377add7",
+    "file_id": "file_00000000345481f5a9be9d090de28e21",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+  },
+  "previous_checkpoint": "ce3bb33c78f9aade19aa631f4c94ea8551f86013",
+  "shipped_version": "0.14.0-desktop-preview",
+  "shipped_app_pack_sha256": "721da2d1f4f9fed0320c2e2663be94d81a46714d5d62c43a0c5e9d1b557b9e52",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -68,9 +78,9 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_41c9575efca0819192fb7b4b3718ab99",
+  "report_library_file_id": "libfile_76dfcb96f9148191932f3304c5f5f8a2",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
-  "report_version": 0,
+  "report_version": 1,
   "recovery_event": {
     "date_moscow": "2026-10-28",
     "source_head": "fb9c8195099ed1503c1c89e459fc510c8056da7f",
@@ -132,7 +142,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000b5ac81fd9eb5c2dc6f30b13c",
+  "report_file_id": "file_00000000a3b481f88e7fbbae126b42ec",
   "motion_artifact": {
     "filename": "Leemon_0.11_Motions.mp4",
     "bytes": 182482,
@@ -145,7 +155,23 @@
     "sha256": "217f5008402b9216f13a01f91405b90b565fbb3268271779faeb74c156d4a722",
     "version_label": "0.11_reference_not_0.12_capture"
   },
-  "shipped_exe_sha256": "92a659d4d5180cace94ee097ba9d4e4e9382f71ae034f3f321116d4cc12c7b2e",
+  "shipped_exe_sha256": "55166cfe1374c1e8bd24741f56e5116d40b0ba8a72f0c27926431ba886fbb08c",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Pinned review/result above approval; all new numeric/Boolean/range UI checks rerun from rebuilt final PCK. run_checks isolates profiles per group to prevent persisted locale/test-fixture contamination."
+  "final_fix": "Explicit follow after submitting synchronous utility reply;3-frame layout settle. HTTP reader uses persistent HTTP1.1 connection until Content-Length/chunked completion and clears socket/data. New user decision prioritizes general adaptive agent, not manual command catalog.",
+  "product_direction": {
+    "primary": "general_adaptive_desktop_agent",
+    "loop": [
+      "observe_UIA_or_screen",
+      "infer_goal",
+      "bounded_plan",
+      "shared_tools",
+      "observe_verify",
+      "adapt_or_stop"
+    ],
+    "existing_applications_first": true,
+    "replacement_office_or_virtual_user_environment": false,
+    "per_application_models": false,
+    "deterministic_helpers_are_support": true,
+    "continuous_weight_training_implemented": false
+  }
 }
