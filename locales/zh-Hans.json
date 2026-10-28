@@ -447,5 +447,7 @@
   "chat_draft_repairing": "正在修改草稿…",
   "chat_draft_unverified": "未能生成不含未经确认细节的草稿。没有发送任何内容。",
   "window_read_interpretation": "基于摘录的回答：",
-  "window_read_unverified": "回答未通过检查。以下是原始摘录，可能无法回答你的问题。"
+  "window_read_unverified": "回答未通过检查。以下是原始摘录，可能无法回答你的问题。",
+  "logic_unverified": "无法可靠地解析前提。请将各个前提分开写，并指出要检验的结论。",
+  "logic_interpreting": "正在解析前提…"
 }

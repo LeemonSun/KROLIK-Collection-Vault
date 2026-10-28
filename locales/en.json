@@ -447,5 +447,7 @@
   "chat_draft_repairing": "Correcting the draft…",
   "chat_draft_unverified": "I could not produce a draft without unsupported details. Nothing was sent.",
   "window_read_interpretation": "Answer based on excerpts:",
-  "window_read_unverified": "The answer did not pass validation. Below are original excerpts; they may not answer the question."
+  "window_read_unverified": "The answer did not pass validation. Below are original excerpts; they may not answer the question.",
+  "logic_unverified": "I could not reliably interpret the premises. Write them as separate sentences and specify the conclusion to check.",
+  "logic_interpreting": "Interpreting the premises…"
 }

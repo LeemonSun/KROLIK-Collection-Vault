@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Leemon",
   "publisher": null,
-  "version": "0.20.0-desktop-preview",
+  "version": "0.21.0-desktop-preview",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [
@@ -14,7 +14,7 @@
   "telemetry": false,
   "models_bundled": false,
   "final_character_selected": false,
-  "project_stage": "measured_worker_cache_and_guarded_practical_drafts_private_preview",
+  "project_stage": "bounded_symbolic_reasoning_with_small_model_retained_private_preview",
   "character_concept_selected": true,
   "pixel_direction": "deferred",
   "optional_offline_bundle": true

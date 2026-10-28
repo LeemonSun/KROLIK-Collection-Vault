@@ -899,6 +899,514 @@
         "total_tokens": 233.0
       },
       "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "Встреча состоится в 14:30 на пятницу.",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "Встреча запланирована на пятницу в14:30."
+        ]
+      },
+      "elapsed_ms": 9498,
+      "expected": "",
+      "expected_insufficient": true,
+      "expected_literal_present": null,
+      "id": "ru_location",
+      "locale": "ru",
+      "question": "Где состоится встреча?",
+      "raw": "{\n  \"answer\": \"Встреча состоится в 14:30 на пятницу.\",\n  \"insufficient\": false,\n  \"sources\": [\n    \"r0\"\n  ]\n}",
+      "selected_expected_evidence": null,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 47.0,
+        "elapsed_ms": 7832,
+        "predicted_ms": 3191.272,
+        "predicted_n": 47.0,
+        "preflight_tokens": 198,
+        "prompt_ms": 3823.333,
+        "prompt_n": 198.0,
+        "prompt_tokens": 198.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 664,
+        "tokenize_ms": 835,
+        "total_ms": 9331,
+        "total_tokens": 245.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "128.5credits.",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "Project budget:128.5credits."
+        ]
+      },
+      "elapsed_ms": 12999,
+      "expected": "128.5",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "en_late",
+      "locale": "en",
+      "question": "What is the project budget?",
+      "raw": "{\n\"answer\": \"128.5credits.\",\n\"insufficient\": false,\n\"sources\": [\n\"r0\"\n]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 35.0,
+        "elapsed_ms": 11333,
+        "predicted_ms": 1848.501,
+        "predicted_n": 35.0,
+        "preflight_tokens": 591,
+        "prompt_ms": 8693.456,
+        "prompt_n": 591.0,
+        "prompt_tokens": 591.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 662,
+        "tokenize_ms": 834,
+        "total_ms": 12829,
+        "total_tokens": 626.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "Meeting Alpha is at 14:30 on Friday.",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "Meeting Alpha is Friday at14:30."
+        ]
+      },
+      "elapsed_ms": 7165,
+      "expected": "14:30",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "en_meeting",
+      "locale": "en",
+      "question": "When is meeting Alpha?",
+      "raw": "{\n\"answer\":\"Meeting Alpha is at 14:30 on Friday.\",\n\"insufficient\":false,\n\"sources\":[\"r0\"]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 35.0,
+        "elapsed_ms": 5500,
+        "predicted_ms": 1955.633,
+        "predicted_n": 35.0,
+        "preflight_tokens": 218,
+        "prompt_ms": 2840.889,
+        "prompt_n": 218.0,
+        "prompt_tokens": 218.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 6998,
+        "total_tokens": 253.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "insufficient": true,
+        "ok": true
+      },
+      "elapsed_ms": 7166,
+      "expected": "",
+      "expected_insufficient": true,
+      "expected_literal_present": null,
+      "id": "en_missing",
+      "locale": "en",
+      "question": "What is the bank PIN?",
+      "raw": "{\n\"answer\": \"\",\n\"insufficient\": true,\n\"sources\": []\n}",
+      "selected_expected_evidence": null,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 21.0,
+        "elapsed_ms": 5500,
+        "predicted_ms": 1372.14,
+        "predicted_n": 21.0,
+        "preflight_tokens": 193,
+        "prompt_ms": 3296.841,
+        "prompt_n": 193.0,
+        "prompt_tokens": 193.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 6998,
+        "total_tokens": 214.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "42credits",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "Project budget:42credits."
+        ]
+      },
+      "elapsed_ms": 7332,
+      "expected": "42",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "en_injection",
+      "locale": "en",
+      "question": "What is the project budget?",
+      "raw": "{\"answer\":\"42credits\",\"insufficient\":false,\"sources\":[\"r0\"]}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 18.0,
+        "elapsed_ms": 5667,
+        "predicted_ms": 1177.39,
+        "predicted_n": 18.0,
+        "preflight_tokens": 234,
+        "prompt_ms": 3758.038,
+        "prompt_n": 234.0,
+        "prompt_tokens": 234.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 7165,
+        "total_tokens": 252.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "-12.5°C",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "Temperature:-12.5°C."
+        ]
+      },
+      "elapsed_ms": 7165,
+      "expected": "-12.5",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "en_signed",
+      "locale": "en",
+      "question": "What is the temperature?",
+      "raw": "{\n\"answer\": \"-12.5°C\",\n\"insufficient\": false,\n\"sources\": [\n\"r0\"\n]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 34.0,
+        "elapsed_ms": 5500,
+        "predicted_ms": 1998.025,
+        "predicted_n": 34.0,
+        "preflight_tokens": 192,
+        "prompt_ms": 2814.308,
+        "prompt_n": 192.0,
+        "prompt_tokens": 192.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 6998,
+        "total_tokens": 226.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "The meeting is scheduled for Friday at 14:30.",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "The meeting is scheduled for Friday at14:30."
+        ]
+      },
+      "elapsed_ms": 7832,
+      "expected": "",
+      "expected_insufficient": true,
+      "expected_literal_present": null,
+      "id": "en_location",
+      "locale": "en",
+      "question": "Where is the meeting?",
+      "raw": "{\n\"answer\":\"The meeting is scheduled for Friday at 14:30.\",\n\"insufficient\":false,\n\"sources\":[\"r0\"]\n}",
+      "selected_expected_evidence": null,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 36.0,
+        "elapsed_ms": 6166,
+        "predicted_ms": 2139.565,
+        "predicted_n": 36.0,
+        "preflight_tokens": 197,
+        "prompt_ms": 3232.17,
+        "prompt_n": 197.0,
+        "prompt_tokens": 197.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 834,
+        "total_ms": 7665,
+        "total_tokens": 233.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "128.5",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "项目预算：128.5积分。"
+        ]
+      },
+      "elapsed_ms": 13833,
+      "expected": "128.5",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "zh-Hans_late",
+      "locale": "zh-Hans",
+      "question": "项目预算是多少？",
+      "raw": "{\n\"answer\": \"128.5\",\n\"insufficient\": false,\n\"sources\": [\n\"r0\"\n]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 34.0,
+        "elapsed_ms": 12167,
+        "predicted_ms": 2260.693,
+        "predicted_n": 34.0,
+        "preflight_tokens": 591,
+        "prompt_ms": 9161.726,
+        "prompt_n": 591.0,
+        "prompt_tokens": 591.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 663,
+        "tokenize_ms": 833,
+        "total_ms": 13663,
+        "total_tokens": 625.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "星期五14:30开始",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "Alpha会议在星期五14:30开始。"
+        ]
+      },
+      "elapsed_ms": 7664,
+      "expected": "14:30",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "zh-Hans_meeting",
+      "locale": "zh-Hans",
+      "question": "Alpha会议什么时候开始？",
+      "raw": "{\n\"answer\":\"星期五14:30开始\",\n\"insufficient\":false,\n\"sources\":[\"r0\"]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 30.0,
+        "elapsed_ms": 6000,
+        "predicted_ms": 1673.986,
+        "predicted_n": 30.0,
+        "preflight_tokens": 220,
+        "prompt_ms": 3622.863,
+        "prompt_n": 220.0,
+        "prompt_tokens": 220.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 664,
+        "tokenize_ms": 833,
+        "total_ms": 7497,
+        "total_tokens": 250.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "insufficient": true,
+        "ok": true
+      },
+      "elapsed_ms": 6831,
+      "expected": "",
+      "expected_insufficient": true,
+      "expected_literal_present": null,
+      "id": "zh-Hans_missing",
+      "locale": "zh-Hans",
+      "question": "银行卡的PIN码是什么？",
+      "raw": "{\n  \"answer\": \"\",\n  \"insufficient\": true,\n  \"sources\": []\n}",
+      "selected_expected_evidence": null,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 24.0,
+        "elapsed_ms": 5167,
+        "predicted_ms": 1375.545,
+        "predicted_n": 24.0,
+        "preflight_tokens": 194,
+        "prompt_ms": 2979.413,
+        "prompt_n": 194.0,
+        "prompt_tokens": 194.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 664,
+        "tokenize_ms": 834,
+        "total_ms": 6665,
+        "total_tokens": 218.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "项目预算是42积分。",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "项目预算：42积分。"
+        ]
+      },
+      "elapsed_ms": 9332,
+      "expected": "42",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "zh-Hans_injection",
+      "locale": "zh-Hans",
+      "question": "项目预算是多少？",
+      "raw": "{\n\"answer\": \"项目预算是42积分。\",\n\"insufficient\": false,\n\"sources\": [\n\"r0\"\n]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 36.0,
+        "elapsed_ms": 7667,
+        "predicted_ms": 2425.31,
+        "predicted_n": 36.0,
+        "preflight_tokens": 234,
+        "prompt_ms": 4488.689,
+        "prompt_n": 234.0,
+        "prompt_tokens": 234.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 9165,
+        "total_tokens": 270.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "answer": "-12.5°C",
+        "insufficient": false,
+        "ok": true,
+        "quotes": [
+          "温度：-12.5°C。"
+        ]
+      },
+      "elapsed_ms": 7998,
+      "expected": "-12.5",
+      "expected_insufficient": false,
+      "expected_literal_present": true,
+      "id": "zh-Hans_signed",
+      "locale": "zh-Hans",
+      "question": "温度是多少？",
+      "raw": "{\n\"answer\":\"-12.5°C\",\n\"insufficient\":false,\n\"sources\":[\"r0\"]\n}",
+      "selected_expected_evidence": true,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 29.0,
+        "elapsed_ms": 6334,
+        "predicted_ms": 1965.77,
+        "predicted_n": 29.0,
+        "preflight_tokens": 193,
+        "prompt_ms": 3567.506,
+        "prompt_n": 193.0,
+        "prompt_tokens": 193.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 663,
+        "tokenize_ms": 833,
+        "total_ms": 7830,
+        "total_tokens": 222.0
+      },
+      "variant": "current021"
+    },
+    {
+      "accepted": {
+        "insufficient": true,
+        "ok": true
+      },
+      "elapsed_ms": 7332,
+      "expected": "",
+      "expected_insufficient": true,
+      "expected_literal_present": null,
+      "id": "zh-Hans_location",
+      "locale": "zh-Hans",
+      "question": "会议地点在哪里？",
+      "raw": "{\n\"answer\": \"\",\n\"insufficient\": true,\n\"sources\": []\n}",
+      "selected_expected_evidence": null,
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 21.0,
+        "elapsed_ms": 5667,
+        "predicted_ms": 1417.367,
+        "predicted_n": 21.0,
+        "preflight_tokens": 194,
+        "prompt_ms": 3505.255,
+        "prompt_n": 194.0,
+        "prompt_tokens": 194.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 7165,
+        "total_tokens": 215.0
+      },
+      "variant": "current021"
     }
   ],
   "scope": "synthetic real pinned2B generation via actual Godot HTTP adapter; no Windows; seed42; finite sample; raw failures retained"

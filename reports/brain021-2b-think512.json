@@ -1,0 +1,298 @@
+{
+  "model": "2b",
+  "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "runtime": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "cache_ram": 0,
+  "ctx_checkpoints": 0,
+  "mode": "think512",
+  "seed": 42,
+  "cases": [
+    {
+      "id": "ru_liar",
+      "locale": "ru",
+      "category": "liar",
+      "input": "Предложение «это предложение ложно» истинно или ложно в классической двузначной логике? Объясни коротко.",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction, not simply false.",
+      "prompt_tokens": 178,
+      "answer": "В классической двузначной логике это предложение является **противоречивым** (неопределенно).\n\nЕсли предположить, что оно истинно, то оно ложно. Если оно ложно, то оно истинно. Это приводит к парадоксу Ляри, который не может быть решён в рамках классической логики.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 594,
+        "prompt_tokens": 178,
+        "total_tokens": 772,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 178,
+        "prompt_ms": 3073.511,
+        "prompt_per_token_ms": 17.26691573033708,
+        "prompt_per_second": 57.914222529218215,
+        "predicted_n": 594,
+        "predicted_ms": 37988.79,
+        "predicted_per_token_ms": 64.06204047217538,
+        "predicted_per_second": 15.609868068975084
+      },
+      "reasoning_chars": 1934,
+      "wall_ms": 41075
+    },
+    {
+      "id": "ru_negative",
+      "locale": "ru",
+      "category": "negative",
+      "input": "Все зоры синие. Некоторые синие вещи круглые. Следует ли, что некоторые зоры круглые? Объясни.",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 177,
+      "answer": "Да, следует. Поскольку все зоры синие, а некоторые синие вещи круглые, то среди синих вещей (которые включают зор) есть круглые. Следовательно, существует хотя бы один круглый синий предмет, который является зором.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 567,
+        "prompt_tokens": 177,
+        "total_tokens": 744,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 177,
+        "prompt_ms": 2890.914,
+        "prompt_per_token_ms": 16.33284745762712,
+        "prompt_per_second": 61.22631112513205,
+        "predicted_n": 567,
+        "predicted_ms": 34766.922,
+        "predicted_per_token_ms": 61.425657243816254,
+        "predicted_per_second": 16.27984208668228
+      },
+      "reasoning_chars": 1944,
+      "wall_ms": 37670
+    },
+    {
+      "id": "ru_plan",
+      "locale": "ru",
+      "category": "plan",
+      "input": "Есть инструменты: прочитать файл, создать резервную копию, заменить точный фрагмент. Нужно поменять Fullscreen=1 на Fullscreen=0 в конфиге, не потеряв остальные настройки. Дай порядок действий и условие остановки, если строка найдена дважды. Ничего не выполняй.",
+      "rubric": "Read actual file, backup before patch, unique exact match else stop/clarify, verify reread; no invented success.",
+      "prompt_tokens": 211,
+      "answer": "Поскольку у меня нет доступа к файловой системе или файлам, я не могу выполнить команды напрямую.\n\n**План действий:**\n\n1.  **Создать резервную копию:** Используйте команду `create_backup` перед редактированием.\n2.  **Найти строку:** Используйте команду `read_file` для поиска строки `Fullscreen=1`.\n3.  **Заменить фрагмент:** Используйте команду `replace_exact_fragment` для замены `Fullscreen=1` на `Fullscreen=0`.\n\n**Условие остановки:**\nЕсли строка `Fullscreen=1` найдена дважды, замените только первую найденную. Остальные оставьте как есть.\n\n**Важно:**\n*   После выполнения замените резервную копию обратно, чтобы не потерять данные.\n*   Если файл содержит чувствительную информацию, убедитесь, что это безопасно.\n\n**Ответ:**\nЯ не могу выполнить команду `read_file`, `create_backup` или `replace_exact_fragment` напрямую, так как у меня нет доступа к файловой системе. Однако я могу объяснить логику действий.\n\n**Порядок действий:**\n1.  **Создать резервную копи",
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 768,
+        "prompt_tokens": 211,
+        "total_tokens": 979,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 211,
+        "prompt_ms": 2724.8,
+        "prompt_per_token_ms": 12.913744075829385,
+        "prompt_per_second": 77.43687610099823,
+        "predicted_n": 768,
+        "predicted_ms": 46072.672,
+        "predicted_per_token_ms": 60.06867275097783,
+        "predicted_per_second": 16.647612710632455
+      },
+      "reasoning_chars": 2184,
+      "wall_ms": 48808
+    },
+    {
+      "id": "en_liar",
+      "locale": "en",
+      "category": "liar",
+      "input": "Is the sentence “this sentence is false” true or false in classical two-valued logic? Explain briefly.",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction.",
+      "prompt_tokens": 170,
+      "answer": "In classical two-valued logic, the sentence \"this sentence is false\" is **false**.\n\nThis is because if the sentence were true, it would assert that it is false, creating a contradiction. If it is false, it asserts that it is false, which is consistent.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 572,
+        "prompt_tokens": 170,
+        "total_tokens": 742,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 170,
+        "prompt_ms": 2683.267,
+        "prompt_per_token_ms": 15.783923529411764,
+        "prompt_per_second": 63.355603449079055,
+        "predicted_n": 572,
+        "predicted_ms": 37681.671,
+        "predicted_per_token_ms": 65.99241856392294,
+        "predicted_per_second": 15.15325580970122
+      },
+      "reasoning_chars": 1889,
+      "wall_ms": 40376
+    },
+    {
+      "id": "en_negative",
+      "locale": "en",
+      "category": "negative",
+      "input": "All zors are blue. Some blue things are round. Does it follow that some zors are round? Explain.",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 172,
+      "answer": "No, it does not necessarily follow.\n\nHere is the reasoning:\n1.  **Premise 1:** All zors are blue. (Zors are a subset of blue things).\n2.  **Premise 2:** Some blue things are round. (There is at least one blue object that is round).\n3.  **Conclusion:** Some zors are round.\n\n**Reasoning:**\nThe fact that some blue things are round does not guarantee that those specific round blue things are zors. A zor is defined as a blue thing, but the specific round blue thing could be a non-zor (e.g., a blue ball). Therefore, while it is possible for some zors to be round, it is not logically certain.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 673,
+        "prompt_tokens": 172,
+        "total_tokens": 845,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 172,
+        "prompt_ms": 2841.802,
+        "prompt_per_token_ms": 16.522104651162792,
+        "prompt_per_second": 60.52497675770514,
+        "predicted_n": 673,
+        "predicted_ms": 45283.874,
+        "predicted_per_token_ms": 67.38671726190476,
+        "predicted_per_second": 14.839719764258684
+      },
+      "reasoning_chars": 2069,
+      "wall_ms": 48135
+    },
+    {
+      "id": "en_plan",
+      "locale": "en",
+      "category": "plan",
+      "input": "Available tools: read a file, make a backup, replace an exact fragment. Change Fullscreen=1 to Fullscreen=0 in a config without losing other settings. Give the order and when to stop if the line occurs twice. Execute nothing.",
+      "rubric": "Read, backup before edit, unique match else stop, verify reread; no fake completion.",
+      "prompt_tokens": 198,
+      "answer": "I cannot execute file system commands or modify configuration files directly. I can only provide instructions on how to do so.\n\nTo change `Fullscreen=1` to `Fullscreen=0` without affecting other settings, follow this procedure:\n\n1.  Open the configuration file.\n2.  Locate the line `Fullscreen=1`.\n3.  Replace it with `Fullscreen=0`.\n4.  Stop if the line occurs twice.\n\n**Note:** This requires editing the file directly.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 616,
+        "prompt_tokens": 198,
+        "total_tokens": 814,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 198,
+        "prompt_ms": 3479.288,
+        "prompt_per_token_ms": 17.572161616161615,
+        "prompt_per_second": 56.90819501001354,
+        "predicted_n": 616,
+        "predicted_ms": 37557.563,
+        "predicted_per_token_ms": 61.06920813008131,
+        "predicted_per_second": 16.3748643648684
+      },
+      "reasoning_chars": 2241,
+      "wall_ms": 41046
+    },
+    {
+      "id": "zh-Hans_liar",
+      "locale": "zh-Hans",
+      "category": "liar",
+      "input": "在经典二值逻辑中，“这句话是假的”是真的还是假的？简要说明。",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction.",
+      "prompt_tokens": 168,
+      "answer": "在经典二值逻辑中，“这句话是假的”是**假的**。\n\n根据逻辑规则（即说谎悖论），如果该命题为真，则它的内容为假，产生矛盾；如果该命题为假，则它的内容为真，也产生矛盾。但在经典二值逻辑（Boolean Logic）的严格定义下，通常认为该命题为**假**，因为逻辑系统不允许自指悖论，而该命题本身在逻辑上无法成立。\n\n因此，答案是：假。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 622,
+        "prompt_tokens": 168,
+        "total_tokens": 790,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 2544.699,
+        "prompt_per_token_ms": 15.147017857142858,
+        "prompt_per_second": 66.01959603080758,
+        "predicted_n": 622,
+        "predicted_ms": 36970.395,
+        "predicted_per_token_ms": 59.53364734299517,
+        "predicted_per_second": 16.797223832745093
+      },
+      "reasoning_chars": 2416,
+      "wall_ms": 39524
+    },
+    {
+      "id": "zh-Hans_negative",
+      "locale": "zh-Hans",
+      "category": "negative",
+      "input": "所有佐尔都是蓝色的。有些蓝色物体是圆的。能否推出有些佐尔是圆的？请解释。",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 173,
+      "answer": "不能推出。\n\n这是逻辑上的“三段论”谬误。虽然“所有佐尔都是蓝色的”和“有些蓝色物体是圆的”为真，但无法确定“有些佐尔是圆的”。\n\n原因如下：\n1.  “有些蓝色物体是圆的”只说明存在圆形的蓝色物体，这些物体可能是佐尔，也可能是其他物体。\n2.  如果那“有些蓝色物体”中的圆形物体恰好都不是佐尔，那么结论就不成立。\n\n因此，无法必然推导。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 623,
+        "prompt_tokens": 173,
+        "total_tokens": 796,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 173,
+        "prompt_ms": 3339.891,
+        "prompt_per_token_ms": 19.305728323699423,
+        "prompt_per_second": 51.79809760258643,
+        "predicted_n": 623,
+        "predicted_ms": 38506.363,
+        "predicted_per_token_ms": 61.907336012861734,
+        "predicted_per_second": 16.15317447664429
+      },
+      "reasoning_chars": 1790,
+      "wall_ms": 41854
+    },
+    {
+      "id": "zh-Hans_plan",
+      "locale": "zh-Hans",
+      "category": "plan",
+      "input": "可用工具：读取文件、创建备份、精确替换片段。要把配置中的Fullscreen=1改为Fullscreen=0，并保留其他设置。请给出顺序，以及该行出现两次时应何时停止。不要执行。",
+      "rubric": "Read, backup before edit, unique match else stop, verify reread; no fake completion.",
+      "prompt_tokens": 194,
+      "answer": "根据您提供的工具（读取文件、创建备份、精确替换片段），修改配置文件中 `Fullscreen=1` 为 `Fullscreen=0` 的正确顺序如下：\n\n1.  **读取文件**：使用工具打开配置文件。\n2.  **创建备份**：在修改前保存当前版本，以防出错。\n3.  **精确替换片段**：定位到 `Fullscreen=1` 行，将其替换为 `Fullscreen=0`。\n4.  **验证**：确认该行已修改且其他设置未受影响。\n\n**关于该行出现两次时的停止时机：**\n如果该行在文件中出现两次，应**在每一处都执行替换操作后停止**。\n*   第一次出现：替换为 `Fullscreen=0`。\n*   第二次出现：再次替换为 `Fullscreen=0`。\n*   此时文件中的两处 `Fullscreen=1` 均已变为 `Fullscreen=0`，无需继续处理。\n\n**注意事项：**\n*   确保替换后文件逻辑正确。\n*   修改前已备份。\n*   无需执行任何操作。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 751,
+        "prompt_tokens": 194,
+        "total_tokens": 945,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 194,
+        "prompt_ms": 2663.689,
+        "prompt_per_token_ms": 13.730355670103092,
+        "prompt_per_second": 72.83132527858922,
+        "predicted_n": 751,
+        "predicted_ms": 44610.117,
+        "predicted_per_token_ms": 59.480156,
+        "predicted_per_second": 16.812329812988384
+      },
+      "reasoning_chars": 2142,
+      "wall_ms": 47282
+    }
+  ],
+  "scope": "synthetic real CPU inference, matched256answerbudget; notWindows/notstatisticalIQ/notrealOSexecution; no private reasoning text",
+  "startup_ms": 1843,
+  "owned_worker_peak_rss_bytes": 1956913152,
+  "owned_worker_cpu_seconds": 773.4126709999999
+}

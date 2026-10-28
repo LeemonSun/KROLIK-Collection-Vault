@@ -1,0 +1,819 @@
+{
+  "cases": [
+    {
+      "expected": "undetermined",
+      "id": "ru_invalid",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "classes": [
+          "зоры",
+          "синие",
+          "круглые"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Все зоры синие",
+          "Некоторые синие вещи круглые"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6
+        ]
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "зоры",
+          "синие",
+          "круглые"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Все зоры синие",
+          "Некоторые синие вещи круглые"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6
+        ]
+      }
+    },
+    {
+      "expected": "entailed",
+      "id": "ru_valid",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "зоры",
+          "синие",
+          "круглые"
+        ],
+        "conclusion": {
+          "a": 1,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Все зоры синие",
+          "Некоторые зоры круглые"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          7
+        ]
+      }
+    },
+    {
+      "expected": "inconsistent",
+      "id": "ru_inconsistent",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "classes": [
+          "зоры",
+          "синие"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 1,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "none"
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Никакие зоры не синие",
+          "Некоторые зоры синие"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "зоры",
+          "синие"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 1,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "none"
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Никакие зоры не синие",
+          "Некоторые зоры синие"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      }
+    },
+    {
+      "expected": "entailed",
+      "id": "ru_chain",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "classes": [
+          "роботы",
+          "устройства",
+          "металлические",
+          "красные"
+        ],
+        "conclusion": {
+          "a": 3,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 3,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Все роботы — устройства",
+          "Все устройства — металлические",
+          "Некоторые роботы — красные"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          15
+        ]
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "роботы",
+          "устройства",
+          "металлические",
+          "красные"
+        ],
+        "conclusion": {
+          "a": 3,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 3,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "Все роботы — устройства",
+          "Все устройства — металлические",
+          "Некоторые роботы — красные"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          15
+        ]
+      }
+    },
+    {
+      "expected": "undetermined",
+      "id": "en_invalid",
+      "initial_harness_validation": {
+        "classes": [
+          "zors",
+          "blue",
+          "round"
+        ],
+        "conclusion": {
+          "a": 0.0,
+          "b": 2.0,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0.0,
+            "b": 1.0,
+            "kind": "all"
+          },
+          {
+            "a": 1.0,
+            "b": 2.0,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All zors are blue",
+          "Some blue things are round"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6.0
+        ]
+      },
+      "raw_model_validation": {
+        "classes": [
+          "zors",
+          "blue",
+          "round"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All zors are blue",
+          "Some blue things are round"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6
+        ]
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "zors",
+          "blue",
+          "round"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All zors are blue",
+          "Some blue things are round"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6
+        ]
+      }
+    },
+    {
+      "expected": "entailed",
+      "id": "en_valid",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "zors",
+          "blue",
+          "round"
+        ],
+        "conclusion": {
+          "a": 1,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All zors are blue",
+          "Some zors are round"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          7
+        ]
+      }
+    },
+    {
+      "expected": "inconsistent",
+      "id": "en_inconsistent",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "zors",
+          "blue"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 1,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "none"
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "No zors are blue",
+          "Some zors are blue"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      }
+    },
+    {
+      "expected": "entailed",
+      "id": "en_chain",
+      "initial_harness_validation": {
+        "classes": [
+          "robots",
+          "devices",
+          "metallic",
+          "red",
+          "things"
+        ],
+        "conclusion": {
+          "a": 3.0,
+          "b": 4.0,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0.0,
+            "b": 1.0,
+            "kind": "all"
+          },
+          {
+            "a": 1.0,
+            "b": 2.0,
+            "kind": "all"
+          },
+          {
+            "a": 0.0,
+            "b": 3.0,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All robots are devices",
+          "All devices are metallic",
+          "Some robots are red"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          15.0
+        ]
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "robots",
+          "devices",
+          "metallic",
+          "red"
+        ],
+        "conclusion": {
+          "a": 3,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 3,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All robots are devices",
+          "All devices are metallic",
+          "Some robots are red"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          15
+        ]
+      }
+    },
+    {
+      "expected": "undetermined",
+      "id": "zh-Hans_invalid",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "佐尔",
+          "蓝色的",
+          "圆的"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "所有佐尔都是蓝色的",
+          "有些蓝色物体是圆的"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6
+        ]
+      }
+    },
+    {
+      "expected": "entailed",
+      "id": "zh-Hans_valid",
+      "initial_harness_validation": {
+        "ok": false
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "佐尔",
+          "蓝色的",
+          "圆的"
+        ],
+        "conclusion": {
+          "a": 1,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "所有佐尔都是蓝色的",
+          "有些佐尔是圆的"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          7
+        ]
+      }
+    },
+    {
+      "expected": "inconsistent",
+      "id": "zh-Hans_inconsistent",
+      "initial_harness_validation": {
+        "classes": [
+          "佐尔",
+          "蓝色的"
+        ],
+        "conclusion": {
+          "a": 0.0,
+          "b": 1.0,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0.0,
+            "b": 1.0,
+            "kind": "none"
+          },
+          {
+            "a": 0.0,
+            "b": 1.0,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "没有佐尔是蓝色的",
+          "有些佐尔是蓝色的"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      },
+      "raw_model_validation": {
+        "classes": [
+          "佐尔",
+          "蓝色的"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 1,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "none"
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "没有佐尔是蓝色的",
+          "有些佐尔是蓝色的"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "佐尔",
+          "蓝色的"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 1,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "none"
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "没有佐尔是蓝色的",
+          "有些佐尔是蓝色的"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      }
+    },
+    {
+      "expected": "entailed",
+      "id": "zh-Hans_chain",
+      "initial_harness_validation": {
+        "classes": [
+          "机器人",
+          "设备",
+          "金属制的",
+          "红色的",
+          "物体"
+        ],
+        "conclusion": {
+          "a": 3.0,
+          "b": 4.0,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0.0,
+            "b": 1.0,
+            "kind": "all"
+          },
+          {
+            "a": 1.0,
+            "b": 2.0,
+            "kind": "all"
+          },
+          {
+            "a": 0.0,
+            "b": 3.0,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "所有机器人都是设备",
+          "所有设备都是金属制的",
+          "有些机器人是红色的"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          15.0
+        ]
+      },
+      "raw_model_validation": {
+        "ok": false
+      },
+      "typed_grammar_direct": {
+        "classes": [
+          "机器人",
+          "设备",
+          "金属制的",
+          "红色的"
+        ],
+        "conclusion": {
+          "a": 3,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 3,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "所有机器人都是设备",
+          "所有设备都是金属制的",
+          "有些机器人是红色的"
+        ],
+        "verdict": "entailed",
+        "witnesses": [
+          15
+        ]
+      }
+    }
+  ],
+  "model_accepted": 5,
+  "model_verdict_matches": 5,
+  "scope": "Final-source revalidation of preserved synthetic model outputs; not new inference. Earlier runningGodot cached validator before Cyrillic-case/surface fixes. Semantic format rejected; experimental model interpreter OFF by default. Directgrammar12cases is separate non-neural evidence."
+}

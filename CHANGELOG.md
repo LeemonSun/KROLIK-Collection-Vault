@@ -1,3 +1,8 @@
+##0.21 private preview
+- Bounded categorical set reasoning and explicit interpreted premises before model load;6classes/8premises, RU/EN/zh flat syntax. Not globalIQ training.
+- Smallmodel/4B/128/512deliberation comparisons retained; no heavier default or new required downloads. Neural formalization experimentalOFF.
+- Queryranked window excerpts, narrow cited literal/day/sign guards and original-excerpt fallback without extra inference.
+
 ##0.20.0 private preview
 - Measured and disabled additional worker RAM prompt cache/context checkpoints; controlled Linux A/B retained.
 - Short standalone practical chat authoring, one bounded hidden repair, unsent draft label and narrow literal/action guards.

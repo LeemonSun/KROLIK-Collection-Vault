@@ -1,0 +1,1 @@
+Controlled early stop of index-binding formalizer. Raw completedcases retained inJSON; process-group interrupt means no finalRSSreceipt.

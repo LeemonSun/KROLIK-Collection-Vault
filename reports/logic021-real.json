@@ -1,0 +1,522 @@
+{
+  "cases": [
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 15668,
+      "expected": "undetermined",
+      "id": "ru_invalid",
+      "input": "Все зоры синие. Некоторые синие вещи круглые. Следует ли, что некоторые зоры круглые?",
+      "locale": "ru",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"круглые\",\n    \"subject\": \"зоры\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"синие\",\n      \"quote\": \"Все зоры синие.\",\n      \"subject\": \"зоры\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"круглые\",\n      \"quote\": \"Некоторые синие вещи круглые.\",\n      \"subject\": \"синие вещи\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 149.0,
+        "elapsed_ms": 14333,
+        "predicted_ms": 10092.315,
+        "predicted_n": 149.0,
+        "preflight_tokens": 187,
+        "prompt_ms": 3505.046,
+        "prompt_n": 187.0,
+        "prompt_tokens": 187.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 334,
+        "tokenize_ms": 834,
+        "total_ms": 15501,
+        "total_tokens": 336.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 14999,
+      "expected": "entailed",
+      "id": "ru_valid",
+      "input": "Все зоры синие. Некоторые зоры круглые. Следует ли, что некоторые синие вещи круглые?",
+      "locale": "ru",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"all\",\n    \"predicate\": \"вещи\",\n    \"subject\": \"синие\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"зор\",\n      \"quote\": \"Все зоры синие\",\"subject\": \"зор\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"зор\",\n      \"quote\": \"Некоторые зоры круглые\",\"subject\": \"зор\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 140.0,
+        "elapsed_ms": 13333,
+        "predicted_ms": 9408.323,
+        "predicted_n": 140.0,
+        "preflight_tokens": 187,
+        "prompt_ms": 3093.759,
+        "prompt_n": 187.0,
+        "prompt_tokens": 187.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 666,
+        "tokenize_ms": 834,
+        "total_ms": 14833,
+        "total_tokens": 327.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 15999,
+      "expected": "inconsistent",
+      "id": "ru_inconsistent",
+      "input": "Никакие зоры не синие. Некоторые зоры синие. Следует ли, что все зоры синие?",
+      "locale": "ru",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"all\",\n    \"predicate\": \"синие\",\n    \"subject\": \"зоры\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"none\",\n      \"predicate\": \"синие\",\n      \"quote\": \"Никакие зоры не синие\",\n      \"subject\": \"зоры\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"синие\",\n      \"quote\": \"Некоторые зоры синие\",\n      \"subject\": \"зоры\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 150.0,
+        "elapsed_ms": 14334,
+        "predicted_ms": 10288.901,
+        "predicted_n": 150.0,
+        "preflight_tokens": 190,
+        "prompt_ms": 3294.668,
+        "prompt_n": 190.0,
+        "prompt_tokens": 190.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 667,
+        "tokenize_ms": 833,
+        "total_ms": 15834,
+        "total_tokens": 340.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 19998,
+      "expected": "entailed",
+      "id": "ru_chain",
+      "input": "Все роботы — устройства. Все устройства — металлические. Некоторые роботы — красные. Следует ли, что некоторые красные — металлические?",
+      "locale": "ru",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"металлические\",\n    \"subject\": \"красные\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"устройства\",\n      \"quote\": \"Все роботы — устройства.\",\n      \"subject\": \"роботы\"\n    },\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"металлические\",\n      \"quote\": \"Все устройства — металлические.\",\n      \"subject\": \"устройства\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"красные\",\n      \"quote\": \"Некоторые роботы — красные.\",\n      \"subject\": \"роботы\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 203.0,
+        "elapsed_ms": 18333,
+        "predicted_ms": 13892.199,
+        "predicted_n": 203.0,
+        "preflight_tokens": 190,
+        "prompt_ms": 3621.544,
+        "prompt_n": 190.0,
+        "prompt_tokens": 190.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 834,
+        "total_ms": 19832,
+        "total_tokens": 393.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "classes": [
+          "zors",
+          "blue",
+          "round"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 2,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All zors are blue",
+          "Some blue things are round"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          6
+        ]
+      },
+      "elapsed_ms": 15000,
+      "expected": "undetermined",
+      "id": "en_invalid",
+      "input": "All zors are blue. Some blue things are round. Does it follow that some zors are round?",
+      "locale": "en",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"round\",\n    \"subject\": \"zors\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"blue\",\n      \"quote\": \"All zors are blue.\",\n      \"subject\": \"zors\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"round\",\n      \"quote\": \"Some blue things are round.\",\n      \"subject\": \"blue things\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 142.0,
+        "elapsed_ms": 13333,
+        "predicted_ms": 9483.991,
+        "predicted_n": 142.0,
+        "preflight_tokens": 184,
+        "prompt_ms": 3094.246,
+        "prompt_n": 184.0,
+        "prompt_tokens": 184.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 667,
+        "tokenize_ms": 832,
+        "total_ms": 14833,
+        "total_tokens": 326.0
+      },
+      "verdict_match": true
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 15000,
+      "expected": "entailed",
+      "id": "en_valid",
+      "input": "All zors are blue. Some zors are round. Does it follow that some blue things are round?",
+      "locale": "en",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"things\",\n    \"subject\": \"blue\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"zors\",\n      \"quote\": \"All zors are blue.\",\n      \"subject\": \"zors\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"zors\",\n      \"quote\": \"Some zors are round.\",\n      \"subject\": \"zors\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 143.0,
+        "elapsed_ms": 13334,
+        "predicted_ms": 9312.683,
+        "predicted_n": 143.0,
+        "preflight_tokens": 184,
+        "prompt_ms": 3227.207,
+        "prompt_n": 184.0,
+        "prompt_tokens": 184.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 666,
+        "tokenize_ms": 833,
+        "total_ms": 14833,
+        "total_tokens": 327.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 15166,
+      "expected": "inconsistent",
+      "id": "en_inconsistent",
+      "input": "No zors are blue. Some zors are blue. Does it follow that all zors are blue?",
+      "locale": "en",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some_not\",\n    \"predicate\": \"blue\",\n    \"subject\": \"zors\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"blue\",\n      \"quote\": \"No zors are blue.\",\n      \"subject\": \"zors\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"blue\",\n      \"quote\": \"Some zors are blue.\",\n      \"subject\": \"zors\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 143.0,
+        "elapsed_ms": 13500,
+        "predicted_ms": 9628.224,
+        "predicted_n": 143.0,
+        "preflight_tokens": 184,
+        "prompt_ms": 3148.622,
+        "prompt_n": 184.0,
+        "prompt_tokens": 184.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 666,
+        "tokenize_ms": 833,
+        "total_ms": 14999,
+        "total_tokens": 327.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "classes": [
+          "robots",
+          "devices",
+          "metallic",
+          "red",
+          "things"
+        ],
+        "conclusion": {
+          "a": 3,
+          "b": 4,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 3,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "All robots are devices",
+          "All devices are metallic",
+          "Some robots are red"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          15
+        ]
+      },
+      "elapsed_ms": 17666,
+      "expected": "entailed",
+      "id": "en_chain",
+      "input": "All robots are devices. All devices are metallic. Some robots are red. Does it follow that some red things are metallic?",
+      "locale": "en",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"things\",\n    \"subject\": \"red\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"devices\",\n      \"quote\": \"All robots are devices.\",\n      \"subject\": \"robots\"\n    },\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"metallic\",\n      \"quote\": \"All devices are metallic.\",\n      \"subject\": \"devices\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"red\",\n      \"quote\": \"Some robots are red.\",\n      \"subject\": \"robots\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 182.0,
+        "elapsed_ms": 16000,
+        "predicted_ms": 12061.193,
+        "predicted_n": 182.0,
+        "preflight_tokens": 187,
+        "prompt_ms": 3259.685,
+        "prompt_n": 187.0,
+        "prompt_tokens": 187.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 666,
+        "tokenize_ms": 833,
+        "total_ms": 17499,
+        "total_tokens": 369.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 14332,
+      "expected": "undetermined",
+      "id": "zh-Hans_invalid",
+      "input": "所有佐尔都是蓝色的。有些蓝色物体是圆的。能否推出有些佐尔是圆的？",
+      "locale": "zh-Hans",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"圆\",\n    \"subject\": \"佐尔\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"蓝色\",\n      \"quote\": \"所有佐尔都是蓝色的。\",\"subject\": \"佐尔\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"物体\",\n      \"quote\": \"有些蓝色物体是圆的。\",\"subject\": \"蓝色物体\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 139.0,
+        "elapsed_ms": 12667,
+        "predicted_ms": 8626.319,
+        "predicted_n": 139.0,
+        "preflight_tokens": 182,
+        "prompt_ms": 3336.336,
+        "prompt_n": 182.0,
+        "prompt_tokens": 182.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 666,
+        "tokenize_ms": 832,
+        "total_ms": 14165,
+        "total_tokens": 321.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "ok": false
+      },
+      "elapsed_ms": 14832,
+      "expected": "entailed",
+      "id": "zh-Hans_valid",
+      "input": "所有佐尔都是蓝色的。有些佐尔是圆的。能否推出有些蓝色物体是圆的？",
+      "locale": "zh-Hans",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"物体\",\n    \"subject\": \"蓝色\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"佐尔\",\n      \"quote\": \"所有佐尔都是蓝色的。\",\n      \"subject\": \"佐尔\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"佐尔\",\n      \"quote\": \"有些佐尔是圆的。\",\n      \"subject\": \"佐尔\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 144.0,
+        "elapsed_ms": 13167,
+        "predicted_ms": 9368.599,
+        "predicted_n": 144.0,
+        "preflight_tokens": 182,
+        "prompt_ms": 3066.995,
+        "prompt_n": 182.0,
+        "prompt_tokens": 182.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 834,
+        "total_ms": 14666,
+        "total_tokens": 326.0
+      },
+      "verdict_match": false
+    },
+    {
+      "accepted": {
+        "classes": [
+          "佐尔",
+          "蓝色的"
+        ],
+        "conclusion": {
+          "a": 0,
+          "b": 1,
+          "kind": "all"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "none"
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "没有佐尔是蓝色的",
+          "有些佐尔是蓝色的"
+        ],
+        "verdict": "inconsistent",
+        "witnesses": []
+      },
+      "elapsed_ms": 13833,
+      "expected": "inconsistent",
+      "id": "zh-Hans_inconsistent",
+      "input": "没有佐尔是蓝色的。有些佐尔是蓝色的。能否推出所有佐尔都是蓝色的？",
+      "locale": "zh-Hans",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"all\",\n    \"predicate\": \"蓝色的\",\n    \"subject\": \"佐尔\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"none\",\n      \"predicate\": \"蓝色的\",\n      \"quote\": \"没有佐尔是蓝色的。\",\n      \"subject\": \"佐尔\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"蓝色的\",\n      \"quote\": \"有些佐尔是蓝色的。\",\n      \"subject\": \"佐尔\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 143.0,
+        "elapsed_ms": 12167,
+        "predicted_ms": 8659.257,
+        "predicted_n": 143.0,
+        "preflight_tokens": 182,
+        "prompt_ms": 2782.598,
+        "prompt_n": 182.0,
+        "prompt_tokens": 182.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 666,
+        "tokenize_ms": 833,
+        "total_ms": 13666,
+        "total_tokens": 325.0
+      },
+      "verdict_match": true
+    },
+    {
+      "accepted": {
+        "classes": [
+          "机器人",
+          "设备",
+          "金属制的",
+          "红色的",
+          "物体"
+        ],
+        "conclusion": {
+          "a": 3,
+          "b": 4,
+          "kind": "some"
+        },
+        "ok": true,
+        "premises": [
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "all"
+          },
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "all"
+          },
+          {
+            "a": 0,
+            "b": 3,
+            "kind": "some"
+          }
+        ],
+        "quotes": [
+          "所有机器人都是设备",
+          "所有设备都是金属制的",
+          "有些机器人是红色的"
+        ],
+        "verdict": "undetermined",
+        "witnesses": [
+          15
+        ]
+      },
+      "elapsed_ms": 17499,
+      "expected": "entailed",
+      "id": "zh-Hans_chain",
+      "input": "所有机器人都是设备。所有设备都是金属制的。有些机器人是红色的。能否推出有些红色的物体是金属制的？",
+      "locale": "zh-Hans",
+      "raw": "{\n  \"conclusion\": {\n    \"kind\": \"some\",\n    \"predicate\": \"物体\",\n    \"subject\": \"红色的\"\n  },\n  \"premises\": [\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"设备\",\n      \"quote\": \"所有机器人都是设备。\",\n      \"subject\": \"机器人\"\n    },\n    {\n      \"kind\": \"all\",\n      \"predicate\": \"金属制的\",\n      \"quote\": \"所有设备都是金属制的。\",\n      \"subject\": \"设备\"\n    },\n    {\n      \"kind\": \"some\",\n      \"predicate\": \"红色的\",\n      \"quote\": \"有些机器人是红色的。\",\n      \"subject\": \"机器人\"\n    }\n  ]\n}",
+      "truncated": false,
+      "usage": {
+        "cache_n": 0.0,
+        "completion_tokens": 186.0,
+        "elapsed_ms": 15834,
+        "predicted_ms": 11825.227,
+        "predicted_n": 186.0,
+        "preflight_tokens": 187,
+        "prompt_ms": 3258.876,
+        "prompt_n": 187.0,
+        "prompt_tokens": 187.0,
+        "prompt_tokens_details": {
+          "cached_tokens": 0.0
+        },
+        "reasoning_budget": 0,
+        "template_ms": 665,
+        "tokenize_ms": 833,
+        "total_ms": 17332,
+        "total_tokens": 373.0
+      },
+      "verdict_match": false
+    }
+  ],
+  "scope": "synthetic actualGodotHTTP+pinned2B categorical formalization; noOS; verdictmatch not semantic interpretation proof"
+}

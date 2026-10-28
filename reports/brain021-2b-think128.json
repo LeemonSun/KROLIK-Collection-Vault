@@ -1,0 +1,391 @@
+{
+  "model": "2b",
+  "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+  "runtime": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "cache_ram": 0,
+  "ctx_checkpoints": 0,
+  "mode": "think128",
+  "seed": 42,
+  "cases": [
+    {
+      "id": "ru_liar",
+      "locale": "ru",
+      "category": "liar",
+      "input": "Предложение «это предложение ложно» истинно или ложно в классической двузначной логике? Объясни коротко.",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction, not simply false.",
+      "prompt_tokens": 178,
+      "answer": "В классической двузначной логике это предложение **ложно**.\n\nЛогическая тавтология (в данном случае) приводит к парадоксу Лотера (Liar Paradox): если утверждение истинно, то оно ложно, а если ложно — то оно истинно. Поскольку логика требует бинарных значений (истина/ложь), этот парадокс не может быть решён без противоречия.\n\nОтвет: **Ложно**.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 237,
+        "prompt_tokens": 178,
+        "total_tokens": 415,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 178,
+        "prompt_ms": 3061.178,
+        "prompt_per_token_ms": 17.197629213483147,
+        "prompt_per_second": 58.14754973412196,
+        "predicted_n": 237,
+        "predicted_ms": 15305.773,
+        "predicted_per_token_ms": 64.85497033898305,
+        "predicted_per_second": 15.419018693142778
+      },
+      "reasoning_chars": 537,
+      "wall_ms": 18377
+    },
+    {
+      "id": "ru_negative",
+      "locale": "ru",
+      "category": "negative",
+      "input": "Все зоры синие. Некоторые синие вещи круглые. Следует ли, что некоторые зоры круглые? Объясни.",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 177,
+      "answer": "Нет, это не следует.\n\nЛогика:\n1. Все зоры синие.\n2. Некоторые синие вещи круглые.\n3. Не все синие вещи — это зоры.\n4. Не все зоры — это синие вещи.\n5. Не все синие вещи круглые.\n\nТак как не все синие вещи являются зорыми, а не все зоры являются синими, мы не можем заключить, что некоторые зоры круглые.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 238,
+        "prompt_tokens": 177,
+        "total_tokens": 415,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 177,
+        "prompt_ms": 2563.078,
+        "prompt_per_token_ms": 14.480666666666666,
+        "prompt_per_second": 69.05759403342387,
+        "predicted_n": 238,
+        "predicted_ms": 15552.277,
+        "predicted_per_token_ms": 65.62142194092827,
+        "predicted_per_second": 15.238926107090299
+      },
+      "reasoning_chars": 558,
+      "wall_ms": 18125
+    },
+    {
+      "id": "ru_arithmetic",
+      "locale": "ru",
+      "category": "arithmetic",
+      "input": "Заказали7тетрадей по36рублей. Заплатили500рублей, ещё дали скидку10% от стоимости тетрадей. Сколько сдачи? Покажи короткий расчёт.",
+      "rubric": "273.2 change:252 subtotal,226.8afterdiscount.",
+      "prompt_tokens": 192,
+      "answer": "Расчёт:\n\n1.  **Стоимость тетрадей:** 36 × 7 = 252 рубля.\n2.  **Скидка:** 252 × 0.10 = 25.2 рубля.\n3.  **Итоговая стоимость:** 252 - 25.2 = 226.8 рубля.\n4.  **Сдача:** 500 - 226.8 = 273.2 рубля.\n\nСдача: 273.2 рубля.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 253,
+        "prompt_tokens": 192,
+        "total_tokens": 445,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 192,
+        "prompt_ms": 2508.409,
+        "prompt_per_token_ms": 13.064630208333334,
+        "prompt_per_second": 76.54254150738575,
+        "predicted_n": 253,
+        "predicted_ms": 15223.356,
+        "predicted_per_token_ms": 60.41014285714286,
+        "predicted_per_second": 16.553511591005293
+      },
+      "reasoning_chars": 441,
+      "wall_ms": 17742
+    },
+    {
+      "id": "ru_plan",
+      "locale": "ru",
+      "category": "plan",
+      "input": "Есть инструменты: прочитать файл, создать резервную копию, заменить точный фрагмент. Нужно поменять Fullscreen=1 на Fullscreen=0 в конфиге, не потеряв остальные настройки. Дай порядок действий и условие остановки, если строка найдена дважды. Ничего не выполняй.",
+      "rubric": "Read actual file, backup before patch, unique exact match else stop/clarify, verify reread; no invented success.",
+      "prompt_tokens": 211,
+      "answer": "Для изменения `Fullscreen=1` на `Fullscreen=0` в файле конфигурации используйте следующие шаги:\n\n1.  **Чтение файла:** `read_file config.txt`\n2.  **Создание резервной копии:** `create_backup config.txt`\n3.  **Замена фрагмента:** `replace_exact_fragment \"Fullscreen=1\" \"Fullscreen=0\" config.txt`\n\n**Условие остановки:** Если фрагмент `Fullscreen=1` встречается дважды, замените только первый. Остальные будут сохранены как есть.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 246,
+        "prompt_tokens": 211,
+        "total_tokens": 457,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 211,
+        "prompt_ms": 3141.434,
+        "prompt_per_token_ms": 14.888312796208531,
+        "prompt_per_second": 67.16677797464469,
+        "predicted_n": 246,
+        "predicted_ms": 16645.182,
+        "predicted_per_token_ms": 67.93951836734693,
+        "predicted_per_second": 14.718973934920026
+      },
+      "reasoning_chars": 541,
+      "wall_ms": 19796
+    },
+    {
+      "id": "en_liar",
+      "locale": "en",
+      "category": "liar",
+      "input": "Is the sentence “this sentence is false” true or false in classical two-valued logic? Explain briefly.",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction.",
+      "prompt_tokens": 170,
+      "answer": "In classical two-valued logic, the sentence \"this sentence is false\" is **false**.\n\nThis is because the sentence asserts that the sentence itself is false. If the sentence is false, the assertion that it is false is itself true. If the sentence is true, the assertion that it is false is itself false. However, since the sentence claims it is false, and in this logic, the sentence \"is false\" is the claim, the sentence asserts a falsehood about itself. Therefore, the sentence is false.\n\nWait, I need to correct my reasoning above. Let's analyze the sentence $S$: \"This sentence is false.\"\nIn classical logic, this is the Liar Paradox.\nIf $S$ is true, then \"This sentence is false\" is true, meaning $S$ is false. Contradiction.\nIf $S$ is false, then \"This sentence is false\" is false, meaning $S$ is true. Contradiction.\n\nWait, the prompt asks for the answer based on well-established knowledge and the supplied conversation. The user is asking a logic question. I should answer directly.\nThe standard answer in classical logic is that the sentence is **false** (or rather, the sentence",
+      "finish": "length",
+      "usage": {
+        "completion_tokens": 384,
+        "prompt_tokens": 170,
+        "total_tokens": 554,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 170,
+        "prompt_ms": 3167.163,
+        "prompt_per_token_ms": 18.630370588235294,
+        "prompt_per_second": 53.67579755131011,
+        "predicted_n": 384,
+        "predicted_ms": 25698.989,
+        "predicted_per_token_ms": 67.09918798955614,
+        "predicted_per_second": 14.903310009588314
+      },
+      "reasoning_chars": 540,
+      "wall_ms": 28877
+    },
+    {
+      "id": "en_negative",
+      "locale": "en",
+      "category": "negative",
+      "input": "All zors are blue. Some blue things are round. Does it follow that some zors are round? Explain.",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 172,
+      "answer": "No, it does not follow that some zors are round.\n\nReasoning:\n1.  **Premise 1:** All zors are blue. (Zors ⊆ Blue)\n2.  **Premise 2:** Some blue things are round. (Blue ∩ Round ≠ Empty)\n3.  **Logical Form:** Does (Zors ⊆ Blue) ∧ (Blue ∩ Round ≠ Empty) imply (Zors ∩ Round ≠ Empty)?\n\nNo. The intersection of the two sets (blue things that are round) could be entirely distinct from the set of zors. For example, if the only round blue things are \"blue balls,\" and all zors are \"blue balls,\" then some zors are round. However, if all zors are \"blue shirts\" and some blue things are \"round,\" then no zors are round.\n\nThe logical form is valid only if the intersection of the two sets is not empty. Since the premises do not guarantee this, the conclusion does not follow.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 345,
+        "prompt_tokens": 172,
+        "total_tokens": 517,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 172,
+        "prompt_ms": 3281.596,
+        "prompt_per_token_ms": 19.079046511627908,
+        "prompt_per_second": 52.41352073807988,
+        "predicted_n": 345,
+        "predicted_ms": 20917.515,
+        "predicted_per_token_ms": 60.80672965116279,
+        "predicted_per_second": 16.445548144700744
+      },
+      "reasoning_chars": 554,
+      "wall_ms": 24207
+    },
+    {
+      "id": "en_arithmetic",
+      "locale": "en",
+      "category": "arithmetic",
+      "input": "Seven notebooks cost36credits each. I pay500credits and get a10% discount on the notebook subtotal. How much change? Show a short calculation.",
+      "rubric": "273.2change;252subtotal,226.8afterdiscount.",
+      "prompt_tokens": 183,
+      "answer": "To find the change, calculate the subtotal and apply the discount, then subtract the discount from the payment.\n\n1.  **Calculate the subtotal:**\n    $7 \\text{ notebooks} \\times 36 \\text{ credits/notebook} = 252 \\text{ credits}$\n\n2.  **Apply the 10% discount:**\n    $252 \\text{ credits} \\times 0.10 = 25.2 \\text{ credits}$\n    $\\text{Subtotal} = 252 - 25.2 = 226.8 \\text{ credits}$\n\n3.  **Calculate the change:**\n    $\\text{Payment} - \\text{Subtotal} = 500 - 226.8 = 273.2 \\text{ credits}$\n\n**Answer:** 273.2 credits",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 324,
+        "prompt_tokens": 183,
+        "total_tokens": 507,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 183,
+        "prompt_ms": 2315.74,
+        "prompt_per_token_ms": 12.654316939890709,
+        "prompt_per_second": 79.02441552160434,
+        "predicted_n": 324,
+        "predicted_ms": 18318.322,
+        "predicted_per_token_ms": 56.71307120743034,
+        "predicted_per_second": 17.63261940695223
+      },
+      "reasoning_chars": 545,
+      "wall_ms": 20641
+    },
+    {
+      "id": "en_plan",
+      "locale": "en",
+      "category": "plan",
+      "input": "Available tools: read a file, make a backup, replace an exact fragment. Change Fullscreen=1 to Fullscreen=0 in a config without losing other settings. Give the order and when to stop if the line occurs twice. Execute nothing.",
+      "rubric": "Read, backup before edit, unique match else stop, verify reread; no fake completion.",
+      "prompt_tokens": 198,
+      "answer": "You can change the Fullscreen setting in the config file using the following sequence:\n\n1.  Open the config file.\n2.  Locate the line `Fullscreen=1`.\n3.  Replace that line with `Fullscreen=0`.\n4.  Save the file.\n\nThe line `Fullscreen=0` should not be modified again in the same file.\n\nDo not execute any other tools or actions.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 217,
+        "prompt_tokens": 198,
+        "total_tokens": 415,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 198,
+        "prompt_ms": 2588.439,
+        "prompt_per_token_ms": 13.072924242424241,
+        "prompt_per_second": 76.49397957610745,
+        "predicted_n": 217,
+        "predicted_ms": 13841.771,
+        "predicted_per_token_ms": 64.08227314814815,
+        "predicted_per_second": 15.604939570232737
+      },
+      "reasoning_chars": 526,
+      "wall_ms": 16440
+    },
+    {
+      "id": "zh-Hans_liar",
+      "locale": "zh-Hans",
+      "category": "liar",
+      "input": "在经典二值逻辑中，“这句话是假的”是真的还是假的？简要说明。",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction.",
+      "prompt_tokens": 168,
+      "answer": "在经典二值逻辑中，这句话是**假的**。\n\n根据哥德尔悖论（Liar Paradox）的推导：\n1.  如果这句话是真的，那么它的内容（“这句话是假的”）就是真的，这意味着“这句话是假的”是事实，从而证明它是假的，产生矛盾。\n2.  如果这句话是假的，那么它的内容（“这句话是假的”）就是假的，这意味着“这句话是假的”不是事实，从而证明它是真的，产生矛盾。\n\n因此，在经典二值逻辑中，该陈述无法自洽，通常被视为逻辑上的自指悖论，导致系统崩溃或无法确定其真假。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 273,
+        "prompt_tokens": 168,
+        "total_tokens": 441,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 168,
+        "prompt_ms": 2487.799,
+        "prompt_per_token_ms": 14.808327380952381,
+        "prompt_per_second": 67.52957131986949,
+        "predicted_n": 273,
+        "predicted_ms": 18224.493,
+        "predicted_per_token_ms": 67.0018125,
+        "predicted_per_second": 14.924969380492506
+      },
+      "reasoning_chars": 512,
+      "wall_ms": 20722
+    },
+    {
+      "id": "zh-Hans_negative",
+      "locale": "zh-Hans",
+      "category": "negative",
+      "input": "所有佐尔都是蓝色的。有些蓝色物体是圆的。能否推出有些佐尔是圆的？请解释。",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 173,
+      "answer": "不能推出。\n\n逻辑推导如下：\n1. 前提一：“所有佐尔都是蓝色的”。\n2. 前提二：“有些蓝色物体是圆的”。\n3. 结论：“有些佐尔是圆的”。\n\n这是一个典型的逻辑谬误。前提一说明“佐尔”和“蓝色”之间的包含关系，前提二说明“蓝色”和“圆形”之间的包含关系，但没有说明“佐尔”和“圆形”之间的直接关系。即使所有佐尔都是蓝色的，蓝色物体中有圆形的，也不意味着佐尔这个集合中必然包含圆形物体。\n\n例如：所有苹果都是红色的。有些红色物体是球形的。能否推出有些苹果是球形的？不能。因为苹果可能是方形或圆形，但前提只说了部分红色物体是球形，并未限定苹果的形状。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 299,
+        "prompt_tokens": 173,
+        "total_tokens": 472,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 173,
+        "prompt_ms": 2601.342,
+        "prompt_per_token_ms": 15.036658959537572,
+        "prompt_per_second": 66.50413517330671,
+        "predicted_n": 299,
+        "predicted_ms": 17344.235,
+        "predicted_per_token_ms": 58.202130872483224,
+        "predicted_per_second": 17.181501519092656
+      },
+      "reasoning_chars": 472,
+      "wall_ms": 19955
+    },
+    {
+      "id": "zh-Hans_arithmetic",
+      "locale": "zh-Hans",
+      "category": "arithmetic",
+      "input": "买7本笔记本，每本36积分。笔记本总价打九折，支付500积分，应找回多少？简要列出计算。",
+      "rubric": "273.2change;252subtotal,226.8afterdiscount.",
+      "prompt_tokens": 181,
+      "answer": "计算过程如下：\n1.  **原价总额**：7 × 36 = 252 积分\n2.  **折扣后价格**：252 × 0.9 = 226.8 积分\n3.  **应找回金额**：500 - 226.8 = 273.2 积分\n\n答：应找回 273.2 积分。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 226,
+        "prompt_tokens": 181,
+        "total_tokens": 407,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 181,
+        "prompt_ms": 2638.24,
+        "prompt_per_token_ms": 14.575911602209944,
+        "prompt_per_second": 68.60634362302142,
+        "predicted_n": 226,
+        "predicted_ms": 13461.014,
+        "predicted_per_token_ms": 59.82672888888889,
+        "predicted_per_second": 16.71493692822844
+      },
+      "reasoning_chars": 446,
+      "wall_ms": 16110
+    },
+    {
+      "id": "zh-Hans_plan",
+      "locale": "zh-Hans",
+      "category": "plan",
+      "input": "可用工具：读取文件、创建备份、精确替换片段。要把配置中的Fullscreen=1改为Fullscreen=0，并保留其他设置。请给出顺序，以及该行出现两次时应何时停止。不要执行。",
+      "rubric": "Read, backup before edit, unique match else stop, verify reread; no fake completion.",
+      "prompt_tokens": 194,
+      "answer": "在配置文件中修改 `Fullscreen=1` 为 `Fullscreen=0` 的步骤如下：\n\n1.  **定位文件**：打开包含该配置项的配置文件。\n2.  **定位行**：找到包含 `Fullscreen=1` 的特定行。\n3.  **修改值**：将该行的值从 `1` 改为 `0`。\n4.  **保存文件**：保存文件以应用更改。\n\n**关于该行出现两次时的停止时机：**\n*   若该行出现两次，请**仅修改第一处**，确保其他行保持原样。\n*   若需同时修改两处，请**逐行修改**，确保每一处都正确替换，避免遗漏或重复修改。",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 290,
+        "prompt_tokens": 194,
+        "total_tokens": 484,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 194,
+        "prompt_ms": 3112.412,
+        "prompt_per_token_ms": 16.043360824742265,
+        "prompt_per_second": 62.33107956144623,
+        "predicted_n": 290,
+        "predicted_ms": 17634.682,
+        "predicted_per_token_ms": 61.019660899653985,
+        "predicted_per_second": 16.388160557701013
+      },
+      "reasoning_chars": 540,
+      "wall_ms": 20757
+    }
+  ],
+  "scope": "synthetic real CPU inference, matched256answerbudget; notWindows/notstatisticalIQ/notrealOSexecution; no private reasoning text",
+  "startup_ms": 1723,
+  "owned_worker_peak_rss_bytes": 1957015552,
+  "owned_worker_cpu_seconds": 485.38093399999997
+}

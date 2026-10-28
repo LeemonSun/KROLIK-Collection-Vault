@@ -21,6 +21,10 @@ def main():
     env = dict(os.environ)
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("logic021",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_logic021.gd","--","--test-mode"]),
+        ("logic_app021",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_logic_app021.gd","--","--test-mode"]),
+        ("logic_fast021",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_logic_fast021.gd","--","--test-mode"]),
+        ("evidence021",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_evidence021.gd","--","--test-mode"]),
         ("chat_draft020",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_chat_draft020.gd","--","--test-mode"]),
         ("control_context019",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_control_context019.gd","--","--test-mode"]),
         ("verification019",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_verification019.gd","--","--test-mode"]),

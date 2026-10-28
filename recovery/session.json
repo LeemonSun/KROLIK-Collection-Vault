@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "app_version": "0.20.0-desktop-preview",
-  "checkpoint_status": "021_in_progress_user_prioritizes_model_intelligence",
-  "current_task": "User explicitly steered away from minor guards toward model intelligence. Reader021boundedselection/grounding/fallback code46checksPASS;36realReadercomparisons inprogress. Verified4Bcandidate2740937888B; matched30case model/reasoning comparison next; no defaultchange yet.",
-  "next_action": "Finish sole-readerworker, run matched2B/4B model reasoning/typos/planning/UIA tests then implement only evidenced model/inference upgrade; preserveweakPCmode.",
+  "app_version": "0.21.0-desktop-preview",
+  "checkpoint_status": "021_source45groupsPASS_native_build_pending",
+  "current_task": "021implementation source45groupsPASS. Directtypedlogic12cases noAIload;4096solver+1536grammarchecks.2Bretained,4B/128/512notdeployed. Native/build/delivery next.",
+  "next_action": "Finish45groups, native021review, checkpoint, build021, finalpack/native checks, ZIP/report save and finalcheckpoint. No heaviermodeldeployment or broadIQ claim.",
   "read_next": [
-    "docs/WORKFLOWS_020.md",
-    "reports/quality020-review.md",
+    "docs/BRAIN_021.md",
+    "reports/brain021-review.md",
     "docs/WINDOWS_ACCEPTANCE_017.md"
   ],
   "known_limits": [

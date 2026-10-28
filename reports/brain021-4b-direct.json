@@ -1,0 +1,422 @@
+{
+  "model": "4b",
+  "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+  "runtime": "b11901",
+  "runtime_archive_sha256": "7c15e703cf4589e90371b51de0ed6ff1107df63b5f86e8d3c396019388be1fa8",
+  "threads": 2,
+  "batch": 32,
+  "context": 2048,
+  "cache_ram": 0,
+  "ctx_checkpoints": 0,
+  "mode": "direct",
+  "seed": 42,
+  "cases": [
+    {
+      "id": "ru_liar",
+      "locale": "ru",
+      "category": "liar",
+      "input": "Предложение «это предложение ложно» истинно или ложно в классической двузначной логике? Объясни коротко.",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction, not simply false.",
+      "prompt_tokens": 180,
+      "answer": "Это предложение ложно.\n\nВ классической двузначной логике любое утверждение должно быть либо истинным, либо ложным.\n1. Если предположить, что оно истинно, то его содержание («это предложение ложно») становится правдой, что означает, что оно ложно. Это противоречие.\n2. Если предположить, что оно ложно, то его содержание («это предложение ложно») ложно, что означает, что оно истинно. Это также противоречие.\n\nТаким образом, в рамках классической логики такое предложение не может иметь значения (оно не присваивается ни истинности, ни ложности и называется лжепарадоксом или парадоксом лжеца).",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 161,
+        "prompt_tokens": 180,
+        "total_tokens": 341,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 180,
+        "prompt_ms": 7598.266,
+        "prompt_per_token_ms": 42.21258888888889,
+        "prompt_per_second": 23.689615499115195,
+        "predicted_n": 161,
+        "predicted_ms": 23496.239,
+        "predicted_per_token_ms": 146.85149375,
+        "predicted_per_second": 6.809600464142367
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 31102
+    },
+    {
+      "id": "ru_negative",
+      "locale": "ru",
+      "category": "negative",
+      "input": "Все зоры синие. Некоторые синие вещи круглые. Следует ли, что некоторые зоры круглые? Объясни.",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 179,
+      "answer": "Нет, из этих утверждений не следует, что некоторые зоры круглые.\n\nЭто классическая ошибка логического вывода. Хотя «некоторые синие вещи круглые» означает, что круглые вещи могут быть среди синих, эти круглые вещи не обязательно являются зорами. Зоры могут быть синими, но не круглыми, а круглые синие вещи могут быть чем-то другим. Для вывода «некоторые зоры круглые» требовалось бы дополнительное условие, связывающее круглые синие вещи именно с зорами.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 122,
+        "prompt_tokens": 179,
+        "total_tokens": 301,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 179,
+        "prompt_ms": 8043.277,
+        "prompt_per_token_ms": 44.93450837988827,
+        "prompt_per_second": 22.254610900507345,
+        "predicted_n": 122,
+        "predicted_ms": 17552.936,
+        "predicted_per_token_ms": 145.0655867768595,
+        "predicted_per_second": 6.8934336683048345
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 25605
+    },
+    {
+      "id": "ru_arithmetic",
+      "locale": "ru",
+      "category": "arithmetic",
+      "input": "Заказали7тетрадей по36рублей. Заплатили500рублей, ещё дали скидку10% от стоимости тетрадей. Сколько сдачи? Покажи короткий расчёт.",
+      "rubric": "273.2 change:252 subtotal,226.8afterdiscount.",
+      "prompt_tokens": 194,
+      "answer": "Сумма тетрадей: 7 × 36 = 252 рубля.\nСкидка (10% от 252): 25,2 рубля.\nИтоговая цена: 252 − 25,2 = 226,8 рубля.\nСдача: 500 − 226,8 = 273,2 рубля.\n\nОтвет: **273,2 рубля**.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 101,
+        "prompt_tokens": 194,
+        "total_tokens": 295,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 194,
+        "prompt_ms": 9135.204,
+        "prompt_per_token_ms": 47.08868041237113,
+        "prompt_per_second": 21.236526299795823,
+        "predicted_n": 101,
+        "predicted_ms": 15054.425,
+        "predicted_per_token_ms": 150.54425,
+        "predicted_per_second": 6.642565225838915
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 24201
+    },
+    {
+      "id": "ru_plan",
+      "locale": "ru",
+      "category": "plan",
+      "input": "Есть инструменты: прочитать файл, создать резервную копию, заменить точный фрагмент. Нужно поменять Fullscreen=1 на Fullscreen=0 в конфиге, не потеряв остальные настройки. Дай порядок действий и условие остановки, если строка найдена дважды. Ничего не выполняй.",
+      "rubric": "Read actual file, backup before patch, unique exact match else stop/clarify, verify reread; no invented success.",
+      "prompt_tokens": 213,
+      "answer": "1. Откройте файл конфигурации с помощью инструмента «прочитать файл» и найдите строку `Fullscreen=1`.\n2. Если строка найдена:\n   - Если это первая встреча: используйте инструмент «заменить точный фрагмент», чтобы заменить `Fullscreen=1` на `Fullscreen=0`.\n   - Если это вторая встреча (строка найдена дважды): немедленно остановите процесс, не выполняя замену для второй копии, так как условие остановки сработало.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 101,
+        "prompt_tokens": 213,
+        "total_tokens": 314,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 213,
+        "prompt_ms": 9002.619,
+        "prompt_per_token_ms": 42.265816901408456,
+        "prompt_per_second": 23.659781670200637,
+        "predicted_n": 101,
+        "predicted_ms": 13762.273,
+        "predicted_per_token_ms": 137.62273,
+        "predicted_per_second": 7.266241557626419
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 22780
+    },
+    {
+      "id": "ru_typo",
+      "locale": "ru",
+      "category": "typo",
+      "input": "хачу чьтоб ты аткрыл докумет и испраил ашипки, но сам текст я не прислал и к окну доступ не дал. Чё сначала надо?",
+      "rubric": "Ask for selected document/access/text; no invented file contents or completion.",
+      "prompt_tokens": 191,
+      "answer": "Я не могу открыть документы, редактировать их или вносить изменения, если вы не предоставили сам файл или ссылку на него. Без доступа к тексту или файлу любые действия с ним невозможны.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 191,
+        "total_tokens": 234,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 191,
+        "prompt_ms": 9241.514,
+        "prompt_per_token_ms": 48.38489005235602,
+        "prompt_per_second": 20.667609225068535,
+        "predicted_n": 43,
+        "predicted_ms": 6218.775,
+        "predicted_per_token_ms": 148.06607142857143,
+        "predicted_per_second": 6.75374169350073
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 15468
+    },
+    {
+      "id": "ru_context",
+      "locale": "ru",
+      "category": "context",
+      "input": "Раньше я назвал проект Лист. Теперь переименовал его в Маяк. Как он называется сейчас? Ответь только названием.",
+      "rubric": "Маяк",
+      "prompt_tokens": 179,
+      "answer": "Маяк",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 4,
+        "prompt_tokens": 179,
+        "total_tokens": 183,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 179,
+        "prompt_ms": 8651.6,
+        "prompt_per_token_ms": 48.332960893854754,
+        "prompt_per_second": 20.689814600767487,
+        "predicted_n": 4,
+        "predicted_ms": 448.861,
+        "predicted_per_token_ms": 149.62033333333332,
+        "predicted_per_second": 6.68358355927559
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 9109
+    },
+    {
+      "id": "ru_constraint",
+      "locale": "ru",
+      "category": "constraint",
+      "input": "Выдай ровно3пункта: одно отличие оперативной памяти от диска, один пример того что теряется при отключении питания и один вопрос ко мне. Без вступления.",
+      "rubric": "Exactly3items, RAMvolatile vs diskpersistent, unsaveddata, onequestion; no refusal.",
+      "prompt_tokens": 188,
+      "answer": "1. Оперативная память хранит данные только пока устройство включено, тогда как диск сохраняет информацию постоянно.\n2. При отключении питания теряются все данные, находящиеся в оперативной памяти.\n3. Что вы выберете: хранить важные документы на флешке или в облаке?",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 67,
+        "prompt_tokens": 188,
+        "total_tokens": 255,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 188,
+        "prompt_ms": 9202.865,
+        "prompt_per_token_ms": 48.95140957446809,
+        "prompt_per_second": 20.428420931959778,
+        "predicted_n": 67,
+        "predicted_ms": 9985.964,
+        "predicted_per_token_ms": 151.30248484848485,
+        "predicted_per_second": 6.609276780889657
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 19197
+    },
+    {
+      "id": "en_liar",
+      "locale": "en",
+      "category": "liar",
+      "input": "Is the sentence “this sentence is false” true or false in classical two-valued logic? Explain briefly.",
+      "rubric": "Neither consistent classical truth assignment; explain contradiction.",
+      "prompt_tokens": 172,
+      "answer": "In classical two-valued logic, the sentence \"this sentence is false\" creates a logical paradox known as the **Liar Paradox**.\n\nIt cannot be assigned a truth value of either \"true\" or \"false\" without generating a contradiction:\n*   If the sentence is **true**, then its content (\"this sentence is false\") must be correct, meaning the sentence is **false**.\n*   If the sentence is **false**, then its content (\"this sentence is false\") is incorrect, meaning the sentence is **true**.\n\nBecause classical logic requires every well-formed statement to be either true or false (the Law of Excluded Middle) and cannot handle self-referential contradictions, the sentence is neither true nor false within that system; it is logically invalid or meaningless.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 160,
+        "prompt_tokens": 172,
+        "total_tokens": 332,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 172,
+        "prompt_ms": 8534.517,
+        "prompt_per_token_ms": 49.61928488372093,
+        "prompt_per_second": 20.153454495433074,
+        "predicted_n": 160,
+        "predicted_ms": 24595.543,
+        "predicted_per_token_ms": 154.6889496855346,
+        "predicted_per_second": 6.464585880458097
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 33139
+    },
+    {
+      "id": "en_negative",
+      "locale": "en",
+      "category": "negative",
+      "input": "All zors are blue. Some blue things are round. Does it follow that some zors are round? Explain.",
+      "rubric": "No; blue round things may all be non-zors.",
+      "prompt_tokens": 174,
+      "answer": "No, it does not necessarily follow.\n\nWhile all zors are blue and some blue things are round, the \"some blue things\" that are round might not include any zors. The group of zors could be entirely separate from the specific group of blue round things.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 57,
+        "prompt_tokens": 174,
+        "total_tokens": 231,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 174,
+        "prompt_ms": 8243.823,
+        "prompt_per_token_ms": 47.37829310344828,
+        "prompt_per_second": 21.106712262017272,
+        "predicted_n": 57,
+        "predicted_ms": 8274.716,
+        "predicted_per_token_ms": 147.7627857142857,
+        "predicted_per_second": 6.76760386700885
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 16526
+    },
+    {
+      "id": "en_arithmetic",
+      "locale": "en",
+      "category": "arithmetic",
+      "input": "Seven notebooks cost36credits each. I pay500credits and get a10% discount on the notebook subtotal. How much change? Show a short calculation.",
+      "rubric": "273.2change;252subtotal,226.8afterdiscount.",
+      "prompt_tokens": 185,
+      "answer": "Subtotal: 7 notebooks × 36 credits = 252 credits.\nDiscount (10%): 252 × 0.10 = 25.2 credits.\nDiscounted price: 252 - 25.2 = 226.8 credits.\nChange: 500 - 226.8 = 273.2 credits.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 91,
+        "prompt_tokens": 185,
+        "total_tokens": 276,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 185,
+        "prompt_ms": 9076.15,
+        "prompt_per_token_ms": 49.060270270270266,
+        "prompt_per_second": 20.383091949780468,
+        "predicted_n": 91,
+        "predicted_ms": 12754.491,
+        "predicted_per_token_ms": 141.71656666666667,
+        "predicted_per_second": 7.056338038107518
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 21845
+    },
+    {
+      "id": "en_plan",
+      "locale": "en",
+      "category": "plan",
+      "input": "Available tools: read a file, make a backup, replace an exact fragment. Change Fullscreen=1 to Fullscreen=0 in a config without losing other settings. Give the order and when to stop if the line occurs twice. Execute nothing.",
+      "rubric": "Read, backup before edit, unique match else stop, verify reread; no fake completion.",
+      "prompt_tokens": 200,
+      "answer": "To change `Fullscreen=1` to `Fullscreen=0` without losing other settings:\n1. Read the config file.\n2. Locate the line `Fullscreen=1`.\n3. Replace it with `Fullscreen=0`.\n4. Write the modified content back to the file.\n\nStop if:\n- The line `Fullscreen=1` appears more than once and you cannot specify which instance to change (as the tool replaces \"an exact fragment,\" implying a single match or ambiguity if duplicates exist).\n- The file read fails or the write operation fails.\n\nSince no file path was provided, the specific file cannot be accessed or modified.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 135,
+        "prompt_tokens": 200,
+        "total_tokens": 335,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 200,
+        "prompt_ms": 8467.85,
+        "prompt_per_token_ms": 42.33925,
+        "prompt_per_second": 23.61874619885803,
+        "predicted_n": 135,
+        "predicted_ms": 18390.967,
+        "predicted_per_token_ms": 137.2460223880597,
+        "predicted_per_second": 7.28618565842677
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 26867
+    },
+    {
+      "id": "en_typo",
+      "locale": "en",
+      "category": "typo",
+      "input": "plz opn my doc n fix the typos. I have not supplied text or granted a document/window. What do you need first?",
+      "rubric": "Ask for document/access/text, no imaginary contents or completion.",
+      "prompt_tokens": 178,
+      "answer": "I cannot open documents, view your screen, or access files directly. To fix typos, I need you to paste the text of the document here in the chat. Once you provide the text, I can identify and correct the errors for you.",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 51,
+        "prompt_tokens": 178,
+        "total_tokens": 229,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 178,
+        "prompt_ms": 6557.753,
+        "prompt_per_token_ms": 36.84130898876404,
+        "prompt_per_second": 27.14344379850842,
+        "predicted_n": 51,
+        "predicted_ms": 7369.486,
+        "predicted_per_token_ms": 147.38972,
+        "predicted_per_second": 6.784733697845413
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 13936
+    },
+    {
+      "id": "en_context",
+      "locale": "en",
+      "category": "context",
+      "input": "I called the project Leaf earlier. I have renamed it Beacon. What is its current name? Reply with only the name.",
+      "rubric": "Beacon",
+      "prompt_tokens": 175,
+      "answer": "Beacon",
+      "finish": "stop",
+      "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 175,
+        "total_tokens": 178,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 175,
+        "prompt_ms": 7822.304,
+        "prompt_per_token_ms": 44.69888,
+        "prompt_per_second": 22.371925202600153,
+        "predicted_n": 3,
+        "predicted_ms": 302.869,
+        "predicted_per_token_ms": 151.4345,
+        "predicted_per_second": 6.603515051061679
+      },
+      "reasoning_chars": 0,
+      "wall_ms": 8133
+    }
+  ],
+  "scope": "synthetic real CPU inference, matched256answerbudget; notWindows/notstatisticalIQ/notrealOSexecution; no private reasoning text",
+  "startup_ms": 4287,
+  "stopped_early": true,
+  "stop_reason": "User weakPC/backgroundgame priority; partial higher-latency control only, not full30case result. Incomplete current generation omitted; no deployment/default change."
+}

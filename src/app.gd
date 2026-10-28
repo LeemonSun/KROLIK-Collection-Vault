@@ -91,6 +91,7 @@ var control_panel
 var guard=ResponseGuard.new()
 var reminder_timer
 var response_retries=0
+var logic_mode=false
 var chat_draft_mode=false
 var chat_draft_attempt=0
 var answer_reviewing=false
@@ -316,6 +317,13 @@ func submit(text):
 		while session_turns.size()>8:session_turns.pop_front()
 		voice.speak(verified.text,l10n.locale)
 		return
+	var logical=preload("res://src/core/logic_reasoner.gd").direct(command.text)
+	if logical.get("ok",false):
+		var reply=preload("res://src/core/logic_reasoner.gd").format_result(logical,l10n.locale)
+		add_message("assistant",reply)
+		session_turns.append({"role":"user","content":command.text});session_turns.append({"role":"assistant","content":reply})
+		while session_turns.size()>12:session_turns.pop_front()
+		voice.speak(reply,l10n.locale);request_motion("dialogue.explain_small");changed.emit();return
 	var recalled=memory.retrieve(command.text,store.data.notes)
 	var recall_query=command.text.to_lower()
 	if not recalled.is_empty() and ("мой" in recall_query or "моя" in recall_query or "меня" in recall_query or "my " in recall_query or "remember" in recall_query or "我" in recall_query):
@@ -363,12 +371,18 @@ func _drain_queued_chat(revision):
 func _submit_model_text(text,retry=false,reasoning_retry=false):
 	if not retry:response_retries=0;answer_reviewing=false;chat_started_ms=Time.get_ticks_msec()
 	pending_user_text=text
+	logic_mode=false
 	state.transition("thinking")
 	if local_runtime:
 		local_runtime.generation_busy = true
 		local_runtime.touch()
 	request_motion("dialogue.think_loop")
 	changed.emit()
+	if not retry and store.data.settings.get("experimental_logic_formalization",false)==true and provider_name=="local_worker" and preload("res://src/core/logic_reasoner.gd").requested(text):
+		logic_mode=true
+		var prepared=preload("res://src/core/logic_reasoner.gd").prepare(text)
+		if not provider.submit(prepared.messages,{"max_tokens":384,"context_tokens":2048,"response_schema":prepared.schema}):_on_failure("logic_unverified");return
+		changed.emit();return
 	if not retry and preload("res://src/core/chat_draft.gd").requested(text):
 		chat_draft_mode=true;chat_draft_attempt=1
 		_submit_chat_draft();return
@@ -555,6 +569,13 @@ func _on_answer(text):
 		_goal_answer(text);return
 	if state.current != "thinking":
 		return
+	var symbolic=logic_mode
+	if symbolic:
+		if provider is Llama and provider.last_truncated:_on_failure("logic_unverified");return
+		var solved=preload("res://src/core/logic_reasoner.gd").validate(text,pending_user_text)
+		if not solved.get("ok",false):_on_failure("logic_unverified");return
+		text=preload("res://src/core/logic_reasoner.gd").format_result(solved,l10n.locale)
+		logic_mode=false
 	if chat_draft_mode:
 		var problems=preload("res://src/core/chat_draft.gd").problems(text,pending_user_text)
 		if provider is Llama and provider.last_truncated:problems.append("truncated")
@@ -562,18 +583,18 @@ func _on_answer(text):
 			if chat_draft_attempt<2:
 				chat_draft_attempt+=1;_submit_chat_draft(text);return
 			_on_failure("chat_draft_unverified");return
-	if not chat_draft_mode and not translation_mode and not screen_mode:text=quality.clean(text,pending_user_text)
-	if not chat_draft_mode and not translation_mode and guard.claims_action(text,pending_user_text):
+	if not symbolic and not chat_draft_mode and not translation_mode and not screen_mode:text=quality.clean(text,pending_user_text)
+	if not symbolic and not chat_draft_mode and not translation_mode and guard.claims_action(text,pending_user_text):
 		_on_failure("model_action_unverified")
 		return
-	if not chat_draft_mode and not translation_mode and not screen_mode and quality.impossible_infallibility(text,pending_user_text):
+	if not symbolic and not chat_draft_mode and not translation_mode and not screen_mode and quality.impossible_infallibility(text,pending_user_text):
 		if response_retries<1:
 			response_retries+=1;_submit_model_text(pending_user_text,true,true);return
 		_on_failure("model_reasoning_failed");return
-	if not chat_draft_mode and not translation_mode and not screen_mode and response_retries==0 and answer_review_enabled() and quality.needs_review(pending_user_text):
+	if not symbolic and not chat_draft_mode and not translation_mode and not screen_mode and response_retries==0 and answer_review_enabled() and quality.needs_review(pending_user_text):
 		_review_model_answer(text);return
 	answer_reviewing=false
-	if not chat_draft_mode and not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
+	if not symbolic and not chat_draft_mode and not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
 		if response_retries<1:
 			response_retries+=1
 			_submit_model_text(pending_user_text,true)
@@ -604,6 +625,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	logic_mode=false
 	chat_draft_mode=false;chat_draft_attempt=0
 	answer_reviewing=false
 	chat_queue.clear()
@@ -626,6 +648,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	logic_mode=false
 	chat_draft_mode=false;chat_draft_attempt=0
 	answer_reviewing=false
 	agent.clear()
