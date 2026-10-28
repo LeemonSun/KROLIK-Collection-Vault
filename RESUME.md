@@ -1,6 +1,6 @@
-# Leemon0.17 — final build/checks pending delivery
+# Leemon0.17 — сохранено и выдано
 
-Start `python3 tools/resume.py status`, recovery/session.json and docs/WORKFLOWS_017.md. Canonical /workspace/scratch/deec6c1ed852/leemon-013. Head .resume-remote.json. GitHub LeemonSun/KROLIK-Collection-Vault storage only, no CI/build/deploy. No subagents without authorization. Last delivered0.16IDs remain until final017upload. Do not use stale companion-foundation.
+Start `python3 tools/resume.py status`, recovery/session.json and docs/WORKFLOWS_017.md. Canonical /workspace/scratch/deec6c1ed852/leemon-013. Head .resume-remote.json. GitHub LeemonSun/KROLIK-Collection-Vault storage only, no CI/build/deploy. No subagents without authorization. ZIP/report017native IDs and hashes are in session. Do not use stale companion-foundation.
 
 ## Implemented017
 
@@ -8,7 +8,7 @@ Field selection and plain authoring separated: unique observed field avoids mode
 
 ## Evidence and limits
 
-Prior36sourcegroupsPASS, final rerun71324 pending. Composer32/capability307/diagnostics12 synthetic checks, HTTP33/context28 PASS. Native composing24PASS. Final export43591 pending; finalPCK focus/native checks thenCRC required.
+Final36sourcegroupsPASS. FinalPCK smoke+32composer+307capability+12diagnostics+25adaptive+47draft+21reasoning+45copychecksPASS; native27composer/repair+31copy+156generalPASS; ZIPCRC PASS. HTTP33/context28 protocol checksPASS. Actual semantic failures remain failures.
 
 Semantic pilots NOT general success. reports/benchmark017-ab.json: ordinary2B and128thinking,6cases each; all liar-paradox variants remain wrong/contradictory, bounded thinking much slower. vendor sampling6cases worse; not adopted.4Bdev6case pilot partial improvement EN, RU wrong assertion/zh imperfect, not integrated/default. Actual App composer firstfailed trial copied composer017-before-grounded-repair.txt; latest real_test_composer_real017.txt18checks/1failure (zh keyword) and manualRUoffice hallucination; ENclean. Allproposals still reviewed, noWindows effects here. Do not mask failure or claim IQbreakthrough.24case acceptance seed tests/fixtures/quality017-cases.json is NOT fully executed. docs/WINDOWS_ACCEPTANCE_017.md userhardware test plan. General adaptive agent remains product goal, not per-app models/replacementOffice.
 

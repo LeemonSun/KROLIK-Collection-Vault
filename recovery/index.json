@@ -2,10 +2,10 @@
   "schema_version": 2,
   "repository": "LeemonSun/KROLIK-Collection-Vault",
   "branch": "main",
-  "content_id": "00fa8b1482fdab17c16ca25531993ecc398662fc427d45e8e0438c37f1f96cc1",
-  "capsule_sha256": "f3e5548d84e0b872c1ac81877ac8dcb4cc294425553c62f3df75e27d74d4fc79",
-  "capsule_bytes": 736990,
-  "source_files": 546,
+  "content_id": "828976de6f24705b02bf34d39e5a9411a950a6e2ba8c76c5575ead6595e16d6e",
+  "capsule_sha256": "6991ad182bea9d6deb6df4ae20598755088a5443173a17ed28d790a6a46603cb",
+  "capsule_bytes": 739135,
+  "source_files": 550,
   "capsule_path": "recovery/source_capsule.b64",
   "files": {
     ".gitattributes": {
@@ -39,19 +39,19 @@
       "bytes": 1006
     },
     "PROJECT_STATE.md": {
-      "sha256": "8aa42903933ea5fe5b248e520181f19111ac1da622e004163e52da26c6fffa7d",
-      "gitsha": "90ea26645b2b5d696a149129b6feb119def413d8",
-      "bytes": 1669
+      "sha256": "87cdc4c326a9fb948826dd3a3fd97ee8f03dfffba111e2bbab05133769f956bd",
+      "gitsha": "a149c67e58eea194746ff0d0e3790165d370c2c3",
+      "bytes": 1954
     },
     "README.md": {
-      "sha256": "831d85998182367bbee80c0dd1f8cfd75af19f8b2197b637f163f2be03613d1c",
-      "gitsha": "16cacc0aa9e1c06969a7ef8660c3567c4032c351",
-      "bytes": 3787
+      "sha256": "47b064fdde2c23189b2e027ad8f99246f58d8a8ec82c2cfdbe6abe2df23060da",
+      "gitsha": "04d528f9c24c37b29ee1583d3403e3e816383572",
+      "bytes": 3505
     },
     "RESUME.md": {
-      "sha256": "07677769545088fbe3cbfabf9d613784e1fffc7a621ac6e75b279eac7bf5b0f2",
-      "gitsha": "ef8878fc29f7b0708be701e87eb0010c5496bf14",
-      "bytes": 3834
+      "sha256": "8982101bcdd21f0c51baf6fb0c989349bee3e34f9e85cab99c8174c9c5b725bd",
+      "gitsha": "e99f4e8fbce57c460536f3b2e0769edfcfd2c7a1",
+      "bytes": 3872
     },
     "START_WINDOWS.cmd": {
       "sha256": "9902cee30d0c24fce794582888f58ea5bbc0b3098f913f8d792b9a4145467015",
@@ -404,9 +404,9 @@
       "bytes": 3698
     },
     "docs/HANDOFF.md": {
-      "sha256": "d0b0c80b877401727eecbdb68e8079d78e4ce4e97bd69c54f05b6a01e6a36004",
-      "gitsha": "71f1ba22e774a1d9fc0d7e63d3abcb3f6d497196",
-      "bytes": 1570
+      "sha256": "974f8d40446538b3727281bf03345c8913e8a248e18c184e671d21c937e838bd",
+      "gitsha": "d54b41c234c1ee0f4fe0a7f4c7c067110e793f5c",
+      "bytes": 1735
     },
     "docs/INITIAL_RESEARCH.md": {
       "sha256": "04363b87ca77f3dc9c5685a6e7d1a469f06ea08ca59b8c290ec9fcbb9ed69298",
@@ -729,9 +729,9 @@
       "bytes": 3652
     },
     "recovery/session.json": {
-      "sha256": "c79267d6d2cc7b5a9a93a0407542dbaaa6e298229a3d26ef8a4f575f4af1366f",
-      "gitsha": "de933e5bc880919975e8dd7dbf28335f2a8a1379",
-      "bytes": 11003
+      "sha256": "0fc88d42de06275bfe49f9ea21005cddffb18930251db3f9d775062d979e2e5e",
+      "gitsha": "be79e5b7eaf5382f9380745d2d9492f98f7e6de5",
+      "bytes": 11666
     },
     "reports/AGENT016_COMPARISON.json": {
       "sha256": "7bea0296fc5690920dba73797111ae4d7fc79625a75910044be9f88e7c6fb315",
@@ -739,9 +739,9 @@
       "bytes": 1289
     },
     "reports/VALIDATION.md": {
-      "sha256": "3542ef7d66026dd3b904f54f46a6f1bcaeeb64baeb0d310ec433a98b144d9138",
-      "gitsha": "50d0301eb2735801525af9a5a406898047c5e603",
-      "bytes": 3146
+      "sha256": "4c72d60b8c1718f9704767250922f41109a2365eaf663640df764d76ebc5c5ac",
+      "gitsha": "73d71c44037f0d34d137275821ab7d993cd0cef5",
+      "bytes": 3165
     },
     "reports/VOICE_BLOCK.md": {
       "sha256": "1b90647b4fb79e404d59fef0bf953a3ce7430c6e0b523da8bd72a23baa07b98c",
@@ -1058,6 +1058,21 @@
       "gitsha": "9d4e5b0be5cd0011a04aa7da2dec152a051af68e",
       "bytes": 169
     },
+    "reports/pack_test_capability017.txt": {
+      "sha256": "ce8a1a8e3efb6c6b79a6cc7c74ec2481d5ee3c2aa63875e31987926730aa2a81",
+      "gitsha": "6b6fd102191d51d2f71036d04797c8bf2b5f4085",
+      "bytes": 177
+    },
+    "reports/pack_test_composer017.txt": {
+      "sha256": "123523f323968657b869b576dec56736691f1d66f6ad177096518441a29f2f5b",
+      "gitsha": "b71d343bf69822a7ef01fc3d21cbfd841d1e3361",
+      "bytes": 159
+    },
+    "reports/pack_test_composer_visual017.txt": {
+      "sha256": "f07eff9aef41e22e1bcd53331f6018eaada90fbff1beb2e7a39a209e3d9ab8cf",
+      "gitsha": "85bf7b81857315df3347d1c4ef2a5395d646aa73",
+      "bytes": 618
+    },
     "reports/pack_test_copy_knowledge015.txt": {
       "sha256": "fc5dac6a97bbd60f90d7f6c68d0a703465adf282100020f0d1bc444912936fde",
       "gitsha": "8b6d7f5cf2fd7bbaa0d7fc77b44ebd7d223682fd",
@@ -1072,6 +1087,11 @@
       "sha256": "27248993ba1cc5130c2bc6b01cea85ac05e29a870194853d0ea69ced44849c73",
       "gitsha": "dac8f4b4580e1086973793d421bda5eee9233d64",
       "bytes": 1105
+    },
+    "reports/pack_test_diagnostics017.txt": {
+      "sha256": "6eee1b83e074de5c773ed98d51aaa3c7094399e1753b0125108df16d87cd599a",
+      "gitsha": "57f2873dd38c74e541b5b72700f0bfe33d8902ef",
+      "bytes": 169
     },
     "reports/pack_test_draft016.txt": {
       "sha256": "a6e4ce8d86aaa84727150ef2c108db67b5df9c39793202d32556b3e2d08e57f7",
@@ -2194,9 +2214,9 @@
       "bytes": 20
     },
     "tests/test_composer_visual017.gd": {
-      "sha256": "84920f0852a6ff9d8439ea5622655cb690880d792bf723647a7f46d9cbf7fd19",
-      "gitsha": "483851736b2eaa8e47629d6f5a6c27f9c33b69d7",
-      "bytes": 2414
+      "sha256": "66c616093120e24fdd2cbe76376530dcd75ad3e12c60d7aaf25ef77a0da42568",
+      "gitsha": "f99676c46fb6ec4941bd94dcf7d26f11e96a3102",
+      "bytes": 2723
     },
     "tests/test_composer_visual017.gd.uid": {
       "sha256": "3d59513ecf219e734f2306115203e8f6e5a3c69122d9691054c7a5ce64114fb7",
@@ -2644,9 +2664,9 @@
       "bytes": 2685
     },
     "tools/build_preview.py": {
-      "sha256": "bd956fd3e14235816ecb2dea147b7e784898bcba753a075a40e9ea9de6b34f76",
-      "gitsha": "2913fa6921c7bd927b94b77c8ef5af3081ca9a9f",
-      "bytes": 5237
+      "sha256": "07f50c0b38ad10d50409104dce659ec24b541e323c7165fc975179e6a99a2030",
+      "gitsha": "e58073feeb113face79510db77769a50840d4283",
+      "bytes": 5304
     },
     "tools/make_content_patch.py": {
       "sha256": "0940ac09ba087a6643d212fef8c84b9101abedb3feb3c2ffe53b9201f8e18e0e",

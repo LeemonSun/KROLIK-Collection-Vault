@@ -1,4 +1,7 @@
 extends SceneTree
+class FakeProvider extends Node:
+ func submit(_messages,_options):return true
+ func cancel():pass
 var checks=0
 var failures=0
 func _initialize():run.call_deferred()
@@ -11,7 +14,7 @@ func frame():
 func run():
  var app=root.get_node('App');var boot=load('res://scenes/bootstrap.tscn').instantiate();root.add_child(boot)
  await create_timer(.4).timeout;app.show_chat();await frame()
- var original=app.provider;var fake=preload('res://tests/test_adaptive015.gd').FakeProvider.new();app.add_child(fake);app.provider=fake
+ var original=app.provider;var fake=FakeProvider.new();app.add_child(fake);app.provider=fake
  var view=app.chat_window.view
  for locale in ['ru','en','zh-Hans']:
   app.cancel();app.set_locale(locale)
@@ -25,6 +28,8 @@ func run():
    var bounds=Rect2(Vector2.ZERO,Vector2(dimensions))
    check(bounds.encloses(view.editor.get_global_rect()) and bounds.encloses(view.stop_button.get_global_rect()),'Input/stop fit during composition '+locale+str(dimensions))
    check(not view.stop_button.disabled and view.plan_button.disabled,'Stop available and competing plan disabled '+locale)
+  var count=app.messages.size();app._on_answer('Meet at 2 PM');await frame()
+  check(app.goal_mode=='composing' and app.t('goal_status_repairing') in view.status_label.text and app.messages.size()==count,'Hidden repair has honest visible stage '+locale)
   app._on_answer('Welcome, everyone!');await frame()
   check(app.goal_mode=='proposal' and view.confirmation_button.visible and 'Welcome, everyone!' in view.history.get_parsed_text(),'Complete draft approval appears after composing '+locale)
   check(app.application_access.pid<0,'Preview causes no native process '+locale)

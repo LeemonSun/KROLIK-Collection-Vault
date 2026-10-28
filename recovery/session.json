@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.17.0-desktop-preview",
-  "checkpoint_status": "0.17_final_build_and_regressions",
-  "current_task": "0.17 final code: separate field selection/plain authoring with destination cleanup; canonical temporal grounding and one witness-driven repair; capability registry answers; private numeric phase diagnostics retained after unload and partial process labels.2B/128thinking/vendor/4B pilots completed; no production model or sampler switch.",
-  "next_action": "Collect source36groups session71324 and final export43591. Run finalPCK headless newgroups+nativecomposer/general/copy, CRC. SaveZIP/report with fresh library-tools-017, update artifactIDs/RESUME/session and final GitHub checkpoint. General reasoning remains unsolved; real composer latest18checks/1failure plus manual RU invented office. No IQ success claim.",
+  "checkpoint_status": "0.17_saved_general_reasoning_limits_documented",
+  "current_task": "0.17 built/validated/saved: separate field selection/plain authoring/destination cleanup, one witness-driven repair, temporal guards, registry capability answers, private retained phase diagnostics. No default model/sampler change; general reasoning remains unsolved.",
+  "next_action": "Real Windows/hardware acceptance using docs/WINDOWS_ACCEPTANCE_017.md, and broader24case semantic comparison of compact instruction models/observation formats. Do not enable failed thinking/critic/vendor sampler or ship4B by assumption. General agent remains primary, not per-app models or replacementOffice. Inspect failed real semantic outputs before claims.",
   "read_next": [
     "docs/WORKFLOWS_017.md",
     "reports/real_test_composer_real017.txt",
@@ -23,27 +23,29 @@
     "Public DNS unavailable in this environment (Godot and Python getaddrinfo failed). Real local TLS fixture passed; public websites/proxies/Windows remain unverified.",
     "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window.",
     "Adaptive loop is selected-window UIA only,4steps/240sec, each step approval. Reviewed drafts512chars can be generated under explicit compose intent; numeric/address literal gate is not complete semantic grounding. No universal editing or learned procedures.",
-    "Real2B draft/reasoning trial failed: invented English meeting time and wrong liar paradox, even after one review. Experimental extra review is OFF by default; current model IQ not solved. Full15question test not validated."
+    "Real2B draft/reasoning trial failed: invented English meeting time and wrong liar paradox, even after one review. Experimental extra review is OFF by default; current model IQ not solved. Full15question test not validated.",
+    "0.17 authoring is still semantically weak: unsupported locations/names may pass narrow grounding. One repair may fail or invent different facts; full preview/approval remains essential. Only selected-window supported UIA fields."
   ],
   "validation": [
-    "Earlier36sourcegroups PASS; final36rerun pending after small last changes",
-    "Composer32+capability307+diagnostics12 deterministic checks PASS; HTTP33/context28 protocol checks PASS",
-    "Native new composing stage24checks PASS on X11; finalPCK/native regressions pending",
-    "Actual App2B latest17pilot18checks/1failure (zh meeting keyword absent); manual RU invented office remains. All3proposals required approval, no native Windows writes. Independent repair synthetic tests prove bounds/cancel, not universal semantic correctness.",
-    "2Bbaseline and128thinking sixfixed semantic cases each, vendor sixcases and4B sixcases retained. No reliable general logic fix or production model/sampler change. Earlier invalid RSS measurements discarded; vendor worker Linux kernelpeak2346201088bytes, not app-total/Windows or a quota."
+    "36fresh-profile sourcegroupsPASS",
+    "Final PCK smoke+32composer+307capability+12diagnostics+25adaptive+47draft+21reasoning-behavior+45copy/selfknowledge PASS",
+    "Final PCK real X11:27composer/repair+31copy60messages+156general checks PASS; ZIPCRC PASS",
+    "Actual2B App composer latest18checks/1failure (zh meeting keyword absent); manualRUoffice hallucination remains. This is not a semantic success; source/pack correctness does not imply model intelligence.",
+    "Actual fixed6case pilots:2Bbaseline/128thinking/vendor and4B. Failed/partial semantic evidence retained; production model/sampler unchanged.24case acceptance seed NOT fully executed.",
+    "Earlier RSS samples invalidated; later vendor ownedworker Linux kernelpeak2346201088bytes, not app-total/Windows/quota. True Windows and target hardware still unverified."
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.16.0.zip",
-    "bytes": 53909921,
-    "sha256": "641e87d838b0c4cd07bd2c195a10f36fe6252555f9d1d14492affb6ccbd6f30f",
-    "library_file_id": "libfile_e4b0a628afcc8191b783417039923c0c",
-    "file_id": "file_000000008b3481fd8f19232a41816fad",
+    "full": "Companion_Preview_Windows_v0.17.0.zip",
+    "bytes": 53925224,
+    "sha256": "23b9ef47522bcf63a979017bd30a138bcb73006c13ad5a6924e2e90b42e58153",
+    "library_file_id": "libfile_de465322e12c81918850dfe13ee9f0ae",
+    "file_id": "file_0000000019bc823080cff309894be573",
     "version": 0,
     "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
   },
-  "previous_checkpoint": "ce2eb86efa546923146e36a7e3438256c697c269",
-  "shipped_version": "0.16.0-desktop-preview",
-  "shipped_app_pack_sha256": "465cc3c47a523ead33b8eb9b3c817199e736ca22cf40ace8a019ec2016caa5f7",
+  "previous_checkpoint": "6eb90d5aaab346233010707f72064b7ef6ff7058",
+  "shipped_version": "0.17.0-desktop-preview",
+  "shipped_app_pack_sha256": "c08eb837eb0efba540ab2db644f4adb374c43f93afef88c9c02b63b0e74310a5",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -78,7 +80,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_412368ff40d88191bb250ed571c96186",
+  "report_library_file_id": "libfile_4d7452916e1081918b3dd6aaee677021",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -91,6 +93,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.16.0.zip",
+      "bytes": 53909921,
+      "sha256": "641e87d838b0c4cd07bd2c195a10f36fe6252555f9d1d14492affb6ccbd6f30f",
+      "library_file_id": "libfile_e4b0a628afcc8191b783417039923c0c",
+      "file_id": "file_000000008b3481fd8f19232a41816fad",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.15.0.zip",
       "bytes": 53901739,
@@ -160,7 +171,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000755881f59070da16458b0d91",
+  "report_file_id": "file_0000000089a081f8a03659032d9fa561",
   "motion_artifact": {
     "filename": "Leemon_0.11_Motions.mp4",
     "bytes": 182482,
@@ -173,9 +184,9 @@
     "sha256": "217f5008402b9216f13a01f91405b90b565fbb3268271779faeb74c156d4a722",
     "version_label": "0.11_reference_not_0.12_capture"
   },
-  "shipped_exe_sha256": "3959cd3452534bcf79b59fe568334abe0749a45482272eb5036dd83750158b52",
+  "shipped_exe_sha256": "0fe6bf849f3daa0353f18ba45a9e3790657cf4e307143cd0011c19a528f7502c",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Reject draft numeric/time/URL/email tokens absent from original goal before approval; failed extra model review opt-in advanced only; final package checks completed.",
+  "final_fix": "Separated field destination from author text, bounded witness repair and relative-time guard; capability examples executable; numeric phase diagnostics persist after unload; no unrelated hostPID fallback. README/state/handoff updated to017.",
   "product_direction": {
     "primary": "general_adaptive_desktop_agent",
     "loop": [
