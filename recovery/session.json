@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.20.0-desktop-preview",
-  "checkpoint_status": "0.20_semantic_evidence_and_guarded_drafts_source_pass_delivery_pending",
-  "current_task": "020 source41groups PASS; bounded cache real-model and draft evidence retained; native/packed/build/delivery in progress",
-  "next_action": "Finish final020pack/native acceptance and deliver; retain all semantic failures",
+  "checkpoint_status": "0.20_delivered_final_pack_native_and_semantic_evidence_saved",
+  "current_task": "020delivered; cachememory optimization and bounded practical drafts complete, remaining quality failures retained",
+  "next_action": "ActualWindows acceptance incl cacheflags, UIA/DPI, model vision memory; broader held-out source-grounded semantics and adaptive tasks before default model change",
   "read_next": [
     "docs/WORKFLOWS_020.md",
     "reports/quality020-review.md",
@@ -26,27 +26,29 @@
     "0.17 authoring is still semantically weak: unsupported locations/names may pass narrow grounding. One repair may fail or invent different facts; full preview/approval remains essential. Only selected-window supported UIA fields.",
     "018 front-facing procedural locomotion, not full side-view hand-authored walk cycle; no window obstacle pathfinding. Small screens may have no nonoverlapping bubble position. Windows performance not measured.",
     "019 context matching is bounded/truncated and can reject legitimate UI changes. Native snapshot90/200visited/8depth/25KiB may omit useful controls;2500ms budget is soft between UIA calls. Outcome-only contextual recreation is not persistent identity. Real model selection quality on new prompts unmeasured.",
-    "020 standalone draft literal/action gate misses nonnumeric semantic hallucinations;10/12delivered is not10semantic successes. Cache0/checkpoints0 reduces one Linux worker peak22%, not strictquota or Windows/vision/minRAM proof."
+    "020 standalone draft literal/action gate misses nonnumeric semantic hallucinations;10/12delivered is not10semantic successes. Cache0/checkpoints0 reduces one Linux worker peak22%, not strictquota or Windows/vision/minRAM proof.",
+    "019contextual UIA small020modelpilot9/9; no broader dynamicWindows acceptance. RAM evidence is Linux CPU2/ctx2048 only; Windows/vision/quietprofile not remeasured."
   ],
   "validation": [
-    "40fresh-profile sourcegroups PASS including38context/36Appverification/17realPowerShellsynthetictree checks",
-    "Final PCK smoke+38context+36verification+25adaptive+32composer+42windowreader+17exportedcontent/realGodotPowerShellnonce roundtrip PASS",
-    "Final PCK X11:30agentlayout+156general+35motion PASS; ZIPCRC PASS",
-    "Real PowerShell7.6 oldhelper16protocol+11read PASS; local recoverybridge stale-ref/remotelease contract PASS",
-    "No actual Windows UIA/PowerShell5.1/DPI/hardware or actual model inference on new contextual prompts;017semantic failures remain unresolved."
+    "41fresh-profile sourcegroups PASS including39chatdraft; no productcode changes after suite",
+    "Final PCK smoke+39chatdraft+38context+36verification+25adaptive+32composer+42windowreader+16localruntime+17exportedcontent/actualGodotPowerShellnonce PASS",
+    "Final PCK X11:30draftlayout+30agentlayout+156general+35motion PASS; ZIPCRC PASS",
+    "Real pinned2B baseline33cases+compact15; candidate33; cachepair24each; boundedUIA9/9expectedproposals; App12draftcases10delivered2blocked with semantic failures retained",
+    "Local recoverybridge cold/warm/staleref/remotelease contract PASS",
+    "ActualWindows/UIA/DPI/targethardware/visionmemory not executed; Linuxworker memory not app-total/quota; generalreasoning and nonnumeric hallucinations unresolved"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.19.0.zip",
-    "bytes": 53934940,
-    "sha256": "f830cb43bb9fbfae33536dc969e7039124c9929378ee26dbcdaa7ac3ad6f2c79",
-    "library_file_id": "libfile_a4d009a4915c81918bfd7e142ec8e89a",
-    "file_id": "file_00000000c9b081f9967bfe828906bd51",
+    "full": "Companion_Preview_Windows_v0.20.0.zip",
+    "bytes": 53940587,
+    "sha256": "e9ed99ad4d804fa8832e93376dc112e8cb4d93653fd8074cecc1069aa5ecb000",
+    "library_file_id": "libfile_ded265b908c881919a75a19f177fd088",
+    "file_id": "file_0000000097f081f585fe96433bb8fccc",
     "version": 0,
     "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
   },
-  "previous_checkpoint": "c41362cdf081111085d4522f5a0a5d7004945e41",
-  "shipped_version": "0.19.0-desktop-preview",
-  "shipped_app_pack_sha256": "4989ff3495b6a639e76083ea97c149288cb6842edb62653ca9f7446e4feb7ade",
+  "previous_checkpoint": "803c101242fab40e7ae957bfc5536c7de3999479",
+  "shipped_version": "0.20.0-desktop-preview",
+  "shipped_app_pack_sha256": "079768a1375a955ab8d44b953fa1920da2f302b4963904e23817117bdc6d0cf5",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -81,7 +83,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_59f4253447f48191b0752c56c4c80d19",
+  "report_library_file_id": "libfile_e3623b5d4a588191a5420f1b1cc6d3cf",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -94,6 +96,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.19.0.zip",
+      "bytes": 53934940,
+      "sha256": "f830cb43bb9fbfae33536dc969e7039124c9929378ee26dbcdaa7ac3ad6f2c79",
+      "library_file_id": "libfile_a4d009a4915c81918bfd7e142ec8e89a",
+      "file_id": "file_00000000c9b081f9967bfe828906bd51",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.18.0.zip",
       "bytes": 53929819,
@@ -190,7 +201,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000064081f5a226ab43c2bc28f4",
+  "report_file_id": "file_00000000ff4881f585283a901f8c5875",
   "motion_artifact": {
     "filename": "Leemon_0.18_Behavior_Demo.mp4",
     "bytes": 145196,
@@ -202,9 +213,9 @@
     "sha256": "70301f1c1ad2c02285eb06b784bfa14e734959da878cafb2e7b3618023f6ebfa",
     "version_label": "018_synthetic_scripted_renderer_demo_no_OS_actions_no_model_no_FPS_benchmark"
   },
-  "shipped_exe_sha256": "ded4e39d97ea7a4f21f49fc21f8cfb6b545b0f433dad6f297963daa9a91f9663",
+  "shipped_exe_sha256": "5ddb4acf8bb6ba6a9f87e3a99652f32c6b78e321f6ffd4265d18bd1f1aa2f0e2",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Selected elements carry bounded parent context; exact scoped descriptor rechecked before effects; no stale approval retargeting. Max3read-onlyverification snapshots with cancelled timers; UIA notices/reviews ephemeral; receipts stripped. Restore helper tolerates known-old cached ref read without overwriting unrelated heads.",
+  "final_fix": "Disable additional RAM prompt cache/checkpoints after controlled A/B; standalone practical authoring with narrow literal/action guards, one hidden repair and explicit unsent label. Not semantic correctness guarantee. General2Bweights/prompt unchanged.",
   "product_direction": {
     "primary": "general_adaptive_desktop_agent",
     "loop": [
