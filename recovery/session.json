@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "app_version": "0.13.0-desktop-preview",
-  "checkpoint_status": "0.13_saved_windows_acceptance_pending",
-  "current_task": "0.13 completed: economy/standard compute budget including ASR, cross-run plain DOCX replacement, typed XLSX, bounded no-model range summaries, pinned visible review/results. Official stack review and Windows package/report saved.",
-  "next_action": "Actual Windows acceptance and hardware measurements; safe browser reading/source evidence, common document/table tool integration with bounded model-authored plans; compare lightweight models on RU/EN/zh before any new distribution. No per-program models. Technical work before artistic redesign.",
+  "app_version": "0.14.0-desktop-preview",
+  "checkpoint_status": "0.14_source_checked_export_pending",
+  "current_task": "0.14 utilities implemented: bounded arithmetic, dimensional unit conversion, fixed Windows Settings handoff, explicit HTTPS public-page reader with pinned public DNS/TLS and ephemeral inert excerpts.21-entry component backlog saved. Final UI/pack/export pending.",
+  "next_action": "Finish UI follow-to-latest check and final export/PCK/native checks, then save artifacts. Public DNS in this environment unavailable; local real TLS fixture passes, actual public websites/Windows pending.",
   "read_next": [
-    "docs/WORKFLOWS_013.md",
-    "docs/TECH_STACK_013.md",
-    "docs/WORKFLOWS_012.md"
+    "docs/WORKFLOWS_014.md",
+    "research/component_backlog.json",
+    "docs/TECH_STACK_013.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
@@ -18,27 +18,20 @@
     "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and not remeasured",
     "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud",
     "Selected files <=1MiB; DOCX one plain paragraph across adjacent runs; XLSX existing cells text/number/Boolean, formula workbooks refused. Range summaries<=1024cells use approximate doubles/raw numeric values, not exact financial arithmetic.",
-    "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured."
+    "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured.",
+    "New reader returns bounded source excerpts only, not automatic Q&A/search/guide execution. Only explicit public HTTPS, no redirects/login/JS/cookies, UTF-8 identity HTML/plain<=256KiB and20s.",
+    "Public DNS unavailable in this environment (Godot and Python getaddrinfo failed). Real local TLS fixture passed; public websites/proxies/Windows remain unverified.",
+    "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window."
   ],
   "validation": [
-    "26 source check groups PASS in fresh per-group profiles",
-    "44 technical013 checks PASS from source and final PCK; budget propagation, DOCX boundaries, real CSV ranges, no model quality claim",
-    "33 real OOXML checks PASS from source and final PCK; independent python-docx/openpyxl numeric/Boolean/text/style readback, CRC, all untouched parts compared",
-    "156 general +34 technical native X11 checks PASS from final PCK; explicit type selector, range summaries, pinned review/approval at400x420and640x500,3locales, real synthetic fixture apply/undo",
-    "9 final PCK composition/localization/version checks PASS; Leemon-only character assets",
-    "Final ZIP CRC PASS; no new model/runtime downloads required",
-    "Windows EXE/UIA/DPI/locks/native picker/mic/TTS, actual model throughput/resource use and actual2Bquality not remeasured"
+    "29 source check groups PASS, each in fresh profile",
+    "112 utilities014 checks PASS (after global IPv6 refinement)",
+    "16 public transport state-machine checks PASS (fake network)",
+    "7 real local TLS checks plus independent server request assertions PASS; no public DNS/live-site success",
+    "24 native utility UI source checks PASS before latest follow-scroll fix; final repeat pending"
   ],
-  "artifact": {
-    "full": "Companion_Preview_Windows_v0.13.0.zip",
-    "bytes": 53875263,
-    "sha256": "c2268ad88ec2fb913621a0c798a6f58b8d6d630e4489124459d8fb3f4a009a6d",
-    "library_file_id": "libfile_909ecf9b0d7881918b99c6d5bdc30516",
-    "file_id": "file_00000000600481fdb8c27214f2b5755f",
-    "version": 0,
-    "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
-  },
-  "previous_checkpoint": "f47afc5d1b9f467587409ad8a78491f15a4edf27",
+  "artifact": null,
+  "previous_checkpoint": "7994982c3545a29004bbfd1d41d597e6a2654730",
   "shipped_version": "0.13.0-desktop-preview",
   "shipped_app_pack_sha256": "c9dd1699e2836560df4b5eb6c9e5d85907b923dd859d085c5367ad20e19a8744",
   "offline_artifact": {
@@ -88,6 +81,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.13.0.zip",
+      "bytes": 53875263,
+      "sha256": "c2268ad88ec2fb913621a0c798a6f58b8d6d630e4489124459d8fb3f4a009a6d",
+      "library_file_id": "libfile_909ecf9b0d7881918b99c6d5bdc30516",
+      "file_id": "file_00000000600481fdb8c27214f2b5755f",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.12.0.zip",
       "bytes": 53869811,

@@ -1,6 +1,10 @@
 extends RefCounted
 ## Trusted tool registry controls effects; model text is never executed.
 const TOOLS = {
+	"web.read":{"implemented":true,"confirmation":false},
+	"math.calculate":{"implemented":true,"confirmation":false},
+	"math.convert":{"implemented":true,"confirmation":false},
+	"settings.open":{"implemented":true,"confirmation":false},
 	"files.edit_selected":{"implemented":true,"confirmation":false},
 	"facts.set":{"implemented":true,"confirmation":false},
 	"facts.forget":{"implemented":true,"confirmation":false},

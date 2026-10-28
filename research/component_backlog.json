@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-10-28",
+  "purpose": "non_executable_backlog_not_a_download_manifest",
+  "policy": {
+    "auto_install": false,
+    "new_candidates_bundled": false,
+    "single_heavy_job": true,
+    "shared_model_for_apps": true,
+    "review_each_model_voice_and_dependency": true
+  },
+  "entries": [
+    {
+      "id": "qwen35-2b",
+      "role": "text_and_vision",
+      "status": "in_use",
+      "declared_license": "Apache-2.0",
+      "source": "https://huggingface.co/Qwen/Qwen3.5-2B",
+      "resource_group": "shared_llm",
+      "integration_gate": "Keep one shared model; quality remains limited"
+    },
+    {
+      "id": "qwen35-08b",
+      "role": "lightweight_comparison",
+      "status": "candidate",
+      "declared_license": "Apache-2.0",
+      "source": "https://huggingface.co/Qwen/Qwen3.5-0.8B",
+      "resource_group": "shared_llm",
+      "integration_gate": "Compare RU/EN/zh actual tasks before replacing2B"
+    },
+    {
+      "id": "qwen35-4b",
+      "role": "quality_comparison",
+      "status": "candidate",
+      "declared_license": "Apache-2.0",
+      "source": "https://huggingface.co/Qwen/Qwen3.5-4B",
+      "resource_group": "shared_llm",
+      "integration_gate": "Not an obligatory base download; compare resource/quality"
+    },
+    {
+      "id": "llama-cpu",
+      "role": "text_vision_inference",
+      "status": "in_use_pinned",
+      "declared_license": "MIT_and_dependency_notices",
+      "source": "https://github.com/ggml-org/llama.cpp",
+      "resource_group": "shared_llm",
+      "integration_gate": "Keep pinned binary allowlist"
+    },
+    {
+      "id": "llama-vulkan",
+      "role": "optional_gpu_inference",
+      "status": "candidate",
+      "declared_license": "MIT_and_dependency_notices",
+      "source": "https://github.com/ggml-org/llama.cpp",
+      "resource_group": "shared_llm",
+      "integration_gate": "Driver matrix, CPU fallback and measurements required"
+    },
+    {
+      "id": "whisper",
+      "role": "local_asr",
+      "status": "in_use_pinned",
+      "declared_license": "MIT",
+      "source": "https://github.com/ggml-org/whisper.cpp",
+      "resource_group": "speech",
+      "integration_gate": "Do not load concurrently with sharedLLM"
+    },
+    {
+      "id": "silero-vad",
+      "role": "voice_activity",
+      "status": "candidate",
+      "declared_license": "MIT",
+      "source": "https://github.com/snakers4/silero-vad",
+      "resource_group": "small_audio",
+      "integration_gate": "No ASR duplicate; compare value against button recording"
+    },
+    {
+      "id": "sherpa-onnx",
+      "role": "speech_runtime",
+      "status": "candidate",
+      "declared_license": "Apache-2.0",
+      "source": "https://github.com/k2-fsa/sherpa-onnx",
+      "resource_group": "speech",
+      "integration_gate": "Engine license is not every model/voice license"
+    },
+    {
+      "id": "piper-current",
+      "role": "neural_voice",
+      "status": "deferred_distribution_review",
+      "declared_license": "GPL-3.0",
+      "source": "https://github.com/OHF-Voice/piper1-gpl",
+      "resource_group": "speech",
+      "integration_gate": "Distribution obligations and each voice MODEL_CARD need review"
+    },
+    {
+      "id": "kokoro",
+      "role": "neural_voice",
+      "status": "candidate_language_gap",
+      "declared_license": "Apache-2.0",
+      "source": "https://huggingface.co/hexgrad/Kokoro-82M",
+      "resource_group": "speech",
+      "integration_gate": "Not a complete verified Russian/English/Chinese solution"
+    },
+    {
+      "id": "windows-ocr",
+      "role": "text_in_images",
+      "status": "candidate_platform",
+      "declared_license": "platform_api",
+      "source": "https://learn.microsoft.com/en-us/uwp/api/windows.media.ocr.ocrengine",
+      "resource_group": "ocr",
+      "integration_gate": "Language packs differ by device"
+    },
+    {
+      "id": "rapidocr",
+      "role": "text_in_images",
+      "status": "candidate",
+      "declared_license": "Apache-2.0",
+      "source": "https://github.com/RapidAI/RapidOCR",
+      "resource_group": "ocr",
+      "integration_gate": "Pin exact weights and runtime/dependency notices"
+    },
+    {
+      "id": "onnxruntime",
+      "role": "shared_optional_inference",
+      "status": "candidate",
+      "declared_license": "MIT",
+      "source": "https://github.com/microsoft/onnxruntime",
+      "resource_group": "shared_optional_runtime",
+      "integration_gate": "Add only when an actual component needs it; check telemetry"
+    },
+    {
+      "id": "playwright",
+      "role": "controlled_browser",
+      "status": "candidate",
+      "declared_license": "Apache-2.0",
+      "source": "https://github.com/microsoft/playwright",
+      "resource_group": "browser",
+      "integration_gate": "Explicit profile/session, pin browser runtime; no credential reuse by default"
+    },
+    {
+      "id": "pdfium",
+      "role": "pdf_reading",
+      "status": "candidate",
+      "declared_license": "upstream_BSD_Apache_and_third_party",
+      "source": "https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE",
+      "resource_group": "documents",
+      "integration_gate": "Disable JS/external actions; document/page limits, dependency review"
+    },
+    {
+      "id": "sympy",
+      "role": "symbolic_study_math",
+      "status": "candidate",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://github.com/sympy/sympy",
+      "resource_group": "study_math",
+      "integration_gate": "Python+mpmath footprint; bounded grammar/worker, never raw sympify/eval of arbitrary user text"
+    },
+    {
+      "id": "sqlite-fts5",
+      "role": "local_document_index",
+      "status": "candidate",
+      "declared_license": "public_domain_core",
+      "source": "https://www.sqlite.org/copyright.html",
+      "resource_group": "memory_index",
+      "integration_gate": "Compare with lightweight keyword index; explicit document selection"
+    },
+    {
+      "id": "multilingual-e5-small",
+      "role": "semantic_document_retrieval",
+      "status": "candidate",
+      "declared_license": "MIT_declared_card",
+      "source": "https://huggingface.co/intfloat/multilingual-e5-small",
+      "resource_group": "embedding",
+      "integration_gate": "Pin artifact/conversion; compare with keyword baseline; not default always-on"
+    },
+    {
+      "id": "win-job-objects",
+      "role": "hard_resource_quota",
+      "status": "candidate_platform",
+      "declared_license": "platform_api",
+      "source": "https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects",
+      "resource_group": "resource_control",
+      "integration_gate": "Owned process handles, nesting/lifetime and Windows acceptance required"
+    },
+    {
+      "id": "steam-depots",
+      "role": "installation_and_updates",
+      "status": "candidate_account_setup",
+      "declared_license": "Steamworks_terms",
+      "source": "https://partner.steamgames.com/doc/store/application/depots",
+      "resource_group": "distribution",
+      "integration_gate": "Base purchase includes advertised features; ownAppID required"
+    },
+    {
+      "id": "steam-cloud",
+      "role": "optional_fact_sync",
+      "status": "plan_only",
+      "declared_license": "Steamworks_terms",
+      "source": "https://partner.steamgames.com/doc/features/cloud",
+      "resource_group": "cloud",
+      "integration_gate": "Opt-in, account separation, conflicts; no weights/screenshots/userfiles"
+    }
+  ]
+}

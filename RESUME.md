@@ -1,3 +1,15 @@
+# Leemon 0.14 — исходники проверены, финальная сборка готовится
+
+Начать с recovery/session.json и docs/WORKFLOWS_014.md. Копилка: research/component_backlog.json (21 запись), docs/TECH_STACK_013.md. Не скачивать кандидатов автоматически. GitHub только хранилище, без CI/remote builds/deployment. Без субагентов без прямого разрешения. Рабочая папка по-прежнему /workspace/scratch/deec6c1ed852/leemon-013; старая companion-foundation может быть0.1.
+
+0.14: tools/calculator.gd (ограниченная грамматика, неeval), unit_converter.gd (явные размерности/affine temperature), windows_settings.gd (fixedURI handoff, не изменение настройки), public_page.gd (explicitHTTPS, asyncDNS/allIPschecked/pinnedIP/TLSoriginalhost, GET/no credentials/no redirects, bounded inert UTF8 excerpts, ephemeral/noLLM). Router/ToolPolicy/App интегрированы; tools не ставятся в chat queue. Стоп очищает reader. UI показывает этапы. Исправляется follow-to-latest после синхронных tool replies.
+
+29 source groups PASS;112utilities,16fakeHTTPtransport,7real localTLS+independentPythonrequests PASS. ВнешнийDNS недоступен и вGodot, и вPython; успешного публичногоwebfetch не заявлять. Это не автономный поиск/Q&A/исполнение гайдов. Windows-settings значения не меняет. Double не exact money/CAS. Новые модели/runtime не добавлены. Новые нативные проверки/экспорт ещё pending в этом checkpoint.
+
+Ключевые проверки: test_utilities014.gd, test_public_transport014.gd, test_public_tls014.gd + tools/test_public_tls.py; тестовый localhost adapter/ключи не входят в export. Следом test_utilities_visual014.gd и pack014. Сохранить AI/ и AppData; модели0.8–0.13совместимы. Last shipped0.13 IDs вsession.previous_artifacts. До финала собрать0.14, проверитьPCK/ZIP, сохранить Library и обновитьsession/README/shippedversion.
+
+Предыдущая основа0.13 (для reference):
+
 # Leemon 0.13 — сохранено и выдано
 
 Начать с `python3 tools/resume.py status`, recovery/session.json и docs/WORKFLOWS_013.md. Выбор инструментов/лицензий: docs/TECH_STACK_013.md. Не перечитывать весь чат и не перезапускать фундамент. GitHub LeemonSun/KROLIK-Collection-Vault/main — только хранилище, без Actions/remote builds/deployment. Без субагентов без прямого разрешения. Текущий head — .resume-remote.json.

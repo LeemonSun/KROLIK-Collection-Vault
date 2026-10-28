@@ -71,6 +71,8 @@ func _follow():
 	if not is_inside_tree():return
 	await tree.process_frame
 	if not is_inside_tree():return
+	await tree.process_frame
+	if not is_inside_tree():return
 	scroll_vertical=int(rows.get_child(rows.get_child_count()-1).position.y) if follow_start and rows.get_child_count()>0 else int(get_v_scroll_bar().max_value)
 	follow_start=false;follow_pending=false
 

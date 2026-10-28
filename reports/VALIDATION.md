@@ -15,6 +15,9 @@
 | window_reader | PASS |
 | file_memory | PASS |
 | queue_table | PASS |
+| utilities014 | PASS |
+| public_tls014 | PASS |
+| public_transport014 | PASS |
 | technical013 | PASS |
 | office | PASS |
 | workflow | PASS |
@@ -33,7 +36,7 @@
 
 release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.
 
-Leemon 0.13: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.
+Leemon 0.14: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.
 Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.
 Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.
 Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.

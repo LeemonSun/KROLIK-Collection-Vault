@@ -216,6 +216,7 @@ func submit_current():
 		return
 	editor.clear()
 	app.submit(text)
+	history.follow_latest()
 	editor.grab_focus()
 func _setup_ai():
 	var engine=app.vision_asset if install_mode=="screen" else (app.speech_input.transcriber if install_mode=="voice" else app.local_runtime)
@@ -269,6 +270,7 @@ func refresh():
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
+	if app.public_page.busy:status_label.text=app.t("web_stage_"+app.public_page.stage)
 	if app.workflow.active:status_label.text=app.t("workflow_step",{"step":app.workflow.index+1,"total":app.workflow.steps.size()})+" · "+status_label.text
 	if app.goal_mode=="proposal":status_label.text+=" · "+app.t("approval_remaining",{"seconds":maxi(0,ceili((app.goal_deadline_ms-Time.get_ticks_msec())/1000.0))})
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED

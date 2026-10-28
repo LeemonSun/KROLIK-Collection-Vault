@@ -53,6 +53,7 @@ var desktop_companion
 var voice = SystemVoice.new()
 var local_ai_enabled = false
 var browser_search = BrowserSearch.new()
+var public_page=preload("res://src/tools/public_page.gd").new()
 var motion = AnimationDirector.new()
 var last_motion_result = {}
 const DesktopActions=preload("res://src/tools/desktop_actions.gd")
@@ -148,6 +149,10 @@ func _ready():
 		messages=memory.messages.duplicate(true)
 		session_turns=memory.turns.duplicate(true)
 	browser_search.set_browser(str(store.data.settings.get("browser", "system")))
+	add_child(public_page)
+	public_page.completed.connect(_public_page_ready)
+	public_page.failed.connect(_public_page_failed)
+	public_page.changed.connect(func():changed.emit())
 	profile_name = profiles.select(profile_request, OS.get_memory_info().get("physical", 0))
 	# Network adapter must be enabled explicitly; not restored by saved settings.
 	_set_provider("unconfigured")
@@ -274,7 +279,7 @@ func submit(text):
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text, command.get("tool","")=="access.read")
+	add_message("user", text, command.get("tool","") in ["access.read","web.read"])
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -368,6 +373,21 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool=="web.read":
+		if public_page.start(command.args.url):request_motion("dialogue.think_loop")
+		else:state.reset();changed.emit()
+		return
+	if command.tool in ["math.calculate","math.convert"]:
+		var result=preload("res://src/tools/calculator.gd").new().evaluate(command.args.expression) if command.tool=="math.calculate" else preload("res://src/tools/unit_converter.gd").convert(command.args.number,command.args.from,command.args.to)
+		if result.ok:
+			add_message("assistant",t("math_result",{"value":result.text})+(" "+result.to if command.tool=="math.convert" else "")+"\n"+t("math_precision"))
+			request_motion("dialogue.explain_small")
+		else:add_message("assistant",t("math_"+str(result.status)))
+		state.reset();changed.emit();return
+	if command.tool=="settings.open":
+		var result=preload("res://src/tools/windows_settings.gd").open_page(command.args.page)
+		add_message("assistant",t("settings_page_"+str(result.status)))
+		state.reset();changed.emit();return
 	if command.tool=="files.edit_selected":
 		state.reset();open_file_editor();return
 	if command.tool.begins_with("facts."):
@@ -536,6 +556,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	if is_instance_valid(public_page):public_page.cancel()
 	chat_queue.clear();chat_started_ms=0
 	file_activity="";task_event=""
 	if is_instance_valid(file_editor):file_editor.revoke()
@@ -696,12 +717,14 @@ func _task_stage_changed():
 	if not goal_mode.is_empty():stage="goal_"+goal_mode
 	elif not window_read_mode.is_empty():stage="read_"+window_read_mode
 	elif not queued_chat_text.is_empty():stage="model_loading"
+	elif public_page.busy:stage="web_"+public_page.stage
 	elif state.current=="thinking" and not pending_user_text.is_empty():stage="reply"
 	if stage==last_task_stage:return
 	last_task_stage=stage
 	if stage in ["model_loading","reply"]:
 		task_event=stage;say_companion(t("task_"+stage))
 	elif not stage.is_empty():
+		if public_page.busy:say_companion(t("web_stage_"+public_page.stage));return
 		var key="goal_status_"+goal_mode if not goal_mode.is_empty() else "window_read_status_"+window_read_mode
 		say_companion(t(key))
 
@@ -716,6 +739,14 @@ func show_chat():
 	chat_window.open_near(anchor)
 	if is_instance_valid(desktop_companion):desktop_companion.park_near(Rect2i(chat_window.position,chat_window.size))
 	return true
+
+func _public_page_ready(result):
+	state.reset()
+	var text=t("web_source",{"url":result.url,"time":result.retrieved_utc})+"\n\n"+"\n\n".join(PackedStringArray(result.blocks))+"\n\n"+t("web_partial")
+	add_message("assistant",text,true)
+	request_motion("dialogue.explain_small");changed.emit()
+func _public_page_failed(key):
+	state.reset();add_message("assistant",t(key),true);changed.emit()
 
 func set_browser(id):
 	if browser_search.set_browser(id):
