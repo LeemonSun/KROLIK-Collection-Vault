@@ -2,9 +2,9 @@
   "schema_version": 2,
   "repository": "LeemonSun/KROLIK-Collection-Vault",
   "branch": "main",
-  "content_id": "d73c6d8861f01e11eb5219bb5e21d7cf70d4aea3e6b468b2de8edb1d4396dcec",
-  "capsule_sha256": "ca43045fa81495f8ec191dc9cb83cd956f649f9ec508e85974b3aea349ec7ac3",
-  "capsule_bytes": 501379,
+  "content_id": "0a2fcb7c3e2cb4f14785ef97912391a7b967a58d85261a23ca2db5c49d7fcc7a",
+  "capsule_sha256": "792aca439f6407f965f6e527a604e948f06410097fe01353e8b6755c611fb84f",
+  "capsule_bytes": 501562,
   "source_files": 369,
   "capsule_path": "recovery/source_capsule.b64",
   "files": {
@@ -734,9 +734,9 @@
       "bytes": 5781
     },
     "recovery/session.json": {
-      "sha256": "f30d03f6c363296a9d33cde103129d22267bc2013bf8243b483ab2f249d7307d",
-      "gitsha": "d495c3b725561883e5471a0dece4644e55488185",
-      "bytes": 4084
+      "sha256": "737ac231438b42c76313ba03213f64335bcfc491787369306651af8d2e3a1cef",
+      "gitsha": "967d6f79ef5baed115516396b95c53d7969d081d",
+      "bytes": 4462
     },
     "reports/VALIDATION.md": {
       "sha256": "341708984fdb5ddf9c43671c7b6466cacaffece6a4a5ceae09c8450b8912bd0d",

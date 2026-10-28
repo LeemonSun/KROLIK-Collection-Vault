@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.8.0-desktop-preview",
-  "checkpoint_status": "0.8_packaged_saved_native_artifacts_windows_acceptance_pending",
-  "current_task": "Completed integrated 0.8 private preview. App-only ZIP, full offline archive split into4 native Library parts, report and actual interface screenshot are saved. Source/runtime tests passed; actual Windows acceptance is the next priority.",
-  "next_action": "Use current README download links and RESUME state. Ask user for actual Windows behavior after they test; do not rebuild foundation or promise Steam1.0. Continue ROADMAP priorities from Windows/DPI/mic/UIA and measured performance.",
+  "checkpoint_status": "0.8_restored_and_revalidated_continuing_window_goal_planning",
+  "current_task": "Recovered exact 0.8 after workspace reverted to 0.1. Preserved previous workspace separately; all18 source groups pass again. Night app/AI package restored and hashes rechecked. Continuing next real block: semantic user goal -> observed accessible controls -> validated proposed step -> user approval -> scoped executor/result verification.",
+  "next_action": "Continue window goal proposal implementation and actual compact-model JSON tests. Do not restart foundation or re-upload unchanged0.8 artifacts. Preserve one heavy worker and explicit chosen window.",
   "read_next": [
     "docs/HANDOFF.md",
     "docs/ROADMAP.md"
@@ -73,5 +73,13 @@
   },
   "report_library_file_id": "libfile_b75e2dfda7c48191905110dcb5321a67",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
-  "report_version": 1
+  "report_version": 1,
+  "recovery_event": {
+    "date_moscow": "2026-10-28",
+    "source_head": "3aa27decdd5a240dd8fa8381763dc4e596d5bed5",
+    "source_files": 369,
+    "restored_without_conflicts": true,
+    "previous_workspace_preserved": "companion-foundation-before-restore-20261028T015717",
+    "checks": "18 groups PASS"
+  }
 }
