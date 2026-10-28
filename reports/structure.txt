@@ -1,1 +1,1 @@
-STRUCTURE: {"json_files": 38, "locale_keys": 354, "gd_scripts": 90} errors=0
+STRUCTURE: {"json_files": 38, "locale_keys": 367, "gd_scripts": 93} errors=0

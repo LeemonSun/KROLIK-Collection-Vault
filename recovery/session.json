@@ -1,45 +1,33 @@
 {
   "schema_version": 1,
-  "app_version": "0.12.0-desktop-preview",
-  "checkpoint_status": "0.12_saved_windows_acceptance_pending",
-  "current_task": "0.12 completed: Leemon-only active assets/docs/recovery; bounded FIFO chat queue and deterministic task progress; reviewed CSV/TSV cells and bounded DOCX/XLSX adapters; visible editor/queue improvements, file-state behavior, smoother settling. Windows ZIP and update/status guide saved.",
-  "next_action": "Actual Windows acceptance and hardware measurements. Extend shared document/table/browser tools (typed ranges, DOCX multi-run/structure, XLSX calculation dependencies), bounded model-authored plans with verified results; stronger measured offline model. No per-program models. Preserve one Leemon style and low load. Do not rebuild completed foundation.",
+  "app_version": "0.13.0-desktop-preview",
+  "checkpoint_status": "0.13_source_checked_export_pending",
+  "current_task": "0.13 source implemented: quiet/standard compute budget including ASR, multi-run plain DOCX paragraphs, typed XLSX and read-only range statistics. Official technical stack research saved. Final export and artifact save pending.",
+  "next_action": "Finish native technical UI checks, export0.13 using verified local template, run final PCK checks, save artifacts and final checkpoint. Windows acceptance/model accuracy still pending.",
   "read_next": [
-    "docs/WORKFLOWS_012.md",
-    "docs/WINDOW_READING.md",
-    "docs/STEAM_CLOUD_PLAN.md"
+    "docs/WORKFLOWS_013.md",
+    "docs/TECH_STACK_013.md",
+    "docs/WORKFLOWS_012.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
     "Queue holds at most3 ordinary text messages and uses one model inference; no deferred OS/window/capture/voice/tools context",
-    "Selected file<=1MiB; CSV comma/TSV tab, bounded rectangular tables; DOCX unique text inside one run only; XLSX existing cell as text, formula workbooks refused; not full Office",
     "OOXML ZIP<=256entries/8MiB expanded/2MiB per part; no signed/encrypted/ZIP64/.bin packages; bounded XML balance checks, not full schema validation",
     "SHA+rename/file backup guard is not complete adversarial Windows race/reparse protection",
     "Only user-authored workflow up to4steps; browser reading via chosen-window UIA and search handoff, no universal autonomous planner/browser",
     "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and not remeasured",
-    "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud"
+    "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud",
+    "Selected files <=1MiB; DOCX one plain paragraph across adjacent runs; XLSX existing cells text/number/Boolean, formula workbooks refused. Range summaries<=1024cells use approximate doubles/raw numeric values, not exact financial arithmetic.",
+    "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured."
   ],
   "validation": [
-    "25 local check groups PASS (source, locales, worker, workflow, file/memory, UI, expected public gate block)",
-    "39 queue/table checks PASS from source and final PCK; fake inference, actual CSV/TSV files",
-    "16 real OOXML checks PASS from source and final PCK; independent python-docx/openpyxl style/type/readback, CRC and all untouched parts compared",
-    "156 native X11 checks PASS from final PCK; actual windows/rendering, synthetic fixtures; not Windows",
-    "9 final PCK composition/localization/version checks PASS; only Leemon character asset directory",
-    "15 Python recovery tests PASS; retirement hash guards, changed local files preserved, licenses protected",
-    "Local connector-contract tests PASS: cold/warm restore, unknown local edits, capsule/checkpoint, remote-head lease",
-    "Final ZIP CRC PASS; current update guide bundled",
-    "Real model/conversation/vision/voice quality not re-benchmarked in this pass"
+    "26 source check groups PASS in fresh per-group profiles",
+    "44 technical013 checks PASS (no model/Windows claim)",
+    "33 real Office checks plus independent python-docx/openpyxl readback PASS",
+    "156 native X11 source checks PASS; final pack pending"
   ],
-  "artifact": {
-    "full": "Companion_Preview_Windows_v0.12.0.zip",
-    "bytes": 53869811,
-    "sha256": "49d8d93533660030119ad2588ef0443ebadf375c7013a4094b4423c1afa1a407",
-    "library_file_id": "libfile_59fd4fb8f5ac81919d46809a2044f85f",
-    "file_id": "file_000000007c6c81f5b98cd497d0bb2754",
-    "version": 1,
-    "status": "saved_native_library_with_local_metadata_zip_crc_verified"
-  },
-  "previous_checkpoint": "81dfabb474a30b2904f6ae195c3791316a30c575",
+  "artifact": null,
+  "previous_checkpoint": "5523ff1085818bdf3a9cfbf9e74bdd19e23ad834",
   "shipped_version": "0.12.0-desktop-preview",
   "shipped_app_pack_sha256": "d964779e177ecdc7410444974a4e79722d4eccbdaeab2ab3c2bc8e230b0bb3f4",
   "offline_artifact": {
@@ -89,6 +77,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.12.0.zip",
+      "bytes": 53869811,
+      "sha256": "49d8d93533660030119ad2588ef0443ebadf375c7013a4094b4423c1afa1a407",
+      "library_file_id": "libfile_59fd4fb8f5ac81919d46809a2044f85f",
+      "file_id": "file_000000007c6c81f5b98cd497d0bb2754",
+      "version": 1,
+      "status": "saved_native_library_with_local_metadata_zip_crc_verified"
+    },
     {
       "full": "Companion_Preview_Windows_v0.11.0.zip",
       "bytes": 53853821,

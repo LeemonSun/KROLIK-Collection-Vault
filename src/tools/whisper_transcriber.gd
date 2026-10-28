@@ -10,6 +10,7 @@ var verify_thread
 var job_revision=0
 var verify_revision=0
 var requested_language="auto"
+var cpu_thread_limit=2
 var process_io={}
 var cleanup_queue=[]
 var cleanup_ms=0
@@ -64,7 +65,7 @@ func _process(delta):
 		else:transcribed.emit(text)
 func build_asr_args(input_path,output_path,language,processors=-1):
 	if processors<1:processors=OS.get_processor_count()
-	var threads=mini(2,maxi(1,processors/2))
+	var threads=mini(clampi(cpu_thread_limit,1,2),maxi(1,processors/2))
 	return PackedStringArray(["-m",ProjectSettings.globalize_path(model_path()),"-f",input_path,"-l",language,"-t",str(threads),"-p","1","-bs","1","-bo","1","-mc","0","-nf","-np","-nt","-ng","-otxt","-of",output_path])
 func _launch_asr():
 	var args=build_asr_args(ProjectSettings.globalize_path(job_folder.path_join("audio.wav")),ProjectSettings.globalize_path(job_folder.path_join("result")),requested_language)

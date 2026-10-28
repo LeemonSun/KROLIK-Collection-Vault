@@ -86,26 +86,19 @@ func _archive_plan(path,source,entries,part,after,before_value,after_value,line)
 func prepare(path,find,replacement):
 	if path.get_extension().to_lower()!="docx":return super.prepare(path,find,replacement)
 	cancel()
-	if not find is String or not replacement is String or find.is_empty() or replacement.to_utf8_buffer().size()>65536 or "\n" in replacement or "\r" in replacement:return {"ok":false,"status":"input"}
+	if not find is String or not replacement is String or find.is_empty() or replacement.to_utf8_buffer().size()>65536 or "\n" in replacement or "\r" in replacement or "\t" in replacement:return {"ok":false,"status":"input"}
 	var source=_read(path)
 	if not source.ok:return source
 	var package=parts(path,source)
 	if not package.ok:return package
+	var settings=package.entries.get("word/settings.xml",PackedByteArray()).get_string_from_utf8()
+	if not settings.is_empty() and (not xml_ok(settings) or not matches('<w:documentProtection(?:\\s|/|>)',settings).is_empty()):return {"ok":false,"status":"office_xml"}
 	var part="word/document.xml";var xml=package.entries.get(part,PackedByteArray()).get_string_from_utf8()
 	if not xml_ok(xml) or "<w:document" not in xml or "<w:ins" in xml or "<w:del" in xml:return {"ok":false,"status":"office_xml"}
-	var candidates=[]
-	for match_ in matches('<w:t(?:\\s[^>]*)?>([^<]*)</w:t>',xml):
-		var value=match_.get_string(1).xml_unescape()
-		for _i in range(value.count(find)):candidates.append({"match":match_,"value":value})
-	if candidates.size()!=1:return {"ok":false,"status":"office_text"}
-	var candidate=candidates[0];var match_=candidate.match
-	var new_value=candidate.value.replace(find,replacement)
-	var escaped=new_value.xml_escape()
-	var tag=match_.get_string().substr(0,match_.get_start(1)-match_.get_start())
-	# Preserve leading/trailing spaces even when the source omitted xml:space.
-	if "xml:space=" not in tag:tag=tag.trim_suffix(">")+' xml:space="preserve">'
-	var after=xml.left(match_.get_start())+tag+escaped+'</w:t>'+xml.substr(match_.get_end())
-	return _archive_plan(path,source,package.entries,part,after,find,replacement,1)
+	var edit=preload("res://src/tools/docx_text.gd").plan(xml,find,replacement)
+	if not edit.ok:return edit
+	return _archive_plan(path,source,package.entries,part,edit.xml,find,replacement,1)
+
 static func attributes(tag):
 	var parser=XMLParser.new();var result={}
 	if parser.open_buffer(tag.to_utf8_buffer())!=OK or parser.read()!=OK or parser.get_node_type()!=XMLParser.NODE_ELEMENT:return result
@@ -115,9 +108,8 @@ static func address(row,column):
 	var letters="";var n=column
 	while n>0:n-=1;letters=char(65+n%26)+letters;n=n/26
 	return letters+str(row)
-func prepare_sheet_cell(path,sheet,row,column,expected,replacement,inspect_only=false):
-	cancel()
-	if sheet<1 or row<1 or row>1048576 or column<1 or column>16384 or replacement.to_utf8_buffer().size()>65536:return {"ok":false,"status":"input"}
+func _sheet_context(path,sheet):
+	if sheet<1:return {"ok":false,"status":"table_address"}
 	var source=_read(path)
 	if not source.ok:return source
 	var package=parts(path,source)
@@ -143,6 +135,14 @@ func prepare_sheet_cell(path,sheet,row,column,expected,replacement,inspect_only=
 			var content=entries[name].get_string_from_utf8()
 			if not xml_ok(content) or not matches('<(?:[A-Za-z_][\\w.-]*:)?f(?:\\s|>|/)',content).is_empty():return {"ok":false,"status":"office_formula"}
 	if not xml_ok(xml) or "<sheetProtection" in xml:return {"ok":false,"status":"office_xml"}
+	return {"ok":true,"source":source,"entries":entries,"xml":xml,"part":part}
+
+func prepare_sheet_cell(path,sheet,row,column,expected,replacement,inspect_only=false,value_type="text"):
+	cancel()
+	if sheet<1 or row<1 or row>1048576 or column<1 or column>16384 or replacement.to_utf8_buffer().size()>65536:return {"ok":false,"status":"input"}
+	var context=_sheet_context(path,sheet)
+	if not context.ok:return context
+	var source=context.source;var entries=context.entries;var xml=context.xml;var part=context.part
 	var ref=address(row,column);var candidates=[]
 	for cell in matches('<c\\s[^>]*(?:/>|>.*?</c>)',xml):
 		var tag=cell.get_string().get_slice(">",0)+">"
@@ -165,6 +165,68 @@ func prepare_sheet_cell(path,sheet,row,column,expected,replacement,inspect_only=
 	for key in attrs:
 		if key not in ["r","s","t"]:return {"ok":false,"status":"office_xml"}
 	var style=' s="'+str(attrs.s).xml_escape(true)+'"' if attrs.has("s") else ""
-	var new_cell='<c r="'+ref+'"'+style+' t="inlineStr"><is><t xml:space="preserve">'+replacement.xml_escape()+'</t></is></c>'
+	var encoded=encode_cell_value(replacement,value_type)
+	if not encoded.ok:return encoded
+	var new_cell='<c r="'+ref+'"'+style+encoded.xml+'</c>'
+
 	var after=xml.left(cell.get_start())+new_cell+xml.substr(cell.get_end())
-	return _archive_plan(path,source,entries,part,after,expected,replacement,row)
+	return _archive_plan(path,source,entries,part,after,expected,"["+value_type+"] "+replacement,row)
+
+static func encode_cell_value(value,kind):
+	if kind=="text":return {"ok":true,"xml":' t="inlineStr"><is><t xml:space="preserve">'+value.xml_escape()+'</t></is>'}
+	if kind=="boolean":
+		if value not in ["true","false"]:return {"ok":false,"status":"office_value"}
+		return {"ok":true,"xml":' t="b"><v>'+str(1 if value=="true" else 0)+'</v>'}
+	if kind!="number":return {"ok":false,"status":"office_value"}
+	var re=RegEx.new();re.compile('^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]{1,3})?$')
+	if value.length()>64 or re.search(value)==null:return {"ok":false,"status":"office_value"}
+	if "e" in value.to_lower() and absi(value.to_lower().get_slice("e",1).to_int())>308:return {"ok":false,"status":"office_value"}
+	if not is_finite(value.to_float()):return {"ok":false,"status":"office_value"}
+	# Excel stores at most 15 significant decimal digits; never silently round IDs.
+	var digits=value.to_lower().get_slice("e",0).replace("-","").replace(".","")
+	while digits.begins_with("0"):digits=digits.substr(1)
+	if digits.length()>15 or (value.to_float()==0.0 and not digits.is_empty()):return {"ok":false,"status":"office_value"}
+	return {"ok":true,"xml":' t="n"><v>'+value+'</v>'}
+
+func inspect_range(path,sheet,row,column,last_row,last_column):
+	cancel()
+	if row<1 or column<1 or last_row<row or last_column<column or last_row>1048576 or last_column>16384 or (last_row-row+1)*(last_column-column+1)>1024:return {"ok":false,"status":"table_address"}
+	var numbers=[];var blank=0;var other=0
+	if path.get_extension().to_lower()=="xlsx":
+		var context=_sheet_context(path,sheet)
+		if not context.ok:return context
+		var cells={}
+		for cell in matches('<c\\s[^>]*(?:/>|>.*?</c>)',context.xml):
+			var attrs=attributes(cell.get_string().get_slice(">",0)+">")
+			var ref=str(attrs.get("r",""))
+			if cells.has(ref):return {"ok":false,"status":"office_xml"}
+			cells[ref]={"attrs":attrs,"xml":cell.get_string()}
+		for r in range(row,last_row+1):
+			for c in range(column,last_column+1):
+				var cell=cells.get(address(r,c),{})
+				if cell.is_empty():blank+=1;continue
+				var values=matches('<v>([^<]*)</v>',cell.xml)
+				if cell.attrs.get("t","") in ["","n"] and values.size()==1:
+					var value=values[0].get_string(1)
+					if not value.is_valid_float()  :return {"ok":false,"status":"office_value"}
+					numbers.append(value.to_float())
+				elif values.is_empty() and not "<is>" in cell.xml:blank+=1
+				else:other+=1
+	else:
+		if path.get_extension().to_lower() not in ["csv","tsv"]:return {"ok":false,"status":"unsupported"}
+		var source=_read(path)
+		if not source.ok:return source
+		var table=preload("res://src/tools/delimited_table.gd").parse(source.text,"\t" if path.get_extension().to_lower()=="tsv" else ",")
+		if not table.ok:return table
+		if last_row>table.rows.size() or last_column>table.columns:return {"ok":false,"status":"table_address"}
+		for r in range(row-1,last_row):
+			for c in range(column-1,last_column):
+				var value=table.rows[r][c].value
+				if value.is_empty():blank+=1
+				elif value==value.strip_edges() and encode_cell_value(value,"number").ok:numbers.append(value.to_float())
+				else:other+=1
+	var sum_=0.0;var correction=0.0
+	for number in numbers:
+		var adjusted=number-correction;var next=sum_+adjusted;correction=(next-sum_)-adjusted;sum_=next
+	if not is_finite(sum_):return {"ok":false,"status":"office_value"}
+	return {"ok":true,"count":numbers.size(),"blank":blank,"other":other,"sum":sum_,"mean":sum_/numbers.size() if not numbers.is_empty() else null,"min":numbers.min() if not numbers.is_empty() else null,"max":numbers.max() if not numbers.is_empty() else null}

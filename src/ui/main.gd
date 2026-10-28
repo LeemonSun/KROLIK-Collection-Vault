@@ -419,6 +419,15 @@ func _build_settings():
 	content.add_child(profile_picker)
 	profile_picker.item_selected.connect(func(index): App.set_profile(names[index]); _build())
 	_label(App.t("settings_hint"), content, 13, true)
+	_label(App.t("resource_mode"),content)
+	var resource_picker=OptionButton.new()
+	resource_picker.name="ResourceMode"
+	resource_picker.add_item(App.t("resource_quiet"));resource_picker.add_item(App.t("resource_standard"))
+	resource_picker.select(0 if App.resource_mode=="quiet" else 1)
+	resource_picker.item_selected.connect(func(index):App.set_resource_mode(["quiet","standard"][index]))
+	content.add_child(resource_picker)
+	_label(App.t("resource_hint"),content,13,true)
+
 	var history=CheckButton.new()
 	history.text=App.t("save_chat")
 	history.button_pressed=App.history_enabled()

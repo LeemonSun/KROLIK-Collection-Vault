@@ -35,7 +35,7 @@ func answer(raw,app):
 		else:key='self_model_inactive'
 	if intent=='offline' and app.provider_name=='llama_loopback':key='self_offline_developer'
 	if intent=='offline' and not app.local_runtime.installed() and app.provider_name!='llama_loopback':key='self_offline_uninstalled'
-	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.profiles.config(app.profile_name).get('cpu_threads',2)})}
+	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.runtime_options().get('cpu_threads',2)})}
 func system_text(locale):
 	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
 	return "You are Leemon, a helpful desktop companion. Reply in %s unless the user requests another language. Be natural and concise. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so." % language

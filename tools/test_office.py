@@ -9,10 +9,10 @@ def main():
  with tempfile.TemporaryDirectory(prefix='leemon-office-') as folder:
   base=Path(folder)
   doc=Document();p=doc.add_paragraph();p.add_run('Исходный текст 中文').bold=True
-  p=doc.add_paragraph();p.add_run('split ');p.add_run('across').italic=True
+  p=doc.add_paragraph();p.add_run('split ').bold=True;p.add_run('across').italic=True
   doc.add_paragraph('repeat');doc.add_paragraph('repeat');doc.save(base/'sample.docx')
   book=Workbook();book.active.title='First';book.active['A1']='untouched'
-  second=book.create_sheet('Данные');second['B2']='Старое 中文';second['B2'].number_format='@';second['C2']=42
+  second=book.create_sheet('Данные');second['B2']='Старое 中文';second['B2'].number_format='@';second['C2']=42;second['D2']=True;second['E2']='number-looking';second['B3']=1.25;second['C3']=2.5;second['D3']='100'
   book.save(base/'sample.xlsx')
   formula=Workbook();formula.active['A1']=1;formula.active['B1']='=A1+1';formula.save(base/'formula.xlsx')
   for name,entry,data in [('bomb.zip','huge.xml',b'a'*3000000),('traversal.zip','../outside',b'x')]:
@@ -26,9 +26,9 @@ def main():
   log=result.stdout+result.stderr;print(log)
   if result.returncode or 'SCRIPT ERROR:' in log or '\nERROR:' in log:return 1
   doc=Document(base/'sample.docx');assert doc.paragraphs[0].text==' Новый & текст <ok> ' and doc.paragraphs[0].runs[0].bold
-  assert doc.paragraphs[1].text=='split across' and doc.paragraphs[1].runs[1].italic
+  assert doc.paragraphs[1].text=='spЖ跨ss' and doc.paragraphs[1].runs[0].bold and doc.paragraphs[1].runs[1].italic
   book=load_workbook(base/'sample.xlsx');assert book['Данные']['B2'].value=='=literal text' and book['Данные']['B2'].data_type=='s'
-  assert book['Данные']['C2'].value==42 and book['First']['A1'].value=='untouched' and book['Данные']['B2'].number_format=='@'
+  assert book['Данные']['C2'].value==12.5 and book['Данные']['C2'].data_type=='n' and book['Данные']['D2'].value is False and book['Данные']['E2'].value=='00042' and book['First']['A1'].value=='untouched' and book['Данные']['B2'].number_format=='@'
   for name,changed in [('sample.docx','word/document.xml'),('sample.xlsx','xl/worksheets/sheet2.xml')]:
    with zipfile.ZipFile(base/name) as z:
     assert {n for n in z.namelist() if not n.endswith('/')}=={n for n in originals[name] if not n.endswith('/')} and z.testzip() is None

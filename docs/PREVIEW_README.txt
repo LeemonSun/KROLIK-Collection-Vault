@@ -110,3 +110,13 @@ llama.cpp and whisper.cpp: MIT; Whisper weights: MIT. Notices are under legal/.
 External model weights were not originally trained by this project. No upstream notices are removed.
 Character concept remains internal AI concept art; exclusive copyright or commercial clearance is not claimed.
 Source checkpoint storage only: https://github.com/LeemonSun/KROLIK-Collection-Vault
+
+0.13: Настройки → Нагрузка во время ответа → Экономно (по умолчанию).
+Один поток, малая порция обработки, выгрузка через 30 секунд простоя.
+Это не жёсткая квота CPU/RAM. Обычная скорость сохраняет прежние бюджеты.
+Редактор: DOCX поддерживает обычный абзац через соседние styled runs.
+XLSX: выбери Текст / Число / Логическое; число с точкой, boolean true/false.
+Формулы не пересчитываются, книги с формулами пока не редактируются.
+Для CSV/TSV/XLSX есть сводка диапазона до 1024 ячеек без модели и записи.
+Результат double приблизительный; форматы дат/процентов не интерпретируются.
+Новых моделей нет. Сохрани папку AI/ и AppData при обновлении.

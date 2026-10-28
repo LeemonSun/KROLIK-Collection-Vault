@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -14,12 +15,9 @@ def main():
     args = parser.parse_args()
     reports = ROOT / "reports"
     reports.mkdir(exist_ok=True)
-    # Tests must not touch the developer's persistent app data.
-    isolated = ROOT / ".godot/test-user"
-    isolated.mkdir(parents=True, exist_ok=True)
+    # A fresh profile per group prevents persisted locale/fixtures from leaking
+    # into later checks, and never touches the developer's real app data.
     env = dict(os.environ)
-    env["XDG_DATA_HOME"] = str(isolated.resolve())
-    env["XDG_CONFIG_HOME"] = str(isolated.resolve())
     engine = str(Path(args.godot).resolve())
     commands = [
         ("structure", [sys.executable, str(ROOT / "tools/verify_project.py")]),
@@ -36,6 +34,7 @@ def main():
         ("window_reader",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_window_reader.gd","--","--test-mode"]),
         ("file_memory",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_file_memory.gd","--","--test-mode"]),
         ("queue_table",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_queue_table.gd","--","--test-mode"]),
+        ("technical013",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_technical013.gd","--","--test-mode"]),
         ("office",[sys.executable,str(ROOT/"tools/test_office.py"),engine]),
         ("workflow",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_workflow.gd","--","--test-mode"]),
         ("action_proposal",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_action_proposal.gd","--","--test-mode"]),
@@ -56,7 +55,9 @@ def main():
     ]
     outcomes = []
     for name, command in commands:
-        result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True, timeout=90)
+        with tempfile.TemporaryDirectory(prefix="leemon-check-"+name+"-") as profile:
+            group_env = dict(env, XDG_DATA_HOME=profile, XDG_CONFIG_HOME=profile)
+            result = subprocess.run(command, cwd=ROOT, env=group_env, capture_output=True, text=True, timeout=90)
         log = result.stdout + result.stderr
         (reports / f"{name}.txt").write_text(log, encoding="utf-8")
         # Godot can report runtime errors and still exit zero.
@@ -71,7 +72,7 @@ def main():
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
-        "", "Leemon 0.12: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
+        "", "Leemon 0.13: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
         "Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.",
         "Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.",
         "Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.",

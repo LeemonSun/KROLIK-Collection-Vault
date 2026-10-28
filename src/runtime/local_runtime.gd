@@ -259,7 +259,7 @@ func _spawn_worker():
 func build_args(options, processor_count=-1):
 	if processor_count<1:processor_count=OS.get_processor_count()
 	var threads=clampi(int(options.get("cpu_threads",2)),1,mini(8,maxi(1,processor_count/2)))
-	var args=PackedStringArray(["--model", ProjectSettings.globalize_path(model_path()), "--host", "127.0.0.1", "--port", str(port), "--api-key", token, "--alias", "companion", "--ctx-size", str(clampi(int(options.get("context_tokens", 2048)), 1024, 4096)), "--threads", str(threads), "--threads-batch", str(threads), "--parallel", "1", "--n-gpu-layers", "0", "--batch-size", "128", "--ubatch-size", "128", "--poll", "0", "--prio", "-1", "--no-ui", "--jinja", "--reasoning", "off"])
+	var args=PackedStringArray(["--model", ProjectSettings.globalize_path(model_path()), "--host", "127.0.0.1", "--port", str(port), "--api-key", token, "--alias", "companion", "--ctx-size", str(clampi(int(options.get("context_tokens", 2048)), 1024, 4096)), "--threads", str(threads), "--threads-batch", str(threads), "--parallel", "1", "--n-gpu-layers", "0", "--batch-size", str(clampi(int(options.get("batch_tokens",128)),32,128)), "--ubatch-size", str(clampi(int(options.get("batch_tokens",128)),32,128)), "--poll", "0", "--prio", "-1", "--no-ui", "--jinja", "--reasoning", "off"])
 	args.append("--log-disable")
 	if not str(options.get("vision_projector", "")).is_empty():
 		args.append_array(PackedStringArray(["--mmproj",str(options.vision_projector),"--no-mmproj-offload","--image-max-tokens","256"]))

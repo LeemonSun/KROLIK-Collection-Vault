@@ -22,3 +22,13 @@ func select(requested, ram_bytes):
 func config(name):
 	return profiles.get(name, profiles.get("lite", {})).duplicate(true)
 
+func effective(name, resource_mode="quiet"):
+	var result=config(name)
+	if resource_mode=="quiet":
+		result["cpu_threads"]=1
+		result["batch_tokens"]=32
+		result["idle_unload_seconds"]=30
+	else:
+		result["batch_tokens"]=128
+	return result
+

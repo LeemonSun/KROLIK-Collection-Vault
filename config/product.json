@@ -2,7 +2,7 @@
   "schema_version": 1,
   "working_title": "Leemon",
   "publisher": null,
-  "version": "0.12.0-desktop-preview",
+  "version": "0.13.0-desktop-preview",
   "target_store": "Steam",
   "primary_platform": "windows-x86_64",
   "ui_locales": [
@@ -14,7 +14,7 @@
   "telemetry": false,
   "models_bundled": false,
   "final_character_selected": false,
-  "project_stage": "bounded_queue_office_adapters_leemon_only_private_preview",
+  "project_stage": "economy_typed_office_ranges_private_preview",
   "character_concept_selected": true,
   "pixel_direction": "deferred",
   "optional_offline_bundle": true
