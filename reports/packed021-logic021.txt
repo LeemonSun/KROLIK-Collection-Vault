@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+LANGUAGE_GRAMMAR021 1536 synthetic cases
+LOGIC021: 41checks, 0failures; 4096independent exhaustive comparisons; model interpretation not proven

@@ -13,3 +13,5 @@ Secondary reader work already implemented before user steering: question-based b
 Next: finish model comparisons, manually review correctness/cost, implement only justified low-resource improvement; then relevant/full source checks and packed/native acceptance before delivery. Final0.21not built yet; shipped0.20links remain authoritative.
 
 Final direction: keep2B default, reject4B/default128/default512thinking. Narrow deterministic categorical reasoning handles unambiguous flat quantifier clauses,6classes/8premises, using same app without loading weights. Experimental neural formalizer OFF by default due5/12finalsourceacceptances. See src/core/categorical_logic.gd, logic_reasoner.gd; reports/brain021-review.md. No broadIQ improvement claim. Source suite45groups/native/export/delivery pending.
+
+Final021delivered:45sourcegroups/finalPCK/native/ZIPCRC PASS. Native27new+30draft+30agent+156general+35motion. ArtifactIDs/sessionREADME; currenthead .resume-remote.json. No further background work after final.

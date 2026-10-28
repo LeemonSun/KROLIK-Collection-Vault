@@ -4,7 +4,7 @@ No model IQ score, no universal safety claim. Fixed seed42/small synthetic sampl
 
 ##2B direct,30cases
 
-21ordinarygenerations+9UIArequests. ThreewriteUIArequests failedHTTP500 because fixture roundtrip converted JSONschema maxLength256to256.0; not a model semantic failure. Canonical integer-schema rerun needed before aggregate UIA score. The earlier020actualUIA9/9 is separate evidence, not replacement for failed harnesscases.
+21ordinarygenerations+9UIArequests. ThreewriteUIArequests failedHTTP500 with fixture roundtrip converting JSONschema maxLength256to256.0 (likely cause, not independently confirmed); not a model semantic failure. Canonical integer-schema rerun needed before aggregate UIA score. The earlier020actualUIA9/9 is separate evidence, not replacement for failed harnesscases.
 
 Main failures: all3liar responses wrong; EN/zhinvalid some/all entailment accepted; all3configplans miss required backup/duplicate stop or advise changing first/all instances. RUentailment main conclusion correct but truncated. All3arithmetic examples correct. Project renaming recalled in3languages. Typo/no-access responses mostly request text but contain broad tool-denial boilerplate. Do not equate short factual replies with a general agent.
 
