@@ -76,5 +76,10 @@ func _run():
 		await create_timer(0.1).timeout
 		check(worker.pid == -1 and not FileAccess.file_exists("/proc/%s/stat" % owned_pid), "Startup cancellation stops process")
 		worker.queue_free()
+	var budget=preload("res://src/runtime/local_runtime.gd").new();budget.manifest={"model":{"bytes":1280835840}}
+	check(not budget.memory_headroom({}, {"available":1024*1024*1024,"physical":8*1024*1024*1024}),"Low available RAM blocks a new heavy model load")
+	check(budget.memory_headroom({}, {"available":4*1024*1024*1024,"physical":8*1024*1024*1024}),"Conservative text load fits with OS reserve")
+	check(not budget.memory_headroom({"vision_projector":"paired"}, {"available":3*1024*1024*1024,"physical":8*1024*1024*1024}),"Vision accounts for additional projector memory")
+	budget.free()
 	print("LOCAL_RUNTIME_TESTS: %s checks, %s failures; real_fixture=%s" % [checks, failures, not path.is_empty()])
 	quit(0 if failures == 0 else 1)

@@ -28,7 +28,7 @@ func _ready():
 		edit.text_changed.connect(func():token="";engine.cancel();apply_button.disabled=true)
 		if i==0:find_edit=edit
 		else:replace_edit=edit
-	preview=TextEdit.new();preview.editable=false;preview.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY;preview.custom_minimum_size.y=112;preview.size_flags_vertical=Control.SIZE_EXPAND_FILL;layout.add_child(preview)
+	preview=TextEdit.new();preview.editable=false;preview.add_theme_color_override("font_readonly_color",V.TEXT);preview.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY;preview.custom_minimum_size.y=112;preview.size_flags_vertical=Control.SIZE_EXPAND_FILL;layout.add_child(preview)
 	var footer=HBoxContainer.new();layout.add_child(footer)
 	for i in range(3):
 		var button=Button.new();button.text=app.t(["file_patch_review","file_patch_apply","file_patch_undo"][i]);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.clip_text=true;footer.add_child(button)
@@ -37,12 +37,16 @@ func _ready():
 		if i==2:undo_button=button;button.disabled=true
 	close_requested.connect(dismiss)
 func open_path(selected):
-	engine.cancel();token="";path=selected;caption.text=selected.get_file();caption.tooltip_text=selected
+	engine.cancel();token="";path=selected;engine.load_backup(path);caption.text=selected.get_file();caption.tooltip_text=selected
 	find_edit.clear();replace_edit.clear();preview.text=app.t("file_patch_hint");apply_button.disabled=true;undo_button.disabled=engine.last_backup.is_empty() or engine.last_backup.get("path")!=path
 	var bounds=DisplayServer.screen_get_usable_rect()
 	size=Vector2i(mini(640,bounds.size.x),mini(500,bounds.size.y));position=bounds.position+(bounds.size-size)/2
 	show();grab_focus()
+func revoke():
+	engine.cancel();token=""
+	if is_instance_valid(apply_button):apply_button.disabled=true
 func review():
+	if app.paused:revoke();return
 	var result=engine.prepare(path,find_edit.text,replace_edit.text)
 	_show_plan(result)
 func _show_plan(result):
@@ -50,11 +54,13 @@ func _show_plan(result):
 	if not result.get("ok",false):preview.text=app.t("file_patch_error",{"reason":app.t("file_status_"+str(result.get("status","failed")))});return
 	preview.text=app.t("file_patch_preview",{"line":result.line})+"\n\n− "+result.before+"\n\n+ "+result.after
 func apply():
+	if app.paused:revoke();return
 	var result=engine.commit(token);token="";apply_button.disabled=true
 	preview.text=app.t("file_patch_written") if result.get("ok",false) else app.t("file_patch_error",{"reason":app.t("file_status_"+str(result.get("status","failed")))})
 	undo_button.disabled=engine.last_backup.is_empty() or engine.last_backup.get("path")!=path
 	if result.get("ok",false):app.add_message("assistant",app.t("file_patch_receipt",{"name":path.get_file()}),true);app.request_motion("work.note_saved")
 func restore():
+	if app.paused:revoke();return
 	if engine.last_backup.get("path")!=path:return
 	_show_plan(engine.prepare_restore())
 func dismiss():

@@ -41,6 +41,17 @@ func _run():
 	check(worker.queued_action.is_empty(),"Failed observation cannot replay an old instruction on a later window")
 	worker.clear_target()
 	check(worker.target.is_empty() and worker.nodes.is_empty() and worker.pending.is_empty(),"Clearing target removes all action authority")
+	worker.support_directory="user://stale-ipc-test"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(worker.support_directory+"/jobs"))
+	var stale_path=worker.support_directory+"/jobs/"+"a".repeat(32)+".request.json"
+	var unrelated=worker.support_directory+"/jobs/user-note.json"
+	for path in [stale_path,unrelated]:
+		var file=FileAccess.open(path,FileAccess.WRITE);file.store_string("{}");file.close()
+	worker.cleanup_stale_jobs()
+	check(FileAccess.file_exists(stale_path),"Recent IPC from another instance is preserved")
+	worker.cleanup_stale_jobs(int(Time.get_unix_time_from_system())+62)
+	check(not FileAccess.file_exists(stale_path) and FileAccess.file_exists(unrelated),"Only abandoned nonce-named IPC is removed")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(unrelated))
 	worker.queue_free()
 	print("ACCESS_TESTS: %s checks, %s failures; scoped protocol only, Windows UIA not executed" %[checks,failures])
 	quit(0 if failures==0 else 1)

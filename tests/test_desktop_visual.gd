@@ -222,6 +222,22 @@ func _run():
 	app.show_chat();await create_timer(0.3).timeout
 	check(not app.speech_bubble.visible,"Opening chat dismisses duplicate speech")
 	desktop.art.set_reduced(true)
+	var editor=preload("res://src/ui/file_edit_window.gd").new();root.add_child(editor)
+	var path=ProjectSettings.globalize_path("user://native-config-test.ini")
+	var config_file=FileAccess.open(path,FileAccess.WRITE);config_file.store_string("[Video]\nFPS=60\n");config_file.close()
+	editor.open_path(path);editor.find_edit.text="FPS=60";editor.replace_edit.text="FPS=90";editor.review();await frame()
+	check(not editor.apply_button.disabled and editor.preview.text.contains("FPS=90"),"File review exposes exact proposed change")
+	for dimensions in [Vector2i(400,420),Vector2i(640,500)]:
+		editor.size=dimensions;await frame()
+		check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(editor.apply_button.get_global_rect()),"File approval stays visible "+str(dimensions))
+		check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(editor.find_edit.get_global_rect()),"File input stays visible "+str(dimensions))
+	shot(editor,"file-review")
+	app.paused=true;editor.apply();check(FileAccess.get_file_as_string(path).contains("FPS=60") and editor.engine.pending.is_empty(),"Paused companion cannot apply a reviewed file write")
+	app.paused=false;editor.review();editor.apply();check(FileAccess.get_file_as_string(path).contains("FPS=90"),"Native file review changes actual synthetic configuration")
+	editor.restore();check(not editor.apply_button.disabled,"Restore also needs an explicit review")
+	editor.apply();check(FileAccess.get_file_as_string(path).contains("FPS=60"),"Native restore returns original configuration")
+	editor.dismiss();check(editor.engine.pending.is_empty(),"Closing review revokes pending write")
+	editor.queue_free()
 	# Actual clipboard command with an injected owned provider and synthetic OS clipboard.
 	var original_provider=app.provider
 	var original_name=app.provider_name

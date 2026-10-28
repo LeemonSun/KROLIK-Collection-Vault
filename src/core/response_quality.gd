@@ -62,7 +62,7 @@ func clean(text,query):
 		var start=int(starts[-1]);var tail=text.substr(start,end-start).strip_edges().to_lower();var filler=false
 		if tail.begins_with("если ") and ("помо" in tail or "обсудить" in tail) and ("скажи" in tail or "скажите" in tail or "хоч" in tail):filler=true
 		if tail.begins_with("if you ") and ("help" in tail or "anything else" in tail or "discuss" in tail):filler=true
-		if tail.begins_with("let me know") or tail.begins_with("feel free to"):filler=true
+		if tail.begins_with("let me know") or tail.begins_with("feel free to") or tail.begins_with("how can i help") or tail.begins_with("чем могу помочь"):filler=true
 		if tail.begins_with("如果") and ("帮助" in tail or "随时" in tail):filler=true
 		if not filler:break
 		end=start;starts.pop_back()
@@ -84,3 +84,10 @@ func casual_fallback(query,locale,turns):
 	for option in options:
 		if not repeated(query,option,turns):return option
 	return ""
+
+func factual(query):
+	var q=query.to_lower().strip_edges()
+	for marker in ["у тебя","как дела","как ты","how are","and you","你呢","你好吗"]:
+		if marker in q:return false
+	var start=RegEx.new();start.compile("^(?:почему|объясни|что такое|как работает|на какой|why|explain|what is|what are|how does|name the|为什么|解释|什么是)")
+	return start.search(q)!=null or q.ends_with("?") or q.ends_with("？")

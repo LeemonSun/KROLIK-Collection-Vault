@@ -87,8 +87,9 @@ def main():
             raise AssertionError("Token budget was not bounded")
         if any("tools" in r or r.get("stream") is not False for r in requests):
             raise AssertionError("Foundation must not enable model tools or streaming")
-        if any(r.get("chat_template_kwargs", {}).get("enable_thinking") is not False or r.get("temperature") != 0.4 or r.get("top_p") != 0.9 or r.get("top_k") != 40 for r in requests):
+        if any(r.get("chat_template_kwargs", {}).get("enable_thinking") is not False or (r.get("temperature"), r.get("top_p"), r.get("top_k")) != ((0.55,0.85,20) if r["messages"][-1]["content"]=="dialogue_sampling" else (0.4,0.9,40)) for r in requests):
             raise AssertionError("Non-thinking sampling contract missing")
+        assert any(r.get("presence_penalty")==0.25 and r.get("repeat_penalty")==1.0 for r in requests), "Mild dialogue sampler missing"
         print(f"HTTP_FIXTURE_OK: {len(requests)} requests; proxies bypassed; payload bounded")
         return 0
     finally:

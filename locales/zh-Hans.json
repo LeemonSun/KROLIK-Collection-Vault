@@ -22,7 +22,7 @@
   "model_connection_failed": "本地模型不可用。请检查开发进程或停止请求。",
   "model_invalid_response": "本地模型返回了无法读取的响应。",
   "module_unavailable": "此模块尚未接入。",
-  "help_text": "例如：打开记事本；北京几点；5分钟后提醒我检查下载；翻译剪贴板为英文；走一走。/notes查看笔记，/reminders查看提醒。",
+  "help_text": "例如：打开记事本；北京几点；5分钟后提醒我检查下载；翻译剪贴板为英文；走一走。/notes查看笔记，/reminders查看提醒。\n修改文件：“编辑文件”。记忆：“记住事实 颜色：绿色”、“我的事实”、“忘记事实 颜色”。流程：“在此窗口：select Insert → write Search: hello”。",
   "empty_input": "请输入消息。",
   "input_too_long": "每条消息最多 2048 个字符。",
   "timer_invalid": "请在 /timer 后输入 1 到 86400 之间的整数秒数。",
@@ -326,5 +326,7 @@
   "file_status_backup_full": "本地备份空间已满",
   "file_status_backup_failed": "无法验证备份",
   "file_status_write_failed": "文件被占用或无写入权限",
-  "file_status_unverified": "无法验证写入，请检查文件和备份"
+  "file_status_unverified": "无法验证写入，请检查文件和备份",
+  "self_updates": "本版本支持所选窗口的短流程、附片段的读取、所选文本文件的预览修改与备份，以及单独保存的简短事实。柠檬有 26 种程序化状态和简短回复窗口。尚未连接 Steam Cloud；语言模型不能任意访问整个电脑。",
+  "ai_memory_low": "当前可用内存不足，无法启动 AI。轻量工具仍可使用，请释放内存后重试。"
 }

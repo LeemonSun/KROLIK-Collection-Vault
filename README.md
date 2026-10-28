@@ -1,3 +1,9 @@
+# Leemon 0.11 — актуальная сборка
+
+[Windows ZIP (~54 МБ)](https://chatgpt.com/library?file_id=libfile_89e926fb5d308191b7b799ffd9cdad63&account_id=personal) · [Отчёт](https://chatgpt.com/library?file_id=libfile_1e5d6ff33c4881918bba4f9096c3c888&account_id=personal) · [Видео движений](https://chatgpt.com/library?file_id=libfile_5c6b298b9660819191f42d4675012038&account_id=personal)
+
+Закрой Лимона и скопируй содержимое Companion_Preview поверх программы. AI/ сохранять: модели прежние. Новое: короткие заданные пользователем цепочки,26состояний/реплики/движение к окну, review/backup/restore выбранных UTF8конфигов, компактные факты и RAMguard. Не Steam1.0: Windows-приёмка, универсальное автономное планирование, XLSX и настоящий SteamCloud впереди. См.docs/WORKFLOWS_011.md и docs/STEAM_CLOUD_PLAN.md.
+
 # Leemon 0.10 — актуальная сборка
 
 [Скачать Windows ZIP (~54 МБ)](https://chatgpt.com/library?file_id=libfile_75f383ba0f208191afedbe33a70ee8a2&account_id=personal) · [Отчёт](https://chatgpt.com/library?file_id=libfile_e736abadc51c8191933b44e709589ff4&account_id=personal)

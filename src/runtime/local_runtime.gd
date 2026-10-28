@@ -209,6 +209,9 @@ func start(options = {}):
 	if OS.get_name() != manifest.get("platform"):
 		_status("ai_windows_only")
 		return false
+	if not memory_headroom(options,OS.get_memory_info()):
+		_status("ai_memory_low")
+		return false
 	_options=options.duplicate(true)
 	start_revision+=1;verifier_revision=start_revision
 	starting=true
@@ -315,3 +318,12 @@ func _exit_tree():
 		hash_thread.wait_to_finish()
 		hash_thread = null
 	stop()
+
+func memory_headroom(options,info):
+	var available=int(info.get("available",info.get("free",0)))
+	if available<=0:return true # Unknown OS accounting is not a fabricated hardware limit.
+	var mib=1024*1024
+	var required=int(manifest.get("model",{}).get("bytes",0))+800*mib
+	if not str(options.get("vision_projector","")).is_empty():required+=1024*mib
+	var reserve=clampi(int(info.get("physical",0))/10,512*mib,2048*mib)
+	return available>=required+reserve

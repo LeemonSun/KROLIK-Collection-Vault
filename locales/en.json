@@ -22,7 +22,7 @@
   "model_connection_failed": "The local model is unavailable. Check the developer worker or stop the request.",
   "model_invalid_response": "The local model returned an unreadable response.",
   "module_unavailable": "This module is not connected yet.",
-  "help_text": "Try: open notepad; time in Beijing; remind me in 5 minutes check the download; translate clipboard to Russian; walk around. /notes lists notes; /reminders lists reminders.",
+  "help_text": "Try: open notepad; time in Beijing; remind me in 5 minutes check the download; translate clipboard to Russian; walk around. /notes lists notes; /reminders lists reminders.\nFile review: “edit a file”. Memory: “remember fact color: green”, “my facts”, “forget fact color”. Workflow: “in this window: select Insert → write Search: hello”.",
   "empty_input": "Enter a message.",
   "input_too_long": "Keep a message under 2,048 characters.",
   "timer_invalid": "Use /timer with a whole number from 1 to 86,400 seconds.",
@@ -326,5 +326,7 @@
   "file_status_backup_full": "local backup storage is full",
   "file_status_backup_failed": "backup could not be verified",
   "file_status_write_failed": "file is locked or write access is unavailable",
-  "file_status_unverified": "write could not be verified; inspect the file and backup"
+  "file_status_unverified": "write could not be verified; inspect the file and backup",
+  "self_updates": "This build adds short selected-window workflows, reading with excerpts, reviewed edits to selected text files with backups, and explicit compact facts. Leemon has 26 procedural states and a short-reply bubble. Steam Cloud is not connected; the language model has no unrestricted access to the PC.",
+  "ai_memory_low": "Not enough available RAM to start the AI right now. Lightweight tools still work; free some memory and retry."
 }

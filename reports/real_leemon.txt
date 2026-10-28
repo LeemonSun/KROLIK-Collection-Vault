@@ -1,9 +1,9 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
-REAL_DIALOGUE {"answer":"Небо кажется голубым из-за рассеянного солнечного света, который отражается от частиц в атмосфере.","input":"Почему небо кажется голубым? Ответь одним предложением.","locale":"ru","usage":{"completion_tokens":27.0,"elapsed_ms":5502,"prompt_tokens":195.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":222.0}}
-REAL_DIALOGUE {"answer":"Earth.","input":"Name the planet humans live on. One word.","locale":"en","usage":{"completion_tokens":3.0,"elapsed_ms":3665,"prompt_tokens":186.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":189.0}}
-REAL_DIALOGUE {"answer":"人类生活在地球。","input":"人类生活在哪个星球？只用一个词回答。","locale":"zh-Hans","usage":{"completion_tokens":5.0,"elapsed_ms":5000,"prompt_tokens":188.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":193.0}}
-REAL_TRANSLATION {"answer":"Солнце ярко.","input":"The sun is bright.","locale":"ru","usage":{"completion_tokens":6.0,"elapsed_ms":2333,"prompt_tokens":60.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":66.0}}
-REAL_TRANSLATION {"answer":"Today is Monday.","input":"今天是星期一。","locale":"en","usage":{"completion_tokens":5.0,"elapsed_ms":2000,"prompt_tokens":58.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":63.0}}
-REAL_TRANSLATION {"answer":"月亮很亮。","input":"The moon is bright.","locale":"zh-Hans","usage":{"completion_tokens":5.0,"elapsed_ms":2000,"prompt_tokens":62.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":67.0}}
+REAL_DIALOGUE {"answer":"Небо кажется голубым из-за рассеивания солнечного света в атмосфере, которое фильтрует синюю часть спектра.","input":"Почему небо кажется голубым? Ответь одним предложением.","locale":"ru","usage":{"completion_tokens":30.0,"elapsed_ms":7501,"prompt_tokens":99.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":129.0}}
+REAL_DIALOGUE {"answer":"Earth","input":"Name the planet humans live on. One word.","locale":"en","usage":{"completion_tokens":2.0,"elapsed_ms":3000,"prompt_tokens":94.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":96.0}}
+REAL_DIALOGUE {"answer":"地球","input":"人类生活在哪个星球？只用一个词回答。","locale":"zh-Hans","usage":{"completion_tokens":2.0,"elapsed_ms":2833,"prompt_tokens":108.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":110.0}}
+REAL_TRANSLATION {"answer":"Солнце ярко.","input":"The sun is bright.","locale":"ru","usage":{"completion_tokens":6.0,"elapsed_ms":2666,"prompt_tokens":60.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":66.0}}
+REAL_TRANSLATION {"answer":"Today is Monday.","input":"今天是星期一。","locale":"en","usage":{"completion_tokens":5.0,"elapsed_ms":2833,"prompt_tokens":58.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":63.0}}
+REAL_TRANSLATION {"answer":"月亮很亮。","input":"The moon is bright.","locale":"zh-Hans","usage":{"completion_tokens":5.0,"elapsed_ms":2500,"prompt_tokens":62.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":67.0}}
 REAL_LEEMON_TESTS: 18 checks, 0 failures; Qwen3.5-2B Q4_K_M, CPU 2 threads

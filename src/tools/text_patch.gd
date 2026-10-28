@@ -42,7 +42,8 @@ func _plan(path,source,bytes,find,replacement,line):
 func commit(token):
 	if pending.is_empty() or not token is String or token!=pending.token:return {"ok":false,"status":"approval"}
 	var plan=pending;pending={}
-	if Time.get_ticks_msec()>plan.deadline or FileAccess.get_sha256(plan.path)!=plan.before:return {"ok":false,"status":"changed"}
+	if Time.get_ticks_msec()>plan.deadline:return {"ok":false,"status":"approval"}
+	if FileAccess.get_sha256(plan.path)!=plan.before:return {"ok":false,"status":"changed"}
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(backup_directory))
 	var id=(plan.path.sha256_text()+plan.before).sha256_text()
 	var backup=backup_directory.path_join(id+".bak")
@@ -56,6 +57,11 @@ func commit(token):
 		if not save:return {"ok":false,"status":"backup_failed"}
 		save.store_buffer(plan.old);save.flush();save.close()
 	if FileAccess.get_sha256(backup)!=plan.before:return {"ok":false,"status":"backup_failed"}
+	var index=backup_directory.path_join(plan.path.sha256_text()+".json")
+	var metadata=FileAccess.open(index+".tmp",FileAccess.WRITE)
+	if not metadata:return {"ok":false,"status":"backup_failed"}
+	metadata.store_string(JSON.stringify({"path":plan.path,"backup":backup.get_file(),"sha":plan.before}));metadata.flush();metadata.close()
+	if DirAccess.rename_absolute(ProjectSettings.globalize_path(index+".tmp"),ProjectSettings.globalize_path(index))!=OK:return {"ok":false,"status":"backup_failed"}
 	var temporary=plan.path.get_base_dir().path_join(".leemon-"+Crypto.new().generate_random_bytes(16).hex_encode()+".tmp")
 	var file=FileAccess.open(temporary,FileAccess.WRITE)
 	if not file:return {"ok":false,"status":"write_failed"}
@@ -76,3 +82,17 @@ func prepare_restore():
 	var old=FileAccess.get_file_as_bytes(last_backup.backup)
 	return _plan(last_backup.path,source,old,source.text.left(1200),old.get_string_from_utf8().left(1200),1)
 func cancel():pending={}
+
+func load_backup(path):
+	last_backup={}
+	var index=backup_directory.path_join(path.sha256_text()+".json")
+	var file=FileAccess.open(index,FileAccess.READ)
+	if not file or file.get_length()>8192:return false
+	var parser=JSON.new()
+	if parser.parse(file.get_as_text())!=OK or not parser.data is Dictionary:return false
+	var record=parser.data
+	if record.get("path")!=path or not record.get("backup") is String or not record.get("sha") is String:return false
+	if record.sha.length()!=64 or not record.sha.is_valid_hex_number(false) or record.backup!=record.backup.get_file() or record.backup.get_basename().length()!=64 or not record.backup.get_basename().is_valid_hex_number(false) or record.backup.get_extension()!="bak":return false
+	var backup=backup_directory.path_join(record.backup)
+	if FileAccess.get_sha256(backup)!=record.sha:return false
+	last_backup={"path":path,"backup":backup,"sha":record.sha};return true

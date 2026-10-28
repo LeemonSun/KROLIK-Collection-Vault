@@ -15,12 +15,7 @@ func _init():
 	helper_resource="res://native/accessibility_bridge.ps1"
 	support_directory="user://support/accessibility"
 func _ready():
-	completed.connect(_result)
-	# Remove abandoned per-request IPC after a crash; never retain window content.
-	var folder=DirAccess.open(support_directory+"/jobs")
-	if folder:
-		for file in folder.get_files():
-			if file.ends_with(".json") or file.ends_with(".json.tmp"):folder.remove(file)
+	super._ready();completed.connect(_result)
 func read_content():
 	if target.is_empty() or pid>0:return false
 	pending={};queued_action={};nodes=[];observed_ms=0

@@ -30,6 +30,10 @@ func _run():
 	provider.submit(messages,{"max_tokens":16,"context_tokens":150});provider.cancel()
 	await create_timer(0.3).timeout
 	check(events.is_empty() and not provider.busy,"Cancel during preflight has no late answer")
+	events.clear()
+	provider.submit([{"role":"user","content":"dialogue_sampling"}],{"max_tokens":16,"context_tokens":200,"companion_dialogue":true})
+	await wait_event()
+	check(not events.is_empty() and events[0][0]=="ok","Owned dialogue sampling reaches the HTTP endpoint")
 	provider.queue_free()
 	print("CONTEXT_HTTP_TESTS: %s checks, %s failures" % [checks,failures])
 	quit(0 if failures==0 else 1)

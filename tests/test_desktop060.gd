@@ -84,6 +84,7 @@ func _run():
 	check(quality.clean("Название — Сосна. Если нужно выбрать файл, нажми кнопку Открыть.","Что делать?").contains("нажми"),"Useful conditional instructions retained")
 	check(quality.clean("Hello. Let me know if you need help.","translate this").contains("Let me know"),"Quoted/translatable text is not silently rewritten")
 	check(quality.clean("Price 3.14. URL https://example.com/a.b. Let me know if you need help.","Price?")=="Price 3.14. URL https://example.com/a.b.","Filler trim preserves decimals and URL punctuation")
+	check(quality.clean("Я на связи. Чем могу помочь?","У меня всё нормально")=="Я на связи.","Generic closing question removed from an already answered small talk")
 	var turns=app.session_turns.duplicate(true)
 	app.session_turns=transcript.duplicate(true)
 	var retry_provider=QuietProvider.new();app.add_child(retry_provider)
@@ -92,8 +93,8 @@ func _run():
 	app._on_answer("Нормально. Как у тебя?")
 	check(retry_provider.calls==2 and app.response_retries==1 and app.state.current=="thinking","One bounded retry")
 	app._on_answer("Нормально. Как у тебя?")
-	check(retry_provider.calls==2 and app.state.current=="idle" and app.messages[-1].text==app.t("model_repeated"),"Repeated retry stops honestly")
-	check(app.session_turns==transcript,"Rejected drafts absent from context")
+	check(retry_provider.calls==2 and app.state.current=="idle" and app.messages[-1].text!=app.t("model_repeated") and app.messages[-1].text!="Нормально. Как у тебя?","Repeated casual retry uses a bounded non-repeating fallback")
+	check(app.session_turns.size()==transcript.size()+2 and app.session_turns[-1].content!="Нормально. Как у тебя?","Rejected drafts absent; only the delivered fallback enters context")
 	app.cancel();app.provider=provider;app.provider_name=provider_name;app.local_ai_enabled=enabled
 	app.session_turns=turns;retry_provider.queue_free()
 	var verifier=preload("res://src/runtime/local_runtime.gd").new()

@@ -11,6 +11,17 @@ var runner="powershell.exe"
 var test_runner=false
 var operation="open"
 var next_poll_ms=0
+func _ready():cleanup_stale_jobs()
+func cleanup_stale_jobs(now=0):
+	if now<=0:now=int(Time.get_unix_time_from_system())
+	var folder=support_directory+"/jobs"
+	if not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(folder)):return
+	var pattern=RegEx.new();pattern.compile("^[a-f0-9]{32}\\.(?:request|result)\\.json(?:\\.tmp)?$")
+	for name in DirAccess.get_files_at(folder):
+		var path=folder.path_join(name)
+		# A live helper has a15s deadline; preserve recent jobs from another instance.
+		if pattern.search(name) and now-int(FileAccess.get_modified_time(path))>60:
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 func request(target):
 	if pid>0 and operation in ["metrics","overlay"]:cancel()
 	return _request({"operation":"open","target":target})
@@ -59,9 +70,11 @@ func _process(_delta):
 	next_poll_ms=Time.get_ticks_msec()+75
 	if FileAccess.file_exists(job+".result.json"):
 		var file=FileAccess.open(job+".result.json",FileAccess.READ)
-		var parsed=JSON.new()
-		if file and file.get_length()<32768 and parsed.parse(file.get_as_text())==OK and parsed.data is Dictionary and parsed.data.get("nonce")==nonce:
-			_finish(parsed.data);return
+		var parsed=JSON.new();var valid=false
+		if file:
+			valid=file.get_length()<32768 and parsed.parse(file.get_as_text())==OK and parsed.data is Dictionary and parsed.data.get("nonce")==nonce
+			file.close() # Windows must release this handle before deleting the result.
+		if valid:_finish(parsed.data);return
 	if Time.get_ticks_msec()-started_ms>15000:
 		if OS.is_process_running(pid):OS.kill(pid)
 		_finish({"status":"timeout"})

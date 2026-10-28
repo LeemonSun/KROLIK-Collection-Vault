@@ -21,6 +21,8 @@ func _run():
 	check(result.ok and FileAccess.get_file_as_string(path).contains("FPS=90"),"Approved patch writes and verifies the actual file")
 	check(FileAccess.get_file_as_bytes(path).slice(0,3)==PackedByteArray([239,187,191]) and "\r\n" in FileAccess.get_file_as_string(path),"UTF-8 BOM and CRLF preserved")
 	check(FileAccess.get_file_as_bytes(patch.last_backup.backup)==original,"Backup preserves exact original bytes")
+	var restarted=Patcher.new();restarted.backup_directory=patch.backup_directory
+	check(restarted.load_backup(path) and restarted.prepare_restore().ok,"Verified backup remains available after restarting the editor")
 	check(not patch.commit(plan.token).ok,"Used approval cannot replay")
 	plan=patch.prepare_restore();check(plan.ok and patch.commit(plan.token).ok,"Restore goes through the same reviewed transaction")
 	check(FileAccess.get_file_as_bytes(path)==original,"Restore returns exact original bytes")

@@ -14,6 +14,7 @@ func classify(raw):
 	if _has(text,['как сильно ты влияешь','какую нагрузку ты','нагрузку оказываешь','нагрузку окзаываешь','ты грузишь','ты нагружаешь','сколько ты потребляешь','your cpu usage','how much ram do you','你占用多少']):return 'load'
 	if _has(text,['ты научилась перемещаться','ты умеешь двигаться','ты можешь перемещаться','ты уже научилась сама перемещаться','твои анимации','can you move around','你的动画','你能移动']):return 'motion'
 	if _has(text,['за счет чего ты работаешь','как ты работаешь','what powers you','how do you work','你如何运行']):return 'power'
+	if _has(text,['что нового в этой версии','что ты научился','что изменилось в последнем патче','what is new in this version','最新版本有什么变化']):return 'updates'
 	if _has(text,['что ты умеешь','твои возможности','что у нас можно сделать','что он уже тебе добавил','what can you do','你会做什么']):return 'capabilities'
 	if _has(text,['погода сейчас','погода сегодня','какая погода','сколько сейчас градусов','сегодня будет градусов','weather today','weather right now','今天天气','现在天气']):return 'weather'
 	var greet=RegEx.new()
@@ -37,7 +38,7 @@ func answer(raw,app):
 	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.profiles.config(app.profile_name).get('cpu_threads',2)})}
 func system_text(locale):
 	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return "You are Leemon, a helpful desktop companion. Reply in %s. Be natural and concise. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so." % language
+	return "You are Leemon, a helpful desktop companion. Reply in %s unless the user requests another language. Be natural and concise. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so." % language
 
 func response_budget(raw,options):
 	var result=options.duplicate(true)
@@ -45,3 +46,7 @@ func response_budget(raw,options):
 	if _has(text,['подроб','полный список','развернут','пошаг','in detail','full list','step by step','详细','完整列表']):
 		result['max_tokens']=mini(256,maxi(int(options.get('max_tokens',96)),192))
 	return result
+
+func factual_text(locale):
+	var language={"ru":"Russian","en":"English","zh-Hans":"Simplified Chinese"}.get(locale,"English")
+	return "Answer in %s unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse." % language

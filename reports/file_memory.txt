@@ -1,0 +1,3 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FILE_MEMORY_TESTS: 29 checks, 0 failures; actual files and local merge, no Steam network
