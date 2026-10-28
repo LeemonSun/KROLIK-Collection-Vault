@@ -91,3 +91,14 @@ func factual(query):
 		if marker in q:return false
 	var start=RegEx.new();start.compile("^(?:почему|объясни|что такое|как работает|на какой|why|explain|what is|what are|how does|name the|为什么|解释|什么是)")
 	return start.search(q)!=null or q.ends_with("?") or q.ends_with("？")
+
+func impossible_infallibility(text,query):
+	var q=query.to_lower()
+	for marker in ["цитат","quote","repeat","повтори","翻译","переведи","translate"]:
+		if marker in q:return false
+	var lower=text.to_lower().replace('ё','е')
+	for marker in ["я не могу ошибаться, потому", "я не могу ошибаться потому", "i cannot make mistakes because", "i can't make mistakes because", "我不会犯错，因为", "我不可能犯错，因为"]:
+		if marker in lower:return true
+	return false
+func reasoning_correction():
+	return "The previous draft falsely claimed that lacking consciousness makes you unable to err. Correct that premise: models can produce false facts and invalid reasoning. Answer the actual reasoning questions directly, with concise numbered points when appropriate. Do not invent a personal past mistake; a clearly labeled illustrative error is acceptable."

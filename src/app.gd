@@ -289,8 +289,8 @@ func submit(text):
 		return
 	mark_active()
 	var command = router.route(text)
-	if not application_access.target.is_empty() and goal_planner.contextual_goal(text) and (command.kind=="chat" or command.get("tool","") in ["apps.open","browser.search"]):
-		command={"kind":"tool","tool":"access.goal","args":{"goal":text}}
+	if not application_access.target.is_empty() and (goal_planner.contextual_goal(text) or preload("res://src/core/draft_policy.gd").requested(text)) and (command.kind=="chat" or command.get("tool","") in ["apps.open","browser.search"]):
+		command={"kind":"tool","tool":"agent.run","args":{"goal":text}}
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
@@ -353,7 +353,7 @@ func _drain_queued_chat(revision):
 	# Also drain deterministic self-knowledge replies which do not emit changed.
 	_schedule_queued_chat()
 
-func _submit_model_text(text,retry=false):
+func _submit_model_text(text,retry=false,reasoning_retry=false):
 	if not retry:response_retries=0;chat_started_ms=Time.get_ticks_msec()
 	pending_user_text=text
 	state.transition("thinking")
@@ -365,7 +365,7 @@ func _submit_model_text(text,retry=false):
 	var factual=quality.factual(text)
 	var system_text=self_knowledge.factual_text(l10n.locale) if factual else self_knowledge.system_text(l10n.locale)
 	system_text+="\n"+quality.context_hint(text,session_turns)
-	if retry:system_text+="\n"+quality.correction(l10n.locale)
+	if retry:system_text+="\n"+(quality.reasoning_correction() if reasoning_retry else quality.correction(l10n.locale))
 	system_text+="\nUser OS: "+OS.get_name()+"."
 	var recalled=memory.retrieve(text,store.data.notes)
 	var recalled_facts=facts.recall(text)
@@ -529,6 +529,10 @@ func _on_answer(text):
 	if not translation_mode and guard.claims_action(text,pending_user_text):
 		_on_failure("model_action_unverified")
 		return
+	if not translation_mode and not screen_mode and quality.impossible_infallibility(text,pending_user_text):
+		if response_retries<1:
+			response_retries+=1;_submit_model_text(pending_user_text,true,true);return
+		_on_failure("model_reasoning_failed");return
 	if not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
 		if response_retries<1:
 			response_retries+=1
@@ -994,7 +998,7 @@ func _agent_finish(key):
 		if names.size()>=6:break
 	agent.clear();workflow.clear();_clear_goal();state.reset()
 	var reply=t(key)+"\n"+t("agent_receipts",{"count":receipts.size()})
-	for step in receipts:reply+="\n• "+str(step.action)+": "+str(step.name)
+	for step in receipts:reply+="\n• "+t("agent_action_"+str(step.action))+": "+str(step.name)
 	if not names.is_empty():reply+="\n\n"+t("agent_observed")+"\n"+" · ".join(PackedStringArray(names))
 	add_message("assistant",reply,true);changed.emit()
 
@@ -1039,7 +1043,7 @@ func _goal_observed():
 		goal_mode="thinking";state.reset();state.transition("thinking")
 		local_runtime.generation_busy=true;local_runtime.touch()
 		request_motion("dialogue.think_loop")
-		provider.submit(goal_context.messages,{"max_tokens":256,"context_tokens":runtime_options().context_tokens,"response_schema":goal_context.schema})
+		provider.submit(goal_context.messages,{"max_tokens":384 if goal_context.get("draft_allowed",false) else 256,"context_tokens":runtime_options().context_tokens,"response_schema":goal_context.schema})
 	elif goal_mode=="confirming":
 		if not goal_planner.same_target(goal_plan.target,application_access.target) or str(goal_plan.target.get("title",""))!=str(application_access.target.get("title","")):_goal_error("goal_changed");return
 		goal_mode="executing";goal_deadline_ms=Time.get_ticks_msec()+20000
@@ -1068,7 +1072,7 @@ func _show_goal_proposal():
 	goal_context={}
 	goal_mode="proposal";state.reset();goal_deadline_ms=Time.get_ticks_msec()+30000
 	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
-	var preview=t("goal_propose_append" if goal_plan.action=="write" and goal_plan.append else "goal_propose_"+goal_plan.action,values)
+	var preview=t("goal_propose_draft" if goal_plan.get("generated",false) else ("goal_propose_append" if goal_plan.action=="write" and goal_plan.append else "goal_propose_"+goal_plan.action),values)
 	if goal_plan.action=="write":preview+="\n\n"+goal_plan.text
 	add_message("assistant",preview,agent.active)
 	request_motion("dialogue.explain_small");changed.emit()

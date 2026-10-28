@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "app_version": "0.15.0-desktop-preview",
-  "checkpoint_status": "0.15_saved_windows_model_acceptance_pending",
-  "current_task": "0.15: bounded adaptive selected-window UIA loop with fresh observations and verified receipts; copy all retained chat; grounded self-knowledge; future chibi idea recorded only.",
-  "next_action": "Actual2B semantic adaptive agent trials, then real Windows UIA/DPI/clipboard acceptance and performance/resource measurement. No universal autonomy or IQ improvement claim. User collecting tests.",
+  "app_version": "0.16.0-desktop-preview",
+  "checkpoint_status": "0.16_in_progress_real_model_and_delivery",
+  "current_task": "Reviewed composed field drafts, compact action+element enum schema, top-level llama json_schema, seen-navigation anti-backtrack, plain-language role/reasoning correction, visibly labeled whole-chat copy, viewport-based small-chat sizing.",
+  "next_action": "Complete real draft/reasoning fixture and final source/native checks; package0.16, save deliverables and update recovery. Current real planner six choices PASS across3locales; draft/reasoning fixture still running.",
   "read_next": [
-    "docs/WORKFLOWS_015.md",
-    "docs/VISUAL_IDEAS.md"
+    "docs/WORKFLOWS_016.md",
+    "reports/real_test_agent_real016.txt"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",

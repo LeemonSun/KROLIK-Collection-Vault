@@ -1,0 +1,15 @@
+# Leemon0.16 — reviewed composition in an existing window
+
+Select a window and ask “Compose a short invitation in Body”, “Составь короткое приглашение в поле Body”, or “请写一句邀请，填入Body”. The explicit `agent:` prefix still works. Pinned contextual UI goals now use the bounded adaptive loop by default. No selected window means ordinary conversation stays ordinary conversation.
+
+Explicit compose verbs at the start of a goal permit a proposed draft<=512characters, not just a verbatim substring. The complete proposed text and destination appear before approval. Nothing is written until approval and fresh target/element/capability checks. Native verified ValuePattern write is retained: fill empty or append, never silently overwrite. Send/invoke controls are excluded entirely for composed drafts. Existing literal writing retains verbatim input. No credential entry, interpreter input, Enter, auto-submit or generated program execution is introduced. Only supported named writable UIA fields; this is not every Notepad/Word/browser editor.
+
+Schema: one enum binds action+element. Navigation-only output has one choice field, avoiding unused empty fields. Schema is supplied as top-level json_schema with response_format=json_object to the pinned llama runtime; application-side validation remains mandatory. Legacy four-field replies validate under the same actual capability gates. Visited selected/expanded controls are remembered for the in-memory task to prevent backtracking loops; revisiting a branch requires a new goal. No persistent learned procedures.
+
+Conversation prompts permit benign logical, ethical and hypothetical reasoning without fabricating consciousness/biography. A narrow detector retries once if the model claims absence of consciousness makes it infallible. It does not remove actual capability or safety boundaries. Multiquestion prompts receive a bounded384token budget; this cannot guarantee complete15part essays. Ordinary short replies keep prior budget. No fine-tuning/new weights/IQ guarantee.
+
+Copy button now has a visible localized whole-chat label, distinct from per-message copy. Copies all retained messages, max100 and4MiB, truncation disclosed. History persistence remains opt-in. Discarded sessions cannot be recovered. Real native60message clipboard test required.
+
+Chat uses available viewport height rather than its own minimum-constrained size to hide optional rows, preventing small-window layout feedback loops. Retains composer/approval/stop; no new visual style.
+
+Actual model semantic trial0.15baseline failed1/6; an intermediate compact format failed2/6. Final top-level schema+visited-state format passed6/6 acrossRU/EN/zh in a synthetic two-step app (select Appearance, expand Fonts). OneCPUthread, generation8–12tokens and9–22sec in this environment. These are narrow test samples, not a robust benchmark or realWindows verification. Draft/reasoning results are in reports after completion. No live user desktop was controlled here.

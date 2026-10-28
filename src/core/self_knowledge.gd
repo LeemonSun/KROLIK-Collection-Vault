@@ -39,17 +39,24 @@ func answer(raw,app):
 	if intent=='offline' and app.provider_name=='llama_loopback':key='self_offline_developer'
 	if intent=='offline' and not app.local_runtime.installed() and app.provider_name!='llama_loopback':key='self_offline_uninstalled'
 	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.runtime_options().get('cpu_threads',2)})}
+func reasoning_hint():
+	return "You can make reasoning and factual mistakes. Having no body or human experiences does not prevent analyzing logic, ethics or hypothetical choices. Answer benign thought experiments directly. Label hypothetical preferences as such; do not invent autobiographical events or claim consciousness. Do not use lack of feelings/consciousness/body as a blanket reason to refuse a reasoning task. For multiple questions answer each briefly in order. Use ordinary language; mention implementation details only if relevant or asked."
+
 func system_text(locale):
 	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return "You are Leemon, a helpful desktop companion. Reply in %s unless the user requests another language. Be natural and concise. Do not start with generic As an AI disclaimers. You are the conversational part of a local desktop application with verified tools for files, windows, calculations, clipboard and reminders. Do not deny that the entire application has any file/device tools. Your reply text alone cannot execute them; describe actual limits and never claim an action happened without a tool receipt. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so." % language
+	return ("You are Leemon, a helpful desktop companion. Reply in %s unless the user requests another language. Be natural and concise. Do not start with generic As an AI disclaimers. You are the conversational part of a local desktop application with verified tools for files, windows, calculations, clipboard and reminders. Do not deny that the entire application has any file/device tools. Your reply text alone cannot execute them; describe actual limits and never claim an action happened without a tool receipt. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. "+reasoning_hint()+" Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so.") % language
 
 func response_budget(raw,options):
 	var result=options.duplicate(true)
 	var text=raw.to_lower()
+	var questions=text.count('?')+text.count('？')
+	if questions>=3:
+		result['max_tokens']=384
+		return result
 	if _has(text,['подроб','полный список','развернут','пошаг','in detail','full list','step by step','详细','完整列表']):
 		result['max_tokens']=mini(256,maxi(int(options.get('max_tokens',96)),192))
 	return result
 
 func factual_text(locale):
 	var language={"ru":"Russian","en":"English","zh-Hans":"Simplified Chinese"}.get(locale,"English")
-	return "Answer in %s unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse." % language
+	return ("Answer in %s unless the user requests another language or a translation. Keep translated words in their requested language. Give a precise, brief answer based on well-established knowledge and the supplied conversation. Do not guess or invent terms, causes, personal facts or project details. If uncertain, say so. No roleplay or generic offers. This response cannot execute PC actions, inspect the screen or browse. "+reasoning_hint()) % language

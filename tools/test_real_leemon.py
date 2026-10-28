@@ -4,7 +4,7 @@ import argparse,hashlib,json,os,secrets,socket,subprocess,tempfile,time,urllib.r
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def main():
- parser=argparse.ArgumentParser();parser.add_argument('--fixture',type=Path,required=True);parser.add_argument('--godot',type=Path,required=True);a=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--fixture',type=Path,required=True);parser.add_argument('--godot',type=Path,required=True);parser.add_argument('--script',default='res://tests/test_real_leemon.gd');parser.add_argument('--threads',type=int,choices=[1,2],default=2);a=parser.parse_args()
  model=a.fixture/json.loads((ROOT/'config/local_worker.json').read_text())['model']['file']
  if not model.exists():model=a.fixture/'model.gguf'
  server_path=a.fixture/'runtime/llama-server'
@@ -16,7 +16,7 @@ def main():
  with tempfile.TemporaryDirectory(prefix='leemon-real-') as temporary:
   temporary=Path(temporary)
   env=dict(os.environ,XDG_DATA_HOME=str(temporary),XDG_CONFIG_HOME=str(temporary),COMPANION_TEST_PORT=str(port),COMPANION_TEST_TOKEN=token,LD_LIBRARY_PATH=str(server_path.parent))
-  command=[str(server_path),'--model',str(model),'--host','127.0.0.1','--port',str(port),'--api-key',token,'--alias','companion','--ctx-size','2048','--threads','2','--threads-batch','2','--parallel','1','--n-gpu-layers','0','--batch-size','128','--ubatch-size','128','--poll','0','--prio','-1','--no-ui','--jinja','--reasoning','off']
+  command=[str(server_path),'--model',str(model),'--host','127.0.0.1','--port',str(port),'--api-key',token,'--alias','companion','--ctx-size','2048','--threads',str(a.threads),'--threads-batch',str(a.threads),'--parallel','1','--n-gpu-layers','0','--batch-size','32','--ubatch-size','32','--poll','0','--prio','-1','--no-ui','--jinja','--reasoning','off']
   server=None
   try:
    with (temporary/'private-server.log').open('w') as log:
@@ -31,10 +31,10 @@ def main():
        if response.status==200:break
      except Exception:time.sleep(.1)
     else:raise RuntimeError('Fixture startup timed out')
-    result=subprocess.run([str(a.godot),'--headless','--path',str(ROOT),'--script','res://tests/test_real_leemon.gd','--','--test-mode'],env=env,capture_output=True,text=True,timeout=300)
+    result=subprocess.run([str(a.godot),'--headless','--path',str(ROOT),'--script',a.script,'--','--test-mode'],env=env,capture_output=True,text=True,timeout=600)
     output=result.stdout+result.stderr
     assert token not in output
-    (ROOT/'reports/real_leemon.txt').write_text(output)
+    (ROOT/'reports'/('real_'+Path(a.script).stem+'.txt')).write_text(output)
     print(output)
     return int(result.returncode!=0 or 'SCRIPT ERROR:' in output or '\nERROR:' in output or '0 failures' not in output)
   finally:

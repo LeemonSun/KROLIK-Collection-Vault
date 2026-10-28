@@ -84,6 +84,7 @@ func _ready():
 		copy_status=app.t("chat_copy_done",{"count":result.get("count",0)}) if result.ok else app.t("chat_copy_failed")
 		copy_status_until=Time.get_ticks_msec()+2500;refresh())
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
+	copy_chat_button.text=app.t("chat_copy_short")
 
 	queue_row=HBoxContainer.new();layout.add_child(queue_row);queue_row.visible=false
 	queue_label=Label.new();queue_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;queue_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;queue_label.add_theme_font_size_override("font_size",11);queue_label.add_theme_color_override("font_color",VisualTheme.RED);queue_row.add_child(queue_label)
@@ -243,8 +244,10 @@ func _on_message(_speaker,_text):
 func _render_history():
 	history.set_messages(app.messages,app.t('chat_you').to_upper())
 func refresh():
-	if not is_instance_valid(status_label):return
+	if not is_inside_tree() or not is_instance_valid(status_label):return
+	var available_height=minf(size.y,get_viewport_rect().size.y)
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
+	copy_chat_button.text=app.t("chat_copy_short")
 	if last_locale!=app.l10n.locale:
 		copy_status_until=0
 		last_locale=app.l10n.locale
@@ -258,10 +261,10 @@ func refresh():
 		footer_hint.text=app.t('composer_keys')
 		for chip in chips:chip.button.text=app.t(chip.key)
 		_render_history()
-	target_row.visible=not app.application_access.target.is_empty() and size.y>=340
+	target_row.visible=not app.application_access.target.is_empty() and available_height>=340
 	target_label.text=app.t("access_target",{"title":app.application_access.target.get("title","")})
 	confirmation_button.visible=app.goal_mode=="proposal" or (not app.application_access.pending.is_empty() and app.application_access.last_result.get("status")=="confirmation_required")
-	confirmation_button.text=app.t("goal_approve_"+str(app.goal_plan.get("action","select")),{"name":app.goal_plan.get("node",{}).get("name","")}) if app.goal_mode=="proposal" else app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
+	confirmation_button.text=app.t("goal_approve_draft" if app.goal_plan.get("generated",false) else "goal_approve_"+str(app.goal_plan.get("action","select")),{"name":app.goal_plan.get("node",{}).get("name","")}) if app.goal_mode=="proposal" else app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
 	confirmation_button.tooltip_text=confirmation_button.text
 	if choose_window and not app.application_access.windows.is_empty():
 		choose_window=false;window_picker.clear()
@@ -274,7 +277,7 @@ func refresh():
 		var extent=Vector2i(mini(560,bounds.size.x-24),mini(420,bounds.size.y-24))
 		window_picker.max_size=extent
 		window_picker.popup(Rect2i(Vector2i(clampi(point.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-extent.x)),clampi(point.y-extent.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-extent.y))),extent))
-	suggestions.visible=size.y>=400 and not confirmation_button.visible
+	suggestions.visible=available_height>=400 and not confirmation_button.visible
 
 	var voice_busy=app.speech_input.busy()
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
@@ -300,7 +303,7 @@ func refresh():
 	stop_button.disabled=not busy and app.chat_queue.items.is_empty()
 	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())
 	var installing=app.vision_asset.installing() if install_mode=='screen' else (app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null)
-	setup_hint.visible=size.y>=380 and not installed
+	setup_hint.visible=available_height>=380 and not installed
 	setup_hint.text=app.t('vision_install_hint' if install_mode=='screen' else ('voice_install_hint' if install_mode=='voice' else 'chat_setup_hint'))
 	install_row.visible=not installed and not confirmation_button.visible
 	setup_button.visible=not installed

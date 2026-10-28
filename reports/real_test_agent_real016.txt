@@ -1,0 +1,9 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+REAL_AGENT {"answer":"{\n\"choice\":\"select:e0\"\n}","error":"","usage":{"completion_tokens":12.0,"elapsed_ms":18644,"prompt_tokens":414.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":426.0}}
+REAL_AGENT {"answer":"{\"choice\":\"expand:e0\"}","error":"","usage":{"completion_tokens":8.0,"elapsed_ms":9167,"prompt_tokens":445.0,"prompt_tokens_details":{"cached_tokens":284.0},"total_tokens":453.0}}
+REAL_AGENT {"answer":"{\n\"choice\":\"select:e0\"\n}","error":"","usage":{"completion_tokens":12.0,"elapsed_ms":21667,"prompt_tokens":412.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":424.0}}
+REAL_AGENT {"answer":"{\n\"choice\":\"expand:e0\"\n}","error":"","usage":{"completion_tokens":12.0,"elapsed_ms":16608,"prompt_tokens":443.0,"prompt_tokens_details":{"cached_tokens":284.0},"total_tokens":455.0}}
+REAL_AGENT {"answer":"{\n\"choice\":\"select:e0\"\n}","error":"","usage":{"completion_tokens":12.0,"elapsed_ms":21166,"prompt_tokens":411.0,"prompt_tokens_details":{"cached_tokens":0.0},"total_tokens":423.0}}
+REAL_AGENT {"answer":"{\n\"choice\":\"expand:e0\"\n}","error":"","usage":{"completion_tokens":12.0,"elapsed_ms":11001,"prompt_tokens":442.0,"prompt_tokens_details":{"cached_tokens":286.0},"total_tokens":454.0}}
+AGENT_REAL016_TESTS: 7 checks, 0 failures; real pinned2B CPU, synthetic observed windows; no Windows effects

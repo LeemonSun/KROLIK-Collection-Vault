@@ -326,7 +326,7 @@
   "file_status_backup_failed": "backup could not be verified",
   "file_status_write_failed": "file is locked or write access is unavailable",
   "file_status_unverified": "write could not be verified; inspect the file and backup",
-  "self_updates": "Added one-button copying of retained conversation and a bounded agent loop: goal → inspect selected window → propose step → approve → verify → inspect again. Up to four verified steps; not a universal autopilot yet.",
+  "self_updates": "Added short composed drafts for supported fields of a selected application: review the complete text before approving entry. The agent re-observes after verified steps. Compact choices now bind each action to its supported element. Universal autopilot is not ready.",
   "ai_memory_low": "Not enough available RAM to start the AI right now. Lightweight tools still work; free some memory and retry.",
   "queue_unavailable": "The queue is full or this task requires a separate start. Your text remains in the input.",
   "queue_pending": "queued: {count}",
@@ -408,5 +408,12 @@
   "chat_copy_retained": "This is all retained conversation. Earlier messages were removed by the history limit and are not included.",
   "self_chat_export": "Copy all available conversation with the ⧉ button beside chat status, or say “copy whole chat”. Messages already removed by the history limit cannot be recovered with this button.",
   "self_desktop_edit": "The app can create text documents, review and back up changes to selected files, and enter text into supported fields of a selected window after approval. A chat reply alone does not type into Notepad. Universal editing inside every application is not ready.",
-  "self_limits": "Reliable universal autopilot, full document/formula handling, a verified custom voice and testing across Windows PCs are still missing. The small model can make mistakes. There is a bounded selected-window loop, files, calculations and other tools; only verified effects count as completed."
+  "self_limits": "Reliable universal autopilot, full document/formula handling, a verified custom voice and testing across Windows PCs are still missing. The small model can make mistakes. There is a bounded selected-window loop, files, calculations and other tools; only verified effects count as completed.",
+  "goal_propose_draft": "Draft for “{name}” in “{window}”. Nothing has been entered. Review the complete text below; approval fills an empty field or appends to its existing text, without sending:",
+  "goal_approve_draft": "Insert reviewed draft into “{name}”",
+  "chat_copy_short": "Whole chat",
+  "agent_action_select": "Selected",
+  "agent_action_expand": "Expanded",
+  "agent_action_write": "Entered text",
+  "model_reasoning_failed": "The answer remained contradictory after one retry. Try asking one question separately."
 }

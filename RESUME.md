@@ -1,3 +1,7 @@
+# Leemon0.16 — active pass
+
+Read recovery/session.json and docs/WORKFLOWS_016.md first. Current source has reviewed drafts, compact paired schema, top-level json_schema, visited navigation tracking, grounded reasoning prompt/correction, clear whole-chat label and viewport layout fix. Final source/native/real draft tests and packaging pending; last delivered0.15 IDs remain in session until updated. Real planner sixsteps across3locales PASS; baseline/intermediate failures honestly documented. No Windows execution.
+
 # Leemon 0.15 — сохранено и выдано
 
 Start `python3 tools/resume.py status` and recovery/session.json. Canonical folder leemon-013 (historical name). Source head .resume-remote.json. GitHub LeemonSun/KROLIK-Collection-Vault storage only, no CI/build/deploy. No subagents without authorization.
