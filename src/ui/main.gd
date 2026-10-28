@@ -443,6 +443,11 @@ func _build_settings():
 	advanced.toggled.connect(func(value):App._save_setting("advanced_controls",value);_build())
 	content.add_child(advanced)
 	if not advanced.button_pressed:return
+	var review=CheckButton.new();review.text=App.t("experimental_answer_review")
+	review.button_pressed=App.answer_review_enabled()
+	review.toggled.connect(func(value):App._save_setting("experimental_answer_review",value))
+	content.add_child(review)
+	_label(App.t("experimental_answer_review_hint"),content,13,true)
 	developer_toggle = CheckButton.new()
 	developer_toggle.text = App.t("dev_mode")
 	developer_toggle.button_pressed = App.provider_name == "llama_loopback"

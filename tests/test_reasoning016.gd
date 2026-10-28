@@ -29,6 +29,8 @@ func run():
 	check(q.needs_review('1. First 2. Second 3. Third') and not q.needs_review('Hi, how are you?'),'Selective review detects multi-part tasks without taxing ordinary chat')
 	var old_provider2=app.provider;var old_name2=app.provider_name
 	var fake=fixture.FakeProvider.new();app.add_child(fake);app.provider=fake;app.provider_name='local_worker';app.cancel()
+	check(not app.answer_review_enabled(),'Unproven extra model review is disabled by default')
+	app.store.data.settings['experimental_answer_review']=true
 	app._submit_model_text('1. Compare smart and wise. 2. Can you err? 3. Explain a paradox.')
 	var prior=app.messages.size();var turns=app.session_turns.size()
 	app._on_answer('A draft with a possible contradiction.')
@@ -39,6 +41,6 @@ func run():
 	app._submit_model_text('1. A 2. B 3. C');app._on_answer('Another draft.');app.cancel()
 	app._on_answer('Late canceled review.')
 	check(app.messages[-1].text!='Late canceled review.' and not app.answer_reviewing,'Cancellation suppresses late review')
-	app.provider=old_provider2;app.provider_name=old_name2;fake.queue_free()
+	app.provider=old_provider2;app.provider_name=old_name2;fake.queue_free();app.store.data.settings.erase('experimental_answer_review')
 	print('REASONING016_TESTS: %d checks, %d failures; deterministic behavior, not model IQ measurement' %[checks,failures])
 	quit(0 if failures==0 else 1)

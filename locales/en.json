@@ -416,5 +416,8 @@
   "agent_action_expand": "Expanded",
   "agent_action_write": "Entered text",
   "model_reasoning_failed": "The answer remained contradictory after one retry. Try asking one question separately.",
-  "answer_reviewing": "Reviewing the answer"
+  "answer_reviewing": "Reviewing the answer",
+  "experimental_answer_review": "Experimental review of multi-part answers",
+  "experimental_answer_review_hint": "Off by default: an extra pass is slower and did not improve accuracy in the current trial. For experiments only.",
+  "draft_unprovided_detail": "The draft added a number, time or address absent from your request. It will not be entered. Specify those details or ask for text without them."
 }

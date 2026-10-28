@@ -9,23 +9,13 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [  83% ] first_scan_filesystem | Starting file scan...
 [ DONE ] first_scan_filesystem
 
-[   0% ] update_scripts_classes | Started Registering global classes... (16 steps)
+[   0% ] update_scripts_classes | Started Registering global classes... (6 steps)
 [   0% ] update_scripts_classes | 
-[   5% ] update_scripts_classes | 
-[  11% ] update_scripts_classes | 
-[  17% ] update_scripts_classes | 
-[  23% ] update_scripts_classes | 
-[  29% ] update_scripts_classes | 
-[  35% ] update_scripts_classes | 
-[  41% ] update_scripts_classes | 
-[  47% ] update_scripts_classes | 
-[  52% ] update_scripts_classes | 
-[  58% ] update_scripts_classes | 
-[  64% ] update_scripts_classes | 
-[  70% ] update_scripts_classes | 
-[  76% ] update_scripts_classes | 
-[  82% ] update_scripts_classes | 
-[  88% ] update_scripts_classes | 
+[  14% ] update_scripts_classes | 
+[  28% ] update_scripts_classes | 
+[  42% ] update_scripts_classes | 
+[  57% ] update_scripts_classes | 
+[  71% ] update_scripts_classes | 
 [ DONE ] update_scripts_classes
 
 [   0% ] savepack | Started Packing (102 steps)

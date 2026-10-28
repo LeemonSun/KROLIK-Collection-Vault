@@ -416,5 +416,8 @@
   "agent_action_expand": "已展开",
   "agent_action_write": "已输入文本",
   "model_reasoning_failed": "重新检查后回答仍有矛盾，请尝试单独提出一个问题。",
-  "answer_reviewing": "正在复核回答"
+  "answer_reviewing": "正在复核回答",
+  "experimental_answer_review": "实验性复核多问题回答",
+  "experimental_answer_review_hint": "默认关闭：额外一轮更慢，当前试验未提高准确率，仅供实验。",
+  "draft_unprovided_detail": "草稿加入了请求中没有的数字、时间或地址，因此不会输入。请提供具体信息，或要求不包含这些细节。"
 }

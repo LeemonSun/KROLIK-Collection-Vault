@@ -86,6 +86,7 @@ func validate(raw,context,current_target,now):
 	if not node.get(parsed.action,false) or not node.get("enabled",false):return {"ok":false}
 	if parsed.action=="write":
 		if parsed.text.is_empty():return {"ok":false}
+		if context.get("draft_allowed",false) and not Draft.grounded_details(parsed.text,str(context.goal)):return {"ok":false,"reason":"draft_unprovided_detail"}
 		if not parsed.text in str(context.goal) and not (context.get("draft_allowed",false) and Draft.requested(context.goal) and Draft.valid(parsed.text)):return {"ok":false}
 	elif not parsed.text.is_empty() or parsed.append:return {"ok":false}
 	return {"ok":true,"action":parsed.action,"node":node.duplicate(true),"text":parsed.text,"append":parsed.append,"target":context.target.duplicate(true),"at":context.at,"generated":parsed.action=="write" and context.get("draft_allowed",false)}

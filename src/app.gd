@@ -382,6 +382,9 @@ func _submit_model_text(text,retry=false,reasoning_retry=false):
 	pending_user_text = text
 	provider.submit(context.messages, options)
 
+func answer_review_enabled():
+	return store.data.settings.get("experimental_answer_review",false) is bool and store.data.settings.get("experimental_answer_review",false)
+
 func _review_model_answer(draft):
 	response_retries+=1;answer_reviewing=true
 	var messages_=[{"role":"system","content":quality.review_system(l10n.locale)},{"role":"user","content":"USER REQUEST:\n"+pending_user_text+"\n\nDRAFT DATA:\n"+draft}]
@@ -541,7 +544,7 @@ func _on_answer(text):
 		if response_retries<1:
 			response_retries+=1;_submit_model_text(pending_user_text,true,true);return
 		_on_failure("model_reasoning_failed");return
-	if not translation_mode and not screen_mode and response_retries==0 and quality.needs_review(pending_user_text):
+	if not translation_mode and not screen_mode and response_retries==0 and answer_review_enabled() and quality.needs_review(pending_user_text):
 		_review_model_answer(text);return
 	answer_reviewing=false
 	if not translation_mode and not screen_mode and quality.repeated(pending_user_text,text,session_turns):
@@ -1075,7 +1078,7 @@ func _goal_answer(text):
 	if provider is Llama and provider.last_truncated:_goal_error("goal_failed");return
 	goal_plan=agent.validate(text,goal_context,application_access.target,Time.get_ticks_msec()) if agent.active else goal_planner.validate(text,goal_context,application_access.target,Time.get_ticks_msec())
 	goal_context={}
-	if not goal_plan.get("ok",false):_goal_error("goal_failed");return
+	if not goal_plan.get("ok",false):_goal_error("draft_unprovided_detail" if goal_plan.get("reason")=="draft_unprovided_detail" else "goal_failed");return
 	if goal_plan.action=="ask":
 		if agent.active:_agent_finish("agent_review")
 		else:_goal_error("goal_more_info")

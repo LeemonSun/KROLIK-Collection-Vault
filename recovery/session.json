@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.16.0-desktop-preview",
-  "checkpoint_status": "0.16_pack_built_validation_finishing",
-  "current_task": "0.16 source33groups PASS; compiled Windows preview built. Reviewed generated field drafts, compact paired choices/top-level schema/visited navigation, selective one-pass answer review, clear whole-chat label+60message clipboard, small-window layout fix, plain-language receipts. Actual real draft/reasoning rerun and final packed regressions running.",
-  "next_action": "Collect owned real model fixture13592 and final pack tests36268; inspect all output. Save ZIP/report using fresh library-tools-016. Update session/RESUME/artifact IDs and final GitHub checkpoint. Do not claim complete15question test or universal agent.",
+  "checkpoint_status": "0.16_saved_semantic_quality_limits_documented",
+  "current_task": "0.16 packaged, validated and saved: reviewed composed field drafts with narrow grounding gate, compact bound choices/top-level schema, visited navigation, visible whole-chat copy, viewport layout fix, grounded persona. Unproven extra answer review OFF by default, advanced experiment only.",
+  "next_action": "Improve actual local model reasoning/content quality using measured RU/EN/zh semantic trials, e.g. budgeted reasoning mode/alternative small model, before claiming IQ gains. Do not default-enable failed same-model critic. Windows UIA/DPI/clipboard/mic/voice/resource acceptance still pending; user collecting tests. Existing general adaptive agent goal remains primary.",
   "read_next": [
     "docs/WORKFLOWS_016.md",
     "reports/real_test_agent_real016.txt"
@@ -20,28 +20,29 @@
     "New reader returns bounded source excerpts only, not automatic Q&A/search/guide execution. Only explicit public HTTPS, no redirects/login/JS/cookies, UTF-8 identity HTML/plain<=256KiB and20s.",
     "Public DNS unavailable in this environment (Godot and Python getaddrinfo failed). Real local TLS fixture passed; public websites/proxies/Windows remain unverified.",
     "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window.",
-    "Adaptive loop is selected-window UIA only,4steps/240sec, each step approval; exact original-goal invoke/write authority. Model planning quality not yet measured. No persistent learned procedures."
+    "Adaptive loop is selected-window UIA only,4steps/240sec, each step approval. Reviewed drafts512chars can be generated under explicit compose intent; numeric/address literal gate is not complete semantic grounding. No universal editing or learned procedures.",
+    "Real2B draft/reasoning trial failed: invented English meeting time and wrong liar paradox, even after one review. Experimental extra review is OFF by default; current model IQ not solved. Full15question test not validated."
   ],
   "validation": [
-    "33source groups PASS",
-    "42draft/authority tests +20reasoning behavior tests PASS",
-    "Actual pinned2B CPU1thread synthetic selected-window planner6/6 correct expected steps acrossRU/EN/zh; failed baseline/intermediate samples retained in AGENT016_COMPARISON.json",
-    "Native source X11:156general+33draft review+31copy60messages PASS",
-    "Final pack smoke PASS; final focused packed checks pending",
-    "Actual Windows and hardware acceptance pending; real draft/logic quality rerun pending"
+    "33source groups PASS in fresh isolated profiles",
+    "Final exported PCK smoke+25adaptive+47draft/authority+21reasoning behavior+45copy/selfknowledge PASS",
+    "Final PCK real X11:31copy60messages+33draft review+156general checks PASS; ZIPCRC PASS",
+    "Actual pinned2B CPU1thread synthetic two-stage UIA6/6expected choices acrossRU/EN/zh; baseline5/6/intermediate4/6, caveats AGENT016_COMPARISON.json",
+    "Actual draft/reasoning quality trial FAILED2/13 assertions; manual inspection additionally confirmed wrong liar-paradox final after review despite broad keyword assertion. No semantic IQ success claimed. Extra review OFF by default; narrow numeric/address gate verified with failing observed2PM example.",
+    "Actual Windows/hardware acceptance and full15question semantic test not completed"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.15.0.zip",
-    "bytes": 53901739,
-    "sha256": "d5b8c3a4caa25c81a3f5594a02946f100a7c9f8415e9b3b4ebbba838d6680baf",
-    "library_file_id": "libfile_48de10d3e5ec8191b7cab2b7afda96ee",
-    "file_id": "file_00000000da1881f5a5aebd165feb2ab2",
+    "full": "Companion_Preview_Windows_v0.16.0.zip",
+    "bytes": 53909921,
+    "sha256": "641e87d838b0c4cd07bd2c195a10f36fe6252555f9d1d14492affb6ccbd6f30f",
+    "library_file_id": "libfile_e4b0a628afcc8191b783417039923c0c",
+    "file_id": "file_000000008b3481fd8f19232a41816fad",
     "version": 0,
     "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
   },
-  "previous_checkpoint": "2edffb67836f0ebfab5e24fe7cb06da05df15b76",
-  "shipped_version": "0.15.0-desktop-preview",
-  "shipped_app_pack_sha256": "279ea83bd31312ca1c8ce03146d345674b57b00285c8379aca2ef2e5ab9485d3",
+  "previous_checkpoint": "ce2eb86efa546923146e36a7e3438256c697c269",
+  "shipped_version": "0.16.0-desktop-preview",
+  "shipped_app_pack_sha256": "465cc3c47a523ead33b8eb9b3c817199e736ca22cf40ace8a019ec2016caa5f7",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -76,7 +77,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_f89a85de218c8191962f81dbce325c9e",
+  "report_library_file_id": "libfile_412368ff40d88191bb250ed571c96186",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -89,6 +90,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.15.0.zip",
+      "bytes": 53901739,
+      "sha256": "d5b8c3a4caa25c81a3f5594a02946f100a7c9f8415e9b3b4ebbba838d6680baf",
+      "library_file_id": "libfile_48de10d3e5ec8191b7cab2b7afda96ee",
+      "file_id": "file_00000000da1881f5a5aebd165feb2ab2",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.14.0.zip",
       "bytes": 53896552,
@@ -149,7 +159,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_000000002dac81f88a79fe53c7c62005",
+  "report_file_id": "file_00000000755881f59070da16458b0d91",
   "motion_artifact": {
     "filename": "Leemon_0.11_Motions.mp4",
     "bytes": 182482,
@@ -162,9 +172,9 @@
     "sha256": "217f5008402b9216f13a01f91405b90b565fbb3268271779faeb74c156d4a722",
     "version_label": "0.11_reference_not_0.12_capture"
   },
-  "shipped_exe_sha256": "4783af4065646530c66aad90327a6f18924f636d49576f5570ee170898a5c0af",
+  "shipped_exe_sha256": "3959cd3452534bcf79b59fe568334abe0749a45482272eb5036dd83750158b52",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Copy toast resets on locale change; final PCK and real clipboard tested. Future chibi recorded only.",
+  "final_fix": "Reject draft numeric/time/URL/email tokens absent from original goal before approval; failed extra model review opt-in advanced only; final package checks completed.",
   "product_direction": {
     "primary": "general_adaptive_desktop_agent",
     "loop": [

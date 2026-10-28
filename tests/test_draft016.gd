@@ -43,6 +43,12 @@ func run():
 	check(not planner.validate(JSON.stringify({'choice':'select:e0'}),nav,target(),now).get('ok',false),'Unsupported pair cannot bypass schema')
 	check(not planner.validate(JSON.stringify({'choice':'expand:e0','text':'hidden','append':false}),nav,target(),now).get('ok',false),'Navigation cannot smuggle text')
 	check(not planner.validate(JSON.stringify({'choice':'expand:e0','extra':1}),nav,target(),now).get('ok',false),'Compact shape cannot add executable fields')
+	check(not Draft.grounded_details('Meet tomorrow at 2 PM','Compose an invitation for tomorrow'),'Invented meeting time blocked independently of model')
+	check(Draft.grounded_details('Meet at 14:30','Compose an invitation for 14:30'),'Explicit numeric detail retained')
+	check(not Draft.grounded_details('Visit https://invented.example','Compose an invitation'),'Invented URL blocked')
+	check(not Draft.grounded_details('Mail alice@example.com','Compose an invitation'),'Invented email blocked')
+	var ungrounded=planner.validate(raw('Meet tomorrow at 2 PM'),context,target(),now)
+	check(not ungrounded.get('ok',false) and ungrounded.get('reason')=='draft_unprovided_detail','Ungrounded details cannot reach draft approval')
 	var app=root.get_node('App');app.cancel();app.set_locale('en')
 	var old_access=app.application_access;var old_provider=app.provider;var old_runtime=app.local_runtime;var old_name=app.provider_name
 	var fixture=preload('res://tests/test_adaptive015.gd')
