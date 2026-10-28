@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.13.0-desktop-preview",
-  "checkpoint_status": "0.13_source_checked_export_pending",
-  "current_task": "0.13 source implemented: quiet/standard compute budget including ASR, multi-run plain DOCX paragraphs, typed XLSX and read-only range statistics. Official technical stack research saved. Final export and artifact save pending.",
-  "next_action": "Finish native technical UI checks, export0.13 using verified local template, run final PCK checks, save artifacts and final checkpoint. Windows acceptance/model accuracy still pending.",
+  "checkpoint_status": "0.13_saved_windows_acceptance_pending",
+  "current_task": "0.13 completed: economy/standard compute budget including ASR, cross-run plain DOCX replacement, typed XLSX, bounded no-model range summaries, pinned visible review/results. Official stack review and Windows package/report saved.",
+  "next_action": "Actual Windows acceptance and hardware measurements; safe browser reading/source evidence, common document/table tool integration with bounded model-authored plans; compare lightweight models on RU/EN/zh before any new distribution. No per-program models. Technical work before artistic redesign.",
   "read_next": [
     "docs/WORKFLOWS_013.md",
     "docs/TECH_STACK_013.md",
@@ -22,14 +22,25 @@
   ],
   "validation": [
     "26 source check groups PASS in fresh per-group profiles",
-    "44 technical013 checks PASS (no model/Windows claim)",
-    "33 real Office checks plus independent python-docx/openpyxl readback PASS",
-    "156 native X11 source checks PASS; final pack pending"
+    "44 technical013 checks PASS from source and final PCK; budget propagation, DOCX boundaries, real CSV ranges, no model quality claim",
+    "33 real OOXML checks PASS from source and final PCK; independent python-docx/openpyxl numeric/Boolean/text/style readback, CRC, all untouched parts compared",
+    "156 general +34 technical native X11 checks PASS from final PCK; explicit type selector, range summaries, pinned review/approval at400x420and640x500,3locales, real synthetic fixture apply/undo",
+    "9 final PCK composition/localization/version checks PASS; Leemon-only character assets",
+    "Final ZIP CRC PASS; no new model/runtime downloads required",
+    "Windows EXE/UIA/DPI/locks/native picker/mic/TTS, actual model throughput/resource use and actual2Bquality not remeasured"
   ],
-  "artifact": null,
-  "previous_checkpoint": "5523ff1085818bdf3a9cfbf9e74bdd19e23ad834",
-  "shipped_version": "0.12.0-desktop-preview",
-  "shipped_app_pack_sha256": "d964779e177ecdc7410444974a4e79722d4eccbdaeab2ab3c2bc8e230b0bb3f4",
+  "artifact": {
+    "full": "Companion_Preview_Windows_v0.13.0.zip",
+    "bytes": 53875263,
+    "sha256": "c2268ad88ec2fb913621a0c798a6f58b8d6d630e4489124459d8fb3f4a009a6d",
+    "library_file_id": "libfile_909ecf9b0d7881918b99c6d5bdc30516",
+    "file_id": "file_00000000600481fdb8c27214f2b5755f",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+  },
+  "previous_checkpoint": "f47afc5d1b9f467587409ad8a78491f15a4edf27",
+  "shipped_version": "0.13.0-desktop-preview",
+  "shipped_app_pack_sha256": "c9dd1699e2836560df4b5eb6c9e5d85907b923dd859d085c5367ad20e19a8744",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -64,9 +75,9 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_5a9a8d0e9a248191aef85a9968b11518",
+  "report_library_file_id": "libfile_41c9575efca0819192fb7b4b3718ab99",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
-  "report_version": 1,
+  "report_version": 0,
   "recovery_event": {
     "date_moscow": "2026-10-28",
     "source_head": "fb9c8195099ed1503c1c89e459fc510c8056da7f",
@@ -119,7 +130,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000059481fb863a749f9e10d405",
+  "report_file_id": "file_00000000b5ac81fd9eb5c2dc6f30b13c",
   "motion_artifact": {
     "filename": "Leemon_0.11_Motions.mp4",
     "bytes": 182482,
@@ -132,7 +143,7 @@
     "sha256": "217f5008402b9216f13a01f91405b90b565fbb3268271779faeb74c156d4a722",
     "version_label": "0.11_reference_not_0.12_capture"
   },
-  "shipped_exe_sha256": "916f5bc5d667aa7727f11432049dbd1a64558a6e280ec5ef4ff8c804f0b915c1",
+  "shipped_exe_sha256": "92a659d4d5180cace94ee097ba9d4e4e9382f71ae034f3f321116d4cc12c7b2e",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Office restore preview compares before/backup SHA-256, never decodes ZIP bytes as text;16Office+29filememory regression PASS;156native checks rerun from rebuilt PCK."
+  "final_fix": "Pinned review/result above approval; all new numeric/Boolean/range UI checks rerun from rebuilt final PCK. run_checks isolates profiles per group to prevent persisted locale/test-fixture contamination."
 }

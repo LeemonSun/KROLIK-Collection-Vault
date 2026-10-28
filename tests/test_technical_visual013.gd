@@ -32,6 +32,7 @@ func run():
 		for dimensions in [Vector2i(400,420),Vector2i(640,500)]:
 			editor.size=dimensions;await frame()
 			check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(editor.apply_button.get_global_rect()),'Approval remains visible '+locale+str(dimensions))
+			check(Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(editor.preview.get_global_rect()),'Review and result stay visible '+locale+str(dimensions))
 			check(editor.range_row.visible,'Range controls available '+locale)
 	app.set_locale('ru');editor.dismiss();editor.queue_free();await frame()
 	editor=load('res://src/ui/file_edit_window.gd').new();root.add_child(editor);editor.open_path(path)

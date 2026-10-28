@@ -9,12 +9,9 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [  83% ] first_scan_filesystem | Starting file scan...
 [ DONE ] first_scan_filesystem
 
-[   0% ] update_scripts_classes | Started Registering global classes... (5 steps)
+[   0% ] update_scripts_classes | Started Registering global classes... (2 steps)
 [   0% ] update_scripts_classes | 
-[  16% ] update_scripts_classes | 
 [  33% ] update_scripts_classes | 
-[  50% ] update_scripts_classes | 
-[  66% ] update_scripts_classes | 
 [ DONE ] update_scripts_classes
 
 [   0% ] savepack | Started Packing (102 steps)
@@ -29,8 +26,8 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [   4% ] savepack | Storing File: res://assets/ui/chat.svg.import
 [   5% ] savepack | Storing File: res://.godot/imported/clock.svg-30286256f7154716a5eb28035694a801.ctex
 [   5% ] savepack | Storing File: res://assets/ui/clock.svg.import
-[   6% ] savepack | Storing File: res://.godot/imported/close.svg-48602a5fd3dfc407a0a61efbc721d36a.ctex
-[   6% ] savepack | Storing File: res://assets/ui/close.svg.import
+[   5% ] savepack | Storing File: res://.godot/imported/close.svg-48602a5fd3dfc407a0a61efbc721d36a.ctex
+[   5% ] savepack | Storing File: res://assets/ui/close.svg.import
 [   6% ] savepack | Storing File: res://.godot/imported/copy.svg-3bfae1b28c738547f6f104d6063d619c.ctex
 [   6% ] savepack | Storing File: res://assets/ui/copy.svg.import
 [   7% ] savepack | Storing File: res://.godot/imported/cpu.svg-6704cf231d7f712beb1c2114565948c7.ctex
@@ -41,8 +38,8 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [   9% ] savepack | Storing File: res://assets/ui/hide.svg.import
 [  10% ] savepack | Storing File: res://.godot/imported/leemon.svg-9608001161b05733f5547ce4821cd57d.ctex
 [  10% ] savepack | Storing File: res://assets/ui/leemon.svg.import
-[  11% ] savepack | Storing File: res://.godot/imported/mark.svg-3c81f09120156905af65007dc602cb51.ctex
-[  11% ] savepack | Storing File: res://assets/ui/mark.svg.import
+[  10% ] savepack | Storing File: res://.godot/imported/mark.svg-3c81f09120156905af65007dc602cb51.ctex
+[  10% ] savepack | Storing File: res://assets/ui/mark.svg.import
 [  11% ] savepack | Storing File: res://.godot/imported/mic.svg-7d48e9af30f071cd34140bcdec45e025.ctex
 [  11% ] savepack | Storing File: res://assets/ui/mic.svg.import
 [  12% ] savepack | Storing File: res://.godot/imported/note.svg-693ccdece7ceefac5613c5730bcd1310.ctex
@@ -53,8 +50,8 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [  14% ] savepack | Storing File: res://assets/ui/quit.svg.import
 [  15% ] savepack | Storing File: res://.godot/imported/read.svg-218729b9d6b850251816bd204785f4ef.ctex
 [  15% ] savepack | Storing File: res://assets/ui/read.svg.import
-[  16% ] savepack | Storing File: res://.godot/imported/screen.svg-37ded3729c0b8f9fdc2946a3151f3e9d.ctex
-[  16% ] savepack | Storing File: res://assets/ui/screen.svg.import
+[  15% ] savepack | Storing File: res://.godot/imported/screen.svg-37ded3729c0b8f9fdc2946a3151f3e9d.ctex
+[  15% ] savepack | Storing File: res://assets/ui/screen.svg.import
 [  16% ] savepack | Storing File: res://.godot/imported/search.svg-ac069a96d0e989a4e0ccd133a527db6f.ctex
 [  16% ] savepack | Storing File: res://assets/ui/search.svg.import
 [  17% ] savepack | Storing File: res://.godot/imported/send.svg-d2f44eb880888f2f73584c6c610a8f22.ctex
@@ -65,81 +62,82 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [  19% ] savepack | Storing File: res://assets/ui/windows.svg.import
 [  20% ] savepack | Storing File: res://.godot/imported/foundation.svg-023e9417baa7524da50682dd92075bfd.ctex
 [  20% ] savepack | Storing File: res://assets/foundation.svg.import
-[  21% ] savepack | Storing File: res://native/accessibility_bridge.ps1
+[  20% ] savepack | Storing File: res://legal/upstream/WHISPER_CPP_LICENSE.txt
 [  21% ] savepack | Storing File: res://config/local_worker.json
 [  22% ] savepack | Storing File: res://config/perception.json
 [  23% ] savepack | Storing File: res://config/product.json
 [  24% ] savepack | Storing File: res://config/profiles.json
-[  25% ] savepack | Storing File: res://config/release.json
-[  26% ] savepack | Storing File: res://config/vision_asset.json
+[  24% ] savepack | Storing File: res://config/release.json
+[  25% ] savepack | Storing File: res://config/vision_asset.json
 [  26% ] savepack | Storing File: res://config/voice_worker.json
 [  27% ] savepack | Storing File: res://config/world_clock.json
-[  28% ] savepack | Storing File: res://legal/upstream/CLDR-LICENSE.txt
-[  29% ] savepack | Storing File: res://legal/upstream/IANA-tzdata-LICENSE.txt
-[  30% ] savepack | Storing File: res://legal/upstream/WHISPER_CPP_LICENSE.txt
-[  31% ] savepack | Storing File: res://legal/upstream/llama-b11901-LICENSE.txt
-[  31% ] savepack | Storing File: res://legal/upstream/Qwen3.5-2B-LICENSE.txt
+[  28% ] savepack | Storing File: res://legal/upstream/Godot-COPYRIGHT.txt
+[  29% ] savepack | Storing File: res://legal/upstream/Qwen3-1.7B-LICENSE.txt
+[  29% ] savepack | Storing File: res://legal/upstream/NotoCJK-LICENSE.txt
+[  30% ] savepack | Storing File: res://legal/ASSET_POLICY.md
+[  31% ] savepack | Storing File: res://legal/upstream/IANA-tzdata-LICENSE.txt
 [  32% ] savepack | Storing File: res://locales/en.json
 [  33% ] savepack | Storing File: res://locales/ru.json
 [  33% ] savepack | Storing File: res://locales/zh-Hans.json
-[  34% ] savepack | Storing File: res://manifests/animation_catalog.json
-[  35% ] savepack | Storing File: res://manifests/animation_pack.json
+[  33% ] savepack | Storing File: res://manifests/animation_catalog.json
+[  34% ] savepack | Storing File: res://manifests/animation_pack.json
 [  35% ] savepack | Storing File: res://manifests/capabilities.json
 [  36% ] savepack | Storing File: res://manifests/characters.json
 [  37% ] savepack | Storing File: res://manifests/components.json
 [  38% ] savepack | Storing File: res://manifests/models.json
-[  39% ] savepack | Storing File: res://manifests/world_clock_sources.json
-[  40% ] savepack | Storing File: res://native/legacy_patch_files.json
-[  40% ] savepack | Storing File: res://legal/upstream/Godot-COPYRIGHT.txt
-[  41% ] savepack | Storing File: res://legal/upstream/NotoCJK-LICENSE.txt
-[  42% ] savepack | Storing File: res://legal/upstream/Godot-LICENSE.txt
-[  43% ] savepack | Storing File: res://legal/upstream/WHISPER_MODEL_LICENSE.txt
-[  44% ] savepack | Storing File: res://legal/upstream/LLVM-OpenMP-LICENSE.txt
-[  45% ] savepack | Storing File: res://native/desktop_bridge.ps1
-[  45% ] savepack | Storing File: res://legal/upstream/Qwen3-1.7B-LICENSE.txt
-[  46% ] savepack | Storing File: res://legal/ASSET_POLICY.md
+[  38% ] savepack | Storing File: res://manifests/world_clock_sources.json
+[  39% ] savepack | Storing File: res://native/legacy_patch_files.json
+[  40% ] savepack | Storing File: res://legal/upstream/WHISPER_MODEL_LICENSE.txt
+[  41% ] savepack | Storing File: res://legal/upstream/Qwen3.5-2B-LICENSE.txt
+[  42% ] savepack | Storing File: res://native/accessibility_bridge.ps1
+[  42% ] savepack | Storing File: res://legal/upstream/CLDR-LICENSE.txt
+[  43% ] savepack | Storing File: res://legal/upstream/LLVM-OpenMP-LICENSE.txt
+[  44% ] savepack | Storing File: res://native/desktop_bridge.ps1
+[  45% ] savepack | Storing File: res://legal/upstream/Godot-LICENSE.txt
+[  46% ] savepack | Storing File: res://legal/README.md
 [  47% ] savepack | Storing File: res://.godot/exported/133200997/export-dda3c85ab6987aaf9187a7d12a53725e-bootstrap.scn
-[  48% ] savepack | Storing File: res://.godot/exported/133200997/export-3ad5c15c4f3250da0cc7c1af1770d85f-main.scn
-[  49% ] savepack | Storing File: res://src/animation/director.gdc
-[  50% ] savepack | Storing File: res://src/animation/leemon_rig.gdc
+[  47% ] savepack | Storing File: res://.godot/exported/133200997/export-3ad5c15c4f3250da0cc7c1af1770d85f-main.scn
+[  48% ] savepack | Storing File: res://src/animation/director.gdc
+[  49% ] savepack | Storing File: res://src/animation/leemon_rig.gdc
 [  50% ] savepack | Storing File: res://src/core/action_proposal.gdc
 [  51% ] savepack | Storing File: res://src/core/chat_queue.gdc
 [  52% ] savepack | Storing File: res://src/core/context_budget.gdc
-[  53% ] savepack | Storing File: res://src/core/conversation_memory.gdc
-[  54% ] savepack | Storing File: res://src/core/desktop_intent.gdc
-[  55% ] savepack | Storing File: res://src/core/fact_memory.gdc
+[  52% ] savepack | Storing File: res://src/core/conversation_memory.gdc
+[  53% ] savepack | Storing File: res://src/core/desktop_intent.gdc
+[  54% ] savepack | Storing File: res://src/core/fact_memory.gdc
 [  55% ] savepack | Storing File: res://src/core/intent_spelling.gdc
 [  56% ] savepack | Storing File: res://src/core/localization.gdc
 [  57% ] savepack | Storing File: res://src/core/profile.gdc
-[  58% ] savepack | Storing File: res://src/core/resource_gate.gdc
-[  59% ] savepack | Storing File: res://src/core/response_guard.gdc
-[  60% ] savepack | Storing File: res://src/core/response_quality.gdc
+[  57% ] savepack | Storing File: res://src/core/resource_gate.gdc
+[  58% ] savepack | Storing File: res://src/core/response_guard.gdc
+[  59% ] savepack | Storing File: res://src/core/response_quality.gdc
 [  60% ] savepack | Storing File: res://src/core/router.gdc
 [  61% ] savepack | Storing File: res://src/core/self_knowledge.gdc
-[  62% ] savepack | Storing File: res://src/core/state_machine.gdc
-[  63% ] savepack | Storing File: res://src/core/store.gdc
-[  64% ] savepack | Storing File: res://src/core/tool_policy.gdc
-[  65% ] savepack | Storing File: res://src/core/window_reader.gdc
+[  61% ] savepack | Storing File: res://src/core/state_machine.gdc
+[  62% ] savepack | Storing File: res://src/core/store.gdc
+[  63% ] savepack | Storing File: res://src/core/tool_policy.gdc
+[  64% ] savepack | Storing File: res://src/core/window_reader.gdc
 [  65% ] savepack | Storing File: res://src/core/window_workflow.gdc
 [  66% ] savepack | Storing File: res://src/desktop/action_menu.gdc
 [  66% ] savepack | Storing File: res://src/desktop/chat_window.gdc
-[  67% ] savepack | Storing File: res://src/desktop/companion_behavior.gdc
-[  68% ] savepack | Storing File: res://src/desktop/companion_window.gdc
-[  69% ] savepack | Storing File: res://src/desktop/speech_bubble.gdc
+[  66% ] savepack | Storing File: res://src/desktop/companion_behavior.gdc
+[  67% ] savepack | Storing File: res://src/desktop/companion_window.gdc
+[  68% ] savepack | Storing File: res://src/desktop/speech_bubble.gdc
 [  69% ] savepack | Storing File: res://src/modules/module_port.gdc
 [  70% ] savepack | Storing File: res://src/perception/observation_buffer.gdc
-[  71% ] savepack | Storing File: res://src/providers/llama_http_provider.gdc
-[  72% ] savepack | Storing File: res://src/providers/provider_base.gdc
-[  73% ] savepack | Storing File: res://src/providers/unconfigured_provider.gdc
-[  74% ] savepack | Storing File: res://src/runtime/bundled_package.gdc
+[  70% ] savepack | Storing File: res://src/providers/llama_http_provider.gdc
+[  71% ] savepack | Storing File: res://src/providers/provider_base.gdc
+[  72% ] savepack | Storing File: res://src/providers/unconfigured_provider.gdc
+[  73% ] savepack | Storing File: res://src/runtime/bundled_package.gdc
 [  74% ] savepack | Storing File: res://src/runtime/local_runtime.gdc
 [  75% ] savepack | Storing File: res://src/runtime/pinned_asset.gdc
-[  76% ] savepack | Storing File: res://src/tools/application_access.gdc
-[  77% ] savepack | Storing File: res://src/tools/browser_search.gdc
-[  78% ] savepack | Storing File: res://src/tools/clipboard_translation.gdc
-[  79% ] savepack | Storing File: res://src/tools/delimited_table.gdc
+[  75% ] savepack | Storing File: res://src/tools/application_access.gdc
+[  76% ] savepack | Storing File: res://src/tools/browser_search.gdc
+[  77% ] savepack | Storing File: res://src/tools/clipboard_translation.gdc
+[  78% ] savepack | Storing File: res://src/tools/delimited_table.gdc
 [  79% ] savepack | Storing File: res://src/tools/desktop_actions.gdc
-[  80% ] savepack | Storing File: res://src/tools/diagnostics.gdc
+[  79% ] savepack | Storing File: res://src/tools/diagnostics.gdc
+[  80% ] savepack | Storing File: res://src/tools/docx_text.gdc
 [  81% ] savepack | Storing File: res://src/tools/legacy_cleanup.gdc
 [  82% ] savepack | Storing File: res://src/tools/microphone_recorder.gdc
 [  83% ] savepack | Storing File: res://src/tools/office_patch.gdc
@@ -160,7 +158,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [  95% ] savepack | Storing File: res://src/ui/visual_theme.gdc
 [  96% ] savepack | Storing File: res://src/ui/window_handle.gdc
 [  97% ] savepack | Storing File: res://src/app.gdc
-[  98% ] savepack | Storing File: res://legal/README.md
+[  98% ] savepack | Storing File: res://legal/upstream/llama-b11901-LICENSE.txt
 [  98% ] savepack | Storing File: res://scenes/bootstrap.tscn.remap
 [  98% ] savepack | Storing File: res://scenes/main.tscn.remap
 [  98% ] savepack | Storing File: res://src/animation/director.gd.remap
@@ -203,6 +201,7 @@ Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 [  98% ] savepack | Storing File: res://src/tools/delimited_table.gd.remap
 [  98% ] savepack | Storing File: res://src/tools/desktop_actions.gd.remap
 [  98% ] savepack | Storing File: res://src/tools/diagnostics.gd.remap
+[  98% ] savepack | Storing File: res://src/tools/docx_text.gd.remap
 [  98% ] savepack | Storing File: res://src/tools/legacy_cleanup.gd.remap
 [  98% ] savepack | Storing File: res://src/tools/microphone_recorder.gd.remap
 [  98% ] savepack | Storing File: res://src/tools/office_patch.gd.remap

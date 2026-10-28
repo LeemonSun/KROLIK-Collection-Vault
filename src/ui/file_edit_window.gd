@@ -65,7 +65,7 @@ func _ready():
 		edit.text_changed.connect(func():token="";engine.cancel();apply_button.disabled=true)
 		if i==0:find_edit=edit
 		else:replace_edit=edit
-	preview=TextEdit.new();preview.editable=false;preview.add_theme_color_override("font_readonly_color",V.TEXT);preview.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY;preview.custom_minimum_size.y=112;preview.size_flags_vertical=Control.SIZE_EXPAND_FILL;layout.add_child(preview)
+	preview=TextEdit.new();preview.editable=false;preview.add_theme_color_override("font_readonly_color",V.TEXT);preview.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY;preview.custom_minimum_size.y=112;preview.size_flags_vertical=Control.SIZE_EXPAND_FILL;shell.add_child(preview)
 	var footer=HBoxContainer.new();shell.add_child(footer)
 	for i in range(3):
 		var button=Button.new();button.text=app.t(["file_patch_review","file_patch_apply","file_patch_undo"][i]);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.clip_text=true;footer.add_child(button)
