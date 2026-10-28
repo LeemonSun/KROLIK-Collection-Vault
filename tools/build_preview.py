@@ -26,7 +26,7 @@ def main():
  if not exe.exists() or exe.read_bytes()[:2]!=b'MZ':raise SystemExit('Missing PE executable')
  shutil.copytree(ROOT/'legal',out/'legal',dirs_exist_ok=True)
  (out/'START_HERE.txt').write_text((ROOT/'docs/PREVIEW_README.txt').read_text(encoding='utf-8').replace('{VERSION}',version),encoding='utf-8')
- metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':16,'local_voice':True,'explicit_screen_vision':True,'scoped_windows_uia':True,'optional_offline_bundle':True,'public_release_ready':False,'windows_executed_here':False}
+ metadata={'version':version,'target':'windows-x86_64','exe_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'exe_bytes':exe.stat().st_size,'template_sha256':template_sha,'active_character':'leemon_01','motion_type':'articulated_2d_authored_procedural','motion_states':16,'local_voice':True,'explicit_screen_vision':True,'scoped_windows_uia':True,'one_step_goal_proposals':True,'optional_offline_bundle':True,'public_release_ready':False,'windows_executed_here':False}
  (out/'BUILD_INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
  archive=out.parent/('Companion_Preview_Windows_v'+version+'.zip')
  with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:

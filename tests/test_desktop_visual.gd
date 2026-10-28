@@ -79,8 +79,11 @@ func _run():
 	view.window_picker.hide();app.application_access.windows=[]
 	app.application_access.adopt({"handle":"123","target_pid":1234,"started":"567","title":"Synthetic editor","app":"Test"})
 	app.goal_mode="proposal";app.goal_origin_target=app.application_access.target.duplicate(true);app.goal_deadline_ms=Time.get_ticks_msec()+30000
-	app.goal_plan={"node":{"name":"Insert"}};view.refresh();await frame()
+	app.goal_plan={"action":"select","node":{"name":"Insert"}};view.refresh();await frame()
 	check(view.confirmation_button.visible,"Proposed step approval is directly in native chat")
+	app.add_message("assistant",app.t("goal_propose_select",{"name":"Insert","window":"Synthetic editor"}))
+	await frame()
+	await frame()
 	shot(app.chat_window,"goal-proposal")
 	for dimensions in [Vector2i(320,280),Vector2i(360,320),Vector2i(460,460)]:
 		app.chat_window.size=dimensions;await frame()

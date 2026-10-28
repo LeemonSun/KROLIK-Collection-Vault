@@ -1,12 +1,18 @@
-# Leemon Companion · 0.8.0
+# Leemon Companion · 0.9.0
 
-[Скачать Windows x64 приложение · 54 МБ](https://chatgpt.com/library?file_id=libfile_af9e7176839c81918d6cd18a56d8bff6&account_id=personal) · [Полный отчёт](https://chatgpt.com/library?file_id=libfile_b75e2dfda7c48191905110dcb5321a67&account_id=personal)
+[Скачать Windows x64 приложение · 54 МБ](https://chatgpt.com/library?file_id=libfile_269b9a752e78819197809d8f5341729e&account_id=personal) · [Полный отчёт](https://chatgpt.com/library?file_id=libfile_574a65adb7f0819182f6764771e296c3&account_id=personal)
 
 **Полный офлайн-комплект с моделями · 1,92 ГБ:** [Часть1](https://chatgpt.com/library?file_id=libfile_4772dcd06024819189496a9631aa12ec&account_id=personal) · [Часть2](https://chatgpt.com/library?file_id=libfile_567be8fa52e08191baf1a97d4b86680a&account_id=personal) · [Часть3](https://chatgpt.com/library?file_id=libfile_c0aa8b16ab008191b8ad505aeaa24466&account_id=personal) · [Часть4](https://chatgpt.com/library?file_id=libfile_61b5844ce3788191897830a7c8fd4b6f&account_id=personal)
 
 Скачать все4 части в одну папку, сохранить имена, открыть **.zip.001** через 7-Zip и распаковать. Затем запустить Companion.exe. Цельный большой файл не прошёл передачу, поэтому комплект сохранён частями.
 
 Закрой старую версию, распакуй **Companion_Preview** целиком, запусти **Companion.exe**. Для обновления существующей0.8 можно заменить файлы поверх своей папки, сохранив **AI/**. Отдельных BAT/CMD-патчей в пакете нет.
+
+## Оконные цели0.9
+
+Выбери программу и напиши «переключись на вкладку Вставка». Локальная модель предлагает один шаг по доступным элементам. Кнопка подтверждения называет действие; перед исполнением окно читается заново, выбор/раскрытие проверяются по состоянию. Для обычной кнопки нужно явно попросить нажатие и назвать её. Это не многошаговый автопилот.
+
+Обновление0.9 распаковывается поверх полного0.8комплекта. **ПапкуAI сохраняй:** модели не менялись. Полный комплект ниже по-прежнему0.8; после его распаковки скопируй поверх приложение0.9 по верхней ссылке.
 
 ## В этой версии
 

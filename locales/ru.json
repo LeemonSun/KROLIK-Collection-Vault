@@ -273,5 +273,9 @@
   "goal_status_proposal": "Проверь предложенный шаг",
   "goal_status_confirming": "Повторно сверяю окно",
   "goal_status_executing": "Выполняю подтверждённый шаг",
-  "goal_status_verifying": "Проверяю результат"
+  "goal_status_verifying": "Проверяю результат",
+  "goal_approve_select": "Выбрать «{name}»",
+  "goal_approve_expand": "Раскрыть «{name}»",
+  "goal_approve_invoke": "Нажать «{name}»",
+  "goal_approve_write": "Вписать текст в «{name}»"
 }

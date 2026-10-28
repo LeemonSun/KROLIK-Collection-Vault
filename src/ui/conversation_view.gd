@@ -71,3 +71,7 @@ func _follow():
 	await tree.process_frame
 	if not is_inside_tree():return
 	scroll_vertical=int(get_v_scroll_bar().max_value);follow_pending=false
+
+func follow_latest():
+	if not follow_pending:
+		follow_pending=true;_follow.call_deferred()

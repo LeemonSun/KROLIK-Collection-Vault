@@ -273,5 +273,9 @@
   "goal_status_proposal": "Review the proposed step",
   "goal_status_confirming": "Checking the window again",
   "goal_status_executing": "Performing the approved step",
-  "goal_status_verifying": "Verifying the result"
+  "goal_status_verifying": "Verifying the result",
+  "goal_approve_select": "Select “{name}”",
+  "goal_approve_expand": "Expand “{name}”",
+  "goal_approve_invoke": "Press “{name}”",
+  "goal_approve_write": "Write into “{name}”"
 }

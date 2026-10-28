@@ -213,6 +213,7 @@ func _setup_ai():
 	refresh()
 func _on_message(_speaker,_text):
 	_render_history()
+	if app.goal_mode=="proposal":history.follow_latest()
 func _render_history():
 	history.set_messages(app.messages,app.t('chat_you').to_upper())
 func refresh():
@@ -232,7 +233,8 @@ func refresh():
 	target_row.visible=not app.application_access.target.is_empty() and size.y>=340
 	target_label.text=app.t("access_target",{"title":app.application_access.target.get("title","")})
 	confirmation_button.visible=app.goal_mode=="proposal" or (not app.application_access.pending.is_empty() and app.application_access.last_result.get("status")=="confirmation_required")
-	confirmation_button.text=app.t("goal_confirm") if app.goal_mode=="proposal" else app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
+	confirmation_button.text=app.t("goal_approve_"+str(app.goal_plan.get("action","select")),{"name":app.goal_plan.get("node",{}).get("name","")}) if app.goal_mode=="proposal" else app.t("access_confirm_button",{"name":app.application_access.pending.get("element_name","")})
+	confirmation_button.tooltip_text=confirmation_button.text
 	if choose_window and not app.application_access.windows.is_empty():
 		choose_window=false;window_picker.clear()
 		for index in range(app.application_access.windows.size()):

@@ -1,42 +1,42 @@
 {
   "schema_version": 1,
   "app_version": "0.9.0-desktop-preview",
-  "checkpoint_status": "grounded_goal_block_verified_packaging_in_progress",
-  "current_task": "Night0.8 recovered and preserved; new0.9 one-step semantic window goals implemented. Structured anyOf JSON schema, scoped capabilities, user approval, fresh preflight, selected/expanded state verification, verbatim write input; unrelated/negated goals and unsolicited button invocation filtered. Model3language fixture38checks PASS, unit37PASS. Native UI102checks reminder timing failure under investigation; packaging in progress.",
-  "next_action": "Finish source/native UI checks (bounded reminder wait), final9EXE/PCK export, update README and deliver app-only package over existing0.8AI folder. Preserve old artifact IDs and do not re-upload model bundle.",
+  "checkpoint_status": "0.9_saved_after_recovery_windows_acceptance_pending",
+  "current_task": "Recovered all night0.8 source/artifacts and continued through0.9 grounded single-step window goals. App ZIP and user report saved.19 source groups,102 native exported UI,12 exported-content checks pass. Actual 2B plans tested RU/EN/zh; no Windows UI execution claimed.",
+  "next_action": "Continue from current0.9. Priorities: actual Windows/DPI/mic/UIA acceptance, reduce planner latency(17–28s CPU2threads here), expand adversarial/ambiguous-goal corpus, then bounded multistep goals and browser reading. Do not restore foundation again or re-download/re-upload unchanged0.8 model bundle.",
   "read_next": [
     "docs/GOAL_PROPOSALS.md",
     "docs/ROADMAP.md"
   ],
   "known_limits": [
-    "Windows EXE, microphone hardware, UIA actions, transparency and voices not executed on actual Windows",
-    "2B factual accuracy limited; no continuously observed screen or autonomous browser reader",
-    "16 authored procedural cutout states, not thousands of hand-drawn/3D clips",
-    "UIA needs an accessible selected window and exact named elements; multiline custom editors may be unsupported",
-    "Concept art and brand are not commercially cleared; Steam gate remains blocked"
+    "Actual Windows EXE/transparency/UIA/microphone not executed here",
+    "Single proposed step with user approval, not a multistep autonomous agent",
+    "Generic button invocation requires explicit click verb and literal observed button name",
+    "Current real CPU planner cases take17–28seconds with2threads; optimization unfinished",
+    "UIA requires accessible controls; custom multiline editors/games may be unsupported",
+    "Model factual accuracy limited; no autonomous browser reader, custom voice, SteamCloud or commercial release clearance"
   ],
   "validation": [
-    "18 standard source groups PASS",
-    "94 native X11 source and exported-PCK checks PASS, including24-window picker",
-    "20 actual vision checks PASS RU/EN/zh JPEG+ownedlocalHTTP",
-    "24 real Whisper checks PASS, English audio only; physical microphone untested",
-    "18 actual text/translation checks PASS RU/EN/zh; factual accuracy remains limited",
-    "11 actual completeAIbundle verification/cache checks PASS",
-    "24 desktop helper and16 accessibility helper checks PASS, C# compiled; Windows API untested",
-    "11 exported content checks PASS via actual PowerShell roundtrip",
-    "FullZIP CRC and4parts concatenated SHA verified",
-    "Official7-Zip26.05 split-volume test PASS:4volumes,66files,Everything is Ok"
+    "All night0.8 source/artifact hashes recovered;18 baseline source groups PASS",
+    "19 final source groups PASS",
+    "37 proposal/controller/routing unit checks PASS",
+    "3 actual Qwen3.5-2B proposal cases RU/EN/zh PASS; full mixed suite38checks, unrelated intent filtered before model",
+    "110 layout checks PASS(3locales,4sizes,proposal approval,draft preservation)",
+    "102 actual nativeX11 checks PASS from final exportedPCK",
+    "12 exported content/helper checks PASS",
+    "16 accessibility helper checks PASS; C#compiled, WindowsAPI not run",
+    "Final0.9ZIP CRC checked; original0.8 offline parts remain saved andcompatible"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.8.0.zip",
-    "bytes": 53791063,
-    "sha256": "03922e037f3d9cd79c05203f18881067d7dda59dcf88e131c821317671edeb07",
-    "library_file_id": "libfile_af9e7176839c81918d6cd18a56d8bff6",
-    "status": "saved_native_library_verified_exported_pack"
+    "full": "Companion_Preview_Windows_v0.9.0.zip",
+    "bytes": 53800506,
+    "sha256": "a960468ffa4d42d2c3a7ca167d5ef0544d56f2d1af954eaf1a09427fc5cd9c68",
+    "library_file_id": "libfile_269b9a752e78819197809d8f5341729e",
+    "status": "saved_native_library_export_verified"
   },
-  "previous_checkpoint": "6e39759a7f8f1d2bad43454611d9f674a5b4bcb0",
-  "shipped_version": "0.8.0-desktop-preview",
-  "shipped_app_pack_sha256": "b428b57d841b9f7d8af073f7c8cde04e7468c05344ec7ca979130d645094b465",
+  "previous_checkpoint": "d5bccec549bfcfdb3d14664fc838c2c72373daac",
+  "shipped_version": "0.9.0-desktop-preview",
+  "shipped_app_pack_sha256": "1a13e86427c1d4477618c3e09e693be83283a39ce617fe2ef802eae6f478c1da",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -71,9 +71,9 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_b75e2dfda7c48191905110dcb5321a67",
+  "report_library_file_id": "libfile_574a65adb7f0819182f6764771e296c3",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
-  "report_version": 1,
+  "report_version": 0,
   "recovery_event": {
     "date_moscow": "2026-10-28",
     "source_head": "3aa27decdd5a240dd8fa8381763dc4e596d5bed5",
@@ -81,5 +81,14 @@
     "restored_without_conflicts": true,
     "previous_workspace_preserved": "companion-foundation-before-restore-20261028T015717",
     "checks": "18 groups PASS"
-  }
+  },
+  "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.8.0.zip",
+      "bytes": 53791063,
+      "sha256": "03922e037f3d9cd79c05203f18881067d7dda59dcf88e131c821317671edeb07",
+      "library_file_id": "libfile_af9e7176839c81918d6cd18a56d8bff6",
+      "status": "saved_native_library_verified_exported_pack"
+    }
+  ]
 }

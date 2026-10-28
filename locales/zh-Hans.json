@@ -273,5 +273,9 @@
   "goal_status_proposal": "请检查建议步骤",
   "goal_status_confirming": "正在重新核对窗口",
   "goal_status_executing": "正在执行已批准的步骤",
-  "goal_status_verifying": "正在核实结果"
+  "goal_status_verifying": "正在核实结果",
+  "goal_approve_select": "选择“{name}”",
+  "goal_approve_expand": "展开“{name}”",
+  "goal_approve_invoke": "点击“{name}”",
+  "goal_approve_write": "向“{name}”输入文本"
 }
