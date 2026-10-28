@@ -4,6 +4,8 @@
 
 | Проверка | Результат |
 | --- | --- |
+| adaptive015 | PASS |
+| copy_knowledge015 | PASS |
 | structure | PASS |
 | core | PASS |
 | http | PASS |

@@ -35,6 +35,9 @@ var setup_hint
 var status_dot
 var queue_row
 var queue_label
+var copy_chat_button
+var copy_status_until=0
+var copy_status=""
 var queue_clear
 func _ready():
 	if embedded:inset=0
@@ -76,6 +79,12 @@ func _ready():
 	status_label.add_theme_font_size_override('font_size',12)
 	status_label.add_theme_color_override('font_color',VisualTheme.MUTED)
 	status_row.add_child(status_label)
+	copy_chat_button=_icon('copy',status_row,func():
+		var result=app.copy_chat()
+		copy_status=app.t("chat_copy_done",{"count":result.get("count",0)}) if result.ok else app.t("chat_copy_failed")
+		copy_status_until=Time.get_ticks_msec()+2500;refresh())
+	copy_chat_button.tooltip_text=app.t("chat_copy_all")
+
 	queue_row=HBoxContainer.new();layout.add_child(queue_row);queue_row.visible=false
 	queue_label=Label.new();queue_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;queue_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;queue_label.add_theme_font_size_override("font_size",11);queue_label.add_theme_color_override("font_color",VisualTheme.RED);queue_row.add_child(queue_label)
 	queue_clear=_button("×",queue_row,func():app.chat_queue.clear();app.changed.emit());VisualTheme.quiet(queue_clear)
@@ -235,6 +244,7 @@ func _render_history():
 	history.set_messages(app.messages,app.t('chat_you').to_upper())
 func refresh():
 	if not is_instance_valid(status_label):return
+	copy_chat_button.tooltip_text=app.t("chat_copy_all")
 	if last_locale!=app.l10n.locale:
 		last_locale=app.l10n.locale
 		editor.placeholder_text=app.t('chat_placeholder')
@@ -271,6 +281,7 @@ func refresh():
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
 	if app.public_page.busy:status_label.text=app.t("web_stage_"+app.public_page.stage)
+	if app.agent.active:status_label.text=app.t("agent_step",{"step":mini(app.agent.history.size()+1,app.agent.MAX_STEPS),"total":app.agent.MAX_STEPS})+" · "+status_label.text
 	if app.workflow.active:status_label.text=app.t("workflow_step",{"step":app.workflow.index+1,"total":app.workflow.steps.size()})+" · "+status_label.text
 	if app.goal_mode=="proposal":status_label.text+=" · "+app.t("approval_remaining",{"seconds":maxi(0,ceili((app.goal_deadline_ms-Time.get_ticks_msec())/1000.0))})
 	status_dot.modulate=VisualTheme.RED if busy else VisualTheme.MUTED
@@ -278,6 +289,7 @@ func refresh():
 	read_button.tooltip_text=app.t("window_read_button")
 	plan_button.tooltip_text=app.t("goal_button")
 	inspect_button.tooltip_text=app.t("access_read")
+	if Time.get_ticks_msec()<copy_status_until:status_label.text=copy_status
 	if app.state.current=="thinking" and not app.pending_user_text.is_empty():status_label.text+=" · "+app.t("task_elapsed",{"seconds":maxi(0,(Time.get_ticks_msec()-app.chat_started_ms)/1000)})
 	if not app.chat_queue.items.is_empty():status_label.text+=" · "+app.t("queue_pending",{"count":app.chat_queue.items.size()})
 	queue_row.visible=not app.chat_queue.items.is_empty()

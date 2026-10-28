@@ -20,6 +20,8 @@ def main():
     env = dict(os.environ)
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("adaptive015",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_adaptive015.gd","--","--test-mode"]),
+        ("copy_knowledge015",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_copy_knowledge015.gd","--","--test-mode"]),
         ("structure", [sys.executable, str(ROOT / "tools/verify_project.py")]),
         ("core", [engine, "--headless", "--path", str(ROOT), "--script",
                   "res://tests/test_core.gd", "--", "--test-mode"]),

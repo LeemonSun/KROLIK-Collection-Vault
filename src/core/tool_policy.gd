@@ -1,6 +1,8 @@
 extends RefCounted
 ## Trusted tool registry controls effects; model text is never executed.
 const TOOLS = {
+	"chat.copy":{"implemented":true,"confirmation":false},
+	"agent.run":{"implemented":true,"confirmation":false},
 	"web.read":{"implemented":true,"confirmation":false},
 	"math.calculate":{"implemented":true,"confirmation":false},
 	"math.convert":{"implemented":true,"confirmation":false},

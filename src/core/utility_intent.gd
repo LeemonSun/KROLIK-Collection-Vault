@@ -1,6 +1,13 @@
 extends RefCounted
 static func route(raw):
 	var text=raw.strip_edges();var rx=RegEx.new()
+	if text.to_lower().rstrip(".!。！") in ["скопируй весь чат","скопируй всю переписку","копировать весь чат","copy whole chat","copy all chat","复制全部聊天"]:return {"kind":"tool","tool":"chat.copy","args":{}}
+	rx.compile('(?i)^(?:/agent|агент|помоги в этом окне|agent|窗口任务)\\s*[:：]?\\s+([\\s\\S]+)$')
+	var delegated=rx.search(text)
+	if delegated:return {"kind":"tool","tool":"agent.run","args":{"goal":delegated.get_string(1)}}
+	rx.compile('(?i)^(?:(?:квадратный\\s+)?корень\\s+из|square root of)\\s+([0-9]+(?:\\.[0-9]+)?)[?？]?$')
+	var root=rx.search(text)
+	if root:return {"kind":"tool","tool":"math.calculate","args":{"expression":"sqrt("+root.get_string(1)+")"}}
 	rx.compile('(?i)^(?:/read|прочитай страницу|read page|读取网页)\\s+(\\S+)$')
 	var web=rx.search(text)
 	if web:return {"kind":"tool","tool":"web.read","args":{"url":web.get_string(1)}}

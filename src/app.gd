@@ -32,6 +32,7 @@ var profile_request = "auto"
 var resource_mode="quiet"
 var provider_name = "unconfigured"
 var messages = []
+var messages_truncated=false
 var timers = []
 var persistence_ready = true
 var paused = false
@@ -68,6 +69,7 @@ var window_read_target={}
 var window_read_deadline=0
 var window_reader=preload("res://src/core/window_reader.gd").new()
 var workflow=preload("res://src/core/window_workflow.gd").new()
+var agent=preload("res://src/core/adaptive_agent.gd").new()
 var goal_mode=""
 var goal_text=""
 var goal_context={}
@@ -147,6 +149,7 @@ func _ready():
 	_schedule_reminders()
 	if history_enabled() and memory.load_history():
 		messages=memory.messages.duplicate(true)
+		messages_truncated=memory.truncated
 		session_turns=memory.turns.duplicate(true)
 	browser_search.set_browser(str(store.data.settings.get("browser", "system")))
 	add_child(public_page)
@@ -176,6 +179,7 @@ func t(key, values = {}):
 	return l10n.text(key, values)
 
 func _process(_delta):
+	if agent.active and Time.get_ticks_msec()>agent.deadline:_agent_finish("agent_expired")
 	if not window_read_mode.is_empty() and Time.get_ticks_msec()>window_read_deadline:_window_read_error("window_read_expired")
 	if not goal_mode.is_empty() and Time.get_ticks_msec()>goal_deadline_ms:_goal_error("goal_expired")
 	var panel_visible=is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible
@@ -261,9 +265,20 @@ func add_message(speaker, text, ephemeral=false):
 	messages.append(message)
 	if messages.size() > 100:
 		messages.pop_front()
+		messages_truncated=true
 	message_added.emit(speaker, text)
 	if speaker=="assistant":say_companion.call_deferred(text)
 	if history_enabled() and is_instance_valid(history_timer):history_timer.start()
+
+func copy_chat(setter=Callable()):
+	var result=preload("res://src/core/chat_transcript.gd").format(messages,t("chat_you").to_upper(),messages_truncated,t("chat_copy_retained"))
+	if not result.ok:return result
+	if setter.is_valid():setter.call(result.text)
+	else:
+		if DisplayServer.get_name()=="headless":return {"ok":false}
+		DisplayServer.clipboard_set(result.text)
+		if DisplayServer.clipboard_get()!=result.text:return {"ok":false}
+	return {"ok":true,"count":result.count,"truncated":result.truncated}
 
 func submit(text):
 	if paused:
@@ -279,7 +294,7 @@ func submit(text):
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text, command.get("tool","") in ["access.read","web.read"])
+	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run"])
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -373,6 +388,10 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool=="chat.copy":
+		var result=copy_chat()
+		add_message("assistant",t("chat_copy_done",{"count":result.get("count",0)}) if result.ok else t("chat_copy_failed"))
+		state.reset();changed.emit();return
 	if command.tool=="web.read":
 		if public_page.start(command.args.url):request_motion("dialogue.think_loop")
 		else:state.reset();changed.emit()
@@ -390,6 +409,8 @@ func _execute(command):
 		var result=preload("res://src/tools/windows_settings.gd").open_page(command.args.page)
 		add_message("assistant",t("settings_page_"+str(result.status)))
 		state.reset();changed.emit();return
+	if command.tool=="agent.run":
+		state.reset();begin_agent(command.args.goal);return
 	if command.tool=="files.edit_selected":
 		state.reset();open_file_editor();return
 	if command.tool.begins_with("facts."):
@@ -558,6 +579,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	agent.clear()
 	if is_instance_valid(public_page):public_page.cancel()
 	chat_queue.clear();chat_started_ms=0
 	file_activity="";task_event=""
@@ -785,12 +807,14 @@ func set_history_enabled(value):
 	changed.emit()
 
 func _save_history():
+	memory.truncated=memory.truncated or messages_truncated
 	if history_enabled() and not memory.save_history(messages):
 		push_warning("Conversation save failed; existing file preserved")
 
 func clear_history_confirmed():
 	if not memory.erase():return false
 	messages=[]
+	messages_truncated=false
 	session_turns=[]
 	history_cleared.emit()
 	changed.emit()
@@ -951,6 +975,29 @@ func _bundle_changed():
 		engine.status=("vision_installed" if key=="vision" else "ai_installed") if entry.ready else "ai_verifying"
 	changed.emit()
 
+func begin_agent(text):
+	if paused or chat_busy() or screen_mode or not window_read_mode.is_empty():return false
+	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
+	if not agent.begin(text,application_access.target,Time.get_ticks_msec()):add_message("assistant",t("agent_invalid"));return false
+	workflow.clear()
+	add_message("assistant",t("agent_start",{"limit":agent.MAX_STEPS}),true)
+	return _start_goal_step(agent.goal)
+func _agent_continue(revision):
+	if revision!=agent.revision or not agent.active or goal_mode!="between":return
+	if paused or not agent.live(application_access.target,Time.get_ticks_msec()):_agent_finish("agent_expired");return
+	_clear_goal();_start_goal_step(agent.goal)
+func _agent_finish(key):
+	var receipts=agent.history.duplicate(true);var names=[]
+	for node in application_access.nodes:
+		var name=str(node.get("name","")).left(72)
+		if not name.is_empty() and node.get("enabled",false) and name not in names:names.append(name)
+		if names.size()>=6:break
+	agent.clear();workflow.clear();_clear_goal();state.reset()
+	var reply=t(key)+"\n"+t("agent_receipts",{"count":receipts.size()})
+	for step in receipts:reply+="\n• "+str(step.action)+": "+str(step.name)
+	if not names.is_empty():reply+="\n\n"+t("agent_observed")+"\n"+" · ".join(PackedStringArray(names))
+	add_message("assistant",reply,true);changed.emit()
+
 func begin_window_goal(text):
 	if paused or state.current!="idle" or speech_input.busy() or application_access.pid>0 or not queued_chat_text.is_empty() or not goal_mode.is_empty():return false
 	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
@@ -974,17 +1021,21 @@ func _goal_observe():
 	changed.emit()
 func _goal_observed():
 	if goal_mode=="observing":
-		var direct=goal_planner.direct(goal_text,application_access.target,application_access.nodes,application_access.observed_ms)
-		if direct.get("ok",false):
-			goal_plan=direct;_show_goal_proposal();return
-		if direct.get("blocked",false):_goal_error("goal_more_info");return
+		if not agent.active:
+			var direct=goal_planner.direct(goal_text,application_access.target,application_access.nodes,application_access.observed_ms)
+			if direct.get("ok",false):
+				goal_plan=direct;_show_goal_proposal();return
+			if direct.get("blocked",false):_goal_error("goal_more_info");return
 		if not local_runtime.installed():_goal_error("goal_need_ai");return
 		if local_runtime.status!="ai_ready" or provider_name!="local_worker":
 			goal_mode="loading";local_ai_enabled=true
 			if not local_runtime.start(runtime_options()):_goal_error(local_runtime.status)
 			changed.emit();return
-		goal_context=goal_planner.prepare(goal_text,application_access.target,application_access.nodes,application_access.observed_ms,l10n.locale)
-		if not goal_context.get("ok",false):_goal_error("goal_more_info");return
+		goal_context=agent.prepare(application_access.target,application_access.nodes,application_access.observed_ms,Time.get_ticks_msec(),l10n.locale) if agent.active else goal_planner.prepare(goal_text,application_access.target,application_access.nodes,application_access.observed_ms,l10n.locale)
+		if not goal_context.get("ok",false):
+			if agent.active:_agent_finish("agent_"+str(goal_context.get("reason","no_actions")))
+			else:_goal_error("goal_more_info")
+			return
 		goal_mode="thinking";state.reset();state.transition("thinking")
 		local_runtime.generation_busy=true;local_runtime.touch()
 		request_motion("dialogue.think_loop")
@@ -1005,10 +1056,13 @@ func _goal_observed():
 func _goal_answer(text):
 	local_runtime.generation_busy=false;local_runtime.touch()
 	if provider is Llama and provider.last_truncated:_goal_error("goal_failed");return
-	goal_plan=goal_planner.validate(text,goal_context,application_access.target,Time.get_ticks_msec())
+	goal_plan=agent.validate(text,goal_context,application_access.target,Time.get_ticks_msec()) if agent.active else goal_planner.validate(text,goal_context,application_access.target,Time.get_ticks_msec())
 	goal_context={}
 	if not goal_plan.get("ok",false):_goal_error("goal_failed");return
-	if goal_plan.action=="ask":_goal_error("goal_more_info");return
+	if goal_plan.action=="ask":
+		if agent.active:_agent_finish("agent_review")
+		else:_goal_error("goal_more_info")
+		return
 	_show_goal_proposal()
 func _show_goal_proposal():
 	goal_context={}
@@ -1016,7 +1070,7 @@ func _show_goal_proposal():
 	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
 	var preview=t("goal_propose_append" if goal_plan.action=="write" and goal_plan.append else "goal_propose_"+goal_plan.action,values)
 	if goal_plan.action=="write":preview+="\n\n"+goal_plan.text
-	add_message("assistant",preview)
+	add_message("assistant",preview,agent.active)
 	request_motion("dialogue.explain_small");changed.emit()
 func confirm_window_goal():
 	if goal_mode!="proposal" or paused:return false
@@ -1039,6 +1093,15 @@ func _goal_access_completed(result):
 		if not application_access.inspect(true):_goal_error("goal_unverified")
 	else:_goal_error("goal_unverified")
 func _goal_done(key):
+	if agent.active:
+		var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
+		var verified=key in ["goal_written","goal_verified_select","goal_verified_expand"]
+		if not agent.record(goal_plan,verified,application_access.target,Time.get_ticks_msec()):
+			add_message("assistant",t(key,values),true);_agent_finish("agent_unverified");return
+		add_message("assistant",t(key,values),true)
+		if agent.history.size()>=agent.MAX_STEPS:_agent_finish("agent_budget");return
+		_clear_goal();state.reset();goal_mode="between";goal_origin_target=agent.target.duplicate(true);goal_deadline_ms=Time.get_ticks_msec()+5000
+		get_tree().create_timer(0.35).timeout.connect(_agent_continue.bind(agent.revision));changed.emit();return
 	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
 	var outcome=workflow.advance(key in ["goal_written","goal_verified_select","goal_verified_expand"])
 	if outcome=="single":workflow.clear()
@@ -1055,6 +1118,7 @@ func _workflow_continue(revision):
 	if paused or not goal_planner.same_target(workflow.target,application_access.target):_goal_error("goal_changed");return
 	_clear_goal();_start_goal_step(workflow.current())
 func _goal_error(key):
+	if agent.active:_agent_finish(key);return
 	var interrupted=workflow.active
 	workflow.clear()
 	_clear_goal();state.reset();add_message("assistant",t(key))

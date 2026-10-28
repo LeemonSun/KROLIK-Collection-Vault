@@ -2,13 +2,13 @@ extends RefCounted
 ## Model proposes one bounded step; only observed controls and explicit user approval can authorize it.
 const TTL_MS=90000
 const ACTIONS=["select","expand","invoke","write","ask"]
-func prepare(goal,target,nodes,observed_ms,locale="en"):
+func prepare(goal,target,nodes,observed_ms,locale="en",navigation=false):
 	if not goal is String or goal.strip_edges().is_empty() or goal.length()>800:return {"ok":false}
 	var lower=goal.to_lower().strip_edges()
 	var ui_words=["вклад","раздел","кнопк","поле","меню","выбери","перейди","переключ","найди","раскрой","открой","нажми","впиши","вставь","введи","допиши","tab","field","button","menu","select","switch","expand","navigate","find","open","click","press","write","append","type","fill","enter","控件","标签","选项卡","按钮","输入","填写","填入","菜单","切换","选择","展开","点击"]
-	if negative_intent(goal) or not mentions(lower,ui_words):return {"ok":false}
+	if negative_intent(goal) or (not navigation and not mentions(lower,ui_words)):return {"ok":false}
 	var write_intent=mentions(lower,["впиши","вставь","введи","допиши","напиши","write","append","type","fill","enter","输入","填写","填入","追加"])
-	var select_intent=not write_intent or mentions(lower,["вклад","раздел","меню","выбери","перейди","переключ","раскрой","открой","tab","menu","select","switch","expand","navigate","open","标签","切换","选择","展开","菜单"])
+	var select_intent=navigation or not write_intent or mentions(lower,["вклад","раздел","меню","выбери","перейди","переключ","раскрой","открой","tab","menu","select","switch","expand","navigate","open","标签","切换","选择","展开","菜单"])
 	var selected=[];var map={};var bytes=0
 	# Controls matching a goal word come first, without interpreting application/game types.
 	var candidates=[]
@@ -33,6 +33,10 @@ func prepare(goal,target,nodes,observed_ms,locale="en"):
 		if selected.size()>=24:break
 		var alias="e"+str(selected.size())
 		var record={"id":alias,"name":str(candidate.node.name).left(72),"actions":candidate.actions}
+		if navigation:
+			record["type"]=str(candidate.node.get("type","")).left(48)
+			record["selected"]=candidate.node.get("selected",false)
+			record["expanded"]=int(candidate.node.get("expansion",-1))==1
 		var size_=JSON.stringify(record).to_utf8_buffer().size()
 		if bytes+size_>2200:continue
 		selected.append(record);map[alias]=candidate.node.duplicate(true);bytes+=size_

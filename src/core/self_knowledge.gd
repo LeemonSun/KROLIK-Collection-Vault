@@ -6,6 +6,9 @@ func _has(text,phrases):
 	return false
 func classify(raw):
 	var text=raw.to_lower().replace('ё','е').replace('-',' ').strip_edges()
+	if _has(text,['переписк','чат','chat','聊天']) and _has(text,['скопир','копир','перенес','экспорт','copy','export','复制','导出']):return 'chat_export'
+	if _has(text,['чего тебе не хватает','какие функции отсутствуют','что еще не умеешь','what features are missing','what are you missing','缺少什么','还不会什么']):return 'limits'
+	if _has(text,['можешь ли','умеешь','научился ли','can you','你能']) and _has(text,['редактир','писать туда','писать в','edit','write into','编辑','写入']):return 'desktop_edit'
 	if _has(text,['точное название модели','какая модель у тебя внутри','what base model','which model file','底层模型','模型文件']):return 'runtime_model'
 	if _has(text,['что ты за модель','какая ты модель','ты openai','ты chatgpt','ты чатгпт','what model are you','which model are you','你是什么模型']):return 'model'
 	if _has(text,['тебя написал','тебя создал','тебя переписал','чат гпт и уже переписал','who made you','who created you','谁创造了你']):return 'origin'
@@ -14,7 +17,7 @@ func classify(raw):
 	if _has(text,['как сильно ты влияешь','какую нагрузку ты','нагрузку оказываешь','нагрузку окзаываешь','ты грузишь','ты нагружаешь','сколько ты потребляешь','your cpu usage','how much ram do you','你占用多少']):return 'load'
 	if _has(text,['ты научилась перемещаться','ты умеешь двигаться','ты можешь перемещаться','ты уже научилась сама перемещаться','твои анимации','can you move around','你的动画','你能移动']):return 'motion'
 	if _has(text,['за счет чего ты работаешь','как ты работаешь','what powers you','how do you work','你如何运行']):return 'power'
-	if _has(text,['что нового в этой версии','что ты научился','что изменилось в последнем патче','what is new in this version','最新版本有什么变化']):return 'updates'
+	if _has(text,['чему научился','чему ты научился','чему научилась','что нового','что ты научился','что изменилось в последнем патче','what is new in this version','最新版本有什么变化']):return 'updates'
 	if _has(text,['что ты умеешь','твои возможности','что у нас можно сделать','что он уже тебе добавил','what can you do','你会做什么']):return 'capabilities'
 	if _has(text,['погода сейчас','погода сегодня','какая погода','сколько сейчас градусов','сегодня будет градусов','weather today','weather right now','今天天气','现在天气']):return 'weather'
 	var greet=RegEx.new()
@@ -38,7 +41,7 @@ func answer(raw,app):
 	return {'intent':intent,'text':app.t(key,{'model':model,'threads':app.runtime_options().get('cpu_threads',2)})}
 func system_text(locale):
 	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return "You are Leemon, a helpful desktop companion. Reply in %s unless the user requests another language. Be natural and concise. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so." % language
+	return "You are Leemon, a helpful desktop companion. Reply in %s unless the user requests another language. Be natural and concise. Do not start with generic As an AI disclaimers. You are the conversational part of a local desktop application with verified tools for files, windows, calculations, clipboard and reminders. Do not deny that the entire application has any file/device tools. Your reply text alone cannot execute them; describe actual limits and never claim an action happened without a tool receipt. Answer the user's actual question using the recent conversation. Acknowledge statements briefly. Never invent facts about the user or their projects. Do not claim you acted on the PC or saw its screen. Avoid repeated greetings and generic offers to help. If unsure, say so." % language
 
 func response_budget(raw,options):
 	var result=options.duplicate(true)

@@ -1,36 +1,33 @@
 {
   "schema_version": 1,
-  "app_version": "0.14.0-desktop-preview",
-  "checkpoint_status": "0.14_saved_windows_acceptance_pending",
-  "current_task": "0.14 completed and saved: local bounded calculator, unit conversion, fixed Windows Settings page handoff, explicit public HTTPS excerpts reader,21-entry component backlog; visible synchronous replies. General adaptive desktop agent is the primary next milestone.",
-  "next_action": "Prioritize general observe(UIA/screen)->bounded model-authored plan->shared tools in existing apps->reobserve/verify/adapt loop. Deterministic helpers are execution tools, not replacement for general intelligence. Preserve authority gates and resource budgets. In parallel do Windows/live public web/hardware acceptance; no per-app model training or replacement Office/virtual environment.",
+  "app_version": "0.15.0-desktop-preview",
+  "checkpoint_status": "0.15_source_tested_packaging",
+  "current_task": "0.15: bounded adaptive selected-window UIA loop with fresh observations and verified receipts; copy all retained chat; grounded self-knowledge; future chibi idea recorded only.",
+  "next_action": "Build and validate Windows preview pack, save deliverables. Then real2B semantic agent trials, Windows UIA acceptance and resource measurement. No generic autonomous or learned-skills claim.",
   "read_next": [
-    "docs/WORKFLOWS_014.md",
-    "research/component_backlog.json",
-    "docs/TECH_STACK_013.md"
+    "docs/WORKFLOWS_015.md",
+    "docs/VISUAL_IDEAS.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
     "Queue holds at most3 ordinary text messages and uses one model inference; no deferred OS/window/capture/voice/tools context",
     "OOXML ZIP<=256entries/8MiB expanded/2MiB per part; no signed/encrypted/ZIP64/.bin packages; bounded XML balance checks, not full schema validation",
     "SHA+rename/file backup guard is not complete adversarial Windows race/reparse protection",
-    "Only user-authored workflow up to4steps; browser reading via chosen-window UIA and search handoff, no universal autonomous planner/browser",
     "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and not remeasured",
     "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud",
     "Selected files <=1MiB; DOCX one plain paragraph across adjacent runs; XLSX existing cells text/number/Boolean, formula workbooks refused. Range summaries<=1024cells use approximate doubles/raw numeric values, not exact financial arithmetic.",
     "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured.",
     "New reader returns bounded source excerpts only, not automatic Q&A/search/guide execution. Only explicit public HTTPS, no redirects/login/JS/cookies, UTF-8 identity HTML/plain<=256KiB and20s.",
     "Public DNS unavailable in this environment (Godot and Python getaddrinfo failed). Real local TLS fixture passed; public websites/proxies/Windows remain unverified.",
-    "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window."
+    "Calculator/units use approximate doubles; not symbolic CAS or exact financial engine. Windows settings tool only requests fixed page launch, never changes settings or verifies the window.",
+    "Adaptive loop is selected-window UIA only,4steps/240sec, each step approval; exact original-goal invoke/write authority. Model planning quality not yet measured. No persistent learned procedures."
   ],
   "validation": [
-    "29 source check groups PASS in separate fresh profiles",
-    "Final PCK:9 composition/version,112utilities,16fake-network polling/authority,7real local TLS plus independent server request assertions PASS",
-    "Final PCK:33real Office checks plus independent python-docx/openpyxl readback/CRC/untouched parts PASS",
-    "Final PCK native X11:156general+34Office+25utilities checks PASS;3locales and chat size/last-reply visibility/source inert markup",
-    "Final ZIP CRC PASS; no new weights/runtime required",
-    "Actual public DNS/live websites not verified: Godot and independent Python DNS unavailable in this environment. Local test-only socket adapter verified real TLS protocol; no proxy support claimed.",
-    "Windows EXE/UIA/DPI/locks/mic/TTS and actual2Bquality/performance remain unverified or not remeasured"
+    "31 source groups PASS",
+    "25 adaptive015 synthetic UIA/fake provider checks PASS",
+    "45 copy/selfknowledge/history checks PASS",
+    "31 native X11 clipboard/layout checks PASS across three locales/two sizes",
+    "Not actual Windows or actual2B agent quality; real model fixture downloaded for later testing only"
   ],
   "artifact": {
     "full": "Companion_Preview_Windows_v0.14.0.zip",
