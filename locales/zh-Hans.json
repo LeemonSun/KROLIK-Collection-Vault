@@ -206,7 +206,7 @@
   "voice_recording": "正在聆听…再次点击麦克风结束",
   "voice_preparing": "正在准备录音…",
   "voice_transcribing": "正在你的电脑上识别…",
-  "voice_silence": "录音声音太小，请靠近麦克风再试。",
+  "voice_silence": "未能识别录音，请在设置中检查所选麦克风。",
   "voice_microphone_unavailable": "无法启动麦克风，请检查输入设备和Windows麦克风权限。",
   "voice_audio_invalid": "录音长度需在0.25到20秒之间。",
   "voice_timeout": "识别超时，请尝试更短的录音。",

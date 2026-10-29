@@ -3,7 +3,7 @@
   "app_version": "0.27.0-desktop-preview",
   "checkpoint_status": "027_blocking_regression_repair_validating_not_shipped",
   "current_task": "User actualWindows feedback rejects026 readiness (18issues):slow/wrong app/task execution,micquiet,uncancelledcompute,overlappingtopmostwindows,hallucinatedscreen,poorpersona. STOP decorative work/friends claims. Restored exact026remote into isolated leemon-027 because leemon-013 snapshot was stale023/conflicting; original files preserved.Implementing named launch/no-neural literal file tasks/math,alias preservation,PCM cache/quiet handling/endpoint,inputdevice selection,ownedworker cancellation+HTTPepochs,quiet non-topmostdesktop/one task surface,structured window overview instead unrestricted image descriptions.",
-  "next_action": "Finish027 real-file/PCM/ownedprocess/native UI/transport tests,fix regressions,build/save private repair preview/source/report with actual limits. No claim universal app editing or real microphone success without Windows. GlobalPTT/generalUIediting/real2Bquality/hardware performance remain unresolved. Need user Windows recheck of simplecases before friends.",
+  "next_action": "Finish027 real-file/PCM/ownedprocess/native UI/transport tests,fix regressions,build/save private repair preview/source/report with actual limits. No claim universal app editing or real microphone success without Windows. GlobalPTT/generalUIediting/real2Bquality/hardware performance remain unresolved. Need user Windows recheck of simplecases before friends. New large-file/report requirement and primary-source architecture recorded in docs/LARGE_DOCUMENTS_PLAN.md; no new model or parser installed.",
   "read_next": [
     "docs/REPAIR_027.md",
     "src/core/direct_tasks.gd",
@@ -366,5 +366,20 @@
       "model_weights_bundled": false,
       "snapshot_note": "Product code matches final0.25. Archive contains active pinned runtime art/font. Later delivery/README/report receipt and tool-only validation-report formatting changes may be outside snapshot; no hash self-reference. PerfileSHA/CRC/fresh extract/import/52checks PASS."
     }
-  ]
+  ],
+  "large_documents_plan": {
+    "status": "researched_design_not_implemented",
+    "document": "docs/LARGE_DOCUMENTS_PLAN.md",
+    "requirement": "Offline100page input + grounded report/export; one worker; coverage before retrieval-only summary; no claim cloud-level2B intelligence",
+    "candidates_not_adopted": [
+      "pypdf",
+      "Tesseract",
+      "Docling",
+      "SQLite FTS5",
+      "python-docx",
+      "SymPy",
+      "Qwen3.5-4B"
+    ],
+    "sources_checked": "2026-10-29"
+  }
 }

@@ -4,7 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
-| repair027 | FAIL |
+| repair027 | PASS |
 | orbit026 | PASS |
 | agent025 | PASS |
 | observation024 | PASS |

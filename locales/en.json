@@ -206,7 +206,7 @@
   "voice_recording": "Listening… click the mic again to finish",
   "voice_preparing": "Preparing recording…",
   "voice_transcribing": "Transcribing on your PC…",
-  "voice_silence": "That recording was too quiet. Try speaking closer to the microphone.",
+  "voice_silence": "Could not interpret the recording. Check the selected microphone in settings.",
   "voice_microphone_unavailable": "Couldn’t start the microphone. Check the input device and Windows microphone access.",
   "voice_audio_invalid": "The recording must be between 0.25 and 20 seconds.",
   "voice_timeout": "Transcription took too long. Try a shorter recording.",

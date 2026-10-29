@@ -710,6 +710,8 @@ func _on_answer(text):
 
 func _on_failure(key):
 	if state.current=="idle" and pending_user_text.is_empty() and queued_chat_text.is_empty() and goal_mode.is_empty() and discovery_mode.is_empty() and not delegation.active and not screen_mode and window_read_mode.is_empty() and not translation_mode and queued_translation.is_empty() and not overview_pending and not public_page.busy:return
+	if is_instance_valid(local_runtime) and local_runtime.generation_busy and local_runtime.get("pid") is int and int(local_runtime.get("pid"))>0:
+		local_runtime.stop();local_runtime.status="ai_sleeping"
 	delegation.clear()
 	if not discovery_mode.is_empty():_discovery_error(key);return
 	logic_mode=false
@@ -736,7 +738,7 @@ func _on_failure(key):
 
 func cancel():
 	overview_pending=false;direct_launch_query=""
-	var abort_worker=is_instance_valid(local_runtime) and (local_runtime.get("starting")==true or ((local_runtime.generation_busy or (is_instance_valid(provider) and provider.get("busy")==true)) and local_runtime.get("pid") is int and int(local_runtime.get("pid"))>0))
+	var abort_worker=is_instance_valid(local_runtime) and (local_runtime.get("starting")==true or (local_runtime.get("pid") is int and int(local_runtime.get("pid"))>0))
 	cancel_serial+=1
 	dictation_submit=false
 	delegation.clear()
