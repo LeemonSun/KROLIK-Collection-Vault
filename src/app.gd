@@ -47,6 +47,9 @@ var last_task_stage=""
 var local_runtime
 var chat_window
 var speech_bubble
+var task_window
+var cancel_serial=0
+var dictation_submit=false
 var file_editor
 var file_picker
 var facts=preload("res://src/core/fact_memory.gd").new()
@@ -145,7 +148,7 @@ func _ready():
 	add_child(speech_input)
 	speech_input.changed.connect(func():changed.emit())
 	speech_input.text_ready.connect(_dictation_ready)
-	speech_input.failed.connect(func(key):add_message("assistant",t(key));dictation_target=null)
+	speech_input.failed.connect(func(key):dictation_submit=false;add_message("assistant",t(key));dictation_target=null)
 	application_access=preload("res://src/tools/application_access.gd").new()
 	add_child(application_access)
 	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values),true))
@@ -180,6 +183,8 @@ func _ready():
 		l10n.set_locale(str(store.data.settings.get("locale", "ru")))
 		profile_request = str(store.data.settings.get("profile", "auto"))
 		resource_mode="standard" if store.data.settings.get("resource_mode")=="standard" else "quiet"
+		voice.enabled=bool(store.data.settings.get("voice_enabled",false))
+		motion.set_reduced_motion(bool(store.data.settings.get("reduced_motion",false)))
 	reminder_timer=Timer.new()
 	reminder_timer.one_shot=true
 	add_child(reminder_timer)
@@ -224,12 +229,13 @@ func _process(_delta):
 	if not goal_mode.is_empty() and Time.get_ticks_msec()>goal_deadline_ms:_goal_error("goal_expired")
 	var panel_visible=is_instance_valid(control_panel) and control_panel.get_window()!=null and control_panel.get_window().visible
 	var chat_visible=is_instance_valid(chat_window) and chat_window.visible
+	var task_visible=is_instance_valid(task_window) and task_window.visible
 	var character_visible=is_instance_valid(desktop_companion) and desktop_companion.visible
 	var moving=character_visible and (desktop_companion.dragging or desktop_companion.effect_time>0 or desktop_companion.effect_kind in ["walk","edge_enter"])
 	var blending=character_visible and is_instance_valid(desktop_companion.art) and not desktop_companion.reduced_motion and desktop_companion.art.blend_time<0.18
 	diagnostics.active=panel_visible and control_panel.page=="diagnostics"
-	var limit=60 if moving or blending else (30 if chat_visible or panel_visible else idle_fps)
-	if not character_visible and not chat_visible and not panel_visible:limit=6
+	var limit=60 if moving or blending else (30 if chat_visible or panel_visible or task_visible else idle_fps)
+	if not character_visible and not chat_visible and not panel_visible and not task_visible:limit=6
 	if is_instance_valid(speech_input) and speech_input.busy():limit=maxi(limit,30)
 	var interacting=moving or chat_visible or panel_visible
 	if Engine.max_fps!=limit:
@@ -328,6 +334,7 @@ func submit(text):
 		add_message("assistant", t("busy_message"))
 		return
 	mark_active()
+	if is_instance_valid(task_window) and task_window.snapshot.get("kind")=="result":task_window.dismiss()
 	if is_instance_valid(browser_tabs):browser_tabs.forget()
 	_discovery_clear()
 	var command = router.route(text)
@@ -706,6 +713,8 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	cancel_serial+=1
+	dictation_submit=false
 	delegation.clear()
 	_discovery_clear()
 	launch_goal="";launch_vpn={}
@@ -845,15 +854,24 @@ func show_desktop():
 		desktop_companion = DesktopCompanion.new()
 		desktop_companion.file_requested.connect(open_file_editor)
 		desktop_companion.chat_requested.connect(show_chat)
+		desktop_companion.voice_requested.connect(orbit_voice)
+		desktop_companion.screen_requested.connect(func():
+			if show_chat():chat_window.view._screen())
 		desktop_companion.settings_requested.connect(func(): open_settings("assistant_tools"))
 		desktop_companion.pause_requested.connect(func(): set_paused(not paused))
 		desktop_companion.hide_requested.connect(func():
+			if speech_input.busy():cancel()
+			if is_instance_valid(task_window):task_window.dismiss()
 			if is_instance_valid(chat_window): chat_window.hide()
 			if is_instance_valid(speech_bubble):speech_bubble.dismiss()
 			desktop_companion.hide())
 		desktop_companion.quit_requested.connect(func(): get_tree().quit())
 		add_child(desktop_companion)
+		desktop_companion.set_reduced(motion.reduced_motion)
 		desktop_companion.play_entrance.call_deferred()
+		get_tree().create_timer(1.1).timeout.connect(func():
+			if not paused and not chat_busy():say_companion(t("orbit_ready")))
+		if not is_instance_valid(task_window):task_window=preload("res://src/desktop/task_window.gd").new();add_child(task_window)
 	desktop_companion.show()
 	return true
 
@@ -863,6 +881,7 @@ func open_settings(page = "assistant_tools"):
 func say_companion(text):
 	if DisplayServer.get_name()=="headless" or paused or not is_instance_valid(desktop_companion) or not desktop_companion.visible:return false
 	if is_instance_valid(chat_window) and chat_window.visible:return false
+	if is_instance_valid(task_window) and task_window.visible:return false
 	if not store.data.settings.get("speech_bubbles",true):return false
 	if not is_instance_valid(speech_bubble):
 		speech_bubble=preload("res://src/desktop/speech_bubble.gd").new();add_child(speech_bubble)
@@ -875,19 +894,23 @@ func report_task(event):
 
 func _task_stage_changed():
 	var stage=""
-	if not goal_mode.is_empty():stage="goal_"+goal_mode
+	if speech_input.busy():stage="voice_"+speech_input.state
+	elif not goal_mode.is_empty():stage="goal_"+goal_mode
 	elif not window_read_mode.is_empty():stage="read_"+window_read_mode
 	elif not queued_chat_text.is_empty():stage="model_loading"
 	elif public_page.busy:stage="web_"+public_page.stage
 	elif state.current=="thinking" and not pending_user_text.is_empty():stage="reply"
 	if stage==last_task_stage:return
 	last_task_stage=stage
+	if stage.begins_with("voice_"):
+		say_companion(t("voice_"+speech_input.state));return
 	if stage in ["model_loading","reply"]:
 		task_event=stage;say_companion(t("task_"+stage))
 	elif not stage.is_empty():
 		if public_page.busy:say_companion(t("web_stage_"+public_page.stage));return
-		var key="goal_status_"+goal_mode if not goal_mode.is_empty() else "window_read_status_"+window_read_mode
-		say_companion(t(key))
+		var presentation=preload("res://src/core/orbit_presentation.gd").snapshot(self)
+		if not presentation.is_empty():say_companion(presentation.heading)
+		else:say_companion(t("orbit_detail_think"))
 
 func show_chat():
 	if DisplayServer.get_name() == "headless":
@@ -1029,7 +1052,7 @@ func _submit_translation(messages_):
 	provider.submit(messages_,options)
 	changed.emit()
 
-func begin_dictation(editor):
+func begin_dictation(editor,send_after=false):
 	if paused or not goal_mode.is_empty():return false
 	if speech_input.state=="recording":speech_input.finish();return true
 	if speech_input.busy() or state.current!="idle" or not queued_chat_text.is_empty():return false
@@ -1038,6 +1061,7 @@ func begin_dictation(editor):
 	if local_runtime.pid>0 or local_runtime.starting:
 		local_runtime.stop();local_runtime.status="ai_sleeping";_set_provider("unconfigured")
 	voice.stop()
+	dictation_submit=send_after and editor.text.strip_edges().is_empty()
 	dictation_target=weakref(editor)
 	speech_input.transcriber.cpu_thread_limit=int(runtime_options().get("cpu_threads",1))
 	var ok=speech_input.start(l10n.locale)
@@ -1045,12 +1069,15 @@ func begin_dictation(editor):
 	request_motion("dialogue.think_loop" if ok else "work.error_recover")
 	return ok
 func _dictation_ready(text):
+	var send_after=dictation_submit;dictation_submit=false
 	var editor=dictation_target.get_ref() if dictation_target else null
 	dictation_target=null
 	if is_instance_valid(editor):
 		editor.editable=true
 		editor.insert_text_at_caret(text)
-		editor.grab_focus()
+		if send_after and editor.text.strip_edges()==text.strip_edges() and not paused:
+			editor.clear();submit(text)
+		else:editor.grab_focus()
 	request_motion("work.note_saved")
 	changed.emit()
 
@@ -1550,3 +1577,14 @@ func _delegation_answer(text):
 	if choice=="discover":_execute({"kind":"tool","tool":"agent.discover","args":{"query":"","goal":original,"open_only":false}});return
 	if choice=="window":begin_agent(original);return
 	add_message("assistant",t("delegation_unclear"));changed.emit()
+
+func orbit_voice():
+	if paused:return false
+	if speech_input.state=="recording":speech_input.finish();return true
+	if chat_busy():return false
+	if not speech_input.installed():open_settings("assistant_tools");return false
+	if is_instance_valid(task_window) and task_window.snapshot.get("kind")=="result":task_window.dismiss()
+	if not is_instance_valid(chat_window):chat_window=PopupChat.new();add_child(chat_window)
+	# A pre-existing draft is never silently submitted as part of a spoken request.
+	if not chat_window.view.editor.text.strip_edges().is_empty():show_chat()
+	return begin_dictation(chat_window.view.editor,true)

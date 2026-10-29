@@ -1,13 +1,13 @@
 extends RefCounted
 ## One Leemon palette: graphite, warm paper and amber.
-const INK = Color('#151719')
-const PANEL = Color('#202326')
-const LAYER = Color('#2b2f32')
-const TEXT = Color('#f3f0e5')
-const MUTED = Color('#adafa6')
-const RED = Color('#f5c64f')
+const INK = Color('#17191d')
+const PANEL = Color('#24272d')
+const LAYER = Color('#30343b')
+const TEXT = Color('#f5f0df')
+const MUTED = Color('#b1b3ba')
+const RED = Color('#f4c34d')
 const AMBER_DARK = Color('#6a5427')
-static func box(color, radius=10, margin=12):
+static func box(color, radius=14, margin=12):
 	var style=StyleBoxFlat.new()
 	style.bg_color=color
 	style.set_corner_radius_all(radius)
@@ -18,7 +18,7 @@ static func box(color, radius=10, margin=12):
 	return style
 static func make():
 	var value=Theme.new()
-	value.default_font_size=15
+	value.default_font_size=16
 	value.default_font=load('res://assets/fonts/NotoSansCJKsc-Regular.otf')
 	for type in ['Label','Button','CheckButton','OptionButton','LineEdit','TextEdit','RichTextLabel','PopupMenu']:
 		value.set_color('font_color',type,TEXT)
@@ -58,9 +58,11 @@ static func make():
 	value.set_color('default_color','RichTextLabel',TEXT)
 	return value
 static func primary(button):
-	button.add_theme_stylebox_override('normal',box(AMBER_DARK,10))
-	button.add_theme_stylebox_override('hover',box(Color('#8b6d2c'),10))
-	button.add_theme_stylebox_override('pressed',box(Color('#a38237'),10))
+	button.add_theme_stylebox_override('normal',box(RED,14))
+	button.add_theme_stylebox_override('hover',box(Color('#ffda76'),14))
+	button.add_theme_stylebox_override('pressed',box(Color('#d4a439'),14))
+	for kind in ['font_color','font_hover_color','font_pressed_color']:
+		button.add_theme_color_override(kind,INK)
 static func quiet(button):
 	button.add_theme_stylebox_override('normal',box(Color.TRANSPARENT,8,9))
 	button.add_theme_stylebox_override('hover',box(LAYER,8,9))

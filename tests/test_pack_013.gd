@@ -12,7 +12,7 @@ func _run():
 	check(Queue!=null and Office!=null,"Real queue and OOXML adapter scripts shipped")
 	var app=root.get_node("App")
 	check(app.chat_queue.LIMIT==3,"Bounded queue in exported app")
-	check(load("res://src/animation/leemon_rig.gd").CLIPS.size()==26,"Same shared-master procedural rig shipped")
+	check(load("res://src/animation/leemon_rig.gd").CLIPS.size()==30,"Same shared-master procedural rig shipped")
 	for locale in ["ru","en","zh-Hans"]:
 		app.l10n.set_locale(locale)
 		check(app.t("office_hint")!="office_hint" and app.t("table_read_cell")!="table_read_cell","Office UI localized "+locale)

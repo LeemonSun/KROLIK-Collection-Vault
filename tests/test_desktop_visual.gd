@@ -119,7 +119,7 @@ func _run():
 	main.open_panel("reminders")
 	panel.size=Vector2i(800,360)
 	await frame()
-	check(not main.wide_layout and main.page_picker.visible,"Short wide window keeps all nine pages reachable")
+	check(not main.wide_layout and main._pages().size()==3,"Compact settings keep three normal sections, contextual reminders use their own heading")
 	app.set_locale("ru")
 	main.open_panel("character")
 	panel.size=Vector2i(800,620)
@@ -170,7 +170,7 @@ func _run():
 	desktop.recover()
 	await frame()
 	check(desktop.size==Vector2i(210,232),"Original size restored on normal monitor")
-	main.open_panel("diagnostics")
+	main.page="diagnostics";main._build();panel.show() # Internal diagnostic fixture, not a normal settings tab.
 	await create_timer(0.2).timeout
 	await frame()
 	check(app.diagnostics.values.get("process_bytes",0)>0,"Native panel displays actual process RSS")
@@ -215,6 +215,7 @@ func _run():
 	desktop.set_process(true)
 	var region_count=desktop.region_updates
 	app.chat_window.hide()
+	app.task_window.dismiss() # Isolate the speech window from the separate task card.
 	check(app.say_companion("Проверка окна реплики: ответ остаётся рядом с Лимоном."),"A closed chat can show a short companion reply")
 	await frame()
 	check(app.speech_bubble.visible and app.speech_bubble.unfocusable and app.speech_bubble.mouse_passthrough,"Speech bubble cannot take keyboard or pointer input")

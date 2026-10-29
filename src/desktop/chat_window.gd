@@ -6,22 +6,22 @@ var transition: Tween
 func _init():
 	visible=false
 	borderless=true
-	transparent=false
-	transparent_bg=false
+	transparent=true
+	transparent_bg=true
 	always_on_top=true
 	min_size=Vector2i(320,280)
-	size=Vector2i(460,460)
+	size=Vector2i(480,560)
 	disable_3d=true
 func _ready():
 	app=get_tree().root.get_node("App")
 	title="Leemon — "+app.t("talk")
 	borderless=true
-	transparent=false
-	transparent_bg=false
+	transparent=true
+	transparent_bg=true
 	always_on_top=true
 	exclude_from_capture=false
 	min_size=Vector2i(320,280)
-	size=Vector2i(460,460)
+	size=Vector2i(480,560)
 	view=ChatView.new()
 	view.size=Vector2(size)
 	add_child(view)
@@ -40,7 +40,7 @@ func open_near(anchor):
 	if screen<0:
 		screen=DisplayServer.get_primary_screen()
 	var bounds=DisplayServer.screen_get_usable_rect(screen)
-	size=Vector2i(mini(460,maxi(320,bounds.size.x-24)),mini(460,maxi(280,bounds.size.y-24)))
+	size=Vector2i(mini(480,maxi(320,bounds.size.x-24)),mini(560,maxi(280,bounds.size.y-24)))
 	var left=anchor.position.x-size.x-12
 	if left<bounds.position.x:
 		left=anchor.end.x+12

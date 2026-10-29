@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "app_version": "0.25.0-desktop-preview",
-  "checkpoint_status": "025_delivered_visual_concepts_recorded_awaiting_direction",
-  "current_task": "User moved full priority to design/UI/animation/effects.3imagegen concept boards shown preserving Lemon reference:01Orbit charcoalamber,02Bureau warmlightleaf,03Atelier midnightbronze. Comprehensive visual brief recorded; no runtime change/newweights/newbuild. Preserve shipped025 evidence.",
-  "next_action": "User chooses ONE visual direction (recommend01Orbit). Implement purposeful separate chat/speech/task/result/settings windows and event-driven Lemon movement; simplify ordinary settings to real component downloads and everyday behavior/voice, no debugconsole/XP. Keep licenses/errors accessible. Chibi helper late/animation-only. Maintain bounded observe/plan/approvedact/verify and one local worker; Windows/realmodel acceptance pending.",
+  "app_version": "0.26.0-desktop-preview",
+  "checkpoint_status": "026_orbit_implemented_validating_not_shipped",
+  "current_task": "User chose01Orbit.Implemented shared graphiteamber material/typography,4buttonorbit plus extras,independent task/review/choice/result card with exact tokens/cancel epoch/dismiss suppression,3simple settings sections with real installer cards/OSvoice/license access,30shared-mastergestures,hidden-chat explicit voice conversation with draft/cancel guards.36new sourcechecks and140chatlayout PASS; native/general validation ongoing.025 remains shipped until artifacts replaced.",
+  "next_action": "Finish native Orbit review/screenshots and fullsource/packed checks; fix issues; build026 preview/NoAI source/report; save and checkpoint. Preserve one worker/authorities. No actualWindows/real2B/microphone/gameFPS proof. Polish Orbit further based on actual Windows feedback; chibi late.",
   "read_next": [
     "docs/design/VISUAL_DIRECTION_026.md",
-    "docs/AGENT_025.md"
+    "src/core/orbit_presentation.gd",
+    "src/desktop/task_window.gd"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
@@ -324,7 +325,7 @@
   },
   "previous_report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6",
   "visual_direction": {
-    "status": "concepts_shown_not_selected_not_implemented",
+    "status": "01Orbit_selected_implementation_validating",
     "recommended": "01 Orbit",
     "candidates": [
       "01 Orbit charcoalamber",
@@ -336,6 +337,7 @@
     "separate_purposeful_windows": true,
     "simple_component_downloads": true,
     "xp_levels_shop": false,
-    "chibi_helper": "late_optional_event_driven_animation_no_second_AI"
+    "chibi_helper": "late_optional_event_driven_animation_no_second_AI",
+    "selected": "01 Orbit"
   }
 }

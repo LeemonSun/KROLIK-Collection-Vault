@@ -38,12 +38,14 @@ func _card(item,animate):
 	var line=HBoxContainer.new();line.add_theme_constant_override("separation",16)
 	rows.add_child(line)
 	if user:
-		var spacer=Control.new();spacer.custom_minimum_size.x=12;line.add_child(spacer)
+		var spacer=Control.new();spacer.custom_minimum_size.x=32;line.add_child(spacer)
 	var card=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var style=V.box(Color("#292d2d") if user else Color("#1d2223"),12,14)
+	var style=V.box(Color("#30343b") if user else Color("#24272d"),18,16)
 	style.content_margin_top=11;style.content_margin_bottom=13
 	if not user:style.border_width_left=2;style.border_color=Color("#8c753e")
 	card.add_theme_stylebox_override("panel",style);line.add_child(card)
+	if not user:
+		var spacer=Control.new();spacer.custom_minimum_size.x=16;line.add_child(spacer)
 	var column=VBoxContainer.new();column.add_theme_constant_override("separation",6);card.add_child(column)
 	var heading=HBoxContainer.new();column.add_child(heading)
 	var label=Label.new();label.text=user_title if user else "LEEMON"
@@ -56,7 +58,7 @@ func _card(item,animate):
 	var body=RichTextLabel.new();body.bbcode_enabled=false;body.selection_enabled=true
 	body.scroll_active=false;body.fit_content=true;body.text=item.text
 	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	body.add_theme_font_size_override("normal_font_size",15)
+	body.add_theme_font_size_override("normal_font_size",16)
 	body.add_theme_color_override("default_color",V.TEXT)
 	body.add_theme_constant_override("line_separation",4);column.add_child(body)
 	if animate and is_visible_in_tree():

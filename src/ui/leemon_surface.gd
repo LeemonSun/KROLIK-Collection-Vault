@@ -9,14 +9,15 @@ func _ready():
 	empty.content_margin_left=inset;empty.content_margin_right=inset
 	empty.content_margin_top=inset;empty.content_margin_bottom=inset
 	add_theme_stylebox_override('panel',empty)
-	surface_style=V.box(V.INK,16,0);surface_style.set_border_width_all(1);surface_style.border_color=Color('#3b403d')
-	header=V.box(V.PANEL,15,0);header.corner_radius_bottom_left=0;header.corner_radius_bottom_right=0
+	surface_style=V.box(V.INK,24,0);surface_style.set_border_width_all(1);surface_style.border_color=Color('#414650')
+	header=V.box(V.PANEL,23,0);header.corner_radius_bottom_left=0;header.corner_radius_bottom_right=0
 	resized.connect(queue_redraw);mouse_filter=Control.MOUSE_FILTER_PASS
 func _draw():
 	if not surface_style:return
 	draw_style_box(surface_style,Rect2(Vector2.ZERO,size))
 	draw_style_box(header,Rect2(Vector2.ONE,Vector2(maxf(0,size.x-2),66)))
-	draw_line(Vector2(18,67),Vector2(size.x-18,67),Color('#3b403a'),1,true)
+	draw_line(Vector2(18,67),Vector2(size.x-18,67),Color('#373c45'),1,true)
+	draw_style_box(V.box(V.RED,3,0),Rect2(Vector2(size.x*0.5-16,1),Vector2(32,4)))
 	var origin=Vector2(size.x-30,size.y-28)
 	draw_arc(origin,12,PI*0.15,PI*1.4,24,Color('#71613a'),1.2,true)
 	draw_line(origin+Vector2(-3,-11),origin+Vector2(3,-14),V.RED,1.5,true)

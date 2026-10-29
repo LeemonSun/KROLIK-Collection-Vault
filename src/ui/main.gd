@@ -78,12 +78,12 @@ func _button(text, parent, callback):
 	return node
 
 func open_panel(target_page = "assistant_tools"):
-	page = target_page
+	page = target_page if target_page in _pages() or target_page in ["talk","notes","reminders"] else "assistant_tools"
 	_build()
 	var win = get_window()
 	if DisplayServer.get_name() != "headless":
 		var bounds = DisplayServer.screen_get_usable_rect(win.current_screen)
-		win.size = Vector2i(mini(800,bounds.size.x-24),mini(620,bounds.size.y-48))
+		win.size = Vector2i(mini(720,bounds.size.x-24),mini(640,bounds.size.y-48))
 		win.position = bounds.position+(bounds.size-win.size)/2
 		win.always_on_top = true
 	win.show()
@@ -163,7 +163,11 @@ func _build():
 	page_picker.select(maxi(0,pages.find(page)))
 	page_picker.item_selected.connect(func(index): page = pages[index]; _build())
 	header.add_child(page_picker)
-	page_picker.visible=not wide_layout
+	page_picker.visible=not wide_layout and page in _pages()
+	if not wide_layout and page not in _pages():
+		_button("‹",header,func():open_panel("assistant_tools"))
+		var context_title=_label(App.t(page),header,15)
+		context_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	if wide_layout:
 		var section=_label(App.t(page),header,13,true)
 		section.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -208,7 +212,7 @@ func _build():
 
 func _build_sidebar(parent):
 	var sidebar=VBoxContainer.new()
-	sidebar.custom_minimum_size.x=192
+	sidebar.custom_minimum_size.x=168
 	sidebar.add_theme_constant_override("separation",6)
 	parent.add_child(sidebar)
 	var identity=HBoxContainer.new()
@@ -238,87 +242,39 @@ func _build_sidebar(parent):
 	var space=Control.new()
 	space.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	sidebar.add_child(space)
+	_button(App.t("talk"),sidebar,func():App.show_chat())
 	_label(App.t("leemon_tagline"),sidebar,12,true)
 	_label(App.t("offline"),sidebar,11,true)
 
+func _toggle(key,value,callback):
+	var node=CheckButton.new();node.text=App.t(key);node.button_pressed=value;node.toggled.connect(callback);content.add_child(node);return node
 func _build_character():
-	_label("Leemon",content,26)
-	_label(App.t("leemon_tagline"),content,14,true)
-	var art=load("res://assets/characters/leemon_01/master_v1.png")
-	if art is Texture2D:
-		var preview=TextureRect.new()
-		preview.texture=art
-		preview.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-		preview.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		preview.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		preview.size_flags_vertical=Control.SIZE_EXPAND_FILL
-		preview.custom_minimum_size=Vector2(240,320)
-		content.add_child(preview)
-	else:
-		_label(App.t("character_art_missing"),content,14,true)
-	var row=HBoxContainer.new()
-	content.add_child(row)
-	var show_button=_button(App.t("show_desktop"),row,func():App.show_desktop())
-	show_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	VisualTheme.primary(show_button)
-	var dash_button=_button(App.t("menu_dash"),row,func():
-		if App.show_desktop():App.desktop_companion.walk_random())
-	dash_button.icon=load("res://assets/ui/dash.svg")
-	dash_button.expand_icon=true
-	dash_button.add_theme_constant_override("icon_max_width",16)
-	_label(App.t("character_controls_short"),content,12,true)
-	_label(App.t("character_size"),content,13,true)
-	var scale_row=HBoxContainer.new();content.add_child(scale_row)
-	for spec in [["75%",0.75],["100%",1.0],["125%",1.25],["150%",1.5]]:
-		_button(spec[0],scale_row,func():
-			if App.show_desktop():App.desktop_companion.set_character_scale(spec[1]))
-
-
-func _build_assistant_tools():
-	_label(App.t("assistant_tools"), content, 22)
-	ai_status_label = _label(App.t(App.local_runtime.status), content, 17)
-	ai_progress_label = _label("", content, 14, true)
-	_label(App.t("ai_install_hint"), content, 14, true)
-	_label(App.t("clipboard_hint"),content,13,true)
-	install_button = _button(App.t("ai_install"), content, func(): App.install_local_ai(); _refresh())
-	VisualTheme.primary(install_button)
-	start_ai_button = _button(App.t("ai_start"), content, func(): App.start_local_ai(); _refresh())
-	stop_ai_button = _button(App.t("ai_stop"), content, func(): App.stop_local_ai(); _refresh())
-	cancel_install_button = _button(App.t("ai_cancel_download"), content, func(): App.local_runtime.cancel_install(); _refresh())
-	_label(App.t("ai_scope_hint"), content, 13, true)
-	var voice_toggle = CheckButton.new()
-	voice_toggle.text = App.t("system_voice")
-	voice_toggle.button_pressed = App.voice.enabled
-	voice_toggle.toggled.connect(func(value): App.voice.enabled = value; App.voice.stop())
-	content.add_child(voice_toggle)
-	_label(App.t("system_voice_hint"), content, 13, true)
-	_button(App.t("capture_once"), content, _capture_once)
-	_label(App.t("capture_hint"), content, 13, true)
-	var move_toggle = CheckButton.new()
-	move_toggle.text = App.t("auto_move")
-	move_toggle.button_pressed = is_instance_valid(App.desktop_companion) and App.desktop_companion.auto_move
-	move_toggle.toggled.connect(func(value):
-		if App.show_desktop():
-			App.desktop_companion.auto_move = value
+	_label(App.t("orbit_behavior"),content,25)
+	_label(App.t("orbit_behavior_hint"),content,13,true)
+	_toggle("auto_move",bool(App.store.data.settings.get("companion_roam",true)),func(value):
+		if App.show_desktop():App.desktop_companion.auto_move=value
 		App._save_setting("companion_roam",value))
-	content.add_child(move_toggle)
-	var bubbles=CheckButton.new()
-	bubbles.text=App.t("speech_bubbles")
-	bubbles.button_pressed=App.store.data.settings.get("speech_bubbles",true)
-	bubbles.toggled.connect(func(value):
+	_toggle("speech_bubbles",App.store.data.settings.get("speech_bubbles",true),func(value):
 		App._save_setting("speech_bubbles",value)
 		if not value and is_instance_valid(App.speech_bubble):App.speech_bubble.dismiss())
-	content.add_child(bubbles)
-	var reduced_toggle = CheckButton.new()
-	reduced_toggle.text = App.t("reduced_motion")
-	reduced_toggle.button_pressed=App.motion.reduced_motion
-	reduced_toggle.toggled.connect(func(value):
+	_toggle("reduced_motion",App.motion.reduced_motion,func(value):
 		App.motion.set_reduced_motion(value)
-		if App.show_desktop():
-			App.desktop_companion.set_reduced(value))
-	content.add_child(reduced_toggle)
-	_label(App.t("desktop_controls"), content, 13, true)
-	_refresh()
+		App._save_setting("reduced_motion",value)
+		if App.show_desktop():App.desktop_companion.set_reduced(value))
+	_label(App.t("character_size"),content,14,true)
+	var row=HBoxContainer.new();content.add_child(row)
+	for spec in [["75%",0.75],["100%",1.0],["125%",1.25],["150%",1.5]]:
+		_button(spec[0],row,func():
+			if App.show_desktop():App.desktop_companion.set_character_scale(spec[1]))
+	_button(App.t("show_desktop"),content,func():App.show_desktop())
+	_label(App.t("orbit_controls_hint"),content,13,true)
+
+func _build_assistant_tools():
+	_label(App.t("orbit_components"),content,25)
+	_label(App.t("orbit_components_hint"),content,13,true)
+	for id in ["text","voice","vision"]:
+		var card=preload("res://src/ui/component_card.gd").new();card.kind=id;content.add_child(card)
+	_label(App.t("orbit_voice_os"),content,12,true)
 
 func _capture_once():
 	if App.paused or DisplayServer.get_name() == "headless":
@@ -393,67 +349,26 @@ func _build_modules():
 		_label(App.t("module_ready" if id in ["notes","timers"] or (id == "llm" and App.local_runtime.status == "ai_ready") else "module_pending"), row, 13, true)
 
 func _build_settings():
-	_label(App.t("settings"), content, 22)
-	_label(App.t("language"), content)
-	locale_picker = OptionButton.new()
-	for name in ["Русский", "English", "简体中文"]:
-		locale_picker.add_item(name)
-	locale_picker.select(["ru","en","zh-Hans"].find(App.l10n.locale))
-	content.add_child(locale_picker)
-	locale_picker.item_selected.connect(func(index): App.set_locale(["ru","en","zh-Hans"][index]); _build())
-	_label(App.t("browser_choice"),content)
-	var browser_picker = OptionButton.new()
-	for label in [App.t("browser_system"),"Opera","Opera GX"]:
-		browser_picker.add_item(label)
-	var browser_ids = ["system","opera","opera_gx"]
-	browser_picker.select(browser_ids.find(App.browser_search.browser_id))
-	browser_picker.item_selected.connect(func(index): App.set_browser(browser_ids[index]))
-	content.add_child(browser_picker)
-	_label(App.t("browser_hint"),content,13,true)
-	_label(App.t("profile"), content)
-	profile_picker = OptionButton.new()
-	var names = ["auto","lite","balanced","quality"]
-	for name in names:
-		profile_picker.add_item(App.t(name))
-	profile_picker.select(names.find(App.profile_request))
-	content.add_child(profile_picker)
-	profile_picker.item_selected.connect(func(index): App.set_profile(names[index]); _build())
-	_label(App.t("settings_hint"), content, 13, true)
-	_label(App.t("resource_mode"),content)
-	var resource_picker=OptionButton.new()
-	resource_picker.name="ResourceMode"
-	resource_picker.add_item(App.t("resource_quiet"));resource_picker.add_item(App.t("resource_standard"))
-	resource_picker.select(0 if App.resource_mode=="quiet" else 1)
-	resource_picker.item_selected.connect(func(index):App.set_resource_mode(["quiet","standard"][index]))
-	content.add_child(resource_picker)
-	_label(App.t("resource_hint"),content,13,true)
-
-	var history=CheckButton.new()
-	history.text=App.t("save_chat")
-	history.button_pressed=App.history_enabled()
-	history.toggled.connect(App.set_history_enabled)
-	content.add_child(history)
-	_label(App.t("history_hint"),content,13,true)
+	_label(App.t("orbit_general"),content,25)
+	_label(App.t("language"),content,14,true)
+	locale_picker=OptionButton.new()
+	for name in ["Русский","English","简体中文"]:locale_picker.add_item(name)
+	locale_picker.select(["ru","en","zh-Hans"].find(App.l10n.locale));content.add_child(locale_picker)
+	locale_picker.item_selected.connect(func(index):App.set_locale(["ru","en","zh-Hans"][index]);_build())
+	_toggle("system_voice",App.voice.enabled,func(value):App.voice.enabled=value;App._save_setting("voice_enabled",value);App.voice.stop())
+	_label(App.t("orbit_voice_os"),content,12,true)
+	_toggle("save_chat",App.history_enabled(),App.set_history_enabled)
 	_button(App.t("clear_chat"),content,_confirm_clear_chat)
-	var spacer = Control.new()
-	spacer.custom_minimum_size.y = 24
-	content.add_child(spacer)
-	var advanced=CheckButton.new();advanced.text=App.t("advanced_controls")
-	advanced.button_pressed=bool(App.store.data.settings.get("advanced_controls",false))
-	advanced.toggled.connect(func(value):App._save_setting("advanced_controls",value);_build())
-	content.add_child(advanced)
-	if not advanced.button_pressed:return
-	var review=CheckButton.new();review.text=App.t("experimental_answer_review")
-	review.button_pressed=App.answer_review_enabled()
-	review.toggled.connect(func(value):App._save_setting("experimental_answer_review",value))
-	content.add_child(review)
-	_label(App.t("experimental_answer_review_hint"),content,13,true)
-	developer_toggle = CheckButton.new()
-	developer_toggle.text = App.t("dev_mode")
-	developer_toggle.button_pressed = App.provider_name == "llama_loopback"
-	developer_toggle.toggled.connect(func(enabled): App.enable_developer_llama(enabled))
-	content.add_child(developer_toggle)
-	_label(App.t("dev_hint"), content, 13, true)
+	_label(App.t("orbit_privacy"),content,13,true)
+	_label("Leemon · "+str(ProjectSettings.get_setting("application/config/version")),content,12,true)
+	_button(App.t("orbit_licenses"),content,_show_licenses)
+func _show_licenses():
+	var win=Window.new();win.title=App.t("orbit_licenses");win.size=Vector2i(620,480);win.min_size=Vector2i(300,240);win.disable_3d=true
+	var view=RichTextLabel.new();view.theme=VisualTheme.make();view.bbcode_enabled=false;view.selection_enabled=true;view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var text=FileAccess.get_file_as_string("res://legal/README.md")+"\n\n"
+	for name in DirAccess.get_files_at("res://legal/upstream"):
+		if name.ends_with(".txt"):text+="\n\n"+name+"\n"+FileAccess.get_file_as_string("res://legal/upstream/"+name)
+	view.text=text;win.add_child(view);add_child(win);win.close_requested.connect(win.queue_free);win.popup_centered()
 
 func _send(text):
 	if text.strip_edges().is_empty():
@@ -539,6 +454,4 @@ func _build_reminders():
 		_button(App.t("reminder_cancel"),row,func():App.cancel_reminder(item.id);_build())
 
 func _pages():
-	var items=["talk","assistant_tools","character","notes","reminders","settings"]
-	if bool(App.store.data.settings.get("advanced_controls",false)):items.append_array(["search","diagnostics","modules"])
-	return items
+	return ["assistant_tools","character","settings"]

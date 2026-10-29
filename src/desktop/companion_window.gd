@@ -2,6 +2,8 @@ extends Node
 ## The visible character uses the MAIN window. No invisible offscreen host.
 ## Articulated 2D companion; the native input region is stable between size changes.
 signal file_requested
+signal voice_requested
+signal screen_requested
 signal chat_requested
 signal settings_requested
 signal pause_requested
@@ -51,7 +53,7 @@ var activity_key="idle"
 var activity_elapsed=0.0
 var fx_kind=""
 var fx_time=0.0
-var next_move = 20.0
+var next_move = 75.0
 var last_tick_ms = 0
 var app
 var press_position = Vector2i.ZERO
@@ -91,11 +93,11 @@ class Surface extends Control:
 				draw_arc(Vector2(166,440),45+progress*15,0,TAU,32,tint,1.3,true)
 		if w.effect_time > 0 and not w.reduced_motion:
 			var alpha = minf(1.0, w.effect_time / 0.15)
-			var sweep=1.0-w.effect_time/0.52
-			for i in range(4):
-				var y=470.0-sweep*390.0+i*19.0
-				var offset=sin(sweep*PI)*12.0
-				draw_polyline(PackedVector2Array([Vector2(76+offset,y+15),Vector2(104+offset,y),Vector2(250-offset,y),Vector2(270-offset,y-14)]),Color(1.0,0.78,0.26,alpha*(0.4-i*0.07)),1.4,true)
+			var sweep=clampf(1.0-w.effect_time/0.52,0,1)
+			for i in range(3):
+				var radius=38.0+sweep*28.0+i*11.0
+				draw_arc(Vector2(166,438),radius,-PI+sweep*0.8,sweep*0.8,36,Color(1.0,0.78,0.26,alpha*(0.38-i*0.09)),1.4,true)
+
 
 func _ready():
 	app = get_tree().root.get_node("App")
@@ -215,6 +217,8 @@ func _menu_action(id):
 		4: hide_requested.emit()
 		5: quit_requested.emit()
 		6: file_requested.emit()
+		7: voice_requested.emit()
+		8: screen_requested.emit()
 
 func bounded(candidate):
 	var screen = DisplayServer.get_screen_from_rect(Rect2i(candidate, size))
@@ -280,7 +284,13 @@ func _process(delta):
 	if art.clip=="idle" and not reduced_motion and not dragging:
 		idle_variation-=delta
 		if idle_variation<=0:
-			perform_gesture(["stretch","rest","nod"][randi()%3],2.2,0);idle_variation=randf_range(55,95)
+			perform_gesture(["stretch","adjust_glasses","peek","nod"][randi()%4],2.2,0);idle_variation=randf_range(55,95)
+	if not dragging and not reduced_motion and not app.paused and auto_move and activity_key=="idle" and effect_kind.is_empty():
+		next_move-=delta
+		if next_move<=0:
+			next_move=randf_range(75,130)
+			var panels=(is_instance_valid(app.chat_window) and app.chat_window.visible) or (is_instance_valid(app.task_window) and app.task_window.visible) or (is_instance_valid(app.control_panel) and app.control_panel.get_window().visible)
+			if not panels:walk_random()
 	elapsed += delta
 	boundary_elapsed+=delta
 	if boundary_elapsed>=1.0 and not dragging:

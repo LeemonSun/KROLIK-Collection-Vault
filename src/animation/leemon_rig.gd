@@ -2,7 +2,7 @@ extends Control
 ## One identity source, six articulated texture pieces, authored motion curves.
 ## No per-frame model inference or generated replacement faces.
 const SOURCE_SIZE=Vector2(1199,1312)
-const CLIPS=["idle","hello","thinking","talk","success","error","grab","walk","listen","stretch","settle","read","point","nod","shrug","rest","wait","scan","present","agree","disagree","celebrate","curious","sleep","turn","salute"]
+const CLIPS=["idle","hello","thinking","talk","success","error","grab","walk","listen","stretch","settle","read","point","nod","shrug","rest","wait","scan","present","agree","disagree","celebrate","curious","sleep","turn","salute","adjust_glasses","peek","offer","listen_confirm"]
 var texture:Texture2D
 var parts={}
 var pivots={}
@@ -94,6 +94,19 @@ func _process(delta):
 		"hello":
 			parts.arm_r.rotation=weight*(-0.88+sin(clip_time*12.0)*0.12)
 			parts.head.rotation=-weight*0.035
+		"adjust_glasses":
+			var touch=sin(minf(1.0,clip_time/1.6)*PI)*weight
+			parts.arm_r.rotation=-touch*0.72;parts.head.rotation=-touch*0.035;parts.head.position.y-=touch*3
+		"peek":
+			var peek=sin(minf(1.0,clip_time/2.0)*PI)*weight
+			root_part.position.x=peek*14;parts.head.rotation=-peek*0.08;parts.arm_l.rotation=peek*0.13
+		"offer":
+			parts.arm_l.rotation=weight*0.36;parts.arm_r.rotation=-weight*0.24;parts.head.rotation=-weight*0.018
+			root_part.position.x=-weight*5
+		"listen_confirm":
+			parts.head.rotation=weight*sin(clip_time*6)*0.04;parts.head.position.y+=weight*3
+			parts.arm_r.rotation=-weight*0.09
+
 		"thinking":
 			parts.head.rotation=weight*(0.055+sin(clip_time*1.5)*0.012)
 			parts.arm_r.rotation=-weight*0.19

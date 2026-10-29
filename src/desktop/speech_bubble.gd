@@ -8,7 +8,7 @@ var app
 var transition
 var follow_elapsed=0.0
 func _init():
-	visible=false;borderless=true;unresizable=true;unfocusable=true
+	visible=false;borderless=true;unresizable=true;unfocusable=true;transparent=true;transparent_bg=true
 	transient=true;always_on_top=false;mouse_passthrough=true
 	disable_3d=true;size=Vector2i(300,160)
 func _ready():
@@ -16,10 +16,10 @@ func _ready():
 	app=get_tree().root.get_node("App");title="Leemon — reply"
 	var panel=PanelContainer.new();panel.theme=V.make()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var style=V.box(V.PANEL,14,14);style.border_width_left=2;style.border_color=V.RED
+	var style=V.box(V.PANEL,22,16);style.border_width_left=2;style.border_color=V.RED
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
 	var column=VBoxContainer.new();column.add_theme_constant_override("separation",7);panel.add_child(column)
-	var heading=Label.new();heading.text="LEEMON";heading.add_theme_color_override("font_color",V.RED);heading.add_theme_font_size_override("font_size",10);column.add_child(heading)
+	var heading=Label.new();heading.text="Leemon";heading.add_theme_color_override("font_color",V.RED);heading.add_theme_font_size_override("font_size",12);column.add_child(heading)
 	body=Label.new();body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	body.add_theme_font_size_override("font_size",14);body.max_lines_visible=5
 	body.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS

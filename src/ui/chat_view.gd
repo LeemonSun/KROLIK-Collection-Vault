@@ -67,8 +67,8 @@ func _ready():
 	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	header.add_child(mark)
 	var title=Label.new()
-	title.text='L E E M O N'
-	title.add_theme_font_size_override('font_size',20)
+	title.text='Leemon'
+	title.add_theme_font_size_override('font_size',22)
 	var title_font=FontVariation.new();title_font.base_font=theme.default_font;title_font.variation_embolden=0.5
 	title.add_theme_font_override('font',title_font)
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -252,14 +252,7 @@ func submit_current():
 	history.follow_latest()
 	editor.grab_focus()
 func _setup_ai():
-	var engine=app.vision_asset if install_mode=="screen" else (app.speech_input.transcriber if install_mode=="voice" else app.local_runtime)
-	if engine.downloading and engine.hash_thread==null:
-		engine.cancel_install();refresh();return
-	if install_mode=="screen":app.vision_asset.install()
-	elif install_mode=="voice":app.speech_input.install()
-	elif app.local_runtime.installed():app.start_local_ai()
-	else:app.install_local_ai()
-	refresh()
+	app.open_settings("assistant_tools")
 func _on_message(_speaker,_text):
 	_render_history()
 	if not app.messages.is_empty() and app.messages[-1].get("ephemeral",false):history.reveal_latest()
@@ -325,7 +318,7 @@ func refresh():
 
 	var voice_busy=app.speech_input.busy()
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
-	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
+	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t("orbit_ready"))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_repairing" if app.goal_mode=="composing" and app.goal_compose_attempt>1 else "goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
 	if app.goal_mode=="thinking" and app.goal_scan.active:status_label.text=app.t("goal_scan_pages",{"page":app.goal_scan.index+1,"total":app.goal_scan.pages.size()})
@@ -341,6 +334,7 @@ func refresh():
 	read_button.tooltip_text=app.t("window_read_button")
 	plan_button.tooltip_text=app.t("goal_button")
 	inspect_button.tooltip_text=app.t("access_read")
+	inspect_button.visible=false;plan_button.visible=false
 	if Time.get_ticks_msec()<copy_status_until:status_label.text=copy_status
 	if app.state.current=="thinking" and not app.pending_user_text.is_empty():status_label.text+=" · "+app.t("task_elapsed",{"seconds":maxi(0,(Time.get_ticks_msec()-app.chat_started_ms)/1000)})
 	if not app.chat_queue.items.is_empty():status_label.text+=" · "+app.t("queue_pending",{"count":app.chat_queue.items.size()})
@@ -352,11 +346,11 @@ func refresh():
 	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())
 	var installing=app.vision_asset.installing() if install_mode=='screen' else (app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null)
 	setup_hint.visible=available_height>=380 and not installed and not task_card.visible
-	setup_hint.text=app.t('vision_install_hint' if install_mode=='screen' else ('voice_install_hint' if install_mode=='voice' else 'chat_setup_hint'))
+	setup_hint.text=app.t("orbit_component_hint_"+{"screen":"vision","voice":"voice","text":"text"}[install_mode])
 	install_row.visible=not installed and not confirmation_button.visible and not task_card.visible
 	setup_button.visible=not installed
 	var engine=app.vision_asset if install_mode=='screen' else (app.speech_input.transcriber if install_mode=='voice' else app.local_runtime)
-	setup_button.text=app.t('cancel_install') if engine.downloading else app.t('vision_install' if install_mode=='screen' else ('voice_install' if install_mode=='voice' else 'chat_install'))
+	setup_button.text=app.t('orbit_components')
 	setup_button.disabled=app.paused or engine.hash_thread!=null or engine.bundle_managed
 	editor.editable=not voice_busy
 	window_button.disabled=app.paused or busy

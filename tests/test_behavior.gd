@@ -20,7 +20,7 @@ func _run():
 	app.window_read_mode="";app.paused=true;check(Behavior.activity(app)=="sleep","Pause cannot look like active work")
 	app.paused=false
 	var rig=Rig.new();rig.texture=load("res://assets/characters/leemon_01/master_v1.png");rig.size=Vector2(210,232);root.add_child(rig);rig.set_process(false)
-	check(Rig.CLIPS.size()==26 and rig.installed_clips==26,"Exactly 26 implemented procedural poses")
+	check(Rig.CLIPS.size()==30 and rig.installed_clips==30,"Exactly 30 implemented procedural poses")
 	var signatures={}
 	for clip in Rig.CLIPS:
 		rig.play(clip);rig._process(0.7)

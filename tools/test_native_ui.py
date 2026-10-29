@@ -28,7 +28,13 @@ def main():
    command=[str(a.godot.resolve()),'--audio-driver','Dummy','--display-driver','x11','--rendering-method','gl_compatibility','--path',str(project_path)]
    if a.pack:command+=['--main-pack',str(a.pack.resolve())]
    command+=['--script',str(a.script.resolve()),'--','--test-mode']
-   result=subprocess.run(command,cwd=project_path,env=env,capture_output=True,text=True,timeout=90)
+   try:
+    result=subprocess.run(command,cwd=project_path,env=env,capture_output=True,text=True,timeout=90)
+   except subprocess.TimeoutExpired as error:
+    output=(error.stdout or b'')+(error.stderr or b'')
+    if isinstance(output,bytes):output=output.decode('utf-8','replace')
+    (out/'godot.log').write_text(output);print(output);print('Native UI test timed out after90seconds; partial log retained')
+    return 124
    output=result.stdout+result.stderr;(out/'godot.log').write_text(output);print(output)
    return int(result.returncode!=0 or 'SCRIPT ERROR:' in output or '\nERROR:' in output or '0 failures' not in output)
  finally:
