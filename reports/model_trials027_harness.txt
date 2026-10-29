@@ -1,0 +1,11 @@
+test_missing_runtime_is_not_inference (test_model_benchmark027.BenchmarkEvidenceTests.test_missing_runtime_is_not_inference) ... ok
+test_owned_worker_cannot_forward_auth_by_redirect (test_model_benchmark027.BenchmarkEvidenceTests.test_owned_worker_cannot_forward_auth_by_redirect) ... ok
+test_pin_refuses_changed_bytes (test_model_benchmark027.BenchmarkEvidenceTests.test_pin_refuses_changed_bytes) ... ok
+test_prose_needs_manual_review (test_model_benchmark027.BenchmarkEvidenceTests.test_prose_needs_manual_review) ... ok
+test_strict_output_not_word_matching (test_model_benchmark027.BenchmarkEvidenceTests.test_strict_output_not_word_matching) ... ok
+test_suite_coverage_and_no_invented_full_document_proof (test_model_benchmark027.BenchmarkEvidenceTests.test_suite_coverage_and_no_invented_full_document_proof) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.275s
+
+OK

@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-29",
+  "status": "new_inference_not_run",
+  "local_runtime_found": false,
+  "local_gguf_found": false,
+  "attempts": [
+    {
+      "url": "https://huggingface.co/api/models/ggml-org/Qwen3.5-2B-GGUF",
+      "http": 401
+    },
+    {
+      "url": "https://huggingface.co/api/models/ggml-org/Qwen3.5-4B-GGUF",
+      "http": 401
+    },
+    {
+      "url": "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/b11901",
+      "http": 403
+    }
+  ],
+  "meaning": "Observed endpoint failures, not proof all model repositories unavailable worldwide. No new model downloaded/executed or production config changed."
+}

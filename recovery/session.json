@@ -3,7 +3,7 @@
   "app_version": "0.27.0-desktop-preview",
   "checkpoint_status": "027_blocking_regression_repair_validating_not_shipped",
   "current_task": "User actualWindows feedback rejects026 readiness (18issues):slow/wrong app/task execution,micquiet,uncancelledcompute,overlappingtopmostwindows,hallucinatedscreen,poorpersona. STOP decorative work/friends claims. Restored exact026remote into isolated leemon-027 because leemon-013 snapshot was stale023/conflicting; original files preserved.Implementing named launch/no-neural literal file tasks/math,alias preservation,PCM cache/quiet handling/endpoint,inputdevice selection,ownedworker cancellation+HTTPepochs,quiet non-topmostdesktop/one task surface,structured window overview instead unrestricted image descriptions.",
-  "next_action": "Finish027 real-file/PCM/ownedprocess/native UI/transport tests,fix regressions,build/save private repair preview/source/report with actual limits. No claim universal app editing or real microphone success without Windows. GlobalPTT/generalUIediting/real2Bquality/hardware performance remain unresolved. Need user Windows recheck of simplecases before friends. New large-file/report requirement and primary-source architecture recorded in docs/LARGE_DOCUMENTS_PLAN.md; no new model or parser installed.",
+  "next_action": "Preserve027 repair/delivery objective. New userpriority: genuinely compare model alternatives before adoption. Read research/MODEL_SELECTION_027.md; new generic benchmark +24cases ready,6toolingchecks only, ZERO new inference due missing models/runtime and HTTP401/403. Need verified local runtime/GGUF/revisions to run; do not repeat blocked downloads or claim winner. Existing027private preview still needs finalrebuild/packchecks/save, not shipped. No generalWindowsagent/mic/FPS/100page acceptance.",
   "read_next": [
     "docs/REPAIR_027.md",
     "src/core/direct_tasks.gd",
@@ -381,5 +381,23 @@
       "Qwen3.5-4B"
     ],
     "sources_checked": "2026-10-29"
+  },
+  "model_selection027": {
+    "status": "primary_source_screening_complete_new_inference_blocked_no_adoption",
+    "report": "research/MODEL_SELECTION_027.md",
+    "runner": "tools/benchmark_models027.py",
+    "cases": "research/model_trials027_cases.json",
+    "candidate_count": 13,
+    "synthetic_cases": 24,
+    "new_neural_runs": 0,
+    "previous_runs_reused_as_historical_only": true,
+    "blocker": "No local GGUF/llama-server. HubAPI attempts HTTP401; GitHub runtime release HTTP403. No bypass/credentials requested.",
+    "first_candidates": [
+      "Qwen3-4B-Instruct-2507",
+      "Ministral-3-3B-Instruct-2512",
+      "Phi-4-mini-instruct",
+      "gemma-4-E2B-it"
+    ],
+    "current_model_unchanged": true
   }
 }

@@ -1,0 +1,18 @@
+{
+  "runtime": {
+    "path": "LOCAL_ONLY/llama-server",
+    "sha256": "FILL_VERIFIED_SHA256"
+  },
+  "models": [
+    {
+      "id": "example_candidate",
+      "path": "LOCAL_ONLY/candidate.gguf",
+      "sha256": "FILL_VERIFIED_SHA256",
+      "source_revision": "FILL_UPSTREAM_COMMIT",
+      "quantization": "Q4_K_M",
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  ]
+}
