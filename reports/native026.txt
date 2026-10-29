@@ -1,0 +1,49 @@
+orbit_visual026
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 20.1.2, 256 bits)
+
+DESKTOP_READY main_window=0 position=(1126, 536) size=(210, 232)
+ORBIT_VISUAL026: 35 checks, 0 failures; actual X11/synthetic state, not Windows or model quality
+libspeechd.so.2: cannot open shared object file: No such file or directory
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)
+
+
+desktop_visual
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 20.1.2, 256 bits)
+
+DESKTOP_READY main_window=0 position=(1126, 536) size=(210, 232)
+RIG_COVERAGE missing=18 solid=19760
+DESKTOP_VISUAL_TESTS: 156 checks, 0 failures; real X11 rendering, synthetic data only; Windows not executed
+libspeechd.so.2: cannot open shared object file: No such file or directory
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)
+WARNING: Character texture unavailable; visible recovery panel shown
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] _show_fallback (res://src/desktop/companion_window.gd:428)
+         [1] _run (/workspace/scratch/deec6c1ed852/leemon-013/tests/test_desktop_visual.gd:302)
+         [2] frame (/workspace/scratch/deec6c1ed852/leemon-013/tests/test_desktop_visual.gd:19)
+
+
+performance_visual018
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 20.1.2, 256 bits)
+
+DESKTOP_READY main_window=0 position=(1126, 536) size=(210, 232)
+PERFORMANCE_VISUAL018: 35 checks, 0 failures; actual X11 windows, synthetic tasks; not Windows
+libspeechd.so.2: cannot open shared object file: No such file or directory
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)
+
+
+observation_visual024
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 20.1.2, 256 bits)
+
+DESKTOP_READY main_window=0 position=(1126, 536) size=(210, 232)
+OBSERVATION_VISUAL024: 20 checks, 0 failures; RU/EN synthetic native X11, not Windows
+libspeechd.so.2: cannot open shared object file: No such file or directory
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)

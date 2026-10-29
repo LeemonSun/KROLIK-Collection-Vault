@@ -6,7 +6,10 @@ static func snapshot(app):
 		kind="review";token=JSON.stringify(app.goal_plan)
 		var name=str(app.goal_plan.get("node",{}).get("name",""))
 		identity=str(app.goal_plan.get("target",{}).get("title",""))
-		detail=app.t("goal_propose_draft" if app.goal_plan.get("generated",false) else ("goal_propose_append" if app.goal_plan.get("append",false) and app.goal_plan.get("action")=="write" else "goal_propose_"+str(app.goal_plan.get("action","select"))),{"name":name,"window":identity})
+		var action="draft" if app.goal_plan.get("generated",false) else ("append" if app.goal_plan.get("append",false) and app.goal_plan.get("action")=="write" else str(app.goal_plan.get("action","select")))
+		detail=app.t("orbit_review_"+action,{"name":name})
+		var scope=preload("res://src/core/control_context.gd").label(app.goal_plan.get("node",{}))
+		if not scope.is_empty():detail+="\n"+scope
 		if app.goal_plan.get("action")=="write":detail+="\n\n"+str(app.goal_plan.get("text",""))
 	elif not app.discovery_candidates.is_empty() or not app.browser_tabs.candidates.is_empty():
 		kind="choice";choices=(app.discovery_candidates if not app.discovery_candidates.is_empty() else app.browser_tabs.candidates).duplicate(true);token=JSON.stringify(choices)

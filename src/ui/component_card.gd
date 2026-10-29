@@ -24,7 +24,7 @@ func _ready():
 func engine():return app.local_runtime if kind=="text" else (app.vision_asset if kind=="vision" else app.speech_input.transcriber)
 func refresh():
 	if not is_instance_valid(status):return
-	var e=engine();var installed=e.installed();var checking=e.hash_thread!=null;var downloading=e.downloading
+	var e=engine();var installed=e.installed();var checking=e.hash_thread!=null or (e.bundle_managed and not installed);var downloading=e.downloading
 	var bytes=int(e.manifest.get("bytes",0))
 	if kind in ["text","voice"]:bytes=int(e.manifest.get("model",{}).get("bytes",0))+int(e.manifest.get("runtime",{}).get("bytes",0))
 	size_label.text=app.t("orbit_download_size",{"size":"%.0f MB" %(float(bytes)/1000000.0)}) if not installed else app.t("orbit_on_device")

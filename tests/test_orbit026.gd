@@ -54,6 +54,13 @@ func run():
 				count+=1;child.refresh();check(child.action.text!=locale and not child.action.text.is_empty(),"Real component installer label "+locale)
 		check(count==3,"Conversation/voice/screen cards "+locale)
 		check(main.start_ai_button==null and main.stop_ai_button==null,"No manual worker controls "+locale)
+	var card=Component.new();card.kind="text";root.add_child(card)
+	var managed=app.local_runtime.bundle_managed;var verified=app.local_runtime.bundled_verified
+	app.local_runtime.bundle_managed=true;app.local_runtime.bundled_verified=false;card.refresh()
+	check(card.action.disabled and card.status.text==app.t("orbit_checking"),"Bundled verification is not presented as an unavailable Download action")
+	app.local_runtime.bundle_managed=managed;app.local_runtime.bundled_verified=verified;card.queue_free()
+	for path in ["res://legal/README.md","res://legal/upstream/Qwen3.5-2B-LICENSE.txt","res://legal/upstream/NotoCJK-LICENSE.txt"]:
+		check(FileAccess.file_exists(path) and not FileAccess.get_file_as_string(path).is_empty(),"Mandatory notices accessible to About: "+path)
 	main.queue_free();await process_frame
 	app.set_locale("ru");app.cancel()
 	var original=app.speech_input;var speech=Speech.new();app.add_child(speech);app.speech_input=speech

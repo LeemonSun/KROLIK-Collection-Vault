@@ -49,10 +49,13 @@ static func make():
 	value.set_stylebox('panel','PopupMenu',box(PANEL,12))
 	value.set_stylebox('hover','PopupMenu',box(AMBER_DARK,6,8))
 	value.set_constant('v_separation','PopupMenu',12)
-	value.set_stylebox('scroll','VScrollBar',box(Color('#1b1f21'),3,0))
-	value.set_stylebox('grabber','VScrollBar',box(Color('#62675b'),3,0))
-	value.set_stylebox('grabber_highlight','VScrollBar',box(RED,3,0))
-	value.set_stylebox('grabber_pressed','VScrollBar',box(RED,3,0))
+	value.set_stylebox('scroll','VScrollBar',box(Color('#1b1f21'),3,3))
+	value.set_stylebox('grabber','VScrollBar',box(Color('#62675b'),3,3))
+	value.set_stylebox('grabber_highlight','VScrollBar',box(RED,3,3))
+	value.set_stylebox('grabber_pressed','VScrollBar',box(RED,3,3))
+	for state in ['normal','hover','pressed','hover_pressed','disabled']:
+		value.set_stylebox(state,'CheckButton',box(PANEL,12,12))
+	value.set_color('button_checked_color','CheckButton',RED)
 	value.set_constant('separation','VBoxContainer',10)
 	value.set_color('font_color','RichTextLabel',TEXT)
 	value.set_color('default_color','RichTextLabel',TEXT)
@@ -62,6 +65,8 @@ static func primary(button):
 	button.add_theme_stylebox_override('hover',box(Color('#ffda76'),14))
 	button.add_theme_stylebox_override('pressed',box(Color('#d4a439'),14))
 	for kind in ['font_color','font_hover_color','font_pressed_color']:
+		button.add_theme_color_override(kind,INK)
+	for kind in ['icon_normal_color','icon_hover_color','icon_pressed_color']:
 		button.add_theme_color_override(kind,INK)
 static func quiet(button):
 	button.add_theme_stylebox_override('normal',box(Color.TRANSPARENT,8,9))

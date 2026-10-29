@@ -314,7 +314,7 @@ func refresh():
 		var extent=Vector2i(mini(560,bounds.size.x-24),mini(420,bounds.size.y-24))
 		window_picker.max_size=extent
 		window_picker.popup(Rect2i(Vector2i(clampi(point.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-extent.x)),clampi(point.y-extent.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-extent.y))),extent))
-	suggestions.visible=available_height>=400 and not confirmation_button.visible and not task_card.visible
+	suggestions.visible=false # Natural input and purposeful task cards replace command chips.
 
 	var voice_busy=app.speech_input.busy()
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()

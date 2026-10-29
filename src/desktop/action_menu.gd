@@ -39,6 +39,8 @@ func _ready():
 func open_at(point):
 	var keys=['talk','settings','menu_dash','resume' if app.paused else 'pause','menu_hide_short','menu_quit','file_patch_title','voice_start','vision_button']
 	for i in range(keys.size()):buttons[i].tooltip_text=app.t(keys[i])
+	if app.speech_input.state=="recording":buttons[7].tooltip_text=app.t("voice_finish")
+	buttons[7].modulate=V.RED if app.speech_input.state=="recording" else Color.WHITE
 	more.clear()
 	for i in [2,3,4,5,6]:more.add_item(app.t(keys[i]),i)
 	var screen=DisplayServer.get_screen_from_rect(Rect2i(point,Vector2i.ONE))

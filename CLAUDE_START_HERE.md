@@ -1,3 +1,7 @@
+# Current development0.26 — Orbit implemented
+
+User selected01Orbit. Read docs/ORBIT_026.md, recovery/session.json and docs/design/VISUAL_DIRECTION_026.md. Shared graphite/amber material,4buttonorbit,independent task/review/resultcards with exact tokens/cancellation,3simple settings/realdownloads,explicit voice utterance preserving drafts,30shared-masterposes.53sourcegroups/16PCKgroups/native35Orbit+156general+35motion+20RUEN PASS. ActualWindows/realmodel/mic/gameFPS pending. GitHub storageonly;ONEworker; no themes/newgirlassets/newweights.
+
 # Current development0.25
 
 Read docs/AGENT_025.md and recovery/session.json. Conservative RU/EN delegated-request interpretation using ONE shared local worker; bounded exact read-only UIA subtree scopes and typed control evidence. No generated executable arguments.2read hops/12model selections/4effects/240s; every effect reviewed.52sourcegroups PASS including52new integrated checks,7new PowerShell synthetic-scope checks. ActualWindows/real2B/gameperformance acceptance pending. NEXT dedicated ONE graphite/amber visual pass for friends alpha; no extra girl/newlanguages/newmodels.

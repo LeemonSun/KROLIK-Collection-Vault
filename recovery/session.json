@@ -1,13 +1,12 @@
 {
   "schema_version": 1,
   "app_version": "0.26.0-desktop-preview",
-  "checkpoint_status": "026_orbit_implemented_validating_not_shipped",
-  "current_task": "User chose01Orbit.Implemented shared graphiteamber material/typography,4buttonorbit plus extras,independent task/review/choice/result card with exact tokens/cancel epoch/dismiss suppression,3simple settings sections with real installer cards/OSvoice/license access,30shared-mastergestures,hidden-chat explicit voice conversation with draft/cancel guards.36new sourcechecks and140chatlayout PASS; native/general validation ongoing.025 remains shipped until artifacts replaced.",
-  "next_action": "Finish native Orbit review/screenshots and fullsource/packed checks; fix issues; build026 preview/NoAI source/report; save and checkpoint. Preserve one worker/authorities. No actualWindows/real2B/microphone/gameFPS proof. Polish Orbit further based on actual Windows feedback; chibi late.",
+  "checkpoint_status": "026_orbit_delivered_preview_source_report_validationPASS_windows_pending",
+  "current_task": "026Orbit delivered: coherent graphiteamber materials,4buttonorbit,independent task/review/choice/result,simple3sectionsettings/realcomponentdownloads,explicit hiddenchat voice/draft/cancel guards,30proceduralposes.53sourcegroups+40finalnewsourcechecks/16finalPCKgroups/native35Orbit+156general+35motion+20RUEN PASS;821fileNoAI CRC/SHA/extract/import40PASS.3nativeLibraryfiles version0 saved. No newweights or actualWindows/mic/modelquality/gameFPS acceptance.",
+  "next_action": "ActualWindows acceptance first: startup/perpixeltransparency/AltTab/focus/DPI/multimonitor,Orbitclicks,chat scroll/input,review/token/expiry/cancel/repeatedtasks,componentdownloads,voice transcript/draft preservation/systemTTS and idle/game performance. Collect friend reports after own PC check. Refine ONEOrbit; preserve bounded agent/oneworker; chibi late. Do not resume alternate palette/technicalUI/newmodels by default.",
   "read_next": [
-    "docs/design/VISUAL_DIRECTION_026.md",
-    "src/core/orbit_presentation.gd",
-    "src/desktop/task_window.gd"
+    "docs/ORBIT_026.md",
+    "docs/FRIENDS_ALPHA_025.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
@@ -15,7 +14,7 @@
     "OOXML ZIP<=256entries/8MiB expanded/2MiB per part; no signed/encrypted/ZIP64/.bin packages; bounded XML balance checks, not full schema validation",
     "SHA+rename/file backup guard is not complete adversarial Windows race/reparse protection",
     "One shared model with soft resource guard, not a strict OS RSS/CPU quota;2B factual accuracy limited and see020Linuxworkermeasurements;Windowsunmeasured",
-    "26procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud",
+    "30procedural shared-master states, not thousands of artistic clips; commercial art/Steam release not cleared; no SteamCloud",
     "Selected files <=1MiB; DOCX one plain paragraph across adjacent runs; XLSX existing cells text/number/Boolean, formula workbooks refused. Range summaries<=1024cells use approximate doubles/raw numeric values, not exact financial arithmetic.",
     "Quiet mode is one thread+batch32+30sec idle unload; not hard OS CPU/RSS caps; neither actual model throughput nor Windows resource use remeasured.",
     "New reader returns bounded source excerpts only, not automatic Q&A/search/guide execution. Only explicit public HTTPS, no redirects/login/JS/cookies, UTF-8 identity HTML/plain<=256KiB and20s.",
@@ -40,28 +39,31 @@
     "024numeric diagnostics distinguish prepared/requested page coverage; actual launch summary is last attempt, not a running-worker guarantee. No real-weight language/selection benchmark or Windows/game FPS measurement.",
     "024source archive import+69tests passed. TemporaryDirectory cleanup reported Directory not empty afterward; known scratch path cleaned explicitly, archive unchanged.",
     "025constrained intent gate is conservative RU/EN heuristic plus one model choice; real2B understanding/latency unmeasured. No arbitrary model commands accepted.",
-    "025read scopes maximum2named UIA container hops; repeat fresh top-level traversal for every operation; native pertraversal capture limits retained; no root-return/visual-only/fullmodal/crossapp planner. No persistent learned procedures or general business-outcome verifier."
+    "025read scopes maximum2named UIA container hops; repeat fresh top-level traversal for every operation; native pertraversal capture limits retained; no root-return/visual-only/fullmodal/crossapp planner. No persistent learned procedures or general business-outcome verifier.",
+    "026Orbit is implemented; onlyrightclickopensorbit, nothover.30shared-masterproceduralposes, nothundredshanddrawnclips. Existingboundedagentlimitations remain.",
+    "026voiceOrbit is explicit oneutterance<=20s, not continuouswakeword; systemTTS optional, no customvoice. Existingdraftpreventsautosend. Windowsfocus/AltTab/perpixeltransparency not accepted here.",
+    "026componentcards useexistinginstallers; no uninstallUI. Only3normalsettingssections; retainedinternaldiagnosticfixturedoesnotrestoreordinarydebugtabs."
   ],
   "validation": [
-    "52fresh-profile final sourcegroups PASS, LinuxPowerShell transport enabled",
-    "52new integrated delegation/scope/evidence checks PASS;7newnative scope cases PASS with realPowerShell/syntheticUIA",
-    "15finalPCKgroups PASS including exported helper hash/nonces",
-    "NativeX11:20RUEN+156general+35motion PASS; wrong motion filename corrected before successful run",
-    "No actualWindows/real2Bsemantic/VPNconnection/gameFPS acceptance",
-    "804fileNoAI source archive perfileSHA/CRC/fresh extract/import52new checks PASS; both ZIP CRC PASS;3savedartifacts version0"
+    "53sourcegroups PASS with fresh profiles/LinuxPowerShell; finalOrbit40checks PASS after installer-verification refinement",
+    "16final exported PCKgroups PASS, including40Orbit cases and mandatory notices",
+    "FinalnativeX11:35Orbit window/review/cancel/stale/reopen cases;156general;35motion;20RUEN PASS",
+    "Nativeinitial failures corrected: legacy speech isolation/harness timeout logging, transient+ontop incompatibility, dismissal/cancel state preventing repeated task reopening.35newnativechecks nowPASS",
+    "No actualWindows/DPI/microphone/systemTTS/real2B semantic/gameFPS acceptance; no newweights",
+    "Final821fileNoAI perfileSHA/CRC/fresh extraction/Godotimport/40checks PASS; previewZIPCRC PASS;3artifacts saved version0"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.25.0.zip",
-    "bytes": 53998131,
-    "sha256": "900eae4024d335b4e82ced74ca5168032293143621314e23577dfffe4ca184d3",
-    "library_file_id": "libfile_796daf1a6e648191a222abe8c37123ee",
-    "file_id": "file_00000000fec4820db5b55e5d87b9e2f2",
+    "full": "Companion_Preview_Windows_v0.26.0.zip",
+    "bytes": 54013020,
+    "sha256": "dba835fd8e8047ad8bbd044eff181c78442ce6946c073d718743b876aca432ba",
+    "library_file_id": "libfile_7aa369ca961481918f54b9062939ae69",
+    "file_id": "file_000000004e0081f590e693e35b6a2a6c",
     "version": 0,
-    "status": "saved_native_library_metadata_applied_validationPASS"
+    "status": "saved_native_library_metadata_applied_final_validationPASS"
   },
-  "previous_checkpoint": "4f796e4042956c73c205cf695885b88e4db95940",
-  "shipped_version": "0.25.0-desktop-preview",
-  "shipped_app_pack_sha256": "17d9eee2e5d9e2d65345f31fcdd245e48f1c56e2a24d434914068ab9809c84bd",
+  "previous_checkpoint": "99d0d9e8f56b6b261eb7b78ea94d2c809998678a",
+  "shipped_version": "0.26.0-desktop-preview",
+  "shipped_app_pack_sha256": "89ae28c849bfe2f05f1ff2c04fe6d6ca390a94f02a74aa5a785214c8a3639366",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -96,7 +98,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_09c7cd08407081919e38f27fc884b893",
+  "report_library_file_id": "libfile_30379301ede48191a40b9c85d6c13005",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -109,6 +111,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.25.0.zip",
+      "bytes": 53998131,
+      "sha256": "900eae4024d335b4e82ced74ca5168032293143621314e23577dfffe4ca184d3",
+      "library_file_id": "libfile_796daf1a6e648191a222abe8c37123ee",
+      "file_id": "file_00000000fec4820db5b55e5d87b9e2f2",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_validationPASS"
+    },
     {
       "full": "Companion_Preview_Windows_v0.24.0.zip",
       "bytes": 53990737,
@@ -271,7 +282,7 @@
     "sha256": "70301f1c1ad2c02285eb06b784bfa14e734959da878cafb2e7b3618023f6ebfa",
     "version_label": "018_synthetic_scripted_renderer_demo_no_OS_actions_no_model_no_FPS_benchmark"
   },
-  "shipped_exe_sha256": "0573a20f5439468f1d1e541488b9cff640cb3ba9c5d5c23360ba31b14a689290",
+  "shipped_exe_sha256": "6146bfa23e0ba2677ada9c237f2c082b24f1e7a260b1da820105de3c73a58936",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
   "final_fix": "P0guard and P1captured observation pages implemented with explicit binding/review, stable rank and focus, none/ask scan,69newfixtures and safe diagnostics. Existing1thread/batch32/30sec quiet override retained. User priority RU/EN, no Chinese expansion.",
   "product_direction": {
@@ -291,6 +302,18 @@
     "continuous_weight_training_implemented": false
   },
   "source_review_archive": {
+    "full": "Leemon_Project_v0.26.0_NoAI.zip",
+    "bytes": 15715933,
+    "sha256": "0a63cf86c0c3a32ad29e93361c72887eaaf88ef9e04490449bcaeaf523590435",
+    "library_file_id": "libfile_47aad8fa82408191866d86abf570188b",
+    "file_id": "file_00000000a76c81f5b3b6cc3260093893",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_final_validationPASS",
+    "files": 821,
+    "model_weights_bundled": false,
+    "snapshot_note": "Runtime code matches final026. Includes active pinned art/font and manifest. Later delivery/README/verification receipts intentionally outside snapshot. PerfileSHA/CRC/fresh extract/import40checks PASS."
+  },
+  "previous_source_review_archive": {
     "full": "Leemon_Project_v0.25.0_NoAI.zip",
     "bytes": 15685379,
     "sha256": "b3a9b1237ee1f810f4ad68720cb35cb58a16fa433bd27dc71bb0c316b06e7e82",
@@ -302,30 +325,18 @@
     "model_weights_bundled": false,
     "snapshot_note": "Product code matches final0.25. Archive contains active pinned runtime art/font. Later delivery/README/report receipt and tool-only validation-report formatting changes may be outside snapshot; no hash self-reference. PerfileSHA/CRC/fresh extract/import/52checks PASS."
   },
-  "previous_source_review_archive": {
-    "full": "Leemon_Project_v0.24.0_NoAI.zip",
-    "bytes": 15668553,
-    "sha256": "2e21488812f9c533f73ea962f22bdf26d39d3d0cbeb8e67477b1563adad26715",
-    "files": 792,
-    "model_weights_bundled": false,
-    "library_file_id": "libfile_0e63d7510e988191a541b3d40748ebca",
-    "file_id": "file_0000000086b481f6a6d2069f3a82a5b7",
-    "version": 0,
-    "status": "saved_native_library_metadata_applied_eachfileSHA_CRC_import69checksPASS",
-    "snapshot_note": "Product code matches final0.24. Later delivery receipt/README changes intentionally outside archive to avoid hash self-reference."
-  },
   "report_artifact": {
-    "full": "Leemon_0.25_Report.md",
-    "bytes": 6964,
-    "sha256": "c988c58f6d59e3eebdfb97d7de87ed16e81295e5b3082b36bf472c7467a07dc0",
-    "library_file_id": "libfile_09c7cd08407081919e38f27fc884b893",
-    "file_id": "file_000000006168820d8e57970e4cbc0906",
+    "full": "Leemon_0.26_Report.md",
+    "bytes": 9503,
+    "sha256": "365874d81bd8926229950e661523e0ceb22f6513cfb7d4b4c684654eb4a27126",
+    "library_file_id": "libfile_30379301ede48191a40b9c85d6c13005",
+    "file_id": "file_00000000902881f794f1213374536626",
     "version": 0,
-    "status": "saved_native_library_metadata_applied_validationPASS"
+    "status": "saved_native_library_metadata_applied_final_validationPASS"
   },
-  "previous_report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6",
+  "previous_report_library_file_id": "libfile_09c7cd08407081919e38f27fc884b893",
   "visual_direction": {
-    "status": "01Orbit_selected_implementation_validating",
+    "status": "01Orbit_implemented_private_preview_delivered_windows_acceptance_pending",
     "recommended": "01 Orbit",
     "candidates": [
       "01 Orbit charcoalamber",
@@ -338,6 +349,21 @@
     "simple_component_downloads": true,
     "xp_levels_shop": false,
     "chibi_helper": "late_optional_event_driven_animation_no_second_AI",
-    "selected": "01 Orbit"
-  }
+    "selected": "01 Orbit",
+    "motion_states": 30
+  },
+  "source_review_history": [
+    {
+      "full": "Leemon_Project_v0.25.0_NoAI.zip",
+      "bytes": 15685379,
+      "sha256": "b3a9b1237ee1f810f4ad68720cb35cb58a16fa433bd27dc71bb0c316b06e7e82",
+      "library_file_id": "libfile_fb39866ccdc481919110af7b1e42ab98",
+      "file_id": "file_00000000761081f6bc54d6bb0854916c",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_validationPASS",
+      "files": 804,
+      "model_weights_bundled": false,
+      "snapshot_note": "Product code matches final0.25. Archive contains active pinned runtime art/font. Later delivery/README/report receipt and tool-only validation-report formatting changes may be outside snapshot; no hash self-reference. PerfileSHA/CRC/fresh extract/import/52checks PASS."
+    }
+  ]
 }

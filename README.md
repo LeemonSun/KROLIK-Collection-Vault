@@ -1,3 +1,11 @@
+# Leemon0.26 — Orbit private preview
+
+Implemented ONE graphite/amber Orbit interface, independent task/review/result windows, simple real component downloads, explicit voice requests and30procedural states. Read docs/ORBIT_026.md and recovery/session.json for evidence/delivery. ActualWindows/microphone/model-quality/gameFPS acceptance pending.
+
+[Скачать программу0.26](https://chatgpt.com/library?file_id=libfile_7aa369ca961481918f54b9062939ae69&account_id=personal) · [Полный проект0.26 без моделей](https://chatgpt.com/library?file_id=libfile_47aad8fa82408191866d86abf570188b&account_id=personal) · [Отчёт0.26](https://chatgpt.com/library?file_id=libfile_30379301ede48191a40b9c85d6c13005&account_id=personal)
+
+Previous0.25 delivery history:
+
 # Leemon0.25 — private preview
 
 RU/EN constrained local delegation, read-only UIA subtree observation and typed control evidence. See docs/AGENT_025.md and recovery/session.json. Next: ONE graphite/amber visual pass, then Windows friends alpha. ActualWindows/real-model quality/gameFPS acceptance pending.

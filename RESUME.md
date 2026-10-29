@@ -1,5 +1,7 @@
-# Leemon0.26 Orbit — implementation validating;025still shipped
+# Leemon0.26 — Orbit delivered; Windows acceptance next
 
-User chose01Orbit; allvisual/UI/motion focus. Read recovery/session.json and docs/design/VISUAL_DIRECTION_026.md. Currentcode: shared amber/graphite surfaces,openarc4buttons,independent task/review/choice/resultcard using read-only presenter/exact tokens andcancel serial,3simple settings sections with real installers/OSvoice/license access,30shared-masterposes,explicit one-utterancevoice fromorbit without requiringchat.36newsource+140chatlayoutPASS; native/fullvalidationongoing. No newweights/braintraining/Windowsacceptance.
+Start python3 tools/resume.py status, recovery/session.json, docs/ORBIT_026.md. Canonical leemon-013; GitHub storageonly,ONEOrbit/Lemon/shared2Bworker. No themes/newgirlassets/newweights.
 
-NEXT finish nativevisual/oldregression fixes,53sourcegroups/PCK/native,build026/source/report/save/checkpoint. GitHub storageonly. Do not restoregirl/addthemes. Preserve ONEworker/observe-plan-approve-act-verify.
+026:graphiteamber material/4buttonorbit;independent taskreview/choice/result card with exact approval token/expiry/cancel serial/dismiss suppression;3normalsettingssections with real component installs/OSvoice/license access;explicit one-utterance voice without mandatorychat,existingdraft neverautosends;30shared-masterproceduralposes.53sourcegroups+40finalnewsourcechecks/16PCKgroups/native35Orbit+156general+35motion+20RUEN PASS.821fileNoAI perfileSHA/CRC/extract/import40PASS.3LibraryIDs/hashes/version0 in session.
+
+NEXT actualWindows startup/transparency/AltTab/focus/DPI/multimonitor,mic/systemvoice/downloads,review/cancel/repeatedtasks,real2B semantic and game resource measurements. Then friends alpha. No universalagency/customvoice/performanceproof claimed. Read docs/FRIENDS_ALPHA_025.md. Do not restoredebugtabs/alternatepalettes. Checkpoint beforepause.

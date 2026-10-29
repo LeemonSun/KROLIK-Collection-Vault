@@ -21,24 +21,24 @@ var transition
 var fingerprint=""
 var ttl
 func _init():
-	visible=false;borderless=true;disable_3d=true;always_on_top=true;transient=true;transparent=true;transparent_bg=true
+	visible=false;borderless=true;disable_3d=true;always_on_top=false;transient=true;transparent=true;transparent_bg=true
 	size=Vector2i(400,290);min_size=Vector2i(300,240)
 func _ready():
 	app=get_tree().root.get_node("App");title="Leemon"
-	surface=preload("res://src/ui/leemon_surface.gd").new();surface.theme=V.make();surface.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(surface)
-	var column=VBoxContainer.new();column.add_theme_constant_override("separation",10);surface.add_child(column)
+	surface=preload("res://src/ui/leemon_surface.gd").new();surface.inset=12;surface.theme=V.make();surface.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(surface)
+	var column=VBoxContainer.new();column.add_theme_constant_override("separation",8);surface.add_child(column)
 	var header=preload("res://src/ui/window_handle.gd").new();column.add_child(header)
 	var glyph=Label.new();glyph.text="◉";glyph.modulate=V.RED;header.add_child(glyph)
 	heading=Label.new();heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;heading.add_theme_font_size_override("font_size",17);header.add_child(heading)
 	var close=Button.new();close.text="×";V.quiet(close);close.pressed.connect(dismiss);header.add_child(close)
 	source=Label.new();source.add_theme_font_size_override("font_size",11);source.modulate=V.MUTED;source.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;column.add_child(source)
 	var scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
-	detail=RichTextLabel.new();detail.bbcode_enabled=false;detail.selection_enabled=true;detail.fit_content=true;detail.scroll_active=false;detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail.add_theme_font_size_override("normal_font_size",15);detail.add_theme_constant_override("line_separation",5);scroll.add_child(detail)
+	detail=RichTextLabel.new();detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;detail.bbcode_enabled=false;detail.selection_enabled=true;detail.fit_content=true;detail.scroll_active=false;detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail.add_theme_font_size_override("normal_font_size",15);detail.add_theme_constant_override("line_separation",5);scroll.add_child(detail)
 	choices=OptionButton.new();choices.fit_to_longest_item=false;choices.clip_text=true;choices.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_child(choices)
 	meter=Label.new();meter.modulate=V.MUTED;meter.add_theme_font_size_override("font_size",11);column.add_child(meter)
 	var row=HBoxContainer.new();row.add_theme_constant_override("separation",10);column.add_child(row)
-	primary=Button.new();primary.size_flags_horizontal=Control.SIZE_EXPAND_FILL;primary.custom_minimum_size.y=40;primary.pressed.connect(accept_current);V.primary(primary);row.add_child(primary)
-	cancel_button=Button.new();cancel_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cancel_button.pressed.connect(func():
+	primary=Button.new();primary.size_flags_horizontal=Control.SIZE_EXPAND_FILL;primary.custom_minimum_size.y=36;primary.pressed.connect(accept_current);V.primary(primary);row.add_child(primary)
+	cancel_button=Button.new();cancel_button.custom_minimum_size.y=36;cancel_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cancel_button.pressed.connect(func():
 		if snapshot.get("kind")!="result":app.cancel()
 		dismiss());row.add_child(cancel_button)
 	app.changed.connect(schedule_refresh);app.message_added.connect(func(_speaker,_text):schedule_refresh())
@@ -53,9 +53,10 @@ func refresh():
 	refresh_pending=false
 	var next=Presenter.snapshot(app)
 	if next.is_empty():
+		dismissed_token="";fingerprint=""
 		if suppressed:suppressed=false;active_last=false;return
 		if active_last:
-			if cancel_serial!=app.cancel_serial:active_last=false;dismiss();return
+			if cancel_serial!=app.cancel_serial:active_last=false;dismiss(false);snapshot={};return
 			active_last=false
 			if app.paused:dismiss();return
 			var last=app.messages[-1] if not app.messages.is_empty() else {}
@@ -89,9 +90,9 @@ func _render(opening):
 			if transition:transition.kill()
 			surface.modulate.a=0.25;transition=create_tween();transition.tween_property(surface,"modulate:a",1.0,0.18)
 		if is_instance_valid(app.desktop_companion):app.desktop_companion.perform_gesture("offer",1.2,2)
-	ttl.start()
+	if snapshot.kind=="review":ttl.start()
+	else:ttl.stop()
 func _tick():
-	if not visible:ttl.stop();return
 	meter.visible=snapshot.get("kind")=="review"
 	if meter.visible:meter.text=app.t("approval_remaining",{"seconds":maxi(0,ceili((app.goal_deadline_ms-Time.get_ticks_msec())/1000.0))})
 	primary.disabled=not Presenter.review_live(app,snapshot.token) if meter.visible else false
@@ -105,8 +106,8 @@ func accept_current():
 		if not app.discovery_candidates.is_empty():app.choose_discovered_app(choices.selected)
 		else:app.choose_browser_tab(choices.selected)
 	elif kind=="result":app.show_chat();dismiss()
-func dismiss():
-	if snapshot.get("kind") not in ["result",null]:suppressed=true
+func dismiss(suppress=true):
+	if suppress and snapshot.get("kind") not in ["result",null]:suppressed=true
 	dismissed_token=JSON.stringify(snapshot) if snapshot.get("kind")!="result" else ""
 	if transition:transition.kill()
 	if is_instance_valid(ttl):ttl.stop()
