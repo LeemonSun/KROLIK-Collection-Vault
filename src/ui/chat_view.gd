@@ -40,6 +40,12 @@ var copy_chat_button
 var copy_status_until=0
 var copy_status=""
 var queue_clear
+var task_card
+var task_label
+var tab_choices
+var tab_open
+var tab_row
+var tabs_signature=""
 func _ready():
 	if embedded:inset=0
 	super._ready()
@@ -63,6 +69,8 @@ func _ready():
 	var title=Label.new()
 	title.text='L E E M O N'
 	title.add_theme_font_size_override('font_size',20)
+	var title_font=FontVariation.new();title_font.base_font=theme.default_font;title_font.variation_embolden=0.5
+	title.add_theme_font_override('font',title_font)
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	title.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	header.add_child(title)
@@ -87,6 +95,20 @@ func _ready():
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
 	copy_chat_button.text=app.t("chat_copy_short")
 
+	task_card=PanelContainer.new()
+	var task_style=VisualTheme.box(Color('#252921'),12,12)
+	task_style.border_color=VisualTheme.AMBER_DARK;task_style.border_width_left=3
+	task_card.add_theme_stylebox_override("panel",task_style)
+	layout.add_child(task_card);task_card.visible=false
+	var task_layout=VBoxContainer.new();task_layout.add_theme_constant_override("separation",6);task_card.add_child(task_layout)
+	task_label=Label.new();task_label.add_theme_font_size_override("font_size",11)
+	task_label.add_theme_color_override("font_color",VisualTheme.RED)
+	task_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;task_layout.add_child(task_label)
+	tab_row=HBoxContainer.new();task_layout.add_child(tab_row)
+	tab_choices=OptionButton.new();tab_choices.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	tab_choices.clip_text=true;tab_choices.fit_to_longest_item=false;tab_row.add_child(tab_choices)
+	tab_open=_button("→",tab_row,func():app.choose_browser_tab(tab_choices.selected))
+	VisualTheme.primary(tab_open)
 	queue_row=HBoxContainer.new();layout.add_child(queue_row);queue_row.visible=false
 	queue_label=Label.new();queue_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;queue_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;queue_label.add_theme_font_size_override("font_size",11);queue_label.add_theme_color_override("font_color",VisualTheme.RED);queue_row.add_child(queue_label)
 	queue_clear=_button("×",queue_row,func():app.chat_queue.clear();app.changed.emit());VisualTheme.quiet(queue_clear)
@@ -248,6 +270,21 @@ func refresh():
 	if not is_inside_tree() or not is_instance_valid(status_label):return
 	var available_height=minf(size.y,get_viewport_rect().size.y)
 	layout.add_theme_constant_override("separation",4 if available_height<340 else 8)
+	var tab_items=app.browser_tabs.candidates
+	var task_active=app.state.current=="executing" and (app.browser_tabs.pid>0 or app.vpn_connection.pid>0 or not app.launch_goal.is_empty() or not app.launch_vpn.is_empty())
+	task_card.visible=not tab_items.is_empty() or task_active
+	task_label.visible=available_height>=340 or tab_items.is_empty()
+	tab_row.visible=not tab_items.is_empty()
+	editor.custom_minimum_size.y=44 if available_height<340 and task_card.visible else 58
+	var task_style=task_card.get_theme_stylebox("panel")
+	task_style.content_margin_top=4 if available_height<340 else 8
+	task_style.content_margin_bottom=4 if available_height<340 else 8
+	task_label.text=app.t("tabs_choice" if not tab_items.is_empty() else ("vpn_working" if app.vpn_connection.pid>0 else ("launch_working" if not app.launch_goal.is_empty() or not app.launch_vpn.is_empty() else "tabs_working")))
+	var signature=JSON.stringify(tab_items)+app.l10n.locale
+	if signature!=tabs_signature:
+		tabs_signature=signature;tab_choices.clear()
+		for item in tab_items:tab_choices.add_item(str(item.node.name).left(100)+" · "+str(item.identity.app))
+		tab_open.tooltip_text=app.t("tabs_open")
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
 	copy_chat_button.text=app.t("chat_copy_short")
 	if last_locale!=app.l10n.locale:
@@ -279,7 +316,7 @@ func refresh():
 		var extent=Vector2i(mini(560,bounds.size.x-24),mini(420,bounds.size.y-24))
 		window_picker.max_size=extent
 		window_picker.popup(Rect2i(Vector2i(clampi(point.x,bounds.position.x,maxi(bounds.position.x,bounds.end.x-extent.x)),clampi(point.y-extent.y,bounds.position.y,maxi(bounds.position.y,bounds.end.y-extent.y))),extent))
-	suggestions.visible=available_height>=400 and not confirmation_button.visible
+	suggestions.visible=available_height>=400 and not confirmation_button.visible and not task_card.visible
 
 	var voice_busy=app.speech_input.busy()
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
@@ -305,12 +342,12 @@ func refresh():
 	queue_label.text=app.t("queue_pending",{"count":app.chat_queue.items.size()})+" / 3 · "+(str(app.chat_queue.items[0]).left(65) if queue_row.visible else "")
 	queue_clear.tooltip_text=app.t("queue_clear")
 	send_button.disabled=app.paused
-	stop_button.disabled=not busy and app.chat_queue.items.is_empty()
+	stop_button.disabled=not busy and app.chat_queue.items.is_empty() and app.browser_tabs.candidates.is_empty()
 	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())
 	var installing=app.vision_asset.installing() if install_mode=='screen' else (app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null)
-	setup_hint.visible=available_height>=380 and not installed
+	setup_hint.visible=available_height>=380 and not installed and not task_card.visible
 	setup_hint.text=app.t('vision_install_hint' if install_mode=='screen' else ('voice_install_hint' if install_mode=='voice' else 'chat_setup_hint'))
-	install_row.visible=not installed and not confirmation_button.visible
+	install_row.visible=not installed and not confirmation_button.visible and not task_card.visible
 	setup_button.visible=not installed
 	var engine=app.vision_asset if install_mode=='screen' else (app.speech_input.transcriber if install_mode=='voice' else app.local_runtime)
 	setup_button.text=app.t('cancel_install') if engine.downloading else app.t('vision_install' if install_mode=='screen' else ('voice_install' if install_mode=='voice' else 'chat_install'))

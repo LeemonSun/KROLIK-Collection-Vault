@@ -31,6 +31,8 @@ func route(raw):
 		if argument.is_empty() or argument.length() > 512:
 			return {"kind": "invalid", "key": "search_invalid"}
 		return {"kind": "tool", "tool": "browser.search", "args": {"query": argument}}
+	var task=preload("res://src/core/desktop_task_intent.gd").new().route(text)
+	if not task.is_empty():return task
 	var natural=DesktopIntent.new().route(text)
 	if not natural.is_empty():return natural
 	# Unknown slash commands are not forwarded as tool instructions.

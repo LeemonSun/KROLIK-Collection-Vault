@@ -74,3 +74,12 @@ $nodes=@(Get-ScopedNodes $deep)
 Check ($script:scopeMeta.partial -and $nodes.Count -le 9) 'Depth limit disclosed'
 Check (@($nodes | Where-Object {$_.record.ancestors.Count -gt 3}).Count -eq 0) 'Ancestor context capped at three'
 "ACCESS_PROTOCOL019: $script:checks checks, 0 failures; real PowerShell with synthetic traversal types, not real Windows UIA"
+
+$browser=Element 'Browser' 'browser' 800
+$tab=$browser.Add((Element 'SoundCloud' 'tab' 801));$tab.Current.ControlType.ProgrammaticName='ControlType.TabItem';$tab.Current.IsOffscreen=$true
+$document=$browser.Add((Element 'PAGE_PRIVATE_TEXT' 'page' 802));$document.Current.ControlType.ProgrammaticName='ControlType.Document'
+$null=$document.Add((Element 'HIDDEN_PAGE_DESCENDANT' 'child' 803))
+$chrome=@(Get-ScopedNodes $browser $true)
+Check (@($chrome | Where-Object {$_.record.name -eq 'SoundCloud'}).Count -eq 1) 'Chrome search can inspect an offscreen tab'
+Check (@($chrome | Where-Object {$_.record.name -in @('PAGE_PRIVATE_TEXT','HIDDEN_PAGE_DESCENDANT')}).Count -eq 0) 'Chrome search skips page document and descendants'
+"CHROME022: 2 additional checks, 0 failures; synthetic tree, not Windows"

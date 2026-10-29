@@ -17,7 +17,7 @@ function Get-WindowIdentity($window) {
  $text=[Text.StringBuilder]::new(256);$null=[LeemonAccess]::GetWindowText($window,$text,256)
  return @{handle=[string]$window.ToInt64();target_pid=[int]$ownerId;started=[string]$process.StartTime.ToUniversalTime().Ticks;title=(Clip-Text $text.ToString() 100);app=$process.ProcessName}
 }
-function Get-ScopedNodes($rootElement) {
+function Get-ScopedNodes($rootElement, [bool]$chromeOnly=$false) {
  $walker=[Windows.Automation.TreeWalker]::ControlViewWalker
  $queue=[Collections.Generic.Queue[object]]::new()
  $queue.Enqueue([pscustomobject]@{element=$rootElement;depth=0;ancestors=@()})
@@ -27,7 +27,7 @@ function Get-ScopedNodes($rootElement) {
   $frame=$queue.Dequeue();$element=$frame.element;$depth=[int]$frame.depth;$visited++
   try {
    $c=$element.Current
-   if($c.IsPassword -or $c.IsOffscreen){continue}
+   if($c.IsPassword -or ($chromeOnly -and $c.ControlType.ProgrammaticName -eq 'ControlType.Document') -or ($c.IsOffscreen -and -not $chromeOnly)){continue}
    $name=Clip-Text $c.Name 160
    $automationId=Clip-Text $c.AutomationId 64
    $value=$null;$invoke=$null;$select=$null;$expand=$null
@@ -125,7 +125,7 @@ try {
  $request=Get-Content -LiteralPath $RequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
  if($request.nonce -notmatch '^[a-f0-9]{32}$'){throw 'Invalid nonce'}
  $reply.nonce=$request.nonce
- if($request.operation -notin @('windows','inspect','read','invoke','write')){throw 'Unknown operation'}
+ if($request.operation -notin @('windows','tabs','tab_select','inspect','read','invoke','write')){throw 'Unknown operation'}
  if([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT){$reply.status='unsupported'}else{
  Add-Type -AssemblyName UIAutomationClient
  Add-Type -AssemblyName UIAutomationTypes
@@ -134,6 +134,9 @@ using System;
 using System.Text;
 using System.Runtime.InteropServices;
 public static class LeemonAccess {
+ [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hwnd);
+ [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+ [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hwnd,int command);
  public delegate bool EnumProc(IntPtr hwnd, IntPtr param);
  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc callback,IntPtr param);
  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
@@ -142,7 +145,7 @@ public static class LeemonAccess {
  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint ownerId);
 }
 '@
- if($request.operation -eq 'windows'){
+ if($request.operation -in @('windows','tabs')){
   $windows=[Collections.Generic.List[object]]::new()
   $callback=[LeemonAccess+EnumProc]{param($window,$unused)
    try {if([LeemonAccess]::IsWindowVisible($window)){
@@ -152,7 +155,26 @@ public static class LeemonAccess {
    return $true
   }
   $null=[LeemonAccess]::EnumWindows($callback,[IntPtr]::Zero)
-  $reply.status='windows';$reply.windows=$windows.ToArray()
+  if($request.operation -eq 'windows'){$reply.status='windows';$reply.windows=$windows.ToArray()}else{
+   $tabs=[Collections.Generic.List[object]]::new();$budget=[Diagnostics.Stopwatch]::StartNew();$count=0;$partial=$true
+   foreach($identity in $windows){
+    if($identity.app -notmatch '^(?i:chrome|msedge|firefox|opera|brave|vivaldi|browser)$'){continue}
+    if($count -ge 3 -or $budget.ElapsedMilliseconds -gt 8000){$partial=$true;break};$count++
+    try{
+     $handle=Assert-Identity $identity
+     $rootElement=[Windows.Automation.AutomationElement]::FromHandle($handle)
+     $scoped=@(Get-ScopedNodes $rootElement $true)
+     if($script:scopeMeta.partial){$partial=$true}
+     foreach($item in $scoped){
+      if($item.record.type -eq 'ControlType.TabItem' -and $item.record.select -and $item.record.enabled){
+       if($tabs.Count -ge 24){$partial=$true;break}
+       $tabs.Add(@{identity=$identity;node=$item.record})
+      }
+     }
+    }catch{$partial=$true}
+   }
+   $reply.status='tabs';$reply.tabs=$tabs.ToArray();$reply.partial=$partial
+  }
  }else{
   $window=Assert-Identity $request
   $rootElement=[Windows.Automation.AutomationElement]::FromHandle($window)
@@ -161,13 +183,23 @@ public static class LeemonAccess {
    $null=Assert-Identity $request
    $reply.status='read';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.blocks=$blocks;$reply.partial=$true
   }else{
-  $nodes=@(Get-ScopedNodes $rootElement)
+  $nodes=@(Get-ScopedNodes $rootElement ($request.operation -eq 'tab_select'))
   if($request.operation -eq 'inspect'){
    $r=$rootElement.Current.BoundingRectangle
    $reply.bounds=@{x=[int]$r.X;y=[int]$r.Y;width=[int]$r.Width;height=[int]$r.Height}
    $null=Assert-Identity $request
    $reply.status='inspected';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.nodes=@($nodes | ForEach-Object {$_.record})
    $reply.partial=$script:scopeMeta.partial;$reply.visited=$script:scopeMeta.visited;$reply.elapsed_ms=$script:scopeMeta.elapsed_ms
+  }elseif($request.operation -eq 'tab_select'){
+   $matches=@($nodes | Where-Object {$_.record.id -ceq $request.element_id -and $_.record.name -ceq $request.element_name -and $_.record.type -eq 'ControlType.TabItem' -and (Test-Descriptor $_.record $request.element_descriptor)})
+   if($matches.Count -ne 1){$reply.status='stale'}else{
+    $null=Assert-Identity $request;$element=$matches[0].element;$pattern=$null
+    if($element.Current.IsPassword -or -not $element.Current.IsEnabled -or -not $element.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$pattern)){throw 'Unavailable tab'}
+    $pattern.Select();$null=[LeemonAccess]::ShowWindowAsync($window,9);$null=[LeemonAccess]::SetForegroundWindow($window)
+    Start-Sleep -Milliseconds 100
+    $null=Assert-Identity $request
+    $reply.status=if(-not $pattern.Current.IsSelected){'tab_unverified'}elseif([LeemonAccess]::GetForegroundWindow() -eq $window){'tab_focused'}else{'tab_background'}
+   }
   }else{
    if([string]$request.element_id -notmatch '^-?\d+(,-?\d+){1,30}$' -or $request.element_name -isnot [string]){throw 'Invalid element'}
    $matches=@($nodes | Where-Object {$_.record.id -ceq $request.element_id -and $_.record.name -ceq $request.element_name -and (Test-Descriptor $_.record $request.element_descriptor)})

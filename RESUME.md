@@ -1,13 +1,7 @@
-#Leemon0.21 — bounded verified reasoning,2Bretained
+# Leemon0.22 — task entry points, validation in progress
 
-Start `python3 tools/resume.py status`, recovery/session.json, docs/BRAIN_021.md, reports/brain021-review.md. Canonical /workspace/scratch/deec6c1ed852/leemon-013. GitHub LeemonSun/KROLIK-Collection-Vault STORAGEONLY; noCI/remoteexecution/build/deploy/subagents. Head .resume-remote.json. Recovery tools/resume_bridge.js; assets recovery/assets.json. Preserve licenses, no weights/keys/userfiles/captures, retiredcharacters stayretired.
+Start `python3 tools/resume.py status`, recovery/session.json, docs/WORKFLOWS_022.md. Canonical /workspace/scratch/deec6c1ed852/leemon-013. GitHub LeemonSun/KROLIK-Collection-Vault storage only; no CI, remote builds or deployment. Head .resume-remote.json. Assets recovery/assets.json. Lemon only, preserve licenses. Source capsule bridge has expected-head CAS.
 
-User priority: smarter general adaptive agent usable alongside games on weak PCs. Production2B stays unchanged.4Bcontrol13cases~2.06xmedianpairedlatency, stopped; nofinalRSS.2Bthinking128/512failedrobustquality, notadopted. No new required model/options/download. Do not claim trainedIQ/consciousness.
+022: browser chrome tab search/verified selection/transient choice, app launch→existing shared reviewed UIA agent, existing Windows VPN profiles connection/status, app launch→VPN bounded chain. No new model or universal autonomous control claim. Windows acceptance not performed. Shared one2Bquietworker retained;021logic/fallbackfeatures remain. See current session for latest checks/build/delivery status.
 
-021: small categorical unary-set solver6classes/8premises; strictflatgrammar RU/EN/zh direct path before AIload.12typedarguments realApp no inference;4096independentexhaustiveworldtests+1536grammarcases. Alwaysdisplay interpretation, not factsaboutworld. NOT unrestrictedNL/logic/selfreference/causality. Genericnoun/Chinese suffix normalization assumptions; no guaranteed semanticunderstanding. Experimentalneuralformalizer5/12finalgatesaccepted,OFFdefault (experimental_logic_formalization). Preservedfailedpilots/rawoutputs; do not countrefusalsasLLMsuccess.
-
-Secondaryreader: lexicalqueryrank within48capturedblocks/2400serializedbytes; citedliteral/sign/percent/daychecks; invalidanswerfallbackoriginaltext,noextraLLM/voice/persistentcontext. Same36realoutputs020/021no general semanticgain:RU/ENlocationquestionsstillansweredwithtime. Context/approval/verification/oneworker preserved; oneLemon/style/26proceduralstates.
-
-45sourcegroupsPASS. FinalPCK/nativeX11/ZIP/delivery PASS; IDs/hashes in session/README. ActualWindows/gameFPS/UIA/DPI/visionmemoryunmeasured. Next realWindowsacceptance then sharedgroundedtools/generaladaptiveagent, notmoremanualcommands/perappmodels/replacementOffice.
-
-Devtools: Godot_v4.7.2-stable_linux.x86_64,pwsh/pwsh,xvfb018,verifiedCompanion017.exe template. Benchmarkweights outside repo devtools/quality020,quality021;pinsresearch/SOURCES020.md,SOURCES021.md. Build tools/build_preview.py; keepAI/,replaceEXE/PCKtogether. README/session linkslastdelivered until021savecomplete.
+Devtools ../devtools/Godot_v4.7.2-stable_linux.x86_64, ../devtools/pwsh/pwsh, ../devtools/xvfb018, ../devtools/Companion017.exe. Run tools/verify_project.py, tools/run_checks.py, tests/test_tasks022.gd, tests/test_tasks_visual022.gd. No user files/keys/models/captures in source checkpoint. Before pause update session and checkpoint.

@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| tasks022 | PASS |
 | logic021 | PASS |
 | logic_app021 | PASS |
 | logic_fast021 | PASS |
@@ -58,7 +59,3 @@ Native X11 review, фактический Godot → PowerShell roundtrip и дв
 Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.
 Qwen3.5-2B Q4: прежние text/vision fixtures проверены отдельно; узкий adaptive/draft pilot выполнен, его ошибки и ограничения см. WORKFLOWS_017.md; научная точность ограничена. Полный offline-пакет использует AI/ рядом с EXE, лёгкий пакет предлагает явную установку.
 ASR реализован через локальный Whisper. Разовый анализ экрана реализован; real fixture в vision_real.txt. Общие Windows UIA-действия и явное чтение доступного текста выбранного окна с выдержками реализованы, но Windows приёмка впереди. Собственный голос отсутствует; explicit public HTTPS excerpts reader имеет ограничения, см. WORKFLOWS_014.md. Каталог движений — план производства, а не готовые клипы.
-
-## Final0.21acceptance
-
-45sourcegroups PASS. FinalPCK41logic(4096independentworld+1536grammar)+13logicApp+25logicfast+46evidence+39draft+38context+36verification+25adaptive+32composer+42windowreader+17exportedcontent/realGodotPowerShellnonce PASS. FinalnativeX11:27new+30draft+30agent+156general+35motion PASS. ZIPCRC PASS. RealWindows/gameFPS nottested; no modelIQclaim; production2Bunchanged, experimentalformalizer OFF.

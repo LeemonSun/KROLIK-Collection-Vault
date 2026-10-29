@@ -61,6 +61,10 @@ const DesktopActions=preload("res://src/tools/desktop_actions.gd")
 const ConversationMemory=preload("res://src/core/conversation_memory.gd")
 const ResponseGuard=preload("res://src/core/response_guard.gd")
 var desktop_actions
+var browser_tabs
+var vpn_connection
+var launch_goal=""
+var launch_vpn={}
 var application_access
 var window_read_mode=""
 var window_read_question=""
@@ -132,6 +136,12 @@ func _ready():
 	application_access.read_ready.connect(_window_read_observed)
 	application_access.snapshot_ready.connect(_goal_observed)
 	application_access.completed.connect(_goal_access_completed)
+	vpn_connection=preload("res://src/tools/vpn_connection.gd").new()
+	add_child(vpn_connection)
+	vpn_connection.completed.connect(_vpn_completed)
+	browser_tabs=preload("res://src/tools/browser_tabs.gd").new()
+	add_child(browser_tabs)
+	browser_tabs.completed.connect(_tabs_completed)
 	desktop_actions=DesktopActions.new()
 	add_child(desktop_actions)
 	desktop_actions.completed.connect(_desktop_completed)
@@ -296,13 +306,14 @@ func submit(text):
 		add_message("assistant", t("busy_message"))
 		return
 	mark_active()
+	if is_instance_valid(browser_tabs):browser_tabs.forget()
 	var command = router.route(text)
 	if not application_access.target.is_empty() and (goal_planner.contextual_goal(text) or preload("res://src/core/draft_policy.gd").requested(text)) and (command.kind=="chat" or command.get("tool","") in ["apps.open","browser.search"]):
 		command={"kind":"tool","tool":"agent.run","args":{"goal":text}}
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run"])
+	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task"])
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -431,6 +442,18 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool=="desktop.task":
+		if command.args.action=="vpn":
+			if not vpn_connection.connect_profile(command.args.name):_vpn_completed({"status":"failed"})
+		elif command.args.action=="tabs":
+			if not browser_tabs.find_tabs(command.args.query):_tabs_completed({"status":"failed"})
+		elif command.args.action=="launch_vpn":
+			launch_vpn={"name":command.args.name}
+			if not desktop_actions.request(command.args.target):_desktop_completed({"status":"failed"})
+		else:
+			launch_goal=command.args.goal
+			if not desktop_actions.request(command.args.target):_desktop_completed({"status":"failed"})
+		return
 	if command.tool=="chat.copy":
 		var result=copy_chat()
 		add_message("assistant",t("chat_copy_done",{"count":result.get("count",0)}) if result.ok else t("chat_copy_failed"))
@@ -648,6 +671,9 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	launch_goal="";launch_vpn={}
+	if is_instance_valid(vpn_connection):vpn_connection.cancel()
+	if is_instance_valid(browser_tabs):browser_tabs.forget()
 	logic_mode=false
 	chat_draft_mode=false;chat_draft_attempt=0
 	answer_reviewing=false
@@ -858,6 +884,15 @@ func _desktop_completed(result):
 	if state.current!="executing":return
 	var status=str(result.get("status","failed"))
 	if status=="visible" and result.get("identity") is Dictionary:application_access.adopt(result.identity)
+	if not launch_vpn.is_empty():
+		var followup=launch_vpn;launch_vpn={}
+		if status=="visible":
+			if not vpn_connection.connect_profile(followup.name):_vpn_completed({"status":"failed"})
+			changed.emit();return
+	if not launch_goal.is_empty():
+		var goal=launch_goal;launch_goal=""
+		if status=="visible" and result.get("identity") is Dictionary:
+			state.reset();begin_agent(goal);return
 	if not pending_document.is_empty():
 		result=result.merged(pending_document)
 		if status not in ["document_opened","document_started"]:status="document_saved"
@@ -1329,3 +1364,32 @@ func open_file_editor():
 			if not is_instance_valid(file_editor):file_editor=preload("res://src/ui/file_edit_window.gd").new();add_child(file_editor)
 			file_editor.open_path(selected))
 	file_picker.popup_centered_ratio(0.7);return true
+
+func choose_browser_tab(index):
+	if paused or chat_busy():return false
+	state.transition("executing")
+	if not browser_tabs.choose(index):
+		state.reset();browser_tabs.forget();add_message("assistant",t("tabs_expired"),true);changed.emit();return false
+	changed.emit();return true
+
+func _tabs_completed(result):
+	if state.current!="executing":return
+	var status=str(result.get("status","failed"))
+	if status=="tabs":
+		var matches=browser_tabs.matches(result)
+		if matches.size()==1:
+			if browser_tabs.choose(0):changed.emit();return
+		elif matches.size()>1:
+			add_message("assistant",t("tabs_choose"),true)
+			state.reset();changed.emit();return
+		else:
+			add_message("assistant",t("tabs_missing_partial" if result.get("partial",true) else "tabs_missing"),true)
+	else:
+		add_message("assistant",t("tabs_"+status) if status in ["tab_focused","tab_background","tab_unverified","stale","unsupported"] else t("tabs_failed"),true)
+	state.reset();changed.emit()
+
+func _vpn_completed(result):
+	if state.current!="executing":return
+	var status=str(result.get("status","failed"))
+	add_message("assistant",t(status if status in ["vpn_connected","vpn_missing","vpn_ambiguous","vpn_timeout","vpn_unverified"] else "vpn_failed"),true)
+	state.reset();changed.emit()

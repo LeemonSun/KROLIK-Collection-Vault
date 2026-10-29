@@ -1,12 +1,11 @@
 {
   "schema_version": 1,
-  "app_version": "0.21.0-desktop-preview",
-  "checkpoint_status": "021_delivered_allsource_pack_nativePASS_modelcomparisons_retained",
-  "current_task": "021delivered. Boundedtypedlogic noAIload, readerliteral/fallbackimprovements. Current2Bdefaultretained;4B/thinkingnotadopted. GlobalmodelIQnotfixed.45sourcegroups/finalPCK/native/ZIPPASS.",
-  "next_action": "ActualWindows/gameacceptance; improve generaladaptiveagent sharedtools/grounding and transparent counterexample followups, avoiding mandatoryheaviermodels. Preserveexperiments/failures andNLPformalizerOFF.",
+  "app_version": "0.22.0-desktop-preview",
+  "checkpoint_status": "022_implemented_validation_in_progress",
+  "current_task": "022: native browser tab discovery/verified selection, transient choice UI, launch→shared agent continuation, launch→existing Windows VPN profile connect and status check. Tests/build in progress; no Windows acceptance.",
+  "next_action": "Complete fresh source checks, native layout, exported pack, package and delivery. Windows acceptance mandatory before claims.",
   "read_next": [
-    "docs/BRAIN_021.md",
-    "reports/brain021-review.md",
+    "docs/WORKFLOWS_022.md",
     "docs/WINDOWS_ACCEPTANCE_017.md"
   ],
   "known_limits": [

@@ -1,3 +1,7 @@
+# Current development: Leemon0.22
+
+Browser tab selection, app launch continuation into the existing reviewed UIA agent, existing Windows VPN profiles, app→VPN chain, one compact task card. See docs/WORKFLOWS_022.md and recovery/session.json. Windows acceptance still pending; no IQ/model upgrade claim.
+
 # Leemon0.21 — локальный помощник, private preview
 
 [Скачать Windows x64,54МБ](https://chatgpt.com/library?file_id=libfile_feb14539a630819191f7df1defe09d5a&account_id=personal) · [Отчёт0.21](https://chatgpt.com/library?file_id=libfile_f9333b4c55508191901eb4790ed8fd4d&account_id=personal) · [Прежнее видео0.18](https://chatgpt.com/library?file_id=libfile_e7966175d36081919402223c53a76059&account_id=personal)
