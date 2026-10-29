@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "app_version": "0.25.0-desktop-preview",
-  "checkpoint_status": "025_delivered_preview_source_report_validationPASS_visual_next_windows_model_pending",
-  "current_task": "025 delivered: constrained RU/EN local delegation, exact read-only UIA subtree2hops and scoped fresh effect preflight, typed control evidence and numeric counters.52sourcegroups/15PCKgroups/native20RUEN+156general+35motion PASS.52new integrated+7native cases;804file NoAI perfileSHA/CRC/extract/import52PASS.3nativeLibraryartifacts version0 saved.",
-  "next_action": "Dedicated ONE graphite/amber Lemon visual pass: entrance, accessible chat/voice, typography/panels/DPI/small-screen layouts, user-facing progress/cancel/result wording, developer details separate. Then actualWindows friends alpha using docs/FRIENDS_ALPHA_025.md; real2B RU/EN delegation and third-partyVPN/network evidence/game resource measurements pending. No alternate girl/newmodels/newlanguages, no claim universal agency or Steam release.",
+  "checkpoint_status": "025_delivered_visual_concepts_recorded_awaiting_direction",
+  "current_task": "User moved full priority to design/UI/animation/effects.3imagegen concept boards shown preserving Lemon reference:01Orbit charcoalamber,02Bureau warmlightleaf,03Atelier midnightbronze. Comprehensive visual brief recorded; no runtime change/newweights/newbuild. Preserve shipped025 evidence.",
+  "next_action": "User chooses ONE visual direction (recommend01Orbit). Implement purposeful separate chat/speech/task/result/settings windows and event-driven Lemon movement; simplify ordinary settings to real component downloads and everyday behavior/voice, no debugconsole/XP. Keep licenses/errors accessible. Chibi helper late/animation-only. Maintain bounded observe/plan/approvedact/verify and one local worker; Windows/realmodel acceptance pending.",
   "read_next": [
-    "docs/AGENT_025.md",
-    "docs/FRIENDS_ALPHA_025.md"
+    "docs/design/VISUAL_DIRECTION_026.md",
+    "docs/AGENT_025.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
@@ -322,5 +322,20 @@
     "version": 0,
     "status": "saved_native_library_metadata_applied_validationPASS"
   },
-  "previous_report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6"
+  "previous_report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6",
+  "visual_direction": {
+    "status": "concepts_shown_not_selected_not_implemented",
+    "recommended": "01 Orbit",
+    "candidates": [
+      "01 Orbit charcoalamber",
+      "02 Bureau warmlightleaf",
+      "03 Atelier midnightbronze"
+    ],
+    "one_shipping_style": true,
+    "priority": "complete_visual_ui_motion_effects",
+    "separate_purposeful_windows": true,
+    "simple_component_downloads": true,
+    "xp_levels_shop": false,
+    "chibi_helper": "late_optional_event_driven_animation_no_second_AI"
+  }
 }

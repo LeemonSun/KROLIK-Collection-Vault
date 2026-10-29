@@ -1,3 +1,7 @@
+# Current phase: visual concepts after0.25
+
+Read docs/design/VISUAL_DIRECTION_026.md first. User explicitly prioritizes ALL design/UI/motion/effects and separate purposeful windows; simplify settings to everyday options and real component downloads, no developer console for tester, no XP/levels. Three imagegen boards shown:01Orbit charcoal/amber (recommended),02Bureau warm light/leaf,03Atelier midnight/bronze. User has not selected; ONE shipping style later. No0.26implementation or newapp artifact this concept turn. Chibi girl only late optional event-driven animation, not restored assets/secondAI. Preserve current observe/plan/review/verify foundation; actualWindows/model acceptance pending.
+
 # Leemon0.25 — delivered; visual pass next
 
 Start python3 tools/resume.py status, recovery/session.json, docs/AGENT_025.md. Canonical leemon-013. GitHub storage only; noCI/deploy. ONE Lemon graphite/amber; RU/EN first. No newweights, Chinese deferred.
