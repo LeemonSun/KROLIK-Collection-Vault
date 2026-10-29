@@ -75,6 +75,8 @@ def main():
     ]
     if args.pwsh:
         commands.append(("access_protocol019",[str(Path(args.pwsh).resolve()),"-NoLogo","-NoProfile","-NonInteractive","-File",str(ROOT/"tests/test_access_protocol019.ps1"),"-Helper",str(ROOT/"native/accessibility_bridge.ps1")]))
+    if args.pwsh:
+        commands.append(("vpn_protocol022",[str(Path(args.pwsh).resolve()),"-NoLogo","-NoProfile","-NonInteractive","-File",str(ROOT/"tests/test_vpn_protocol022.ps1"),"-Helper",str(ROOT/"native/vpn_bridge.ps1")]))
     outcomes = []
     for name, command in commands:
         with tempfile.TemporaryDirectory(prefix="leemon-check-"+name+"-") as profile:

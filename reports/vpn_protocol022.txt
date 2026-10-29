@@ -1,0 +1,1 @@
+VPN_PROTOCOL022: 8 checks, 0 failures; synthetic provider, not Windows connection

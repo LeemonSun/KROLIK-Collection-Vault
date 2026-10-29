@@ -50,6 +50,7 @@
 | ui | PASS |
 | release_gate_expected_block | PASS |
 | access_protocol019 | PASS |
+| vpn_protocol022 | PASS |
 
 release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.
 

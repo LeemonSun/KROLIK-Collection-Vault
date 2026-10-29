@@ -18,3 +18,7 @@ Primary direction remains a general adaptive agent in existing applications, not
 This environment cannot execute Windows UIA, PowerShell5.1, real browsers/VPN, games or hardware FPS measurements. Linux PowerShell nonce transport and synthetic UIA traversal do not prove Windows task success. Existing2B semantic planning/reasoning weaknesses remain; no claim of improved IQ or universal unattended PC control. UI is a private preview, not a Steam-ready release.
 
 Acceptance: test an existing SoundCloud tab in each target browser, duplicate titles, hidden tabs, elevated/inaccessible browser, foreground denial, tab renamed/deleted before choice, Stop during scan, launch failure/slow startup, existing Windows VPN with/without saved credentials, multiple profiles, failure/timeout, and actual game FPS/RAM/CPU with quiet settings. Never test on destructive files or external messages first. Keep confirmation gates for shared agent actions.
+
+## Final local evidence
+
+47fresh-profile source groups PASS;38task checks including actual Godot→Linux PowerShell nonce transport PASS;17+2synthetic native traversal checks PASS;8synthetic VPN inventory checks PASS. Exported pack10groups PASS, native X11 packaged39task+156general+35motion PASS, ZIPCRC PASS. ActualWindows/PowerShell5.1/browsers/VPN/FPS acceptance is still pending.
