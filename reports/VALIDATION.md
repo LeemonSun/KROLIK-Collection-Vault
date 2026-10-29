@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| agent025 | PASS |
 | observation024 | PASS |
 | effects023 | PASS |
 | discovery023 | PASS |

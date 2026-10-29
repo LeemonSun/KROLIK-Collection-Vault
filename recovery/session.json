@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "app_version": "0.24.0-desktop-preview",
-  "checkpoint_status": "024_delivered_preview_source_report_validationPASS_ruen_priority_windows_model_pending",
-  "current_task": "024 delivered: RU/EN supported trailing no-close constraints, stable ties/nativefocus, bounded captured-control pages/read-only scan,69new tests,51sourcegroups/14finalpackgroups/native20RUEN+156general+35motion/ZIPCRC PASS.792fileNoAIsource perfileSHA/CRC/import69PASS.3nativeLibraryfiles version0 saved.",
-  "next_action": "Actual Windows/real2B RU/EN cross-language UI selection tests with ordinary typos; compare normal vs ideal observation and measure prompt/prediction/RSS. Prioritize native capture omissions, goal-effect verifiers, then procedural skills and constrained intent fallback. Chinese/new languages deferred. Do not claim newweights/IQ/FPS improvement; no visual-only/crossapp/modal capability yet.",
+  "app_version": "0.25.0-desktop-preview",
+  "checkpoint_status": "025_implemented_validating_not_yet_shipped",
+  "current_task": "025 constrained RU/EN delegation classifier using shared worker; no generated arguments; read-only exact UIA subtree path2hops with fresh native effect resolution; centralized typed control evidence and private numeric counters.52new integrated checks+7native scope checks PASS; broad source run in progress. Visual phase explicitly next.",
+  "next_action": "Finish source/packed/native regressions, build Windows025 and NoAI archive, save preview/source/report, checkpoint delivery. Actual Windows/real2B/third-partyVPN/gameFPS acceptance pending. Then dedicated ONE graphite/amber visual pass and friends alpha.",
   "read_next": [
-    "docs/OBSERVATION_024.md",
-    "CLAUDE_START_HERE.md"
+    "docs/AGENT_025.md",
+    "docs/FRIENDS_ALPHA_025.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
@@ -37,7 +37,9 @@
     "024supports only recognized trailing no-close RU/EN constraint with conservative caption filter, not full semantic conditions or complete side-effect protection. Other recognized negative clauses remain blocked.",
     "024paging covers captured eligible controls only; native200/90/depth8/2500ms limits unchanged. Draft composition remains first bounded page. One snapshot TTL/12model-selectioncalls/4effects/240sec; all-page scan can increase latency and multiple proposals ask.",
     "024numeric diagnostics distinguish prepared/requested page coverage; actual launch summary is last attempt, not a running-worker guarantee. No real-weight language/selection benchmark or Windows/game FPS measurement.",
-    "024source archive import+69tests passed. TemporaryDirectory cleanup reported Directory not empty afterward; known scratch path cleaned explicitly, archive unchanged."
+    "024source archive import+69tests passed. TemporaryDirectory cleanup reported Directory not empty afterward; known scratch path cleaned explicitly, archive unchanged.",
+    "025constrained intent gate is conservative RU/EN heuristic plus one model choice; real2B understanding/latency unmeasured. No arbitrary model commands accepted.",
+    "025read scopes maximum2named UIA container hops; repeat fresh top-level traversal for every operation; native pertraversal capture limits retained; no root-return/visual-only/fullmodal/crossapp planner. No persistent learned procedures or general business-outcome verifier."
   ],
   "validation": [
     "51fresh-profile sourcegroups PASS with LinuxPowerShell transport enabled",

@@ -5,6 +5,7 @@ const Planner=preload("res://src/core/action_proposal.gd")
 const MAX_STEPS=4
 const MAX_MS=240000
 const MAX_MODEL_CALLS=12
+var read_steps=0
 var recovery_attempts=0
 var active=false
 var revision=0
@@ -93,6 +94,8 @@ func record(plan,verified,identity,now):
 	if not Planner.same_target(plan.get("target",{}),target):return false
 	if not verified or plan.action not in ["select","expand","write","enable","disable","invoke"]:return false
 	var receipt=Controls.receipt(plan.node,plan.action)
+	receipt["evidence"]=preload("res://src/core/action_evidence.gd").receipt_kind(plan.action)
+	receipt["goal_verified"]=false
 	if plan.action=="invoke":receipt.result="ui_changed_not_goal_verified"
 	history.append(receipt)
 	return true
@@ -100,5 +103,9 @@ func recover_stale():
 	if not active or recovery_attempts>=2:return false
 	recovery_attempts+=1;return true
 func clear():
-	recovery_attempts=0
+	read_steps=0;recovery_attempts=0
 	revision+=1;active=false;goal="";target={};deadline=0;history=[];planning_calls=0;visited_navigation=[]
+
+func allow_scope_read():
+	if not active or read_steps>=2 or planning_calls>=MAX_MODEL_CALLS:return false
+	read_steps+=1;return true

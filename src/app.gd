@@ -89,6 +89,7 @@ var window_read_deadline=0
 var window_reader=preload("res://src/core/window_reader.gd").new()
 var workflow=preload("res://src/core/window_workflow.gd").new()
 var agent=preload("res://src/core/adaptive_agent.gd").new()
+var delegation=preload("res://src/core/delegation_intent.gd").new()
 var goal_scan=preload("res://src/core/ui_observation_scan.gd").new()
 var goal_mode=""
 var goal_composing_alias=""
@@ -216,6 +217,7 @@ func t(key, values = {}):
 	return l10n.text(key, values)
 
 func _process(_delta):
+	if delegation.active and Time.get_ticks_msec()>delegation.deadline:_on_failure("delegation_unclear")
 	if not discovery_mode.is_empty() and Time.get_ticks_msec()>discovery_deadline:_discovery_error("discover_expired")
 	if agent.active and Time.get_ticks_msec()>agent.deadline:_agent_finish("agent_expired")
 	if not window_read_mode.is_empty() and Time.get_ticks_msec()>window_read_deadline:_window_read_error("window_read_expired")
@@ -334,7 +336,7 @@ func submit(text):
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task","agent.discover"])
+	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task","agent.discover"] or preload("res://src/core/delegation_intent.gd").eligible(text))
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -400,7 +402,9 @@ func _drain_queued_chat(revision):
 	# Also drain deterministic self-knowledge replies which do not emit changed.
 	_schedule_queued_chat()
 
-func _submit_model_text(text,retry=false,reasoning_retry=false):
+func _submit_model_text(text,retry=false,reasoning_retry=false,skip_delegation=false):
+	if not retry and not skip_delegation and preload("res://src/core/delegation_intent.gd").eligible(text):
+		_begin_delegation(text);return
 	if not retry:response_retries=0;answer_reviewing=false;chat_started_ms=Time.get_ticks_msec()
 	pending_user_text=text
 	logic_mode=false
@@ -610,6 +614,9 @@ func _execute(command):
 	changed.emit()
 
 func _on_answer(text):
+	if delegation.active:
+		if provider is Llama and is_instance_valid(diagnostics):diagnostics.record_inference(provider.last_usage)
+		_delegation_answer(text);return
 	if discovery_mode=="thinking":_discovery_answer(text);return
 	if provider is Llama and is_instance_valid(diagnostics):diagnostics.record_inference(provider.last_usage)
 	if window_read_mode=="thinking":
@@ -674,6 +681,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	delegation.clear()
 	if not discovery_mode.is_empty():_discovery_error(key);return
 	logic_mode=false
 	chat_draft_mode=false;chat_draft_attempt=0
@@ -698,6 +706,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	delegation.clear()
 	_discovery_clear()
 	launch_goal="";launch_vpn={}
 	if is_instance_valid(vpn_connection):vpn_connection.cancel()
@@ -715,7 +724,7 @@ func cancel():
 	workflow.clear()
 	_clear_window_read()
 	_clear_goal()
-	if is_instance_valid(application_access):application_access.cancel_job()
+	if is_instance_valid(application_access):application_access.cancel_job();application_access.reset_scope()
 	_forget_screen()
 	if is_instance_valid(speech_input):speech_input.cancel()
 	dictation_target=null
@@ -1116,7 +1125,7 @@ func begin_agent(text):
 	if paused or chat_busy() or screen_mode or not window_read_mode.is_empty():return false
 	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
 	if not agent.begin(text,application_access.target,Time.get_ticks_msec()):add_message("assistant",t("agent_invalid"));return false
-	workflow.clear()
+	application_access.reset_scope();workflow.clear()
 	add_message("assistant",t("agent_start",{"limit":agent.MAX_STEPS}),true)
 	return _start_goal_step(agent.goal)
 func _agent_continue(revision):
@@ -1129,7 +1138,7 @@ func _agent_finish(key):
 		var name=str(node.get("name","")).left(72)
 		if not name.is_empty() and node.get("enabled",false) and name not in names:names.append(name)
 		if names.size()>=6:break
-	agent.clear();workflow.clear();_clear_goal();state.reset()
+	agent.clear();workflow.clear();_clear_goal();application_access.reset_scope();state.reset()
 	var reply=t(key)+"\n"+t("agent_receipts",{"count":receipts.size()})
 	for step in receipts:
 		var scope=preload("res://src/core/control_context.gd").label(step)
@@ -1142,6 +1151,7 @@ func begin_window_goal(text):
 	if application_access.target.is_empty():add_message("assistant",t("access_choose"));return false
 	var sequence=workflow.parse(text)
 	if not sequence.get("ok",false):add_message("assistant",t("workflow_invalid"));return false
+	application_access.reset_scope()
 	workflow.begin(sequence.steps,application_access.target)
 	if workflow.active:
 		var lines=PackedStringArray()
@@ -1187,14 +1197,8 @@ func _goal_observed():
 		goal_invoke_before=application_access.nodes.duplicate(true) if goal_plan.action=="invoke" else []
 		if not application_access.act_id(goal_plan,true):_goal_error("goal_changed")
 	elif goal_mode=="verifying":
-		var verified=false
-		if goal_planner.same_target(goal_plan.target,application_access.target):
-			# Reidentification is for observing an outcome only, never for retargeting a click.
-			var node=preload("res://src/core/control_context.gd").resolve(goal_plan.node,application_access.nodes,true)
-			if goal_plan.action=="invoke":verified=preload("res://src/core/observed_effect.gd").changed(goal_invoke_before,application_access.nodes)
-			elif not node.is_empty():
-				if goal_plan.action in ["enable","disable"]:verified=int(node.get("toggle_state",-1))==(1 if goal_plan.action=="enable" else 0)
-				else:verified=node.get("selected",false)==true if goal_plan.action=="select" else int(node.get("expansion",-1))==1
+		var evidence=preload("res://src/core/action_evidence.gd").inspect(goal_plan,application_access.target,application_access.nodes,goal_invoke_before)
+		var verified=evidence.get("verified",false)
 		if verified:_goal_done("goal_observed_invoke" if goal_plan.action=="invoke" else "goal_verified_"+goal_plan.action)
 		elif goal_verify_attempt<3:
 			goal_mode="verify_wait"
@@ -1202,7 +1206,10 @@ func _goal_observed():
 		else:_goal_error("goal_unverified")
 	changed.emit()
 func _request_goal_selection():
-	if is_instance_valid(diagnostics):diagnostics.record_observation(goal_scan.metrics())
+	if is_instance_valid(diagnostics):
+		var metrics=goal_scan.metrics()
+		metrics["scope_depth"]=application_access.scope_path.size();metrics["model_selection_calls"]=agent.planning_calls;metrics["scope_reads"]=agent.read_steps
+		diagnostics.record_observation(metrics)
 	goal_mode="thinking";state.reset();state.transition("thinking")
 	local_runtime.generation_busy=true;local_runtime.touch()
 	request_motion("dialogue.think_loop")
@@ -1249,6 +1256,12 @@ func _goal_answer(text):
 		if agent.active:_agent_finish("agent_budget" if scan_result=="budget" else "agent_review")
 		else:_goal_error("goal_more_info")
 		return
+	if goal_plan.action=="inspect":
+		if not agent.allow_scope_read():_goal_error("agent_budget");return
+		goal_scan.clear();goal_context={};goal_plan=goal_plan.duplicate(true)
+		goal_mode="observing";state.reset();state.transition("executing")
+		if not application_access.inspect_section(goal_plan):_goal_error("goal_changed");return
+		changed.emit();return
 	_show_goal_proposal()
 func _show_goal_proposal():
 	goal_scan.clear()
@@ -1518,3 +1531,22 @@ func _discovery_clear():
 		if is_instance_valid(local_runtime):local_runtime.generation_busy=false;local_runtime.touch()
 	discovery_page=0;discovery_winners=[];discovery_uncertain=false
 	discovery_mode="";discovery_context={};discovery_goal="";discovery_query="";discovery_candidates=[];discovery_at=0;discovery_deadline=0
+
+func _begin_delegation(text):
+	if provider_name!="local_worker" or not local_runtime.installed():
+		add_message("assistant",t("goal_need_ai"));return
+	if not delegation.begin(text,application_access.target,Time.get_ticks_msec()):return
+	chat_queue.clear();state.reset();state.transition("thinking")
+	local_runtime.generation_busy=true;local_runtime.touch();request_motion("dialogue.think_loop")
+	var context=delegation.prepare()
+	if not provider.submit(context.messages,{"max_tokens":32,"context_tokens":2048,"response_schema":context.schema}):_on_failure("delegation_unclear");return
+	changed.emit()
+func _delegation_answer(text):
+	var choice=delegation.accept(text,application_access.target,Time.get_ticks_msec())
+	if provider is Llama and provider.last_truncated:choice="invalid"
+	var original=delegation.original
+	delegation.clear();local_runtime.generation_busy=false;local_runtime.touch();state.reset()
+	if choice=="chat":_submit_model_text(original,false,false,true);return
+	if choice=="discover":_execute({"kind":"tool","tool":"agent.discover","args":{"query":"","goal":original,"open_only":false}});return
+	if choice=="window":begin_agent(original);return
+	add_message("assistant",t("delegation_unclear"));changed.emit()

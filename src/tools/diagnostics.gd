@@ -79,7 +79,7 @@ func record_inference(metrics):
 
 func record_observation(coverage):
 	last_observation={}
-	for key in ["observed","eligible","prepared_controls","oversized","candidate_pages","planned_pages","page_requests","requested_controls"]:
+	for key in ["observed","eligible","prepared_controls","oversized","candidate_pages","planned_pages","page_requests","requested_controls","scope_depth","scope_reads","model_selection_calls"]:
 		var value=coverage.get(key)
 		if value is int and value>=0:last_observation[key]=value
 func report():

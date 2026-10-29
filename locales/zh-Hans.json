@@ -497,5 +497,6 @@
   "agent_action_invoke": "点击；观察到界面变化",
   "goal_scan_pages": "正在检查窗口控件 · {page}/{total}",
   "observation_metrics": "窗口观察覆盖范围",
-  "launch_metrics": "最近一次 AI 启动尝试参数"
+  "launch_metrics": "最近一次 AI 启动尝试参数",
+  "delegation_unclear": "请说明要在哪个应用中完成什么操作。你可以先选择它的窗口。"
 }

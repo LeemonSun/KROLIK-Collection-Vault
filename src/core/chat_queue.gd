@@ -5,6 +5,7 @@ var items=[]
 var revision=0
 func push(text,router):
 	if not text is String or text.strip_edges().is_empty() or text.length()>2048:return false
+	if preload("res://src/core/delegation_intent.gd").eligible(text):return false
 	if items.size()>=LIMIT or router.route(text).get("kind")!="chat":return false
 	items.append(text);return true
 func take(expected):

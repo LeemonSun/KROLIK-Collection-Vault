@@ -5,6 +5,7 @@ signal snapshot_ready
 signal changed
 signal notice(key,values)
 const Controls=preload("res://src/core/control_context.gd")
+var scope_path=[]
 var observation={}
 var windows=[]
 var target={}
@@ -29,14 +30,14 @@ func list_windows():
 	return _request({"operation":"windows","owner_pid":OS.get_process_id()})
 func bind(index):
 	if index<0 or index>=windows.size() or pid>0:return false
-	target=windows[index].duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;observation={};windows=[]
+	scope_path=[];target=windows[index].duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;observation={};windows=[]
 	changed.emit();return inspect()
 func clear_target():
-	cancel();windows=[];target={};nodes=[];pending={};queued_action={};observed_ms=0;observation={};last_result={};changed.emit()
+	cancel();scope_path=[];windows=[];target={};nodes=[];pending={};queued_action={};observed_ms=0;observation={};last_result={};changed.emit()
 func inspect(silent=false):
 	if target.is_empty() or pid>0:notice.emit("access_choose",{});return false
 	quiet=silent
-	return _request(target.merged({"operation":"inspect","owner_pid":OS.get_process_id()}))
+	return _request(target.merged({"operation":"inspect","owner_pid":OS.get_process_id(),"scope_path":scope_path.duplicate(true)}))
 func act(kind,name,text="",append=false):
 	pending={}
 	if pid>0:notice.emit("busy_message",{});return false
@@ -49,7 +50,7 @@ func act(kind,name,text="",append=false):
 	if matches.size()!=1:notice.emit("access_ambiguous",{"name":name});return false
 	var node=matches[0]
 	if kind not in ["invoke","write"] or not node.get("enabled",false):notice.emit("access_unavailable",{});return false
-	var payload=target.merged({"operation":kind,"element_id":node.id,"element_name":node.name,"text":text.left(2000),"append":append,"owner_pid":OS.get_process_id(),"element_descriptor":Controls.descriptor(node)})
+	var payload=target.merged({"operation":kind,"element_id":node.id,"element_name":node.name,"text":text.left(2000),"append":append,"owner_pid":OS.get_process_id(),"element_descriptor":Controls.descriptor(node),"scope_path":scope_path.duplicate(true)})
 	pending=payload.duplicate(true)
 	return _request(payload)
 func confirm():
@@ -71,7 +72,7 @@ func _result(result):
 		windows=result.get("windows",[]);notice.emit("access_windows",{} )
 	elif status_=="inspected":
 		nodes=result.get("nodes",[]);observed_ms=Time.get_ticks_msec()
-		observation={"partial":bool(result.get("partial",true)),"visited":clampi(int(result.get("visited",0)),0,200),"elapsed_ms":clampi(int(result.get("elapsed_ms",0)),0,15000)}
+		observation={"scope_depth":clampi(int(result.get("scope_depth",0)),0,2),"partial":bool(result.get("partial",true)),"visited":clampi(int(result.get("visited",0)),0,200),"elapsed_ms":clampi(int(result.get("elapsed_ms",0)),0,15000)}
 		if result.get("title") is String:target["title"]=result.title
 		if result.get("bounds") is Dictionary:target["bounds"]=result.bounds.duplicate(true)
 		result.erase("nodes");result.erase("title") # Retain one scoped snapshot, not a duplicate receipt.
@@ -98,7 +99,7 @@ func adopt(identity):
 	if pid>0 or not identity is Dictionary:return false
 	for key in ["handle","target_pid","started","title","app"]:
 		if not identity.has(key):return false
-	target=identity.duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;observation={};windows=[];changed.emit();return true
+	scope_path=[];target=identity.duplicate(true);nodes=[];pending={};queued_action={};observed_ms=0;observation={};windows=[];changed.emit();return true
 func cancel_job():
 	cancel();pending={};queued_action={};quiet=false;changed.emit()
 
@@ -114,5 +115,19 @@ func act_id(plan,confirmed=false):
 	if not node.get("enabled",false) or not node.get("toggle" if plan.action in ["enable","disable"] else plan.action,false):return false
 	if plan.action in ["enable","disable"] and int(node.get("toggle_state",-1))!=int(plan.node.get("toggle_state",-2)):return false
 	quiet=true;pending={}
-	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"expected_toggle_state":node.get("toggle_state",-1),"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true,"element_descriptor":Controls.descriptor(node)})
+	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"expected_toggle_state":node.get("toggle_state",-1),"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true,"element_descriptor":Controls.descriptor(node),"scope_path":scope_path.duplicate(true)})
 	return _request(payload)
+
+func reset_scope():
+	scope_path=[]
+func inspect_section(plan):
+	if pid>0 or scope_path.size()>=2 or not plan.get("ok",false) or plan.get("action")!="inspect":return false
+	if not preload("res://src/core/action_proposal.gd").same_target(plan.get("target",{}),target):return false
+	if Time.get_ticks_msec()-observed_ms>30000:return false
+	var node=Controls.resolve(plan.get("node",{}),nodes)
+	if node.is_empty() or not node.get("inspect",false) or not node.get("enabled",false):return false
+	for hop in scope_path:
+		if hop.id==node.id:return false
+	scope_path.append({"id":node.id,"name":node.name,"descriptor":Controls.descriptor(node)})
+	nodes=[];observed_ms=0;observation={}
+	return inspect(true)

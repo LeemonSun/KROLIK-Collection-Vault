@@ -17,10 +17,10 @@ function Get-WindowIdentity($window) {
  $text=[Text.StringBuilder]::new(256);$null=[LeemonAccess]::GetWindowText($window,$text,256)
  return @{handle=[string]$window.ToInt64();target_pid=[int]$ownerId;started=[string]$process.StartTime.ToUniversalTime().Ticks;title=(Clip-Text $text.ToString() 100);app=$process.ProcessName}
 }
-function Get-ScopedNodes($rootElement, [bool]$chromeOnly=$false) {
+function Get-ScopedNodes($rootElement, [bool]$chromeOnly=$false, $prefixParents=@()) {
  $walker=[Windows.Automation.TreeWalker]::ControlViewWalker
  $queue=[Collections.Generic.Queue[object]]::new()
- $queue.Enqueue([pscustomobject]@{element=$rootElement;depth=0;ancestors=@()})
+ $queue.Enqueue([pscustomobject]@{element=$rootElement;depth=0;ancestors=@($prefixParents)})
  $nodes=[Collections.Generic.List[object]]::new();$visited=0;$bytes=0;$partial=$false
  $clock=[Diagnostics.Stopwatch]::StartNew()
  while($queue.Count -and $visited -lt 200 -and $clock.ElapsedMilliseconds -lt 2500) {
@@ -37,7 +37,7 @@ function Get-ScopedNodes($rootElement, [bool]$chromeOnly=$false) {
    $canExpand=$element.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)
    $canToggle=$element.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$toggle)
    $parents=@($frame.ancestors)
-   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;focused=[bool]$c.HasKeyboardFocus;toggle=$canToggle;toggle_state=$(if($canToggle){[int]$toggle.Current.ToggleState}else{-1});write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
+   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;focused=[bool]$c.HasKeyboardFocus;inspect=($depth -gt 0 -and $c.ControlType.ProgrammaticName -in @('ControlType.Pane','ControlType.Group','ControlType.ToolBar','ControlType.Custom'));toggle=$canToggle;toggle_state=$(if($canToggle){[int]$toggle.Current.ToggleState}else{-1});write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
    if($name -or $writable){
     $recordBytes=[Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json -InputObject $record -Depth 6 -Compress))
     if($nodes.Count -lt 90 -and $bytes+$recordBytes -lt 25000){$nodes.Add(@{record=$record;element=$element});$bytes+=$recordBytes+1}else{$partial=$true}
@@ -70,6 +70,21 @@ function Test-Descriptor($record,$expected) {
   }
  }
  return $true
+}
+function Resolve-ObservationScope($rootElement,$path) {
+ # A path grants read scope only. Resolve every hop afresh from its observed parent.
+ if($null -eq $path){$path=@()}
+ if($path -isnot [array] -or $path.Count -gt 2){throw 'Invalid observation path'}
+ $current=$rootElement;$parents=@();$seen=@{};$budget=[Diagnostics.Stopwatch]::StartNew()
+ foreach($hop in $path){
+  if($budget.ElapsedMilliseconds -gt 6000){throw 'Observation path expired'}
+  if($null -eq $hop -or $hop.id -isnot [string] -or $hop.id -notmatch '^-?\d+(,-?\d+){1,30}$' -or $hop.name -isnot [string]){throw 'Invalid observation hop'}
+  if($seen.ContainsKey($hop.id)){throw 'Observation cycle'}
+  $found=@(Get-ScopedNodes $current $false $parents | Where-Object {$_.record.inspect -eq $true -and $_.record.id -ceq $hop.id -and $_.record.name -ceq $hop.name -and (Test-Descriptor $_.record $hop.descriptor)})
+  if($found.Count -ne 1){throw 'Observation scope changed'}
+  $record=$found[0].record;$current=$found[0].element;$seen[$hop.id]=$true;$parents=@($record.ancestors)
+ }
+ return @{element=$current;parents=$parents;depth=$path.Count}
 }
 function Set-ObservedToggle($element,[int]$expected,[int]$desired){
  if($desired -notin @(0,1) -or $expected -notin @(0,1)){return 'toggle_unverified'}
@@ -196,13 +211,14 @@ public static class LeemonAccess {
    $null=Assert-Identity $request
    $reply.status='read';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.blocks=$blocks;$reply.partial=$true
   }else{
-  $nodes=@(Get-ScopedNodes $rootElement ($request.operation -eq 'tab_select'))
+  $scope=Resolve-ObservationScope $rootElement $request.scope_path
+  $nodes=@(Get-ScopedNodes $scope.element ($request.operation -eq 'tab_select') $scope.parents)
   if($request.operation -eq 'inspect'){
    $r=$rootElement.Current.BoundingRectangle
    $reply.bounds=@{x=[int]$r.X;y=[int]$r.Y;width=[int]$r.Width;height=[int]$r.Height}
    $null=Assert-Identity $request
    $reply.status='inspected';$reply.title=(Clip-Text $rootElement.Current.Name 100);$reply.nodes=@($nodes | ForEach-Object {$_.record})
-   $reply.partial=$script:scopeMeta.partial;$reply.visited=$script:scopeMeta.visited;$reply.elapsed_ms=$script:scopeMeta.elapsed_ms
+   $reply.scope_depth=$scope.depth;$reply.partial=$script:scopeMeta.partial;$reply.visited=$script:scopeMeta.visited;$reply.elapsed_ms=$script:scopeMeta.elapsed_ms
   }elseif($request.operation -eq 'tab_select'){
    $matches=@($nodes | Where-Object {$_.record.id -ceq $request.element_id -and $_.record.name -ceq $request.element_name -and $_.record.type -eq 'ControlType.TabItem' -and (Test-Descriptor $_.record $request.element_descriptor)})
    if($matches.Count -ne 1){$reply.status='stale'}else{

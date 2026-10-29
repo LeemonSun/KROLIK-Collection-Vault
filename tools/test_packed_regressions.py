@@ -3,7 +3,7 @@
 import argparse,hashlib,json,os,subprocess,tempfile,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-CASES=['observation024','draft016','discovery023','effects023','tasks022','logic_app021','evidence021','chat_draft020','control_context019','verification019','adaptive015','composer017','window_reader','exported_content']
+CASES=['agent025','observation024','draft016','discovery023','effects023','tasks022','logic_app021','evidence021','chat_draft020','control_context019','verification019','adaptive015','composer017','window_reader','exported_content']
 def main():
  p=argparse.ArgumentParser();p.add_argument('--godot',type=Path,required=True);p.add_argument('--pack',type=Path,required=True);p.add_argument('--pwsh',type=Path,required=True);a=p.parse_args()
  version=json.loads((ROOT/'config/product.json').read_text())['version']

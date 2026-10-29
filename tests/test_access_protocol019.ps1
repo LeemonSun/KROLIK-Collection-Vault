@@ -6,7 +6,7 @@ function Check($value,[string]$label){$script:checks++;if(-not $value){throw $la
 $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseFile($Helper,[ref]$tokens,[ref]$errors)
 Check ($errors.Count -eq 0) 'Native helper parses'
-foreach($name in @('Clip-Text','Get-ScopedNodes','Test-Descriptor')){
+foreach($name in @('Clip-Text','Get-ScopedNodes','Test-Descriptor','Resolve-ObservationScope')){
  $function=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
  if($null -eq $function){throw "Missing function $name"}
  Invoke-Expression $function.Extent.Text
@@ -85,3 +85,23 @@ $chrome=@(Get-ScopedNodes $browser $true)
 Check (@($chrome | Where-Object {$_.record.name -eq 'SoundCloud'}).Count -eq 1) 'Chrome search can inspect an offscreen tab'
 Check (@($chrome | Where-Object {$_.record.name -in @('PAGE_PRIVATE_TEXT','HIDDEN_PAGE_DESCENDANT')}).Count -eq 0) 'Chrome search skips page document and descendants'
 "CHROME022: 2 additional checks, 0 failures; synthetic tree, not Windows"
+
+$initial=@(Get-ScopedNodes $deep)
+$hopRecord=@($initial | Where-Object {$_.record.id -eq '1,307'})[0].record
+$hop=@{id=$hopRecord.id;name=$hopRecord.name;descriptor=$hopRecord}
+$scope=Resolve-ObservationScope $deep @($hop)
+$inside=@(Get-ScopedNodes $scope.element $false $scope.parents)
+Check (@($inside | Where-Object {$_.record.id -eq '1,312'}).Count -eq 1) 'Read-only subtree reaches controls beyond original depth limit'
+Check ($scope.depth -eq 1 -and $scope.element.Id -eq 307) 'Exact observed scope root retained'
+Check (@($inside | Where-Object {$_.record.id -eq '1,308'})[0].record.ancestors[-1].name -eq 'section6') 'Scoped read preserves actual parent labels'
+$bad=@{id=$hop.id;name='changed';descriptor=$hop.descriptor};$rejected=$false
+try{$null=Resolve-ObservationScope $deep @($bad)}catch{$rejected=$true}
+Check $rejected 'Renamed scope rejected before any effect'
+$rejected=$false;try{$null=Resolve-ObservationScope $deep @($hop,$hop)}catch{$rejected=$true}
+Check $rejected 'Scope cycles rejected'
+$rejected=$false;try{$null=Resolve-ObservationScope $deep @($hop,$hop,$hop)}catch{$rejected=$true}
+Check $rejected 'Native path depth bound independent of model'
+$secretRecord=@{id='1,6';name='Password container';descriptor=@{type='ControlType.Pane';automation_id='password';ancestors=@()}}
+$rejected=$false;try{$null=Resolve-ObservationScope $root @($secretRecord)}catch{$rejected=$true}
+Check $rejected 'Password subtree cannot become a read scope'
+"SCOPE025: 7 additional checks, 0 failures; synthetic UIA only"

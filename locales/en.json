@@ -497,5 +497,6 @@
   "agent_action_invoke": "press; observed UI change",
   "goal_scan_pages": "Inspecting window controls · {page}/{total}",
   "observation_metrics": "Window observation coverage",
-  "launch_metrics": "Last attempted AI worker launch settings"
+  "launch_metrics": "Last attempted AI worker launch settings",
+  "delegation_unclear": "Which application should I use, and what should I do? You can select its window so I can inspect the available actions."
 }

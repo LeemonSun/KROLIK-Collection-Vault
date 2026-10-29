@@ -1,9 +1,7 @@
-# Leemon0.24 — delivered; Windows/real-model acceptance pending
+# Leemon0.25 — implementation validating
 
-Start `python3 tools/resume.py status`, recovery/session.json, docs/OBSERVATION_024.md. Canonical /workspace/scratch/deec6c1ed852/leemon-013. GitHub storage only, no CI/remote build/deploy, .resume-remote.json head. Preserve one Lemon, upstream notices, quiet2Bworker. User: RU/EN first; Chinese/new languages deferred.
+Read python3 tools/resume.py status and recovery/session.json, then docs/AGENT_025.md. Canonical leemon-013, GitHub storage only; noCI/deploy, ONE Lemon graphite/amber. RU/EN first; no newmodels or Chinese expansion.
 
-024: conservative no-close trailing constraints, deterministic ties/native focus, bounded captured-control pages and read-only scan controller, sole-candidate review/fresh preflight,12model-selectioncalls total/4steps/240sec. Numeric coverage + redacted actual launch attempt summary. Draft composition stays first bounded page. Real model/Windows/hardware not validated; no UIA native-range expansion or visual-action fallback. See session for final tests/artifacts when saved.
+025 adds conservative local delegation enum, original-goal discovery/selected-window forwarding,2hop read-only UIA subtree traversal and exact path preflight before approved effects; centralized typed control evidence, numeric scope counters.52new integrated tests+7native scope checks PASS; broader validation/build/delivery in progress. See session for authoritative delivered IDs; previous024 still shipped until replaced.
 
-Devtools ../devtools/Godot_v4.7.2-stable_linux.x86_64, ../devtools/pwsh/pwsh, ../devtools/xvfb018, ../devtools/Companion017.exe. Do not restore retired paths, including duplicated backup. Checkpoint before pause.
-
-Final evidence:51sourcegroups/14PCKgroups/native20RUEN+156general+35motion/ZIPCRC PASS. NoAI792file archive perfileSHA/CRC/extractedimport69tests PASS. Temp cleanup issue after success handled explicitly.3LibraryIDs/hashes/version0 in session. ActualWindows/realweights/FPS not validated. Next RU/EN practical benchmark and native capture/goal verifiers; Chinese expansion deferred.
+Next after functional delivery: dedicated visual pass for friends alpha; realWindows/v2rayTun/real2B/gameperformance acceptance still pending. No universal agent or release claims.
