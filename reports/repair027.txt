@@ -1,4 +1,4 @@
 Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
 
-PCM027 cached processing4seconds_us=190264; synthetic tone, not speech accuracy
+PCM027 cached processing4seconds_us=145817; synthetic tone, not speech accuracy
 REPAIR027: 31 checks, 0 failures; real file/PCM with synthetic transport, no Windows/microphone proof

@@ -1,3 +1,7 @@
+Latest private preview:0.28 (model switching; Windows acceptance pending).
+
+[Windows preview](https://chatgpt.com/library?file_id=libfile_f4f2433b3f008191a0dc56760566a9a2&account_id=personal) · [Source without weights](https://chatgpt.com/library?file_id=libfile_21b251a51b288191b0bba1e5d84e8e69&account_id=personal) · [Report](https://chatgpt.com/library?file_id=libfile_58aa34f2bafc8191b329def5ad0c57e1&account_id=personal)
+
 # Leemon0.26 — Orbit private preview
 
 Implemented ONE graphite/amber Orbit interface, independent task/review/result windows, simple real component downloads, explicit voice requests and30procedural states. Read docs/ORBIT_026.md and recovery/session.json for evidence/delivery. ActualWindows/microphone/model-quality/gameFPS acceptance pending.

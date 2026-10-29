@@ -1,0 +1,158 @@
+[
+  {
+    "id": "qwen35_2b",
+    "name": "Qwen3.5 · 2B",
+    "architectures": [
+      "qwen35"
+    ],
+    "source": "https://huggingface.co/Qwen/Qwen3.5-2B",
+    "license": "Apache-2.0",
+    "kind": "baseline",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": true
+  },
+  {
+    "id": "qwen35_4b",
+    "name": "Qwen3.5 · 4B",
+    "architectures": [
+      "qwen35"
+    ],
+    "source": "https://huggingface.co/Qwen/Qwen3.5-4B",
+    "license": "Apache-2.0",
+    "kind": "candidate",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "qwen3_4b",
+    "name": "Qwen3 Instruct 2507 · 4B",
+    "architectures": [
+      "qwen3"
+    ],
+    "source": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507",
+    "license": "Apache-2.0",
+    "kind": "candidate",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "ministral3_3b",
+    "name": "Ministral 3 · 3B",
+    "architectures": [
+      "mistral3"
+    ],
+    "source": "https://huggingface.co/mistralai/Ministral-3-3B-Instruct-2512",
+    "license": "Apache-2.0",
+    "kind": "candidate",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "phi4_mini",
+    "name": "Phi-4 mini · 3.8B",
+    "architectures": [
+      "phi3"
+    ],
+    "source": "https://huggingface.co/microsoft/Phi-4-mini-instruct",
+    "license": "MIT",
+    "kind": "candidate",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "gemma4_e2b",
+    "name": "Gemma 4 · E2B",
+    "architectures": [
+      "gemma4"
+    ],
+    "source": "https://huggingface.co/google/gemma-4-E2B-it",
+    "license": "Apache-2.0",
+    "kind": "candidate",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "gemma4_e4b",
+    "name": "Gemma 4 · E4B",
+    "architectures": [
+      "gemma4"
+    ],
+    "source": "https://huggingface.co/google/gemma-4-E4B-it",
+    "license": "Apache-2.0",
+    "kind": "large",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "lfm25_26b",
+    "name": "LFM2.5 · 2.6B",
+    "architectures": [
+      "lfm2"
+    ],
+    "source": "https://huggingface.co/LiquidAI/LFM2.5-2.6B",
+    "license": "LFM1.0",
+    "kind": "custom_license",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "smollm3_3b",
+    "name": "SmolLM3 · 3B",
+    "architectures": [
+      "smollm3"
+    ],
+    "source": "https://huggingface.co/HuggingFaceTB/SmolLM3-3B",
+    "license": "Apache-2.0",
+    "kind": "ru_unverified",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "lfm25_12b",
+    "name": "LFM2.5 · 1.2B",
+    "architectures": [
+      "lfm2"
+    ],
+    "source": "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct",
+    "license": "LFM1.0",
+    "kind": "ru_unverified",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "gemma3_4b",
+    "name": "Gemma 3 · 4B",
+    "architectures": [
+      "gemma3"
+    ],
+    "source": "https://huggingface.co/google/gemma-3-4b-it",
+    "license": "Gemma",
+    "kind": "custom_license",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "qwen35_9b",
+    "name": "Qwen3.5 · 9B",
+    "architectures": [
+      "qwen35"
+    ],
+    "source": "https://huggingface.co/Qwen/Qwen3.5-9B",
+    "license": "Apache-2.0",
+    "kind": "large",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  },
+  {
+    "id": "uitars_7b",
+    "name": "UI-TARS 1.5 · 7B",
+    "architectures": [
+      "qwen2vl"
+    ],
+    "source": "https://huggingface.co/ByteDance-Seed/UI-TARS-1.5-7B",
+    "license": "Apache-2.0",
+    "kind": "gui_specialist",
+    "runtime_compatibility": "architecture_present_b11901_specific_GGUF_not_executed",
+    "vision_enabled": false
+  }
+]

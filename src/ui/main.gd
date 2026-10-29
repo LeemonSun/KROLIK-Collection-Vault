@@ -272,7 +272,8 @@ func _build_character():
 func _build_assistant_tools():
 	_label(App.t("orbit_components"),content,25)
 	_label(App.t("orbit_components_hint"),content,13,true)
-	for id in ["text","voice","vision"]:
+	content.add_child(preload("res://src/ui/model_panel.gd").new())
+	for id in ["voice","vision"]:
 		var card=preload("res://src/ui/component_card.gd").new();card.kind=id;content.add_child(card)
 	_label(App.t("orbit_voice_os"),content,12,true)
 

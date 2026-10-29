@@ -1,0 +1,1 @@
+{"archive": "/workspace/scratch/deec6c1ed852/Companion_Preview_Windows_v0.28.0.zip", "bytes": 54037965, "sha256": "be53605982a534e76e4008a9b7a82947eb8590d31a0fe96dc38ed5448c1afa25", "exe_bytes": 109201920}

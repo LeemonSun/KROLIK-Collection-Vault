@@ -29,10 +29,17 @@ var next_liveness_ms=0
 var start_verifier
 var start_revision=0
 var verifier_revision=0
+var custom_model={}
+var original_model={}
+var runtime_only=false
+var model_change_busy=false
+var probe_revision=0
+var shutting_down=false
 
 func _ready():
 	if manifest.is_empty():
 		manifest = JSON.parse_string(FileAccess.get_file_as_string("res://config/local_worker.json"))
+	original_model=manifest.model.duplicate(true)
 	download = HTTPRequest.new()
 	download.use_threads = true
 	download.timeout = 3600
@@ -40,6 +47,11 @@ func _ready():
 	download.download_chunk_size = 1024 * 1024
 	add_child(download)
 	download.request_completed.connect(_download_complete)
+	_make_probe()
+	if installed():
+		status = "ai_installed"
+
+func _make_probe():
 	probe = HTTPRequest.new()
 	probe.timeout = 2.0
 	probe.max_redirects = 0
@@ -47,9 +59,9 @@ func _ready():
 	probe.set_http_proxy("", -1)
 	probe.set_https_proxy("", -1)
 	add_child(probe)
-	probe.request_completed.connect(_probe_complete)
-	if installed():
-		status = "ai_installed"
+	var revision=probe_revision
+	probe.request_completed.connect(func(result,code,headers,body):
+		if revision==probe_revision:_probe_complete(result,code,headers,body))
 
 func _status(value, extra = ""):
 	status = value
@@ -57,12 +69,29 @@ func _status(value, extra = ""):
 	status_changed.emit()
 
 func model_path():
+	if not custom_model.is_empty():return str(custom_model.get("file","user://missing-model.gguf"))
 	return base_path.path_join(str(manifest.model.file))
+
+func select_external(entry={}):
+	if downloading or hash_thread!=null or start_verifier!=null or starting or pid>0:return false
+	custom_model=entry.duplicate(true)
+	manifest.model=original_model.duplicate(true) if entry.is_empty() else {"file":str(entry.get("file","")).get_file(),"sha256":entry.get("sha256",""),"bytes":entry.get("bytes",0)}
+	_status("ai_installed" if installed() else "ai_not_installed")
+	return true
+
+func runtime_available():
+	if bundle_managed and not bundled_verified:return false
+	for name in manifest.runtime.files:
+		if not FileAccess.file_exists(runtime_path().path_join(name)):return false
+	return true
 
 func runtime_path():
 	return base_path.path_join("runtime")
 
 func installed():
+	if not custom_model.is_empty():
+		var f=FileAccess.open(model_path(),FileAccess.READ)
+		return runtime_available() and str(custom_model.get("sha256","")).length()==64 and f!=null and f.get_length()==int(custom_model.get("bytes",-1)) and FileAccess.get_modified_time(model_path())==int(custom_model.get("mtime",-1))
 	if bundle_managed:return bundled_verified
 	if manifest.is_empty():
 		return false
@@ -73,14 +102,18 @@ func installed():
 	var model = FileAccess.open(model_path(), FileAccess.READ)
 	return receipt is Dictionary and receipt.get("model_sha256") == manifest.model.sha256 and receipt.get("runtime_sha256") == manifest.runtime.sha256 and model != null and model.get_length() == int(manifest.model.bytes) and int(receipt.get("model_mtime", -1)) == FileAccess.get_modified_time(model_path()) and FileAccess.file_exists(runtime_path().path_join(manifest.runtime.executable))
 
-func install():
+func install():return _install(false)
+func install_runtime_only():return _install(true)
+func _install(only_runtime):
 	if bundle_managed:return false
+	if not custom_model.is_empty() and not only_runtime:return false
 	if downloading or hash_thread != null or start_verifier!=null or starting or pid > 0:
 		return false
 	if OS.get_name() != manifest.get("platform"):
 		_status("ai_windows_only")
 		return false
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(base_path))
+	runtime_only=only_runtime
 	downloading = true
 	phase = "runtime"
 	return _download_part()
@@ -136,8 +169,12 @@ func _process(_delta):
 				_fail("ai_install_failed")
 			else:
 				DirAccess.remove_absolute(ProjectSettings.globalize_path(hash_target))
-				phase = "model"
-				_download_part()
+				if runtime_only:
+					downloading=false
+					_status("ai_installed" if installed() else "ai_not_installed")
+				else:
+					phase = "model"
+					_download_part()
 		else:
 			var path = ProjectSettings.globalize_path(model_path())
 			if DirAccess.rename_absolute(ProjectSettings.globalize_path(hash_target), path) != OK:
@@ -200,6 +237,7 @@ func _extract_runtime(path):
 	return true
 
 func start(options = {}):
+	if model_change_busy:return false
 	if pid > 0 or starting:
 		return true
 	if downloading or hash_thread != null or start_verifier!=null:
@@ -219,10 +257,13 @@ func start(options = {}):
 	deadline_ms=Time.get_ticks_msec()+120000
 	var folder=ProjectSettings.globalize_path(runtime_path())
 	var expected=manifest.runtime.files.duplicate(true)
+	var selected_path=ProjectSettings.globalize_path(model_path())
+	var expected_model=str(custom_model.get("sha256",""))
 	start_verifier=Thread.new()
 	start_verifier.start(func():
 		for name in expected:
 			if FileAccess.get_sha256(folder.path_join(name))!=expected[name]:return false
+		if not expected_model.is_empty() and FileAccess.get_sha256(selected_path)!=expected_model:return false
 		return true)
 	_status("ai_starting")
 	return true
@@ -302,7 +343,9 @@ func cancel_install():
 		return false # A bounded hash is finishing; no worker can start meanwhile.
 	download.cancel_request()
 	downloading = false
-	for path in [base_path.path_join("worker.zip.part"), model_path() + ".part"]:
+	var partials=[base_path.path_join("worker.zip.part")]
+	if custom_model.is_empty():partials.append(model_path()+".part")
+	for path in partials:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	_status("ai_installed" if installed() else "ai_not_installed")
@@ -317,13 +360,17 @@ func stop():
 	starting = false
 	generation_busy = false
 	if probe:
+		probe_revision+=1
 		probe.cancel_request()
+		remove_child(probe);probe.queue_free();probe=null
+		if not shutting_down:_make_probe()
 	if pid > 0 and OS.is_process_running(pid):
 		OS.kill(pid)
 	pid = -1
 	token = ""
 
 func _exit_tree():
+	shutting_down=true
 	if start_verifier!=null:start_verifier.wait_to_finish()
 	if download:
 		download.cancel_request()

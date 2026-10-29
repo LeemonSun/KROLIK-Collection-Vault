@@ -1,0 +1,11 @@
+{
+  "archive": "Leemon_Project_v0.28.0_NoAI.zip",
+  "files_verified": 861,
+  "bytes": 15770811,
+  "sha256": "5806eaf4b57147205991a4f928f3d1471d842f9708596c59a4ffe8f00b945c5e",
+  "crc": "PASS",
+  "per_file_hashes": "PASS",
+  "fresh_extract_import": "PASS",
+  "fresh_models_checks": 25,
+  "neural_quality_proven": false
+}

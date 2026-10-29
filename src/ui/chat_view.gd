@@ -320,6 +320,7 @@ func refresh():
 	var voice_busy=app.speech_input.busy()
 	var busy=app.state.current!='idle' or not app.queued_chat_text.is_empty() or voice_busy or app.application_access.pid>0 or not app.goal_mode.is_empty()
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t("orbit_ready"))
+	if is_instance_valid(app.model_library):status_label.text=app.model_library.label()+" · "+status_label.text
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_repairing" if app.goal_mode=="composing" and app.goal_compose_attempt>1 else "goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
 	if app.goal_mode=="thinking" and app.goal_scan.active:status_label.text=app.t("goal_scan_pages",{"page":app.goal_scan.index+1,"total":app.goal_scan.pages.size()})

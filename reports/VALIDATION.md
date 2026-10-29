@@ -1,9 +1,10 @@
 # Проверки приложения
 
-Дата: 2026-10-29. Linux x86_64, Godot 4.7.2 standard. Версия: 0.27.0-desktop-preview.
+Дата: 2026-10-29. Linux x86_64, Godot 4.7.2 standard. Версия: 0.28.0-desktop-preview.
 
 | Проверка | Результат |
 | --- | --- |
+| models028 | PASS |
 | repair027 | PASS |
 | orbit026 | PASS |
 | agent025 | PASS |

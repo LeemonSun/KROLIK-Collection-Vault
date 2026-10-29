@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "app_version": "0.27.0-desktop-preview",
-  "checkpoint_status": "027_blocking_regression_repair_validating_not_shipped",
-  "current_task": "User actualWindows feedback rejects026 readiness (18issues):slow/wrong app/task execution,micquiet,uncancelledcompute,overlappingtopmostwindows,hallucinatedscreen,poorpersona. STOP decorative work/friends claims. Restored exact026remote into isolated leemon-027 because leemon-013 snapshot was stale023/conflicting; original files preserved.Implementing named launch/no-neural literal file tasks/math,alias preservation,PCM cache/quiet handling/endpoint,inputdevice selection,ownedworker cancellation+HTTPepochs,quiet non-topmostdesktop/one task surface,structured window overview instead unrestricted image descriptions.",
-  "next_action": "Preserve027 repair/delivery objective. New userpriority: genuinely compare model alternatives before adoption. Read research/MODEL_SELECTION_027.md; new generic benchmark +24cases ready,6toolingchecks only, ZERO new inference due missing models/runtime and HTTP401/403. Need verified local runtime/GGUF/revisions to run; do not repeat blocked downloads or claim winner. Existing027private preview still needs finalrebuild/packchecks/save, not shipped. No generalWindowsagent/mic/FPS/100page acceptance.",
+  "app_version": "0.28.0-desktop-preview",
+  "checkpoint_status": "028_private_preview_delivered_windows_and_candidate_quality_pending",
+  "current_task": "028privateWindows preview, fullsource and report saved.13manualGGUFprofiles with oneownedworker/contextboundary/Orbitmodelpanel;027repairs included.55sourcegroups18packedgroups25models8X11models12X11repairPASS; sourcearchive verified. No newneuralweights executed; actualWindows/candidatequalitypending.",
+  "next_action": "User asks longer unattended work. Official docs confirm Goal mode via /goal in desktop/CLI/IDE; web usesWork goal/outcome/verification. Do not imply currentchat enables unlimitedbackgroundwork. Current028download links in artifact/source_review_archive/report_artifact. Next: actualWindows user trial2B/4B samequestions, check modelimport/runtimeerrors/cancel and generalUItools. No silentclaim all13models work; baseline-only vision, CPUonly, arbitraryGUIediting/100pagepipeline/globalPTT not finished.",
   "read_next": [
     "docs/REPAIR_027.md",
     "src/core/direct_tasks.gd",
@@ -54,17 +54,17 @@
     "Final821fileNoAI perfileSHA/CRC/fresh extraction/Godotimport/40checks PASS; previewZIPCRC PASS;3artifacts saved version0"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.26.0.zip",
-    "bytes": 54013020,
-    "sha256": "dba835fd8e8047ad8bbd044eff181c78442ce6946c073d718743b876aca432ba",
-    "library_file_id": "libfile_7aa369ca961481918f54b9062939ae69",
-    "file_id": "file_000000004e0081f590e693e35b6a2a6c",
+    "full": "Companion_Preview_Windows_v0.28.0.zip",
+    "bytes": 54037965,
+    "sha256": "be53605982a534e76e4008a9b7a82947eb8590d31a0fe96dc38ed5448c1afa25",
+    "library_file_id": "libfile_f4f2433b3f008191a0dc56760566a9a2",
+    "file_id": "file_00000000e93081fda3ef1b2283969104",
     "version": 0,
-    "status": "saved_native_library_metadata_applied_final_validationPASS"
+    "status": "saved_native_library_metadata_applied_validated"
   },
   "previous_checkpoint": "99d0d9e8f56b6b261eb7b78ea94d2c809998678a",
-  "shipped_version": "0.26.0-desktop-preview",
-  "shipped_app_pack_sha256": "89ae28c849bfe2f05f1ff2c04fe6d6ca390a94f02a74aa5a785214c8a3639366",
+  "shipped_version": "0.28.0-desktop-preview",
+  "shipped_app_pack_sha256": "b79100695f9b21881b080c50be4614e66ff7154a3b9165d062e02ca7490d5a84",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -99,9 +99,9 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_30379301ede48191a40b9c85d6c13005",
+  "report_library_file_id": "libfile_58aa34f2bafc8191b329def5ad0c57e1",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
-  "report_version": 0,
+  "report_version": "0.28.0",
   "recovery_event": {
     "date_moscow": "2026-10-28",
     "source_head": "fb9c8195099ed1503c1c89e459fc510c8056da7f",
@@ -112,6 +112,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.26.0.zip",
+      "bytes": 54013020,
+      "sha256": "dba835fd8e8047ad8bbd044eff181c78442ce6946c073d718743b876aca432ba",
+      "library_file_id": "libfile_7aa369ca961481918f54b9062939ae69",
+      "file_id": "file_000000004e0081f590e693e35b6a2a6c",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_validationPASS"
+    },
     {
       "full": "Companion_Preview_Windows_v0.25.0.zip",
       "bytes": 53998131,
@@ -271,7 +280,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_000000000d1c81f6878285d55747278e",
+  "report_file_id": "file_00000000940881f593020aba7117ddf4",
   "motion_artifact": {
     "filename": "Leemon_0.18_Behavior_Demo.mp4",
     "bytes": 145196,
@@ -283,7 +292,7 @@
     "sha256": "70301f1c1ad2c02285eb06b784bfa14e734959da878cafb2e7b3618023f6ebfa",
     "version_label": "018_synthetic_scripted_renderer_demo_no_OS_actions_no_model_no_FPS_benchmark"
   },
-  "shipped_exe_sha256": "6146bfa23e0ba2677ada9c237f2c082b24f1e7a260b1da820105de3c73a58936",
+  "shipped_exe_sha256": "535d244e89e52c1390185385fac15fc9091986d36b8733380a22a7f31a975247",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
   "final_fix": "P0guard and P1captured observation pages implemented with explicit binding/review, stable rank and focus, none/ask scan,69newfixtures and safe diagnostics. Existing1thread/batch32/30sec quiet override retained. User priority RU/EN, no Chinese expansion.",
   "product_direction": {
@@ -303,6 +312,18 @@
     "continuous_weight_training_implemented": false
   },
   "source_review_archive": {
+    "full": "Leemon_Project_v0.28.0_NoAI.zip",
+    "bytes": 15770811,
+    "sha256": "5806eaf4b57147205991a4f928f3d1471d842f9708596c59a4ffe8f00b945c5e",
+    "library_file_id": "libfile_21b251a51b288191b0bba1e5d84e8e69",
+    "file_id": "file_00000000ed8881fda46ef1d227a81ccc",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_validated",
+    "files": 862,
+    "model_weights_bundled": false,
+    "snapshot_note": "Runtime code matches final028. SHA/CRC/fresh extraction/import/25checksPASS. Later delivery/report receipts intentionally outside source snapshot."
+  },
+  "previous_source_review_archive": {
     "full": "Leemon_Project_v0.26.0_NoAI.zip",
     "bytes": 15715933,
     "sha256": "0a63cf86c0c3a32ad29e93361c72887eaaf88ef9e04490449bcaeaf523590435",
@@ -314,28 +335,16 @@
     "model_weights_bundled": false,
     "snapshot_note": "Runtime code matches final026. Includes active pinned art/font and manifest. Later delivery/README/verification receipts intentionally outside snapshot. PerfileSHA/CRC/fresh extract/import40checks PASS."
   },
-  "previous_source_review_archive": {
-    "full": "Leemon_Project_v0.25.0_NoAI.zip",
-    "bytes": 15685379,
-    "sha256": "b3a9b1237ee1f810f4ad68720cb35cb58a16fa433bd27dc71bb0c316b06e7e82",
-    "library_file_id": "libfile_fb39866ccdc481919110af7b1e42ab98",
-    "file_id": "file_00000000761081f6bc54d6bb0854916c",
-    "version": 0,
-    "status": "saved_native_library_metadata_applied_validationPASS",
-    "files": 804,
-    "model_weights_bundled": false,
-    "snapshot_note": "Product code matches final0.25. Archive contains active pinned runtime art/font. Later delivery/README/report receipt and tool-only validation-report formatting changes may be outside snapshot; no hash self-reference. PerfileSHA/CRC/fresh extract/import/52checks PASS."
-  },
   "report_artifact": {
-    "full": "Leemon_0.26_Report.md",
-    "bytes": 9503,
-    "sha256": "365874d81bd8926229950e661523e0ceb22f6513cfb7d4b4c684654eb4a27126",
-    "library_file_id": "libfile_30379301ede48191a40b9c85d6c13005",
-    "file_id": "file_00000000902881f794f1213374536626",
+    "full": "Leemon_0.28_Report.md",
+    "bytes": 7506,
+    "sha256": "f022ba21d11a2f987171d4db80deedff09a32b6bcdeec3ffe8a58876459c86ff",
+    "library_file_id": "libfile_58aa34f2bafc8191b329def5ad0c57e1",
+    "file_id": "file_00000000940881f593020aba7117ddf4",
     "version": 0,
-    "status": "saved_native_library_metadata_applied_final_validationPASS"
+    "status": "saved_native_library_metadata_applied_validated"
   },
-  "previous_report_library_file_id": "libfile_09c7cd08407081919e38f27fc884b893",
+  "previous_report_library_file_id": "libfile_30379301ede48191a40b9c85d6c13005",
   "visual_direction": {
     "status": "01Orbit_implemented_private_preview_delivered_windows_acceptance_pending",
     "recommended": "01 Orbit",
@@ -399,5 +408,14 @@
       "gemma-4-E2B-it"
     ],
     "current_model_unchanged": true
+  },
+  "model_switch028": {
+    "profiles": 13,
+    "storage": "external user-picked GGUF, no duplicate weights",
+    "runtime": "existing pinned b11901, architecture names confirmed src/llama-arch.cpp at tag",
+    "neural_files_executed_here": 0,
+    "image_support": "existing baseline2Bprojector only; other models text/tools",
+    "comparison_context": "reset at switch; persisted boundary keeps old chat visible without reinjection",
+    "tests_so_far": "55sourcegroupsPASS;18finalpackedgroupsPASS;25modelsfixturesPASS;8X11modelpanelPASS;12X11repairPASS;sourcearchive861hashes/CRC/freshimport/25checksPASS. No Windows/neural acceptance."
   }
 }

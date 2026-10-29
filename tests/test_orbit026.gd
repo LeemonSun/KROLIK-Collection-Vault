@@ -52,7 +52,10 @@ func run():
 		for child in main.content.get_children():
 			if child is Component:
 				count+=1;child.refresh();check(child.action.text!=locale and not child.action.text.is_empty(),"Real component installer label "+locale)
-		check(count==3,"Conversation/voice/screen cards "+locale)
+		var model_cards=0
+		for child in main.content.get_children():
+			if child.get_script()==preload("res://src/ui/model_panel.gd"):model_cards+=1
+		check(count==2 and model_cards==1,"Model selector plus voice/screen cards "+locale)
 		check(main.start_ai_button==null and main.stop_ai_button==null,"No manual worker controls "+locale)
 	var card=Component.new();card.kind="text";root.add_child(card)
 	var managed=app.local_runtime.bundle_managed;var verified=app.local_runtime.bundled_verified

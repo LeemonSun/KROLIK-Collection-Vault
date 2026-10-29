@@ -23,6 +23,7 @@ func load_history():
 	turns=[]
 	var pending=""
 	for message in messages:
+		if message.get("context_reset",false)==true:turns=[];pending="";continue
 		if message.speaker=="user": pending=message.text
 		elif not pending.is_empty():
 			turns.append({"role":"user","content":pending})
