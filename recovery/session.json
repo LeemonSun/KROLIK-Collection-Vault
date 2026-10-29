@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "app_version": "0.26.0-desktop-preview",
-  "checkpoint_status": "026_orbit_delivered_preview_source_report_validationPASS_windows_pending",
-  "current_task": "026Orbit delivered: coherent graphiteamber materials,4buttonorbit,independent task/review/choice/result,simple3sectionsettings/realcomponentdownloads,explicit hiddenchat voice/draft/cancel guards,30proceduralposes.53sourcegroups+40finalnewsourcechecks/16finalPCKgroups/native35Orbit+156general+35motion+20RUEN PASS;821fileNoAI CRC/SHA/extract/import40PASS.3nativeLibraryfiles version0 saved. No newweights or actualWindows/mic/modelquality/gameFPS acceptance.",
-  "next_action": "ActualWindows acceptance first: startup/perpixeltransparency/AltTab/focus/DPI/multimonitor,Orbitclicks,chat scroll/input,review/token/expiry/cancel/repeatedtasks,componentdownloads,voice transcript/draft preservation/systemTTS and idle/game performance. Collect friend reports after own PC check. Refine ONEOrbit; preserve bounded agent/oneworker; chibi late. Do not resume alternate palette/technicalUI/newmodels by default.",
+  "app_version": "0.27.0-desktop-preview",
+  "checkpoint_status": "027_blocking_regression_repair_validating_not_shipped",
+  "current_task": "User actualWindows feedback rejects026 readiness (18issues):slow/wrong app/task execution,micquiet,uncancelledcompute,overlappingtopmostwindows,hallucinatedscreen,poorpersona. STOP decorative work/friends claims. Restored exact026remote into isolated leemon-027 because leemon-013 snapshot was stale023/conflicting; original files preserved.Implementing named launch/no-neural literal file tasks/math,alias preservation,PCM cache/quiet handling/endpoint,inputdevice selection,ownedworker cancellation+HTTPepochs,quiet non-topmostdesktop/one task surface,structured window overview instead unrestricted image descriptions.",
+  "next_action": "Finish027 real-file/PCM/ownedprocess/native UI/transport tests,fix regressions,build/save private repair preview/source/report with actual limits. No claim universal app editing or real microphone success without Windows. GlobalPTT/generalUIediting/real2Bquality/hardware performance remain unresolved. Need user Windows recheck of simplecases before friends.",
   "read_next": [
-    "docs/ORBIT_026.md",
-    "docs/FRIENDS_ALPHA_025.md"
+    "docs/REPAIR_027.md",
+    "src/core/direct_tasks.gd",
+    "src/tools/voice_audio.gd"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",

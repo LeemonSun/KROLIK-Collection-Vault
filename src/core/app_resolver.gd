@@ -29,6 +29,9 @@ func prepare(query,goal,records,now,locale="en"):
 			if wanted in [name,product]:score=100
 			elif wanted.length()>=4 and (wanted in name or wanted in product):score=70
 			elif wanted.length()>=6 and mini(distance(wanted,name),distance(wanted,product))<=2:score=50
+		if not wanted.is_empty() and record.get("aliases",[]) is Array:
+			for alias in record.get("aliases",[]).slice(0,8):
+				if wanted==key(alias):score=100
 		ranked.append({"record":record,"score":score,"order":ranked.size()})
 	ranked.sort_custom(func(a,b):return a.score>b.score if a.score!=b.score else a.order<b.order)
 	var direct={}
@@ -45,7 +48,7 @@ func prepare(query,goal,records,now,locale="en"):
 		page_items.append(item);page_map[alias]=entry.record.duplicate(true);map[alias]=entry.record.duplicate(true);bytes+=count
 	if not page_items.is_empty():pages.append(_page(query,goal,page_items,page_map,now,locale))
 	var context=pages[0].duplicate(true) if not pages.is_empty() else {"ok":false}
-	context["direct"]=direct;context["pages"]=pages;context["all_map"]=map
+	context["matched"]=ranked.filter(func(entry):return entry.score>=50).map(func(entry):return entry.record.duplicate(true));context["direct"]=direct;context["pages"]=pages;context["all_map"]=map
 	return context
 func _page(query,goal,items,map,now,locale):
 	var choices=Array(map.keys());choices.append("ask");choices.append("none")

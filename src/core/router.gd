@@ -7,6 +7,8 @@ func route(raw):
 		return {"kind": "invalid", "key": "empty_input"}
 	if text.length() > 2048:
 		return {"kind": "invalid", "key": "input_too_long"}
+	var direct=preload("res://src/core/direct_tasks.gd").route(text)
+	if not direct.is_empty():return direct
 	var utility=preload("res://src/core/utility_intent.gd").route(text)
 	if not utility.is_empty():return utility
 	var space = text.find(" ")

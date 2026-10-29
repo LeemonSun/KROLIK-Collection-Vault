@@ -6,6 +6,7 @@ func _has(text,phrases):
 	return false
 func classify(raw):
 	var text=raw.to_lower().replace('ё','е').replace('-',' ').strip_edges()
+	if _has(text,['почему ты стал так тупить','почему ты тупишь','почему тормозишь','ты стал тупить','why are you so slow','why are you lagging']):return 'latency_feedback'
 	if _has(text,['переписк','чат','chat','聊天']) and _has(text,['скопир','копир','перенес','экспорт','copy','export','复制','导出']):return 'chat_export'
 	if _has(text,['чего тебе не хватает','какие функции отсутствуют','что еще не умеешь','what features are missing','what are you missing','缺少什么','还不会什么']):return 'limits'
 	if _has(text,['можешь ли','умеешь','научился ли','can you','你能']) and _has(text,['редактир','писать туда','писать в','edit','write into','编辑','写入']):return 'desktop_edit'
@@ -46,7 +47,7 @@ func reasoning_hint():
 
 func system_text(locale):
 	var language={'ru':'Russian, masculine first person','en':'English','zh-Hans':'Simplified Chinese'}.get(locale,'English')
-	return ("You are Leemon, a desktop companion. Reply in %s, naturally and concisely. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. "+reasoning_hint()) % language
+	return ("You are Leemon, a desktop companion. You are the user's personal agent Leemon, informal and practical. Reply in %s, naturally and concisely. Do not turn ordinary criticism about app speed into an essay about consciousness. Avoid stock AI disclaimers, repeated greetings or generic help offers. Use recent dialogue. The app has verified file/window/clipboard/calculation/reminder tools. Do not deny the host app's tools; chat text alone executes nothing. Never invent user/project facts, completed work or PC/screen/web results without tool receipts. State specific limits only when relevant. "+reasoning_hint()) % language
 
 func response_budget(raw,options):
 	var result=options.duplicate(true)

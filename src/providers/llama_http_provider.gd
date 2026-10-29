@@ -5,6 +5,7 @@ const ENDPOINT = "http://127.0.0.1:9931/v1/chat/completions"
 var endpoint = ENDPOINT
 var auth_token = ""
 var http
+var transport_revision=0
 var phase=""
 var request_messages=[]
 var request_options={}
@@ -18,14 +19,18 @@ var tokenize_ms=0
 var stage_started_ms=0
 
 func _ready():
+	_make_http()
+func _make_http():
 	http = HTTPRequest.new()
-	http.timeout = 180.0
+	http.timeout = 30.0
 	http.body_size_limit = 1024 * 1024
 	http.max_redirects = 0
 	http.set_http_proxy("", -1)
 	http.set_https_proxy("", -1)
 	add_child(http)
-	http.request_completed.connect(_on_completed)
+	var expected=transport_revision
+	http.request_completed.connect(func(result,code,headers,body):
+		if expected==transport_revision:_on_completed(result,code,headers,body))
 
 func submit(messages, options = {}):
 	if busy:
@@ -95,12 +100,15 @@ func _generate():
 	return _post("/v1/chat/completions",body)
 
 func cancel():
+	transport_revision+=1
 	if http:
 		http.cancel_request()
 	busy = false
 	phase=""
 	request_messages=[]
 	request_options={}
+	if is_inside_tree() and http is HTTPRequest:
+		http.queue_free();http=null;_make_http()
 
 func _on_completed(result, code, _headers, body):
 	if not busy:

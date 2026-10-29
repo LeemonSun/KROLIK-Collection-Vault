@@ -8,7 +8,7 @@ func _init():
 	borderless=true
 	transparent=true
 	transparent_bg=true
-	always_on_top=true
+	always_on_top=false
 	min_size=Vector2i(320,280)
 	size=Vector2i(480,560)
 	disable_3d=true
@@ -18,7 +18,7 @@ func _ready():
 	borderless=true
 	transparent=true
 	transparent_bg=true
-	always_on_top=true
+	always_on_top=false
 	exclude_from_capture=false
 	min_size=Vector2i(320,280)
 	size=Vector2i(480,560)
@@ -31,6 +31,7 @@ func _ready():
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,get_window_id())
 	view.close_requested.connect(close_soft)
 	view.settings_requested.connect(func(): app.open_settings("assistant_tools"))
+	visibility_changed.connect(func():app.changed.emit())
 	close_requested.connect(close_soft)
 	window_input.connect(func(event):
 		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
@@ -62,7 +63,6 @@ func open_near(anchor):
 	view.editor.grab_focus.call_deferred()
 
 func close_soft():
-	if is_instance_valid(app.desktop_companion):app.desktop_companion.return_home()
 	if app.speech_input.busy():app.cancel()
 	if transition:transition.kill()
 	if app.motion.reduced_motion or app.paused:

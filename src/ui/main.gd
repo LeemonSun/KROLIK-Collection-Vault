@@ -85,7 +85,7 @@ func open_panel(target_page = "assistant_tools"):
 		var bounds = DisplayServer.screen_get_usable_rect(win.current_screen)
 		win.size = Vector2i(mini(720,bounds.size.x-24),mini(640,bounds.size.y-48))
 		win.position = bounds.position+(bounds.size-win.size)/2
-		win.always_on_top = true
+		win.always_on_top = false
 	win.show()
 	win.grab_focus()
 	if not App.motion.reduced_motion and not App.paused:
@@ -251,7 +251,7 @@ func _toggle(key,value,callback):
 func _build_character():
 	_label(App.t("orbit_behavior"),content,25)
 	_label(App.t("orbit_behavior_hint"),content,13,true)
-	_toggle("auto_move",bool(App.store.data.settings.get("companion_roam",true)),func(value):
+	_toggle("auto_move",bool(App.store.data.settings.get("companion_roam",false)),func(value):
 		if App.show_desktop():App.desktop_companion.auto_move=value
 		App._save_setting("companion_roam",value))
 	_toggle("speech_bubbles",App.store.data.settings.get("speech_bubbles",true),func(value):
@@ -355,6 +355,14 @@ func _build_settings():
 	for name in ["Русский","English","简体中文"]:locale_picker.add_item(name)
 	locale_picker.select(["ru","en","zh-Hans"].find(App.l10n.locale));content.add_child(locale_picker)
 	locale_picker.item_selected.connect(func(index):App.set_locale(["ru","en","zh-Hans"][index]);_build())
+	_label(App.t("microphone_select"),content,14,true)
+	var microphone=OptionButton.new()
+	var devices=AudioServer.get_input_device_list()
+	for device in devices:microphone.add_item(device)
+	if devices.has(AudioServer.input_device):microphone.select(devices.find(AudioServer.input_device))
+	microphone.item_selected.connect(func(index):
+		if not App.speech_input.busy():AudioServer.input_device=devices[index];App._save_setting("microphone_device",devices[index]))
+	content.add_child(microphone)
 	_toggle("system_voice",App.voice.enabled,func(value):App.voice.enabled=value;App._save_setting("voice_enabled",value);App.voice.stop())
 	_label(App.t("orbit_voice_os"),content,12,true)
 	_toggle("save_chat",App.history_enabled(),App.set_history_enabled)

@@ -237,6 +237,7 @@ func _editor_input(event):
 func submit_current():
 	var text=editor.text.strip_edges()
 	if text.is_empty():return
+	if preload("res://src/core/direct_tasks.gd").is_stop(text):editor.clear();app.submit(text);return
 	if text.length()>2048:
 		status_label.text=app.t('input_too_long')
 		return
@@ -378,6 +379,7 @@ func _voice():
 	refresh()
 
 func _screen():
+	if editor.text.strip_edges().is_empty():app.begin_overview();return
 	if not app.local_runtime.installed():install_mode="text";refresh();return
 	if not app.vision_asset.installed():install_mode="screen";refresh();return
 	var question=editor.text.strip_edges()

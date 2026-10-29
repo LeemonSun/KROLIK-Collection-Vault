@@ -4,14 +4,19 @@ var directory=""
 func _init():
 	var documents=OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
 	if not documents.is_empty():directory=documents.path_join("Leemon")
-func create_text(text):
+func create_text(text,requested_name=""):
 	if directory.is_empty() or not text is String or text.to_utf8_buffer().size()>8192:return {"ok":false}
 	if DirAccess.make_dir_recursive_absolute(directory)!=OK:return {"ok":false}
 	var suffix=Crypto.new().generate_random_bytes(8).hex_encode()
 	var stamp=Time.get_datetime_string_from_system().replace(":","-")
 	var name="Leemon-"+stamp+"-"+suffix+".txt"
+	if not requested_name.is_empty():
+		name=requested_name.strip_edges()
+		if not name.to_lower().ends_with(".txt"):name+=".txt"
+		var valid=RegEx.new();valid.compile("(?i)^[\\p{L}\\p{N}][\\p{L}\\p{N} _.-]{0,90}\\.txt$")
+		if not valid.search(name) or name.contains("..") or name.get_basename().to_upper() in ["CON","PRN","AUX","NUL","COM1","COM2","COM3","COM4","LPT1","LPT2","LPT3"]:return {"ok":false,"status":"invalid_name"}
 	var path=directory.path_join(name)
-	if FileAccess.file_exists(path):return {"ok":false}
+	if FileAccess.file_exists(path):return {"ok":false,"status":"exists"}
 	var file=FileAccess.open(path,FileAccess.WRITE)
 	if not file:return {"ok":false}
 	file.store_buffer(text.to_utf8_buffer());file.close()

@@ -48,6 +48,7 @@ var local_runtime
 var chat_window
 var speech_bubble
 var task_window
+var overview_pending=false
 var cancel_serial=0
 var dictation_submit=false
 var file_editor
@@ -81,6 +82,7 @@ var discovery_retry=0
 var discovery_at=0
 var discovery_resolver=preload("res://src/core/app_resolver.gd").new()
 var goal_invoke_before=[]
+var direct_launch_query=""
 var launch_goal=""
 var launch_vpn={}
 var application_access
@@ -151,11 +153,13 @@ func _ready():
 	speech_input.failed.connect(func(key):dictation_submit=false;add_message("assistant",t(key));dictation_target=null)
 	application_access=preload("res://src/tools/application_access.gd").new()
 	add_child(application_access)
-	application_access.notice.connect(func(key,values):add_message("assistant",t(key,values),true))
+	application_access.notice.connect(func(key,values):
+		if not overview_pending:add_message("assistant",t(key,values),true))
 	application_access.changed.connect(_access_changed)
 	application_access.read_ready.connect(_window_read_observed)
 	application_access.snapshot_ready.connect(_goal_observed)
 	application_access.completed.connect(_goal_access_completed)
+	application_access.completed.connect(_overview_completed)
 	catalog=preload("res://src/tools/app_catalog.gd").new()
 	add_child(catalog)
 	catalog.completed.connect(_discovery_completed)
@@ -178,11 +182,15 @@ func _ready():
 	var catalog = JSON.parse_string(FileAccess.get_file_as_string("res://manifests/animation_catalog.json"))
 	motion.configure(catalog)
 	persistence_ready = store.load_state()
+	if persistence_ready and not store.data.settings.get("quiet_desktop_027",false):
+		store.data.settings["companion_roam"]=false;store.data.settings["quiet_desktop_027"]=true;store.save_state()
 	facts.load_state()
 	if persistence_ready:
 		l10n.set_locale(str(store.data.settings.get("locale", "ru")))
 		profile_request = str(store.data.settings.get("profile", "auto"))
 		resource_mode="standard" if store.data.settings.get("resource_mode")=="standard" else "quiet"
+		var microphone=str(store.data.settings.get("microphone_device","Default"))
+		if AudioServer.get_input_device_list().has(microphone):AudioServer.input_device=microphone
 		voice.enabled=bool(store.data.settings.get("voice_enabled",false))
 		motion.set_reduced_motion(bool(store.data.settings.get("reduced_motion",false)))
 	reminder_timer=Timer.new()
@@ -327,6 +335,7 @@ func copy_chat(setter=Callable()):
 	return {"ok":true,"count":result.count,"truncated":result.truncated}
 
 func submit(text):
+	if preload("res://src/core/direct_tasks.gd").is_stop(text):cancel();add_message("assistant",t("request_stopped"));return
 	if paused:
 		add_message("assistant", t("paused_message"))
 		return
@@ -343,7 +352,7 @@ func submit(text):
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task","agent.discover"] or preload("res://src/core/delegation_intent.gd").eligible(text))
+	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task","agent.discover","files.review_literal"] or preload("res://src/core/delegation_intent.gd").eligible(text))
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -388,6 +397,7 @@ func chat_busy():
 	return not discovery_mode.is_empty() or state.current!="idle" or not queued_chat_text.is_empty() or speech_input.busy() or application_access.pid>0 or not goal_mode.is_empty() or not window_read_mode.is_empty()
 
 func queue_chat(text):
+	if preload("res://src/core/direct_tasks.gd").is_stop(text):cancel();return true
 	# Deferred work must never inherit a selected window or trigger an OS action.
 	if paused or screen_mode or translation_mode or speech_input.busy() or not goal_mode.is_empty() or not window_read_mode.is_empty() or application_access.pid>0 or not application_access.target.is_empty():return false
 	if not ((state.current=="thinking" and not pending_user_text.is_empty()) or not queued_chat_text.is_empty()):return false
@@ -511,6 +521,8 @@ func _execute(command):
 		state.reset();changed.emit();return
 	if command.tool=="agent.run":
 		state.reset();begin_agent(command.args.goal);return
+	if command.tool=="files.review_literal":
+		state.reset();open_literal_review(command.args);return
 	if command.tool=="files.edit_selected":
 		state.reset();open_file_editor();return
 	if command.tool.begins_with("facts."):
@@ -537,12 +549,14 @@ func _execute(command):
 		changed.emit();return
 	if command.tool=="screen.describe":
 		state.reset()
-		begin_screen(str(command.args.get("question","")))
+		var question=str(command.args.get("question",""))
+		if question.strip_edges().is_empty():begin_overview()
+		else:begin_screen(question)
 		return
 	if command.tool=="documents.create":
-		var result=documents.create_docx(command.args.get("text","")) if command.args.get("format")=="docx" else documents.create_text(command.args.get("text",""))
+		var result=documents.create_docx(command.args.get("text","")) if command.args.get("format")=="docx" else documents.create_text(command.args.get("text",""),command.args.get("name",""))
 		if not result.ok:
-			add_message("assistant",t("document_failed"))
+			add_message("assistant",t("document_exists" if result.get("status")=="exists" else "document_failed"))
 			state.reset();changed.emit();return
 		var record={"path":result.path,"sha256":result.sha256,"name":result.name}
 		pending_document=record
@@ -578,9 +592,13 @@ func _execute(command):
 		if target.begins_with("http://") or target.begins_with("https://"):
 			var result=browser_search.open_url(target)
 			_desktop_completed({"status":"browser_handoff" if result.ok else "failed"})
+		elif not preload("res://src/core/direct_tasks.gd").builtin(target).is_empty():
+			if not desktop_actions.request(preload("res://src/core/direct_tasks.gd").builtin(target)):_desktop_completed({"status":"failed"})
 		elif target.to_lower() in ["проводник","explorer","file explorer","文件资源管理器","загрузки","downloads","documents","документы","рабочий стол","desktop","下载","文档","桌面"] or target.contains(":\\"):
 			if not desktop_actions.request(target):_desktop_completed({"status":"failed"})
-		else:_begin_discovery(target,target,true)
+		else:
+			direct_launch_query=target
+			if not desktop_actions.request(target):_desktop_completed({"status":"failed"})
 		return
 	elif command.tool == "notes.add":
 		var ok = persistence_ready and store.add_note(command.args.text)
@@ -621,6 +639,7 @@ func _execute(command):
 	changed.emit()
 
 func _on_answer(text):
+	if screen_mode and provider is Llama and provider.last_truncated:_on_failure("vision_unverified");return
 	if delegation.active:
 		if provider is Llama and is_instance_valid(diagnostics):diagnostics.record_inference(provider.last_usage)
 		_delegation_answer(text);return
@@ -673,9 +692,11 @@ func _on_answer(text):
 			session_turns.pop_front()
 	pending_user_text = ""
 	translation_mode=false
+	var visual_answer=screen_mode
 	_forget_screen()
 	var display_text=(t("chat_draft_heading")+"\n\n"+text) if chat_draft_mode else text
 	chat_draft_mode=false;chat_draft_attempt=0
+	if visual_answer:display_text=t("vision_guess_heading")+"\n"+display_text
 	if provider is Llama and provider.last_truncated:display_text+="\n\n"+t("reply_limit")
 	add_message("assistant", display_text)
 	voice.speak(text, l10n.locale)
@@ -688,6 +709,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	if state.current=="idle" and pending_user_text.is_empty() and queued_chat_text.is_empty() and goal_mode.is_empty() and discovery_mode.is_empty() and not delegation.active and not screen_mode and window_read_mode.is_empty() and not translation_mode and queued_translation.is_empty() and not overview_pending and not public_page.busy:return
 	delegation.clear()
 	if not discovery_mode.is_empty():_discovery_error(key);return
 	logic_mode=false
@@ -713,6 +735,8 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	overview_pending=false;direct_launch_query=""
+	var abort_worker=is_instance_valid(local_runtime) and (local_runtime.get("starting")==true or ((local_runtime.generation_busy or (is_instance_valid(provider) and provider.get("busy")==true)) and local_runtime.get("pid") is int and int(local_runtime.get("pid"))>0))
 	cancel_serial+=1
 	dictation_submit=false
 	delegation.clear()
@@ -752,6 +776,8 @@ func cancel():
 	pending_user_text = ""
 	if provider:
 		provider.cancel()
+	if abort_worker:
+		local_runtime.stop();local_runtime.status="ai_sleeping"
 	state.reset()
 	changed.emit()
 
@@ -765,7 +791,7 @@ func set_paused(value):
 		desktop_companion.set_reduced(true)
 	elif is_instance_valid(desktop_companion):
 		desktop_companion.set_reduced(motion.reduced_motion)
-		desktop_companion.auto_move=bool(store.data.settings.get("companion_roam",true))
+		desktop_companion.auto_move=bool(store.data.settings.get("companion_roam",false))
 	motion.set_paused(value)
 	cancel()
 	changed.emit()
@@ -921,7 +947,7 @@ func show_chat():
 	var anchor = Rect2i(desktop_companion.position,desktop_companion.size) if is_instance_valid(desktop_companion) else DisplayServer.screen_get_usable_rect()
 	if is_instance_valid(speech_bubble):speech_bubble.dismiss()
 	chat_window.open_near(anchor)
-	if is_instance_valid(desktop_companion):desktop_companion.park_near(Rect2i(chat_window.position,chat_window.size))
+	
 	return true
 
 func _public_page_ready(result):
@@ -945,6 +971,10 @@ func _desktop_completed(result):
 	if state.current!="executing":return
 	var status=str(result.get("status","failed"))
 	if status=="visible" and result.get("identity") is Dictionary:application_access.adopt(result.identity)
+	if not direct_launch_query.is_empty():
+		var query=direct_launch_query;direct_launch_query=""
+		if status=="missing":_begin_discovery(query,query,true);return
+
 	if not launch_vpn.is_empty():
 		var followup=launch_vpn;launch_vpn={}
 		if status=="visible":
@@ -1093,7 +1123,7 @@ func begin_screen(question=""):
 	state.transition("executing");changed.emit()
 	var screen=chat_window.current_screen if is_instance_valid(chat_window) and chat_window.visible else DisplayServer.get_primary_screen()
 	screen_restore=[]
-	for panel in [file_editor,speech_bubble,chat_window,control_panel.get_window() if is_instance_valid(control_panel) else null]:
+	for panel in [file_editor,speech_bubble,chat_window,task_window,control_panel.get_window() if is_instance_valid(control_panel) else null]:
 		if is_instance_valid(panel) and panel.visible and panel!=get_tree().root:
 			screen_restore.append(panel);panel.hide()
 	await get_tree().process_frame
@@ -1500,6 +1530,12 @@ func _discovery_completed(result):
 		discovery_context=discovery_resolver.prepare(discovery_query,discovery_goal,result.get("apps",[]),Time.get_ticks_msec(),l10n.locale)
 		if not discovery_context.get("ok",false):_discovery_error("discover_missing");return
 		if not discovery_context.direct.is_empty():_discovery_open(discovery_context.direct);return
+		if not discovery_query.is_empty():
+			var matched=discovery_context.get("matched",[])
+			if matched.is_empty():_discovery_error("discover_named_missing");return
+			discovery_context["all_map"]={}
+			for i in range(matched.size()):discovery_context.all_map[str(i)]=matched[i]
+			_discovery_offer_choices();return
 		if not local_runtime.installed():_discovery_offer_choices();return
 		if local_runtime.status!="ai_ready" or provider_name!="local_worker":
 			discovery_mode="loading";local_ai_enabled=true
@@ -1588,3 +1624,23 @@ func orbit_voice():
 	# A pre-existing draft is never silently submitted as part of a spoken request.
 	if not chat_window.view.editor.text.strip_edges().is_empty():show_chat()
 	return begin_dictation(chat_window.view.editor,true)
+
+func begin_overview():
+	if paused or chat_busy():return false
+	overview_pending=true;state.transition("executing")
+	if not application_access.list_windows():overview_pending=false;state.reset();return false
+	changed.emit();return true
+func _overview_completed(result):
+	if not overview_pending:return
+	overview_pending=false;state.reset()
+	if result.get("status")!="windows":add_message("assistant",t("overview_failed"));changed.emit();return
+	var lines=[]
+	for item in result.get("windows",[]).slice(0,8):lines.append(str(item.get("app",""))+" — "+str(item.get("title","")))
+	add_message("assistant",t("overview_heading")+"\n"+"\n".join(PackedStringArray(lines))+"\n\n"+t("overview_limit"),true);changed.emit()
+
+func open_literal_review(args):
+	if paused or DisplayServer.get_name()=="headless":return false
+	if not is_instance_valid(file_editor):file_editor=preload("res://src/ui/file_edit_window.gd").new();add_child(file_editor)
+	file_editor.open_path(args.path)
+	file_editor.find_edit.text=args.find;file_editor.replace_edit.text=args.replacement
+	file_editor.review();return true

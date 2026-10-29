@@ -548,5 +548,15 @@
   "orbit_review_expand": "展开“{name}”。",
   "orbit_review_invoke": "点击“{name}”。",
   "orbit_review_enable": "开启“{name}”开关。",
-  "orbit_review_disable": "关闭“{name}”开关。"
+  "orbit_review_disable": "关闭“{name}”开关。",
+  "discover_named_missing": "没有找到与该名称匹配的可用应用，不会替换为其他应用。",
+  "microphone_select": "麦克风",
+  "self_latency_feedback": "如果我响应慢或没有完成请求，那是我的工作出了问题。你需要结果，而不是关于意识的长篇解释。",
+  "overview_heading": "已打开的窗口：",
+  "overview_limit": "这是窗口标题列表，不是屏幕内容。选择窗口后可在其中操作。",
+  "overview_failed": "无法读取窗口列表。",
+  "vision_unverified": "无法可靠识别图像，不会编造其中的文字。",
+  "document_exists": "同名文件已存在，未覆盖。请换一个名称。",
+  "vision_guess_heading": "图像解读，可能有误：",
+  "request_stopped": "已停止。"
 }

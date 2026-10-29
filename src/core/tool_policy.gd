@@ -1,6 +1,7 @@
 extends RefCounted
 ## Trusted tool registry controls effects; model text is never executed.
 const TOOLS = {
+	"files.review_literal":{"implemented":true,"confirmation":false},
 	"agent.discover":{"implemented":true,"confirmation":false},
 	"desktop.task":{"implemented":true,"confirmation":false},
 	"chat.copy":{"implemented":true,"confirmation":false},

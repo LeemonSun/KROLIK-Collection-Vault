@@ -17,7 +17,10 @@ static func route(raw):
 	rx.compile('(?i)^(?:посчитай|вычисли|реши|чему равно|сколько будет|calculate|what is|计算|算一下)\\s*[:：]?\\s+(.+?)[?？]?$')
 	hit=rx.search(text)
 	if hit:
-		var expression=hit.get_string(1);var stripped=expression.to_lower()
+		var expression=hit.get_string(1)
+		var wrapper=RegEx.new();wrapper.compile("(?i)^(?:(?:в|на|in|on)\\s+)?(?:кальк[а-я]*|(?:the )?calculator)\\s*[:：]?\\s+")
+		expression=wrapper.sub(expression,"")
+		var stripped=expression.to_lower()
 		for word in ['log10','sqrt','abs','sin','cos','ln','pi','e']:stripped=stripped.replace(word,'')
 		var candidate=RegEx.new();candidate.compile('^[0-9.()+*/^%×÷−π\\-\\s]+$')
 		if candidate.search(stripped):return {"kind":"tool","tool":"math.calculate","args":{"expression":expression}}

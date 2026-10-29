@@ -51,6 +51,8 @@ func schedule_refresh():
 	refresh_pending=true;refresh.call_deferred()
 func refresh():
 	refresh_pending=false
+	if is_instance_valid(app.chat_window) and app.chat_window.visible:
+		hide();ttl.stop();active_last=false;fingerprint="";return
 	var next=Presenter.snapshot(app)
 	if next.is_empty():
 		dismissed_token="";fingerprint=""

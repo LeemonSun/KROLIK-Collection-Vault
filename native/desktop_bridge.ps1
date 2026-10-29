@@ -4,11 +4,16 @@ $reply=@{status='failed';nonce=''}
 function Normalize-Name([string]$value) {
  return ($value.ToLowerInvariant() -replace '[^\p{L}\p{N}]','')
 }
-function Get-AppCatalog {
+function Get-BuiltinCatalog {
  $items=[Collections.Generic.List[object]]::new()
  foreach($app in @(@{name='notepad';aliases=@('блокнот','记事本');path="$env:WINDIR\System32\notepad.exe"},@{name='calculator';aliases=@('калькулятор','calc','计算器');path="$env:WINDIR\System32\calc.exe"},@{name='paint';aliases=@('пейнт','画图');path="$env:WINDIR\System32\mspaint.exe"})) {
   if(Test-Path -LiteralPath $app.path -PathType Leaf){$items.Add($app)}
  }
+ return $items.ToArray()
+}
+function Get-AppCatalog {
+ $items=[Collections.Generic.List[object]]::new()
+ foreach($app in Get-BuiltinCatalog){$items.Add($app)}
  $shell=New-Object -ComObject WScript.Shell
  foreach($folder in @([Environment]::GetFolderPath('StartMenu'),[Environment]::GetFolderPath('CommonStartMenu'),[Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('CommonDesktopDirectory'))) {
   if(-not $folder -or -not (Test-Path -LiteralPath $folder)){continue}
@@ -75,7 +80,7 @@ function Get-DiscoveryCatalog($catalog){
   if($records.Count -ge 96 -or $clock.ElapsedMilliseconds -gt 8000){$partial=$true;break}
   try{
    $file=Get-Item -LiteralPath $app.path;$version=$file.VersionInfo;$identity=Get-AppIdentity $app.path
-   $record=@{id=(Get-AppId $app.path);stamp=(Get-AppStamp $app.path);name=([string]$app.name).Substring(0,[Math]::Min(80,([string]$app.name).Length));product=([string]$version.ProductName);description=([string]$version.FileDescription);running=($null -ne $identity)}
+   $record=@{id=(Get-AppId $app.path);stamp=(Get-AppStamp $app.path);name=([string]$app.name).Substring(0,[Math]::Min(80,([string]$app.name).Length));product=([string]$version.ProductName);aliases=@($app.aliases | Select-Object -First 8 | ForEach-Object {([string]$_).Substring(0,[Math]::Min(64,([string]$_).Length))});description=([string]$version.FileDescription);running=($null -ne $identity)}
    foreach($key in @('product','description')){if($record[$key].Length -gt 64){$record[$key]=$record[$key].Substring(0,64)}}
    $size=[Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json $record -Compress))
    if($bytes+$size -gt 24000){$partial=$true;continue}
@@ -179,7 +184,7 @@ public static class LeemonWindow {
 function Open-Document($request) {
  $path=[IO.Path]::GetFullPath([string]$request.path)
  $folder=[IO.Path]::GetFullPath((Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Leemon'))
- if([IO.Path]::GetDirectoryName($path) -ine $folder -or [IO.Path]::GetFileName($path) -notmatch '^Leemon-[0-9T-]+-[a-f0-9]{16}\.(?:txt|docx)$' -or $request.sha256 -notmatch '^[a-f0-9]{64}$'){throw 'Not an owned draft'}
+ if([IO.Path]::GetDirectoryName($path) -ine $folder -or [IO.Path]::GetFileName($path) -notmatch '^(?:Leemon-[0-9T-]+-[a-f0-9]{16}\.(?:txt|docx)|[\p{L}\p{N}][\p{L}\p{N} _.-]{0,90}\.txt)$' -or $request.sha256 -notmatch '^[a-f0-9]{64}$'){throw 'Not an owned draft'}
  $file=Get-Item -LiteralPath $path
  $parent=Get-Item -LiteralPath $folder
  if(($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -or ($parent.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $file.Length -gt 32768 -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $request.sha256){throw 'Draft changed'}
@@ -232,7 +237,8 @@ try {
  if($request.operation -ne 'open' -or $request.target -isnot [string] -or $request.target.Length -gt 2048 -or -not $request.target.Trim()){throw 'Invalid target'}
  # Reject URLs here: a separately validated URL opener is handled in the application.
  if($request.target -match '^\w+:\/\/'){throw 'Unsupported target'}
- $resolved=Resolve-Target $request.target (Get-AppCatalog)
+ $resolved=Resolve-Target $request.target (Get-BuiltinCatalog)
+ if($resolved.kind -eq 'missing'){$resolved=Resolve-Target $request.target (Get-AppCatalog)}
  $outcome=Open-Target $resolved
  foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
  }

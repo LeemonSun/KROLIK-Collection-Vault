@@ -548,5 +548,15 @@
   "orbit_review_expand": "Expand “{name}”.",
   "orbit_review_invoke": "Press “{name}”.",
   "orbit_review_enable": "Turn on “{name}”.",
-  "orbit_review_disable": "Turn off “{name}”."
+  "orbit_review_disable": "Turn off “{name}”.",
+  "discover_named_missing": "I did not find an available application matching that name. I will not substitute a different one.",
+  "microphone_select": "Microphone",
+  "self_latency_feedback": "If I stall or fail to do what you asked, that is a problem with how I work. You need a result, not a lecture about consciousness.",
+  "overview_heading": "Open windows:",
+  "overview_limit": "This lists window titles, not their contents. Select a window to work inside it.",
+  "overview_failed": "Could not read the window list.",
+  "vision_unverified": "I could not reliably interpret the image. I will not invent its text.",
+  "document_exists": "A file with that name already exists. I did not overwrite it. Choose another name.",
+  "vision_guess_heading": "Image interpretation — may contain errors:",
+  "request_stopped": "Stopped."
 }

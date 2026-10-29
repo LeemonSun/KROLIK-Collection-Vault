@@ -108,13 +108,13 @@ func _ready():
 	host.unresizable = true
 	host.transparent = true
 	host.transparent_bg = true
-	host.always_on_top = true
+	host.always_on_top = false
 	host.unfocusable = false
 	host.mouse_passthrough = false
 	host.exclude_from_capture = false
 	host.disable_3d=true
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED,host.get_window_id())
-	auto_move=bool(app.store.data.settings.get("companion_roam",true))
+	auto_move=bool(app.store.data.settings.get("companion_roam",false))
 	user_scale=clampf(float(app.store.data.settings.get("character_scale",1.0)),0.75,1.5)
 	var usable = DisplayServer.screen_get_usable_rect(DisplayServer.get_primary_screen())
 	var fit = minf(1.0,minf(float(usable.size.y)/float(BASE_SIZE.y*user_scale),float(usable.size.x)/float(BASE_SIZE.x*user_scale)))*user_scale
@@ -158,6 +158,8 @@ func _ready():
 	var bounds = DisplayServer.screen_get_usable_rect(current_screen)
 	last_display_bounds=bounds
 	position = bounds.end - size - Vector2i(30, 0)
+	var saved=app.store.data.settings.get("character_position",{})
+	if saved is Dictionary and saved.get("x") is int and saved.get("y") is int:position=bounded(Vector2i(saved.x,saved.y))
 	home_position=position
 	print("DESKTOP_READY main_window=", host.get_window_id(), " position=", position, " size=", size)
 	_setup_tray()
@@ -195,6 +197,7 @@ func _input_event(event):
 				if moved:
 					position=bounded(DisplayServer.mouse_get_position()-drag_offset)
 					home_position=position
+					app._save_setting("character_position",{"x":position.x,"y":position.y})
 					effect_time = 0.25
 				else:
 					chat_requested.emit()
@@ -270,13 +273,6 @@ func _process(delta):
 	activity_elapsed+=delta
 	if activity_elapsed>=0.15 and not dragging:
 		activity_elapsed=0
-		if effect_kind not in ["walk","edge_enter","dash"]:
-			if is_instance_valid(app.chat_window) and app.chat_window.visible:
-				var anchor=Rect2i(app.chat_window.position,app.chat_window.size)
-				if anchor!=last_chat_rect:last_chat_rect=anchor;park_delay=0.45
-				elif park_delay>0:
-					park_delay-=0.15
-					if park_delay<=0:park_near(anchor)
 		_sync_pose()
 	if fx_time>0:
 		fx_time=maxf(0,fx_time-delta);canvas.queue_redraw()
