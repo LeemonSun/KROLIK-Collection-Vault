@@ -283,6 +283,7 @@ func refresh():
 	task_style.content_margin_bottom=4 if available_height<340 else 8
 	task_label.text=app.t("tabs_choice" if not tab_items.is_empty() else ("vpn_working" if app.vpn_connection.pid>0 else ("launch_working" if not app.launch_goal.is_empty() or not app.launch_vpn.is_empty() else "tabs_working")))
 	if discovering or not app_items.is_empty():task_label.text=app.t("discover_"+app.discovery_mode if discovering else "discover_choose_short")
+	if app.discovery_mode=="thinking":task_label.text+=" · "+str(app.discovery_page+1)+"/"+str(app.discovery_context.get("pages",[]).size())
 	var signature=JSON.stringify(tab_items)+JSON.stringify(app_items)+app.l10n.locale
 	if signature!=tabs_signature:
 		tabs_signature=signature;tab_choices.clear()

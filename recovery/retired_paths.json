@@ -112,6 +112,96 @@
     {
       "path": "src/ui/signal_surface.gd.uid",
       "gitsha": "4fda98e3ad8bf9cd63e6077bb60b01813752a2f1"
+    },
+    {
+      "path": "recovery-before-022/RESUME.md",
+      "gitsha": "0967ad6e376d3cae935464b63f4057e94e4e4b25",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/PROJECT_STATE.md",
+      "gitsha": "84b5ed71708776e37c43b6ab14d495a68f58c22e",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/export_presets.cfg",
+      "gitsha": "db47a37e8b3432264d8b850b96b62cbb42b9e92a",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/project.godot",
+      "gitsha": "ae8922ea65a1cec510c8b508f72424ec0f313ae7",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/README.md",
+      "gitsha": "0af567f77dfd35fddbbcb53550cb69b7d81470cb",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/locales/en.json",
+      "gitsha": "a20951107785f91cff6d6d2c7745c8fc0343c678",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/locales/ru.json",
+      "gitsha": "e92fc0294181fd039dccac97ba77bc5a85e21e9f",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/locales/zh-Hans.json",
+      "gitsha": "2f360a4768725a893d0d2414d8901ac2c40b2779",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/recovery/session.json",
+      "gitsha": "eb2da97377b9560aa2f5c3a2557570d3756fb84b",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/tools/run_checks.py",
+      "gitsha": "a8edca1b058db4747d8a6eff3e29acf12d425697",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/tools/build_preview.py",
+      "gitsha": "a3fc35a202d491119eb05cfe31dcb1a9184b1143",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/docs/PREVIEW_README.txt",
+      "gitsha": "cc6a0b3e6ec64692c10a1ebc2543347fbef8981e",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/docs/HANDOFF.md",
+      "gitsha": "7a4c7cde1677db67eacb1ff11334fbcae0952b80",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/reports/windows_export.txt",
+      "gitsha": "df987666bdf4887c314998a21dbea5f25ca0a6ee",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/reports/VALIDATION.md",
+      "gitsha": "39180eeee53ae7a2e061839383119ee963277966",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/reports/structure.txt",
+      "gitsha": "71581ad2d02ffc6e042190d33d2e8f3eabe34173",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/src/app.gd",
+      "gitsha": "821be664b6297041a3e6a576ea76bac9f3c80da3",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
+    },
+    {
+      "path": "recovery-before-022/config/product.json",
+      "gitsha": "81d4793cc05d0a1eb79980a546bcc71c6747bea0",
+      "reason": "Remove accidentally nested duplicate recovery backup from source; original retained outside project"
     }
   ]
 }

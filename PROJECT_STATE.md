@@ -1,6 +1,6 @@
-# Current development: Leemon0.22
+# Current development: Leemon0.23
 
-Browser tab selection, app launch continuation into the existing reviewed UIA agent, existing Windows VPN profiles, app→VPN chain, one compact task card. See docs/WORKFLOWS_022.md and recovery/session.json. Windows acceptance still pending; no IQ/model upgrade claim.
+General observed third-party app discovery, generic names/transliteration/schema-bound semantic app choice, guarded launch/reuse into shared reviewed UIA agent, generic toggles/invoke UI-state effects and bounded stale replans. Read CLAUDE_START_HERE.md, docs/AGENT_023.md and recovery/session.json. Windows/actual-model semantic acceptance pending; no universal GUI control or Krolik Control parity claim.
 
 #Leemon0.21
 

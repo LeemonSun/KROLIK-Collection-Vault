@@ -33,7 +33,7 @@ func record(name,id='a',description=''):
 func target():return {'handle':'123','target_pid':234,'started':'345','title':'Third party application','app':'ThirdParty'}
 func run():
  var router=preload('res://src/core/router.gd').new()
- for phrase in ['включи мой впн','найди и включи мой впн','enable my vpn','连接我的VPN','открой кролик контрл и включи звук','打开克罗利克控制并设置声音','in Orchid configure audio','в кролик контрол настрой звук']:
+ for phrase in ['включи мой впн','включи впн Orchid','enable vpn Orchid','连接VPN Orchid','найди и включи мой впн','enable my vpn','连接我的VPN','открой кролик контрл и включи звук','打开克罗利克控制并设置声音','in Orchid configure audio','в кролик контрол настрой звук']:
   check(router.route(phrase).get('tool')=='agent.discover','General delegation '+phrase)
  for phrase in ['не включи мой впн','как подключить мой впн?','расскажи о кролик контрол','do not enable my vpn','不要连接我的VPN']:
   check(router.route(phrase).get('tool')!='agent.discover','No delegation from discussion/negative '+phrase)
@@ -44,11 +44,19 @@ func run():
  var ambiguous=resolver.prepare('Krolik Control','open app',[apps[0],record('Krolik Control','d')],1000)
  check(ambiguous.direct.is_empty(),'Equal-name ambiguity never direct opens')
  var context=resolver.prepare('','включи мой впн',apps,1000)
- check(context.direct.is_empty() and context.map.size()==3,'No brand/category shortcut auto-picks VPN')
+ check(context.direct.is_empty() and context.all_map.size()==3,'No brand/category shortcut auto-picks VPN')
  check(resolver.validate('{"app":"a1"}',context,1001).id==apps[1].id,'Bound semantic choice maps only to observed app')
  for raw in ['{"app":"C:/evil.exe"}','{"app":"a1","path":"x"}','{}','not JSON']:
   check(resolver.validate(raw,context,1001).is_empty(),'Unbound model output rejected '+raw)
  check(resolver.validate('{"app":"a1"}',context,122000).is_empty(),'Expired model choice rejected')
+ var many=[]
+ for i in range(96):many.append(record('Application '+str(i),str(i).sha256_text().left(1),'Different observed purpose '+str(i)+' '+ 'z'.repeat(48)))
+ var paged=resolver.prepare('','enable task',many,1000)
+ var total=0
+ for page in paged.pages:
+  total+=page.map.size();check(page.messages[1].content.to_utf8_buffer().size()<3400,'Bounded catalog page fits compact context')
+ check(total==96 and paged.all_map.size()==96 and paged.pages.size()>1,'All observed candidates covered; no silent first-page truncation')
+ check(resolver.validate('{"app":"a95"}',paged.pages[0],1001).is_empty(),'A page cannot select an app outside its own enum')
  var app=root.get_node('App');app.cancel()
  var old=[app.catalog,app.application_access,app.local_runtime,app.provider,app.provider_name]
  var catalog=Catalog.new();var access=Access.new();var runtime=Runtime.new();var provider=Provider.new()

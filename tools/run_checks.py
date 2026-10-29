@@ -19,6 +19,7 @@ def main():
     # A fresh profile per group prevents persisted locale/fixtures from leaking
     # into later checks, and never touches the developer's real app data.
     env = dict(os.environ)
+    if args.pwsh:env["COMPANION_PWSH"]=str(Path(args.pwsh).resolve())
     engine = str(Path(args.godot).resolve())
     commands = [
         ("effects023",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_effects023.gd","--","--test-mode"]),

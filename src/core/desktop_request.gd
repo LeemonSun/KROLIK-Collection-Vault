@@ -4,6 +4,9 @@ func route(raw):
 	var text=raw.strip_edges()
 	if preload("res://src/core/action_proposal.gd").negative_intent(text):return {}
 	var patterns=[
+		["^(?:включи|подключи)\\s+(?:мой\\s+)?(?:vpn|впн)\\s+(.{2,100})$","capture","task"],
+		["^(?:connect|enable)\\s+(?:my\\s+)?vpn\\s+(.{2,100})$","capture","task"],
+		["^(?:连接|开启)VPN\\s+(.{1,100})$","capture","task"],
 		["^(?:найди\\s+и\\s+)?(?:включи|подключи)\\s+(?:мой\\s+)?(?:впн|vpn)$","","task"],
 		["^(?:connect|enable)\\s+(?:my\\s+)?vpn$","","task"],
 		["^(?:连接|开启)(?:我的)?VPN$","","task"],
@@ -16,6 +19,6 @@ func route(raw):
 	for pair in patterns:
 		var re=RegEx.new();re.compile("(?i)"+pair[0]);var m=re.search(text)
 		if not m:continue
-		var query=m.get_string(1) if pair[1]=="capture" else ""
+		var query=m.get_string(1).strip_edges() if pair[1]=="capture" else ""
 		return {"kind":"tool","tool":"agent.discover","args":{"query":query,"goal":text,"open_only":false}}
 	return {}

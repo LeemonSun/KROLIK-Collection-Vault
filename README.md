@@ -1,6 +1,10 @@
-# Current development: Leemon0.22
+[Скачать полный проект 0.23 без весов ИИ — ZIP, 15,6 МБ](https://chatgpt.com/library?file_id=libfile_0e66ba5b17348191bc039053f113082f&account_id=personal)
 
-Browser tab selection, app launch continuation into the existing reviewed UIA agent, existing Windows VPN profiles, app→VPN chain, one compact task card. See docs/WORKFLOWS_022.md and recovery/session.json. Windows acceptance still pending; no IQ/model upgrade claim.
+Для внешнего обзора начать с `CLAUDE_START_HERE.md`. Ссылка доступна владельцу файла; для передачи другому ИИ скачайте ZIP. GitHub здесь используется как хранилище; Release этой версии не создан.
+
+# Current development: Leemon0.23
+
+General observed third-party app discovery, generic names/transliteration/schema-bound semantic app choice, guarded launch/reuse into shared reviewed UIA agent, generic toggles/invoke UI-state effects and bounded stale replans. Read CLAUDE_START_HERE.md, docs/AGENT_023.md and recovery/session.json. Windows/actual-model semantic acceptance pending; no universal GUI control or Krolik Control parity claim.
 
 # Leemon0.21 — локальный помощник, private preview
 

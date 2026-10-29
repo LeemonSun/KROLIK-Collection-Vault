@@ -6,7 +6,7 @@ The product direction is a general adaptive agent in existing third-party applic
 
 Own PowerShell adapter observes StartMenu/CommonStartMenu shortcuts (max512 each, recursion only these roots), Desktop/CommonDesktop shortcuts and EXEs(max64 each), AppPaths registration(max256 each hive), and currently visible running portable apps. It does not recursively scan the drive or read user documents. Existing system helpers remain optional support.
 
-Catalog deduplicates executable paths; rejects UNC/non-EXE/reparse paths and a bounded interpreter/installer name list. These are best-effort filters, not proof of software trust. Metadata comes from file ProductName/FileDescription; it is untrusted data.96records/24KB/8sec soft metadata budget, running apps first; IPC15sec deadline. Enumeration may time out, omit unregistered portable apps, or truncate. No permanent watcher or model load for catalog scan.
+Catalog deduplicates executable paths; rejects UNC/non-EXE/reparse paths and a bounded interpreter/installer name list. These are best-effort filters, not proof of software trust. Metadata comes from file ProductName/FileDescription; it is untrusted data.96records/24KB/8sec soft metadata budget, running apps first; IPC15sec deadline. Enumeration may time out, omit unregistered portable apps, or truncate. No permanent watcher or model load for catalog scan. The small-model semantic scan covers all observed records in sequential<=2200byte pages with page-bound enums; no silent first-page omission. At most one worker and the120sec discovery deadline remain. Ambiguous/missing evidence falls back to actual observed choices. Long inventories/slow hardware may time out; no claim of completed scan then.
 
 Own generic Cyrillic→Latin folding + bounded edit distance provides exact/fuzzy name selection, e.g. «кролик контрл»→Krolik Control. No special Krolik/VPN brand alias is added. Equal scores require further selection. Name matching is not a semantic security guarantee. Chinese translations/purpose-only requests use the existing small local model over observed aliases; it cannot supply paths or commands. Model semantic quality in this pass is NOT measured on actual weights. Injected test answers prove plumbing/authority, not intelligence. Ambiguity/missing model falls back to a30sec user choice.
 
@@ -41,3 +41,7 @@ Reviewed primary project docs and licenses29Oct2026:
 - https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.invokepattern.invoke — invocation need not mean task completion and providers may block.
 
 No code, assets, branding or framework dependencies were copied from these projects. New adapters/planner changes are implemented in this repository; existing legal/upstream notices remain. MIT examples do not provide blanket clearance for all project art/models/distribution. No guarantee against all legal complaints.
+
+## Local validation
+
+50fresh-profile source groups PASS (PowerShell runner enabled),50discovery/14effects/21native adapter checks, finalPCK12groups PASS, finalnativeX11 discovery42 PASS; earlier0.23general156/motion35 PASS. PreviewZIPCRC PASS. No actualWindows/UIA/VPN/PowerShell5.1/hardware FPS or real2Bsemantic result. Tests inject app selection, they do not demonstrate intelligence.

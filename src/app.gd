@@ -71,6 +71,9 @@ var discovery_query=""
 var discovery_open_only=false
 var discovery_deadline=0
 var discovery_candidates=[]
+var discovery_page=0
+var discovery_winners=[]
+var discovery_uncertain=false
 var discovery_retry=0
 var discovery_at=0
 var discovery_resolver=preload("res://src/core/app_resolver.gd").new()
@@ -1429,7 +1432,8 @@ func _vpn_completed(result):
 
 func _begin_discovery(query,goal,open_only=false):
 	_discovery_clear()
-	discovery_retry=0;discovery_query=query;discovery_goal=goal;discovery_open_only=open_only
+	if goal.length()>600:_discovery_error("input_too_long");return
+	discovery_retry=0;discovery_page=0;discovery_winners=[];discovery_uncertain=false;discovery_query=query;discovery_goal=goal;discovery_open_only=open_only
 	discovery_mode="scanning";discovery_deadline=Time.get_ticks_msec()+120000
 	state.reset();state.transition("executing")
 	if not catalog.scan():_discovery_error("discover_failed")
@@ -1437,6 +1441,7 @@ func _begin_discovery(query,goal,open_only=false):
 func _discovery_completed(result):
 	if discovery_mode=="scanning":
 		if result.get("status")!="catalog":_discovery_error("discover_unavailable");return
+		discovery_page=0;discovery_winners=[];discovery_uncertain=false
 		discovery_context=discovery_resolver.prepare(discovery_query,discovery_goal,result.get("apps",[]),Time.get_ticks_msec(),l10n.locale)
 		if not discovery_context.get("ok",false):_discovery_error("discover_missing");return
 		if not discovery_context.direct.is_empty():_discovery_open(discovery_context.direct);return
@@ -1464,15 +1469,20 @@ func _discovery_think():
 	if not discovery_context.get("ok",false):_discovery_error("discover_failed");return
 	discovery_mode="thinking";state.reset();state.transition("thinking")
 	local_runtime.generation_busy=true;local_runtime.touch()
-	if not provider.submit(discovery_context.messages,{"max_tokens":48,"context_tokens":runtime_options().context_tokens,"response_schema":discovery_context.schema}):_discovery_error("discover_failed")
+	if not provider.submit(discovery_context.pages[discovery_page].messages,{"max_tokens":48,"context_tokens":runtime_options().context_tokens,"response_schema":discovery_context.pages[discovery_page].schema}):_discovery_error("discover_failed")
 	changed.emit()
 func _discovery_answer(text):
 	local_runtime.generation_busy=false;local_runtime.touch()
-	var choice=discovery_resolver.validate(text,discovery_context,Time.get_ticks_msec())
-	if choice.is_empty() or choice.get("ask",false) or (provider is Llama and provider.last_truncated):_discovery_offer_choices();return
-	_discovery_open(choice)
+	var choice=discovery_resolver.validate(text,discovery_context.pages[discovery_page],Time.get_ticks_msec())
+	if choice.is_empty() or choice.get("ask",false) or (provider is Llama and provider.last_truncated):discovery_uncertain=true
+	elif not choice.get("none",false):discovery_winners.append(choice)
+	discovery_page+=1
+	if discovery_page<discovery_context.pages.size():_discovery_think();return
+	if discovery_winners.size()==1 and not discovery_uncertain:_discovery_open(discovery_winners[0])
+	else:_discovery_offer_choices()
+
 func _discovery_offer_choices():
-	discovery_candidates=Array(discovery_context.get("map",{}).values()).duplicate(true)
+	discovery_candidates=Array(discovery_context.get("all_map",{}).values()).duplicate(true) if discovery_uncertain or discovery_winners.is_empty() else discovery_winners.duplicate(true)
 	discovery_context={};discovery_mode="";discovery_at=Time.get_ticks_msec();state.reset()
 	add_message("assistant",t("discover_choose"),true);changed.emit()
 func choose_discovered_app(index):
@@ -1491,4 +1501,5 @@ func _discovery_clear():
 	if discovery_mode in ["loading","thinking"]:
 		if is_instance_valid(provider):provider.cancel()
 		if is_instance_valid(local_runtime):local_runtime.generation_busy=false;local_runtime.touch()
+	discovery_page=0;discovery_winners=[];discovery_uncertain=false
 	discovery_mode="";discovery_context={};discovery_goal="";discovery_query="";discovery_candidates=[];discovery_at=0;discovery_deadline=0

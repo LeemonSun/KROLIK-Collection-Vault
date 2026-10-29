@@ -66,7 +66,7 @@ function Get-AppIdentity([string]$path){
  return $null
 }
 function Get-DiscoveryCatalog($catalog){
- $records=[Collections.Generic.List[object]]::new();$bytes=0;$clock=[Diagnostics.Stopwatch]::StartNew();$partial=$false
+ $records=[Collections.Generic.List[object]]::new();$bytes=0;$clock=[Diagnostics.Stopwatch]::StartNew();$partial=$true
  # Running apps precede dormant apps. Metadata is observed file data, never launch authority.
  $running=@{}
  foreach($p in Get-Process -ErrorAction SilentlyContinue){try{if($p.MainWindowHandle -ne 0 -and $p.Path){$running[$p.Path.ToLowerInvariant()]=$true}}catch{}}

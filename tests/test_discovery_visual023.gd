@@ -22,6 +22,6 @@ func run():
    check(bounds.encloses(view.stop_button.get_global_rect()) and not view.stop_button.disabled,'Cancel choice accessible '+locale+str(size))
    check(bounds.encloses(view.tab_open.get_global_rect()),'Choose app accessible '+locale+str(size))
   app.discovery_candidates=[];app.discovery_mode='thinking';app.discovery_deadline=Time.get_ticks_msec()+120000;app.state.transition('thinking');app.changed.emit();await frame()
-  check(view.task_card.visible and view.task_label.text==app.t('discover_thinking') and not view.tab_row.visible,'Semantic discovery stage visible '+locale)
+  check(view.task_card.visible and view.task_label.text.begins_with(app.t('discover_thinking')) and not view.tab_row.visible,'Semantic discovery stage visible '+locale)
   app.cancel();app.changed.emit();await frame();check(not view.task_card.visible,'Stop clears all discovery UI '+locale)
  print('DISCOVERY_VISUAL023: %d checks, %d failures; synthetic native X11, not Windows' %[checks,failures]);quit(0 if failures==0 else 1)
