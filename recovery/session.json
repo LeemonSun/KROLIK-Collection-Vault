@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.24.0-desktop-preview",
-  "checkpoint_status": "024_implementation_validation_build_pending",
-  "current_task": "024: RU/EN trailing no-close constraints retained/enforced, conservative unknown negations, deterministic tie ordering, focus metadata,2200B/24control pages with schema-bound none, no OS effect before full scan/review,12modelcalls cap, requested/prepared coverage counters and redacted actual launch summary.69new checks pass; full final source/build/native pending.",
-  "next_action": "Finish full checks/native UI/export and preview+NoAI source/report delivery. Preserve one small worker/quiet settings; no Chinese expansion, actual Windows/model benchmark unavailable.",
+  "checkpoint_status": "024_delivered_preview_source_report_validationPASS_ruen_priority_windows_model_pending",
+  "current_task": "024 delivered: RU/EN supported trailing no-close constraints, stable ties/nativefocus, bounded captured-control pages/read-only scan,69new tests,51sourcegroups/14finalpackgroups/native20RUEN+156general+35motion/ZIPCRC PASS.792fileNoAIsource perfileSHA/CRC/import69PASS.3nativeLibraryfiles version0 saved.",
+  "next_action": "Actual Windows/real2B RU/EN cross-language UI selection tests with ordinary typos; compare normal vs ideal observation and measure prompt/prediction/RSS. Prioritize native capture omissions, goal-effect verifiers, then procedural skills and constrained intent fallback. Chinese/new languages deferred. Do not claim newweights/IQ/FPS improvement; no visual-only/crossapp/modal capability yet.",
   "read_next": [
     "docs/OBSERVATION_024.md",
     "CLAUDE_START_HERE.md"
@@ -33,27 +33,31 @@
     "022launch continuation only explicit launch→click or launch→WindowsVPN patterns RU/EN/zh. Arbitrary autonomous multiapp tasks not solved.",
     "023app inventory bounded96/24KB, user metadata only; each semantic page<=2200B,120sec hostdeadline, one worker. Unknown purpose/Chinese matching on real model unvalidated, ambiguity asks observed choice.",
     "023reviewed genericinvoke checks UI-state delta, not business outcome. Toggle state is not VPN connectivity. No visual-only GUI action fallback/fullmodal/crossapp planning/KrolikControl function parity.",
-    "023GitHub Releases tool unavailable; large archive GitHub blob attempt did not yield expected SHA and no matching blob was found. No release/archive GitHub URL is claimed; complete sourceZIP saved to nativeLibrary, owner download linked in README."
+    "023GitHub Releases tool unavailable; large archive GitHub blob attempt did not yield expected SHA and no matching blob was found. No release/archive GitHub URL is claimed; complete sourceZIP saved to nativeLibrary, owner download linked in README.",
+    "024supports only recognized trailing no-close RU/EN constraint with conservative caption filter, not full semantic conditions or complete side-effect protection. Other recognized negative clauses remain blocked.",
+    "024paging covers captured eligible controls only; native200/90/depth8/2500ms limits unchanged. Draft composition remains first bounded page. One snapshot TTL/12model-selectioncalls/4effects/240sec; all-page scan can increase latency and multiple proposals ask.",
+    "024numeric diagnostics distinguish prepared/requested page coverage; actual launch summary is last attempt, not a running-worker guarantee. No real-weight language/selection benchmark or Windows/game FPS measurement.",
+    "024source archive import+69tests passed. TemporaryDirectory cleanup reported Directory not empty afterward; known scratch path cleaned explicitly, archive unchanged."
   ],
   "validation": [
-    "50fresh-profile sourcegroups PASS, actualLinuxPowerShell nonce transport enabled",
-    "50discovery +14effects +21native synthetic adapter checks PASS; no real-model/Windows acceptance",
-    "Final PCK12groups PASS; final native X11 discovery42 PASS; earlier0.23 native general156/motion35 PASS",
-    "PreviewZIPCRC PASS;775file source archive CRC/per-fileSHA PASS; extracted fresh project imports and passes50discovery checks with actualLinuxPowerShell roundtrip.",
-    "No Windows/v2rayTun/KrolikControl/PowerShell5.1/gameFPS/actual model semantic acceptance. No visual-only action fallback or complete cross-app planner."
+    "51fresh-profile sourcegroups PASS with LinuxPowerShell transport enabled",
+    "69new constraints/stable ranking/page binding/review/cancel/budget/redacted launch tests PASS",
+    "Final PCK14groups PASS; draft016 requires its intentionally unshipped external test fixture,47checks PASS",
+    "Final native X11:20RUEN paged observation+156general+35motion PASS; ZIPCRC PASS",
+    "No actualWindows/real-model semantic quality/gameFPS acceptance; no neural retraining or newweights"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.23.0.zip",
-    "bytes": 53988413,
-    "sha256": "3b191da7048089e059f05773b0f75450434339b325d158e5e98929a315c7236e",
-    "library_file_id": "libfile_98437604206881918414c5d93356868b",
-    "file_id": "file_000000002f7481f591ca3328bc10031e",
+    "full": "Companion_Preview_Windows_v0.24.0.zip",
+    "bytes": 53990737,
+    "sha256": "bffed07e2d20690d407ee2f5774616fd984f35be802e97710d853a41b1e8fc9c",
+    "library_file_id": "libfile_e9c59a823b608191abb9681496296882",
+    "file_id": "file_00000000a6f481f69a0fcbcb57c08a84",
     "version": 0,
     "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
   },
-  "previous_checkpoint": "fba4518ffff5bded814c02ed2b32bd416e9f5d03",
-  "shipped_version": "0.23.0-desktop-preview",
-  "shipped_app_pack_sha256": "55484ca9a2241cb55fdcea70c839ec6fcfda915804a1ec9244a533968929db48",
+  "previous_checkpoint": "824c3cb67156bca643cc110e11713bf0c54bfadb",
+  "shipped_version": "0.24.0-desktop-preview",
+  "shipped_app_pack_sha256": "f759beff7621750cd9adce6603fcec0ddb120a9fe5e2d320f2b34ee929b2573a",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -88,7 +92,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_ee524ae7d50c8191957a1288e23b4195",
+  "report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -101,6 +105,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.23.0.zip",
+      "bytes": 53988413,
+      "sha256": "3b191da7048089e059f05773b0f75450434339b325d158e5e98929a315c7236e",
+      "library_file_id": "libfile_98437604206881918414c5d93356868b",
+      "file_id": "file_000000002f7481f591ca3328bc10031e",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.22.0.zip",
       "bytes": 53971388,
@@ -233,7 +246,7 @@
       "status": "saved_native_library_verified_exported_pack"
     }
   ],
-  "report_file_id": "file_00000000c69081f5a4735b181f1f1291",
+  "report_file_id": "file_000000000d1c81f6878285d55747278e",
   "motion_artifact": {
     "filename": "Leemon_0.18_Behavior_Demo.mp4",
     "bytes": 145196,
@@ -245,9 +258,9 @@
     "sha256": "70301f1c1ad2c02285eb06b784bfa14e734959da878cafb2e7b3618023f6ebfa",
     "version_label": "018_synthetic_scripted_renderer_demo_no_OS_actions_no_model_no_FPS_benchmark"
   },
-  "shipped_exe_sha256": "00d9dc0e3d916ff16109830b32ec8056ca8a325deb429dda62a0479b22068f7d",
+  "shipped_exe_sha256": "4c45bfc6f62dd5a4df1fb33f76ec97bb0633613c5669051f10e1b547637ad941",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
-  "final_fix": "Generic third-party entry/candidatepages and shared UIA primitives replace default Windows-profile-only direction. Plaintext UI/catalog data never grants shell authority; file stamps/fresh controls checked, review remains. Stale effects replan under cap; UI-change receipts not goal success. Retired duplicated nested backup preserved outside project.",
+  "final_fix": "P0guard and P1captured observation pages implemented with explicit binding/review, stable rank and focus, none/ask scan,69newfixtures and safe diagnostics. Existing1thread/batch32/30sec quiet override retained. User priority RU/EN, no Chinese expansion.",
   "product_direction": {
     "primary": "general_adaptive_desktop_agent",
     "loop": [
@@ -265,15 +278,15 @@
     "continuous_weight_training_implemented": false
   },
   "source_review_archive": {
-    "full": "Leemon_Project_v0.23.0_NoAI.zip",
-    "bytes": 15649402,
-    "sha256": "ad3517e20401fd71f711d692603c8a8aa0c14b843298f4cf4c134571a4941a2e",
-    "files": 775,
+    "full": "Leemon_Project_v0.24.0_NoAI.zip",
+    "bytes": 15668553,
+    "sha256": "2e21488812f9c533f73ea962f22bdf26d39d3d0cbeb8e67477b1563adad26715",
+    "files": 792,
     "model_weights_bundled": false,
-    "library_file_id": "libfile_0e66ba5b17348191bc039053f113082f",
-    "file_id": "file_000000009a0881fda711c84b71f7255d",
-    "version": 1,
-    "status": "saved_native_library_metadata_applied_crc_and_eachfile_sha_verified_extracted_project_import_and50tests_passed",
-    "snapshot_note": "Product source matches0.23 final; subsequent delivery receipts/README links are recorded outside archive to avoid self-referential archive hashes."
+    "library_file_id": "libfile_0e63d7510e988191a541b3d40748ebca",
+    "file_id": "file_0000000086b481f6a6d2069f3a82a5b7",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_eachfileSHA_CRC_import69checksPASS",
+    "snapshot_note": "Product code matches final0.24. Later delivery receipt/README changes intentionally outside archive to avoid hash self-reference."
   }
 }

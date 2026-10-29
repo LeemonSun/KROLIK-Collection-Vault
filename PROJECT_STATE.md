@@ -1,3 +1,7 @@
+# Current development0.24
+
+RU/EN constraints, deterministic ordering, captured-control pages/read-only scan, numeric coverage and redacted actual launch settings. See docs/OBSERVATION_024.md and session for final artifacts. Chinese expansion deferred; no realWindows/model-quality claim.
+
 # Current development: Leemon0.23
 
 General observed third-party app discovery, generic names/transliteration/schema-bound semantic app choice, guarded launch/reuse into shared reviewed UIA agent, generic toggles/invoke UI-state effects and bounded stale replans. Read CLAUDE_START_HERE.md, docs/AGENT_023.md and recovery/session.json. Windows/actual-model semantic acceptance pending; no universal GUI control or Krolik Control parity claim.

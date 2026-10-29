@@ -17,3 +17,7 @@ User priority: Russian and English practical requests first; new languages and C
 New observation tests exercise RU/EN constraint routing/filtering, equal-score order, every captured candidate represented in a page, cross-page binding, last-page review and fresh preflight, ambiguity/no effects, earlier-page winner followed by none, cancellation,12call cap and launch-summary redaction. These are injected model/UIA fixtures, not proof of real model understanding. Actual Windows/apps/DPI/game resource use and real2B language/selection quality not measured here. No visual-only action fallback, full cross-app/modal planning or Krolik Control capability parity.
 
 Independent review input: user-supplied «Leemon0.23 независимый разбор и план развития», read29Oct2026. Confirmed negation/name-key defects in Godot. Quiet-mode contradiction was not confirmed: effective profile already overrides the base. Model/license suggestions in that review were not adopted without separate primary-source validation. Chinese name-key repair deferred per user's language priority.
+
+## Final local validation
+
+51fresh source groups PASS,69new cases PASS. Final PCK14groups PASS (draft016 external fixture as in tools/test_packed_regressions.py);nativeX11 20newRUEN+156general+35motion PASS, previewZIPCRC PASS. No actual Windows/model semantic/FPS result.

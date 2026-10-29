@@ -1,4 +1,8 @@
-[Скачать полный проект 0.23 без весов ИИ — ZIP, 15,6 МБ](https://chatgpt.com/library?file_id=libfile_0e66ba5b17348191bc039053f113082f&account_id=personal)
+# Current development0.24
+
+RU/EN constraints, deterministic ordering, captured-control pages/read-only scan, numeric coverage and redacted actual launch settings. See docs/OBSERVATION_024.md and session for final artifacts. Chinese expansion deferred; no realWindows/model-quality claim.
+
+[Скачать полный проект 0.24 без весов ИИ — ZIP, 15,7 МБ](https://chatgpt.com/library?file_id=libfile_0e63d7510e988191a541b3d40748ebca&account_id=personal)
 
 Для внешнего обзора начать с `CLAUDE_START_HERE.md`. Ссылка доступна владельцу файла; для передачи другому ИИ скачайте ZIP. GitHub здесь используется как хранилище; Release этой версии не создан.
 
