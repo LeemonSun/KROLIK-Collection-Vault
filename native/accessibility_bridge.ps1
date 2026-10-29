@@ -37,7 +37,7 @@ function Get-ScopedNodes($rootElement, [bool]$chromeOnly=$false) {
    $canExpand=$element.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)
    $canToggle=$element.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$toggle)
    $parents=@($frame.ancestors)
-   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;toggle=$canToggle;toggle_state=$(if($canToggle){[int]$toggle.Current.ToggleState}else{-1});write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
+   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;focused=[bool]$c.HasKeyboardFocus;toggle=$canToggle;toggle_state=$(if($canToggle){[int]$toggle.Current.ToggleState}else{-1});write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
    if($name -or $writable){
     $recordBytes=[Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json -InputObject $record -Depth 6 -Compress))
     if($nodes.Count -lt 90 -and $bytes+$recordBytes -lt 25000){$nodes.Add(@{record=$record;element=$element});$bytes+=$recordBytes+1}else{$partial=$true}

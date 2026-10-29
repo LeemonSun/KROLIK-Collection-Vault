@@ -5,6 +5,7 @@ var elapsed=5.0
 var values={}
 var app
 var last_inference={}
+var last_observation={}
 var previous={}
 var previous_ms=0
 func _ready():
@@ -76,6 +77,11 @@ func record_inference(metrics):
 		if (value is int or value is float) and is_finite(float(value)) and value>=0:selected[key]=value
 	if not selected.is_empty():last_inference=selected
 
+func record_observation(coverage):
+	last_observation={}
+	for key in ["observed","eligible","prepared_controls","oversized","candidate_pages","planned_pages","page_requests","requested_controls"]:
+		var value=coverage.get(key)
+		if value is int and value>=0:last_observation[key]=value
 func report():
 	var cpu="—" if not values.has("cpu_percent") else "%.1f%%" % values.cpu_percent
 	var memory="—" if int(values.get("process_count",0))==0 else "%.1f MiB" % (float(values.get("process_bytes",0))/1048576.0)
@@ -86,6 +92,10 @@ func report():
 		for key in ["total_ms","template_ms","tokenize_ms","prompt_ms","predicted_ms","cache_n","prompt_n","predicted_n","reasoning_budget"]:
 			if last_inference.has(key):text+=app.t("metric_"+key)+": "+str(last_inference[key])+"\n"
 
+	if not last_observation.is_empty():text+="\n\n"+app.t("observation_metrics")+"\n"+JSON.stringify(last_observation)
+	if app.local_runtime.has_method("launch_summary"):
+		var launch=app.local_runtime.launch_summary()
+		if not launch.is_empty():text+="\n\n"+app.t("launch_metrics")+"\n"+JSON.stringify(launch)
 	return text
 
 func _proc_path(process_id):

@@ -38,7 +38,7 @@ func run():
 	check(not agent.prepare(target(),nodes(),now,now,'en').ok,'Written field cannot be repeated by next planning cycle')
 	check(not JSON.stringify(agent.history).contains('Welcome'),'Receipt does not retain generated private body')
 	var nav=planner.prepare('Find the font size',target(),[{'id':'1','name':'Fonts','enabled':true,'expand':true}],now,'en',true)
-	check(nav.schema.properties.size()==1 and nav.schema.properties.choice.enum==['ask','expand:e0'],'Navigation schema binds action+element, with no unused fields')
+	check(nav.schema.properties.size()==1 and nav.schema.properties.choice.enum==['ask','none','expand:e0'],'Navigation schema binds action+element, with no unused fields')
 	check(planner.validate(JSON.stringify({'choice':'expand:e0'}),nav,target(),now).get('ok',false),'Compact grammar reply validates')
 	check(not planner.validate(JSON.stringify({'choice':'select:e0'}),nav,target(),now).get('ok',false),'Unsupported pair cannot bypass schema')
 	check(not planner.validate(JSON.stringify({'choice':'expand:e0','text':'hidden','append':false}),nav,target(),now).get('ok',false),'Navigation cannot smuggle text')

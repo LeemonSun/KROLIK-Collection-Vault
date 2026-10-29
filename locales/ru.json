@@ -494,5 +494,8 @@
   "goal_observed_invoke": "После нажатия «{name}» интерфейс изменился. Завершение задачи ещё не подтверждено.",
   "agent_action_enable": "включение переключателя",
   "agent_action_disable": "выключение переключателя",
-  "agent_action_invoke": "нажатие; изменение интерфейса"
+  "agent_action_invoke": "нажатие; изменение интерфейса",
+  "goal_scan_pages": "Изучаю элементы окна · {page}/{total}",
+  "observation_metrics": "Покрытие наблюдения окна",
+  "launch_metrics": "Параметры последней попытки запуска ИИ"
 }

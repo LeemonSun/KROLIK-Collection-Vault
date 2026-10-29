@@ -328,6 +328,7 @@ func refresh():
 	status_label.text=app.t('state_paused') if app.paused else (app.t('state_'+app.state.current) if busy else app.t(app.local_runtime.status))
 	if not app.goal_mode.is_empty():status_label.text=app.t("goal_status_repairing" if app.goal_mode=="composing" and app.goal_compose_attempt>1 else "goal_status_"+app.goal_mode)
 	if not app.window_read_mode.is_empty():status_label.text=app.t("window_read_status_"+app.window_read_mode)
+	if app.goal_mode=="thinking" and app.goal_scan.active:status_label.text=app.t("goal_scan_pages",{"page":app.goal_scan.index+1,"total":app.goal_scan.pages.size()})
 	if app.logic_mode:status_label.text=app.t("logic_interpreting")
 	if app.chat_draft_mode and app.chat_draft_attempt>1:status_label.text=app.t("chat_draft_repairing")
 	if app.answer_reviewing:status_label.text=app.t("answer_reviewing")

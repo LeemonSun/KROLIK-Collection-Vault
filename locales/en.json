@@ -494,5 +494,8 @@
   "goal_observed_invoke": "The interface changed after pressing “{name}”. Task completion is not yet verified.",
   "agent_action_enable": "enable toggle",
   "agent_action_disable": "disable toggle",
-  "agent_action_invoke": "press; observed UI change"
+  "agent_action_invoke": "press; observed UI change",
+  "goal_scan_pages": "Inspecting window controls · {page}/{total}",
+  "observation_metrics": "Window observation coverage",
+  "launch_metrics": "Last attempted AI worker launch settings"
 }

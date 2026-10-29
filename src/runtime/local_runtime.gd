@@ -9,6 +9,7 @@ var base_path = "user://local-ai-v2"
 var status = "ai_not_installed"
 var detail = ""
 var downloading = false
+var last_launch_summary={}
 var pid = -1
 var port = 0
 var token = ""
@@ -243,6 +244,7 @@ func _spawn_worker():
 	token = Crypto.new().generate_random_bytes(32).hex_encode()
 	_options = options.duplicate()
 	idle_seconds = clampi(int(options.get("idle_unload_seconds", 120)), 30, 900)
+	last_launch_summary=_describe_launch(options)
 	var args = build_args(options)
 	pid = OS.create_process(ProjectSettings.globalize_path(runtime_path().path_join(manifest.runtime.executable)), args, false)
 	if pid <= 0:
@@ -256,6 +258,15 @@ func _spawn_worker():
 	_status("ai_starting")
 	return true
 
+func launch_summary():return last_launch_summary.duplicate(true)
+func _describe_launch(options,processor_count=-1):
+	var args=build_args(options,processor_count)
+	var result={}
+	for key in ["--threads","--threads-batch","--ctx-size","--batch-size","--ubatch-size","--parallel","--n-gpu-layers","--cache-ram","--ctx-checkpoints","--prio"]:
+		var index=args.find(key)
+		if index>=0 and index+1<args.size():result[key.trim_prefix("--")]=int(args[index+1])
+	result["reasoning"]="off";result["idle_unload_seconds"]=clampi(int(options.get("idle_unload_seconds",120)),30,900)
+	return result
 func build_args(options, processor_count=-1):
 	if processor_count<1:processor_count=OS.get_processor_count()
 	var threads=clampi(int(options.get("cpu_threads",2)),1,mini(8,maxi(1,processor_count/2)))

@@ -29,8 +29,8 @@ func prepare(query,goal,records,now,locale="en"):
 			if wanted in [name,product]:score=100
 			elif wanted.length()>=4 and (wanted in name or wanted in product):score=70
 			elif wanted.length()>=6 and mini(distance(wanted,name),distance(wanted,product))<=2:score=50
-		ranked.append({"record":record,"score":score})
-	ranked.sort_custom(func(a,b):return a.score>b.score)
+		ranked.append({"record":record,"score":score,"order":ranked.size()})
+	ranked.sort_custom(func(a,b):return a.score>b.score if a.score!=b.score else a.order<b.order)
 	var direct={}
 	if not ranked.is_empty() and ranked[0].score>=50 and (ranked.size()==1 or ranked[0].score>ranked[1].score):direct=ranked[0].record.duplicate(true)
 	var pages=[];var page_items=[];var page_map={};var bytes=0

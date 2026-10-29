@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "app_version": "0.23.0-desktop-preview",
-  "checkpoint_status": "023_delivered_source_archive_preview_report_validationPASS_windows_and_realmodel_pending",
-  "current_task": "023 delivered: general observed third-party discovery, Cyrillic/fuzzy and small paged schema-bound semantic app selection, guarded launch/reuse, reviewed generic buttons/toggles, UI-only effect continuation, bounded stale replans.50sourcegroups/12finalPCKgroups/finalnative42 PASS.775fileNoAIreviewarchive perfileSHA/extractedimport/testsPASS.3Libraryfiles saved.",
-  "next_action": "Actual Windows/real2B semantic acceptance on unknown third-party VPN and Krolik Control, Chinese names, CPU/RAM/FPS in games. Prioritize safe visual-action fallback, cross-app/modal planner and Claude review; no hardcoded brand recipe. Current connector cannot create GitHub Releases; README has owner download link to source archive.",
+  "app_version": "0.24.0-desktop-preview",
+  "checkpoint_status": "024_implementation_validation_build_pending",
+  "current_task": "024: RU/EN trailing no-close constraints retained/enforced, conservative unknown negations, deterministic tie ordering, focus metadata,2200B/24control pages with schema-bound none, no OS effect before full scan/review,12modelcalls cap, requested/prepared coverage counters and redacted actual launch summary.69new checks pass; full final source/build/native pending.",
+  "next_action": "Finish full checks/native UI/export and preview+NoAI source/report delivery. Preserve one small worker/quiet settings; no Chinese expansion, actual Windows/model benchmark unavailable.",
   "read_next": [
-    "docs/AGENT_023.md",
+    "docs/OBSERVATION_024.md",
     "CLAUDE_START_HERE.md"
   ],
   "known_limits": [

@@ -22,6 +22,7 @@ def main():
     if args.pwsh:env["COMPANION_PWSH"]=str(Path(args.pwsh).resolve())
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("observation024",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_observation024.gd","--","--test-mode"]),
         ("effects023",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_effects023.gd","--","--test-mode"]),
         ("discovery023",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_discovery023.gd","--","--test-mode"]),
         ("tasks022",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_tasks022.gd","--","--test-mode"]),

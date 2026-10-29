@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 namespace Windows.Automation {
  public class Kind {public string ProgrammaticName; public Kind(string n){ProgrammaticName=n;}}
- public class CurrentData {public string Name;public string AutomationId;public Kind ControlType;public bool IsPassword=false;public bool IsOffscreen=false;public bool IsEnabled=true;}
+ public class CurrentData {public string Name;public string AutomationId;public Kind ControlType;public bool IsPassword=false;public bool IsOffscreen=false;public bool IsEnabled=true;public bool HasKeyboardFocus=false;}
  public class PatternData {public bool IsReadOnly=false;public bool IsSelected=false;public int ExpandCollapseState=0;}
  public class Pattern {public PatternData Current=new PatternData();}
  public class TogglePattern {public static object Pattern="toggle";}
@@ -42,7 +42,7 @@ namespace Windows.Automation {
 function Element([string]$name,[string]$id,[int]$runtime){return [Windows.Automation.Element]::new($name,$id,$runtime)}
 $root=Element 'Synthetic app' 'root' 1
 $left=$root.Add((Element 'Editor' 'editor' 2));$right=$root.Add((Element 'Player' 'player' 3))
-$field=$left.Add((Element 'Text' 'text' 4));$field.Writable=$true
+$field=$left.Add((Element 'Text' 'text' 4));$field.Writable=$true;$field.Current.HasKeyboardFocus=$true
 $null=$right.Add((Element 'Text' 'text' 5))
 $secret=$root.Add((Element 'Password container' 'password' 6));$secret.Current.IsPassword=$true
 $null=$secret.Add((Element 'SECRET_DESCENDANT' 'secret' 7))
@@ -53,6 +53,7 @@ $rootRecord=@($nodes | Where-Object {$_.record.id -eq '1,1'})[0].record
 $rootExpected=($rootRecord | ConvertTo-Json -Depth 8 | ConvertFrom-Json)
 Check (Test-Descriptor $rootRecord $rootExpected) 'Empty ancestor array roundtrip'
 $record=@($nodes | Where-Object {$_.record.id -eq '1,4'})[0].record
+Check ($record.focused -eq $true) 'Native focus included without granting effect authority'
 Check ($record.write -and $record.automation_id -eq 'text') 'Native capability and AutomationId retained'
 Check ($record.ancestors.Count -eq 2 -and $record.ancestors[1].name -eq 'Editor') 'Context follows actual traversal parents'
 $expected=($record | ConvertTo-Json -Depth 8 | ConvertFrom-Json)

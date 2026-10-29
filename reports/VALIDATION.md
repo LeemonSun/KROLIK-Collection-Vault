@@ -4,6 +4,7 @@
 
 | Проверка | Результат |
 | --- | --- |
+| observation024 | PASS |
 | effects023 | PASS |
 | discovery023 | PASS |
 | tasks022 | PASS |

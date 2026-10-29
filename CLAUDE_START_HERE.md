@@ -1,3 +1,7 @@
+# Update0.24
+
+Current focus RU/EN; Chinese expansion deferred. See docs/OBSERVATION_024.md: conservative trailing no-close constraints, explicit stable ties, native focus, schema-bound captured-control pages, read-only scan controller,64token action-only response budget and safe launch/coverage diagnostics. No new weights/real-model benchmark/Windows acceptance. Remaining native omissions, authoring semantics, visual-only GUI and cross-app gaps remain.
+
 # Leemon — review start,0.23 private preview
 
 ## Goal

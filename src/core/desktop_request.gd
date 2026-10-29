@@ -1,8 +1,10 @@
 extends RefCounted
 ## Explicit desktop delegation. Ordinary conversation never triggers discovery.
 func route(raw):
-	var text=raw.strip_edges()
-	if preload("res://src/core/action_proposal.gd").negative_intent(text):return {}
+	var original=raw.strip_edges()
+	var conditions=preload("res://src/core/intent_constraints.gd").analyze(original)
+	if conditions.blocked:return {}
+	var text=conditions.primary
 	var patterns=[
 		["^(?:включи|подключи)\\s+(?:мой\\s+)?(?:vpn|впн)\\s+(.{2,100})$","capture","task"],
 		["^(?:connect|enable)\\s+(?:my\\s+)?vpn\\s+(.{2,100})$","capture","task"],
@@ -20,5 +22,5 @@ func route(raw):
 		var re=RegEx.new();re.compile("(?i)"+pair[0]);var m=re.search(text)
 		if not m:continue
 		var query=m.get_string(1).strip_edges() if pair[1]=="capture" else ""
-		return {"kind":"tool","tool":"agent.discover","args":{"query":query,"goal":text,"open_only":false}}
+		return {"kind":"tool","tool":"agent.discover","args":{"query":query,"goal":original,"open_only":false}}
 	return {}

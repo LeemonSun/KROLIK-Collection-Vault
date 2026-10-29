@@ -89,6 +89,7 @@ var window_read_deadline=0
 var window_reader=preload("res://src/core/window_reader.gd").new()
 var workflow=preload("res://src/core/window_workflow.gd").new()
 var agent=preload("res://src/core/adaptive_agent.gd").new()
+var goal_scan=preload("res://src/core/ui_observation_scan.gd").new()
 var goal_mode=""
 var goal_composing_alias=""
 var goal_compose_attempt=0
@@ -1174,14 +1175,12 @@ func _goal_observed():
 			if agent.active:_agent_finish("agent_"+str(goal_context.get("reason","no_actions")))
 			else:_goal_error("goal_more_info")
 			return
+		goal_scan.begin(goal_context);goal_context=goal_scan.current()
 		if goal_context.get("draft_allowed",false):
 			var alias=preload("res://src/core/draft_composer.gd").unique_field(goal_context)
 			if not alias.is_empty():_start_goal_composition(alias);return
-		goal_mode="thinking";state.reset();state.transition("thinking")
-		local_runtime.generation_busy=true;local_runtime.touch()
-		request_motion("dialogue.think_loop")
-		var selection=preload("res://src/core/draft_composer.gd").selection(goal_context) if goal_context.get("draft_allowed",false) else goal_context
-		provider.submit(selection.messages,{"max_tokens":64 if goal_context.get("draft_allowed",false) else 256,"context_tokens":runtime_options().context_tokens,"response_schema":selection.schema})
+		_request_goal_selection()
+
 	elif goal_mode=="confirming":
 		if not goal_planner.same_target(goal_plan.target,application_access.target) or str(goal_plan.target.get("title",""))!=str(application_access.target.get("title","")):_goal_error("goal_changed");return
 		goal_mode="executing";goal_deadline_ms=Time.get_ticks_msec()+20000
@@ -1202,6 +1201,16 @@ func _goal_observed():
 			get_tree().create_timer(0.25 if goal_verify_attempt==1 else 0.6).timeout.connect(_retry_goal_verification.bind(goal_verify_revision))
 		else:_goal_error("goal_unverified")
 	changed.emit()
+func _request_goal_selection():
+	if is_instance_valid(diagnostics):diagnostics.record_observation(goal_scan.metrics())
+	goal_mode="thinking";state.reset();state.transition("thinking")
+	local_runtime.generation_busy=true;local_runtime.touch()
+	request_motion("dialogue.think_loop")
+	var selection=preload("res://src/core/draft_composer.gd").selection(goal_context) if goal_context.get("draft_allowed",false) else goal_context
+	var output_limit=64 if goal_context.get("draft_allowed",false) or not goal_context.schema.properties.has("text") else 256
+	if not provider.submit(selection.messages,{"max_tokens":output_limit,"context_tokens":runtime_options().context_tokens,"response_schema":selection.schema}):_goal_error("goal_failed")
+	changed.emit()
+
 func _start_goal_composition(alias,previous_draft=""):
 	if not agent.active or not goal_context.get("draft_allowed",false) or not goal_context.map.has(alias) or not goal_context.map[alias].get("write",false):_goal_error("goal_failed");return false
 	goal_compose_attempt=goal_compose_attempt+1 if not previous_draft.is_empty() else 1
@@ -1230,14 +1239,19 @@ func _goal_answer(text):
 			if choice in goal_context.get("choices",[]) and choice.begins_with("write:"):
 				_start_goal_composition(choice.trim_prefix("write:"));return
 	goal_plan=agent.validate(text,goal_context,application_access.target,Time.get_ticks_msec()) if agent.active else goal_planner.validate(text,goal_context,application_access.target,Time.get_ticks_msec())
-	goal_context={}
 	if not goal_plan.get("ok",false):_goal_error("draft_unprovided_detail" if goal_plan.get("reason")=="draft_unprovided_detail" else "goal_failed");return
-	if goal_plan.action=="ask":
-		if agent.active:_agent_finish("agent_review")
+	var scan_result=goal_scan.accept(goal_plan)
+	if scan_result=="next":
+		if agent.active and not agent.allow_scan_call():_goal_error("agent_budget");return
+		goal_context=goal_scan.current();_request_goal_selection();return
+	if scan_result=="winner":goal_plan=goal_scan.winners[0].plan
+	if scan_result in ["ask","empty","ambiguous","budget"] or goal_plan.action in ["ask","none"]:
+		if agent.active:_agent_finish("agent_budget" if scan_result=="budget" else "agent_review")
 		else:_goal_error("goal_more_info")
 		return
 	_show_goal_proposal()
 func _show_goal_proposal():
+	goal_scan.clear()
 	goal_context={}
 	goal_mode="proposal";state.reset();goal_deadline_ms=Time.get_ticks_msec()+(120000 if goal_plan.get("generated",false) else 30000)
 	var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
@@ -1311,6 +1325,7 @@ func _goal_error(key):
 	if interrupted:add_message("assistant",t("workflow_stopped"),true)
 	request_motion("work.error_recover");changed.emit()
 func _clear_goal():
+	goal_scan.clear()
 	goal_invoke_before=[]
 	goal_verify_revision+=1;goal_verify_attempt=0
 	goal_composing_alias="";goal_compose_attempt=0
