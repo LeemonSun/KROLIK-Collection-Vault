@@ -1,3 +1,7 @@
+# Current development0.25
+
+Read docs/AGENT_025.md and recovery/session.json. Conservative RU/EN delegated-request interpretation using ONE shared local worker; bounded exact read-only UIA subtree scopes and typed control evidence. No generated executable arguments.2read hops/12model selections/4effects/240s; every effect reviewed.52sourcegroups PASS including52new integrated checks,7new PowerShell synthetic-scope checks. ActualWindows/real2B/gameperformance acceptance pending. NEXT dedicated ONE graphite/amber visual pass for friends alpha; no extra girl/newlanguages/newmodels.
+
 # Update0.24
 
 Current focus RU/EN; Chinese expansion deferred. See docs/OBSERVATION_024.md: conservative trailing no-close constraints, explicit stable ties, native focus, schema-bound captured-control pages, read-only scan controller,64token action-only response budget and safe launch/coverage diagnostics. No new weights/real-model benchmark/Windows acceptance. Remaining native omissions, authoring semantics, visual-only GUI and cross-app gaps remain.

@@ -1,7 +1,7 @@
-# Leemon0.25 — implementation validating
+# Leemon0.25 — delivered; visual pass next
 
-Read python3 tools/resume.py status and recovery/session.json, then docs/AGENT_025.md. Canonical leemon-013, GitHub storage only; noCI/deploy, ONE Lemon graphite/amber. RU/EN first; no newmodels or Chinese expansion.
+Start python3 tools/resume.py status, recovery/session.json, docs/AGENT_025.md. Canonical leemon-013. GitHub storage only; noCI/deploy. ONE Lemon graphite/amber; RU/EN first. No newweights, Chinese deferred.
 
-025 adds conservative local delegation enum, original-goal discovery/selected-window forwarding,2hop read-only UIA subtree traversal and exact path preflight before approved effects; centralized typed control evidence, numeric scope counters.52new integrated tests+7native scope checks PASS; broader validation/build/delivery in progress. See session for authoritative delivered IDs; previous024 still shipped until replaced.
+025: constrained local delegation enum and original-goal forwarding; exact read-only UIA subtree paths2hops with fresh native preflight for approved effects; centralized typed control evidence; private numeric counters.52sourcegroups/15PCKgroups/native20RUEN+156general+35motion PASS.52new integrated+7native scope checks.804file NoAI perfileSHA/CRC/fresh extract/import52PASS.3LibraryIDs/hashes/version0 in session. ActualWindows/real2B/VPN/gameFPS acceptance pending.
 
-Next after functional delivery: dedicated visual pass for friends alpha; realWindows/v2rayTun/real2B/gameperformance acceptance still pending. No universal agent or release claims.
+NEXT dedicated visual pass: unified entrance/chat/voice/panels/typography/DPI/progress/cancel/result flow, user wording and separate developer details; friends alpha checklist docs/FRIENDS_ALPHA_025.md. Never hide absent capabilities or upstream licenses. Preserve scope/effect review and ONE worker. Devtools in ../devtools. Checkpoint before pause.

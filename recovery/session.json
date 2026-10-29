@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "app_version": "0.25.0-desktop-preview",
-  "checkpoint_status": "025_implemented_validating_not_yet_shipped",
-  "current_task": "025 constrained RU/EN delegation classifier using shared worker; no generated arguments; read-only exact UIA subtree path2hops with fresh native effect resolution; centralized typed control evidence and private numeric counters.52new integrated checks+7native scope checks PASS; broad source run in progress. Visual phase explicitly next.",
-  "next_action": "Finish source/packed/native regressions, build Windows025 and NoAI archive, save preview/source/report, checkpoint delivery. Actual Windows/real2B/third-partyVPN/gameFPS acceptance pending. Then dedicated ONE graphite/amber visual pass and friends alpha.",
+  "checkpoint_status": "025_delivered_preview_source_report_validationPASS_visual_next_windows_model_pending",
+  "current_task": "025 delivered: constrained RU/EN local delegation, exact read-only UIA subtree2hops and scoped fresh effect preflight, typed control evidence and numeric counters.52sourcegroups/15PCKgroups/native20RUEN+156general+35motion PASS.52new integrated+7native cases;804file NoAI perfileSHA/CRC/extract/import52PASS.3nativeLibraryartifacts version0 saved.",
+  "next_action": "Dedicated ONE graphite/amber Lemon visual pass: entrance, accessible chat/voice, typography/panels/DPI/small-screen layouts, user-facing progress/cancel/result wording, developer details separate. Then actualWindows friends alpha using docs/FRIENDS_ALPHA_025.md; real2B RU/EN delegation and third-partyVPN/network evidence/game resource measurements pending. No alternate girl/newmodels/newlanguages, no claim universal agency or Steam release.",
   "read_next": [
     "docs/AGENT_025.md",
     "docs/FRIENDS_ALPHA_025.md"
@@ -42,24 +42,25 @@
     "025read scopes maximum2named UIA container hops; repeat fresh top-level traversal for every operation; native pertraversal capture limits retained; no root-return/visual-only/fullmodal/crossapp planner. No persistent learned procedures or general business-outcome verifier."
   ],
   "validation": [
-    "51fresh-profile sourcegroups PASS with LinuxPowerShell transport enabled",
-    "69new constraints/stable ranking/page binding/review/cancel/budget/redacted launch tests PASS",
-    "Final PCK14groups PASS; draft016 requires its intentionally unshipped external test fixture,47checks PASS",
-    "Final native X11:20RUEN paged observation+156general+35motion PASS; ZIPCRC PASS",
-    "No actualWindows/real-model semantic quality/gameFPS acceptance; no neural retraining or newweights"
+    "52fresh-profile final sourcegroups PASS, LinuxPowerShell transport enabled",
+    "52new integrated delegation/scope/evidence checks PASS;7newnative scope cases PASS with realPowerShell/syntheticUIA",
+    "15finalPCKgroups PASS including exported helper hash/nonces",
+    "NativeX11:20RUEN+156general+35motion PASS; wrong motion filename corrected before successful run",
+    "No actualWindows/real2Bsemantic/VPNconnection/gameFPS acceptance",
+    "804fileNoAI source archive perfileSHA/CRC/fresh extract/import52new checks PASS; both ZIP CRC PASS;3savedartifacts version0"
   ],
   "artifact": {
-    "full": "Companion_Preview_Windows_v0.24.0.zip",
-    "bytes": 53990737,
-    "sha256": "bffed07e2d20690d407ee2f5774616fd984f35be802e97710d853a41b1e8fc9c",
-    "library_file_id": "libfile_e9c59a823b608191abb9681496296882",
-    "file_id": "file_00000000a6f481f69a0fcbcb57c08a84",
+    "full": "Companion_Preview_Windows_v0.25.0.zip",
+    "bytes": 53998131,
+    "sha256": "900eae4024d335b4e82ced74ca5168032293143621314e23577dfffe4ca184d3",
+    "library_file_id": "libfile_796daf1a6e648191a222abe8c37123ee",
+    "file_id": "file_00000000fec4820db5b55e5d87b9e2f2",
     "version": 0,
-    "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    "status": "saved_native_library_metadata_applied_validationPASS"
   },
-  "previous_checkpoint": "824c3cb67156bca643cc110e11713bf0c54bfadb",
-  "shipped_version": "0.24.0-desktop-preview",
-  "shipped_app_pack_sha256": "f759beff7621750cd9adce6603fcec0ddb120a9fe5e2d320f2b34ee929b2573a",
+  "previous_checkpoint": "4f796e4042956c73c205cf695885b88e4db95940",
+  "shipped_version": "0.25.0-desktop-preview",
+  "shipped_app_pack_sha256": "17d9eee2e5d9e2d65345f31fcdd245e48f1c56e2a24d434914068ab9809c84bd",
   "offline_artifact": {
     "name": "Leemon_0.8.0_Offline_Windows.zip",
     "bytes": 1921186885,
@@ -94,7 +95,7 @@
       }
     ]
   },
-  "report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6",
+  "report_library_file_id": "libfile_09c7cd08407081919e38f27fc884b893",
   "ui_preview_library_file_id": "libfile_89fbaa0f82fc8191b94795e767e6298f",
   "report_version": 0,
   "recovery_event": {
@@ -107,6 +108,15 @@
     "mandatory_licenses_preserved": true
   },
   "previous_artifacts": [
+    {
+      "full": "Companion_Preview_Windows_v0.24.0.zip",
+      "bytes": 53990737,
+      "sha256": "bffed07e2d20690d407ee2f5774616fd984f35be802e97710d853a41b1e8fc9c",
+      "library_file_id": "libfile_e9c59a823b608191abb9681496296882",
+      "file_id": "file_00000000a6f481f69a0fcbcb57c08a84",
+      "version": 0,
+      "status": "saved_native_library_metadata_applied_final_pack_and_zip_checked"
+    },
     {
       "full": "Companion_Preview_Windows_v0.23.0.zip",
       "bytes": 53988413,
@@ -260,7 +270,7 @@
     "sha256": "70301f1c1ad2c02285eb06b784bfa14e734959da878cafb2e7b3618023f6ebfa",
     "version_label": "018_synthetic_scripted_renderer_demo_no_OS_actions_no_model_no_FPS_benchmark"
   },
-  "shipped_exe_sha256": "4c45bfc6f62dd5a4df1fb33f76ec97bb0633613c5669051f10e1b547637ad941",
+  "shipped_exe_sha256": "0573a20f5439468f1d1e541488b9cff640cb3ba9c5d5c23360ba31b14a689290",
   "ui_preview_version_label": "0.11_reference_not_0.12_capture",
   "final_fix": "P0guard and P1captured observation pages implemented with explicit binding/review, stable rank and focus, none/ask scan,69newfixtures and safe diagnostics. Existing1thread/batch32/30sec quiet override retained. User priority RU/EN, no Chinese expansion.",
   "product_direction": {
@@ -280,6 +290,18 @@
     "continuous_weight_training_implemented": false
   },
   "source_review_archive": {
+    "full": "Leemon_Project_v0.25.0_NoAI.zip",
+    "bytes": 15685379,
+    "sha256": "b3a9b1237ee1f810f4ad68720cb35cb58a16fa433bd27dc71bb0c316b06e7e82",
+    "library_file_id": "libfile_fb39866ccdc481919110af7b1e42ab98",
+    "file_id": "file_00000000761081f6bc54d6bb0854916c",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_validationPASS",
+    "files": 804,
+    "model_weights_bundled": false,
+    "snapshot_note": "Product code matches final0.25. Archive contains active pinned runtime art/font. Later delivery/README/report receipt and tool-only validation-report formatting changes may be outside snapshot; no hash self-reference. PerfileSHA/CRC/fresh extract/import/52checks PASS."
+  },
+  "previous_source_review_archive": {
     "full": "Leemon_Project_v0.24.0_NoAI.zip",
     "bytes": 15668553,
     "sha256": "2e21488812f9c533f73ea962f22bdf26d39d3d0cbeb8e67477b1563adad26715",
@@ -290,5 +312,15 @@
     "version": 0,
     "status": "saved_native_library_metadata_applied_eachfileSHA_CRC_import69checksPASS",
     "snapshot_note": "Product code matches final0.24. Later delivery receipt/README changes intentionally outside archive to avoid hash self-reference."
-  }
+  },
+  "report_artifact": {
+    "full": "Leemon_0.25_Report.md",
+    "bytes": 6964,
+    "sha256": "c988c58f6d59e3eebdfb97d7de87ed16e81295e5b3082b36bf472c7467a07dc0",
+    "library_file_id": "libfile_09c7cd08407081919e38f27fc884b893",
+    "file_id": "file_000000006168820d8e57970e4cbc0906",
+    "version": 0,
+    "status": "saved_native_library_metadata_applied_validationPASS"
+  },
+  "previous_report_library_file_id": "libfile_bdfa128ada94819182f3f6b66f0b02b6"
 }

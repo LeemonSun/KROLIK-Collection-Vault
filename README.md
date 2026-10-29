@@ -1,8 +1,8 @@
-# Current development0.24
+# Leemon0.25 — private preview
 
-RU/EN constraints, deterministic ordering, captured-control pages/read-only scan, numeric coverage and redacted actual launch settings. See docs/OBSERVATION_024.md and session for final artifacts. Chinese expansion deferred; no realWindows/model-quality claim.
+RU/EN constrained local delegation, read-only UIA subtree observation and typed control evidence. See docs/AGENT_025.md and recovery/session.json. Next: ONE graphite/amber visual pass, then Windows friends alpha. ActualWindows/real-model quality/gameFPS acceptance pending.
 
-[Скачать полный проект 0.24 без весов ИИ — ZIP, 15,7 МБ](https://chatgpt.com/library?file_id=libfile_0e63d7510e988191a541b3d40748ebca&account_id=personal)
+[Скачать полный проект 0.25 без весов ИИ — ZIP,15,7МБ](https://chatgpt.com/library?file_id=libfile_fb39866ccdc481919110af7b1e42ab98&account_id=personal) · [Программа0.25](https://chatgpt.com/library?file_id=libfile_796daf1a6e648191a222abe8c37123ee&account_id=personal) · [Отчёт](https://chatgpt.com/library?file_id=libfile_09c7cd08407081919e38f27fc884b893&account_id=personal)
 
 Для внешнего обзора начать с `CLAUDE_START_HERE.md`. Ссылка доступна владельцу файла; для передачи другому ИИ скачайте ZIP. GitHub здесь используется как хранилище; Release этой версии не создан.
 

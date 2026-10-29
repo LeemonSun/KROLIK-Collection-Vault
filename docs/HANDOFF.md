@@ -1,3 +1,7 @@
+# Current development0.25
+
+Read docs/AGENT_025.md and recovery/session.json. Conservative RU/EN delegated-request interpretation using ONE shared local worker; bounded exact read-only UIA subtree scopes and typed control evidence. No generated executable arguments.2read hops/12model selections/4effects/240s; every effect reviewed.52sourcegroups PASS including52new integrated checks,7new PowerShell synthetic-scope checks. ActualWindows/real2B/gameperformance acceptance pending. NEXT dedicated ONE graphite/amber visual pass for friends alpha; no extra girl/newlanguages/newmodels.
+
 # Current development0.24
 
 RU/EN constraints, deterministic ordering, captured-control pages/read-only scan, numeric coverage and redacted actual launch settings. See docs/OBSERVATION_024.md and session for final artifacts. Chinese expansion deferred; no realWindows/model-quality claim.

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Run local checks and retain exact logs plus a human-readable validation report."""
 import argparse
+import datetime
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -99,11 +101,11 @@ def main():
             print(log, flush=True)
     lines = [
         "# Проверки приложения", "",
-        "Дата: 28.10.2026. Linux x86_64, Godot 4.7.2 standard.", "",
+        "Дата: "+datetime.date.today().isoformat()+". Linux x86_64, Godot 4.7.2 standard. Версия: "+json.loads((ROOT/"config/product.json").read_text())["version"]+".", "",
         "| Проверка | Результат |", "| --- | --- |",
         *[f"| {name} | {'PASS' if ok else 'FAIL'} |" for name, ok in outcomes],
         "", "release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.",
-        "", "Leemon 0.20: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
+        "", "Текущий визуал: один мастер, шесть частей 2D-рига и26процедурных состояний. Это не рисованные клипы, 3D или facial rig.",
         "Офлайн-часы, сохраняемые напоминания и явный перевод буфера проверяются в leemon_tools; тесты провайдера используют подмену и не доказывают качество нейросети.",
         "Native X11 review, фактический Godot → PowerShell roundtrip и двухфайловое обновление проверяются отдельно: native_ui.txt, exported_content.txt, desktop_bridge.txt, preview_update.txt.",
         "Настоящая Windows здесь не запускалась: EXE, прозрачность, перемещение, системный голос, установщик модели и блокировки файлов требуют отдельной приёмки.",
