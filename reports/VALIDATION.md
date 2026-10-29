@@ -4,6 +4,8 @@
 
 | Проверка | Результат |
 | --- | --- |
+| effects023 | PASS |
+| discovery023 | PASS |
 | tasks022 | PASS |
 | logic021 | PASS |
 | logic_app021 | PASS |
@@ -51,6 +53,7 @@
 | release_gate_expected_block | PASS |
 | access_protocol019 | PASS |
 | vpn_protocol022 | PASS |
+| native023 | PASS |
 
 release_gate_expected_block = PASS означает, что неподготовленная сборка правильно заблокирована.
 

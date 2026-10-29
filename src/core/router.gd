@@ -32,8 +32,12 @@ func route(raw):
 			return {"kind": "invalid", "key": "search_invalid"}
 		return {"kind": "tool", "tool": "browser.search", "args": {"query": argument}}
 	var task=preload("res://src/core/desktop_task_intent.gd").new().route(text)
-	if not task.is_empty():return task
+	if not task.is_empty() and task.args.action=="tabs":return task
 	var natural=DesktopIntent.new().route(text)
+	if not natural.is_empty() and natural.get("tool","") not in ["apps.open","browser.search"]:return natural
+	var delegated=preload("res://src/core/desktop_request.gd").new().route(text)
+	if not delegated.is_empty():return delegated
+	if not task.is_empty():return task
 	if not natural.is_empty():return natural
 	# Unknown slash commands are not forwarded as tool instructions.
 	if text.begins_with("/"):

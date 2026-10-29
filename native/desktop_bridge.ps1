@@ -10,9 +10,9 @@ function Get-AppCatalog {
   if(Test-Path -LiteralPath $app.path -PathType Leaf){$items.Add($app)}
  }
  $shell=New-Object -ComObject WScript.Shell
- foreach($folder in @([Environment]::GetFolderPath('StartMenu'),[Environment]::GetFolderPath('CommonStartMenu'))) {
+ foreach($folder in @([Environment]::GetFolderPath('StartMenu'),[Environment]::GetFolderPath('CommonStartMenu'),[Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('CommonDesktopDirectory'))) {
   if(-not $folder -or -not (Test-Path -LiteralPath $folder)){continue}
-  foreach($link in Get-ChildItem -LiteralPath $folder -Filter '*.lnk' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1500) {
+  foreach($link in Get-ChildItem -LiteralPath $folder -Filter '*.lnk' -Recurse:($folder -notin @([Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('CommonDesktopDirectory'))) -File -ErrorAction SilentlyContinue | Select-Object -First 512) {
    if($link.Attributes -band [IO.FileAttributes]::ReparsePoint){continue}
    $shortcut=$shell.CreateShortcut($link.FullName);$path=[Environment]::ExpandEnvironmentVariables($shortcut.TargetPath)
    if(-not $path -or $path.StartsWith('\\') -or [IO.Path]::GetExtension($path) -ine '.exe' -or -not (Test-Path -LiteralPath $path -PathType Leaf)){continue}
@@ -22,7 +22,77 @@ function Get-AppCatalog {
    $items.Add(@{name=$link.BaseName;aliases=@();path=$path})
   }
  }
- return $items.ToArray()
+ foreach($folder in @([Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('CommonDesktopDirectory'))){
+  if(-not $folder -or -not (Test-Path -LiteralPath $folder)){continue}
+  foreach($file in Get-ChildItem -LiteralPath $folder -Filter '*.exe' -File -ErrorAction SilentlyContinue | Select-Object -First 64){
+   if(Test-AppExecutable $file.FullName){$items.Add(@{name=$file.BaseName;aliases=@();path=$file.FullName})}
+  }
+ }
+ foreach($hive in @('HKCU:\Software\Microsoft\Windows\CurrentVersion\App Paths','HKLM:\Software\Microsoft\Windows\CurrentVersion\App Paths','HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths')){
+  if(-not (Test-Path -LiteralPath $hive)){continue}
+  foreach($entry in Get-ChildItem -LiteralPath $hive -ErrorAction SilentlyContinue | Select-Object -First 256){
+   try{$path=[Environment]::ExpandEnvironmentVariables([string]$entry.GetValue('')).Trim('"');if(Test-AppExecutable $path){$items.Add(@{name=[IO.Path]::GetFileNameWithoutExtension($path);aliases=@();path=$path})}}catch{}
+  }
+ }
+ foreach($process in Get-Process -ErrorAction SilentlyContinue){
+  try{
+   if($process.MainWindowHandle -eq 0 -or -not $process.Path){continue}
+   $path=$process.Path
+   if(Test-AppExecutable $path){$items.Add(@{name=$process.ProcessName;aliases=@();path=$path})}
+  }catch{}
+ }
+ return @($items.ToArray() | Where-Object {Test-AppExecutable $_.path} | Group-Object {$_.path.ToLowerInvariant()} | ForEach-Object {$_.Group[0]})
+}
+function Test-AppExecutable([string]$path){
+ if(-not $path -or $path.StartsWith('\\') -or -not [IO.Path]::IsPathRooted($path) -or [IO.Path]::GetExtension($path) -ine '.exe'){return $false}
+ if([IO.Path]::GetFileNameWithoutExtension($path) -match '^(?i:cmd|powershell|pwsh|wscript|cscript|mshta|rundll32|regsvr32|installutil|python|pythonw|bash|wsl|regedit|uninstall.*|setup.*)$'){return $false}
+ try{
+  $item=Get-Item -LiteralPath $path -ErrorAction Stop
+  if($item.PSIsContainer -or $item.Attributes -band [IO.FileAttributes]::ReparsePoint){return $false}
+  $parent=$item.Directory
+  while($null -ne $parent){if($parent.Attributes -band [IO.FileAttributes]::ReparsePoint){return $false};$parent=$parent.Parent}
+  return $true
+ }catch{return $false}
+}
+function Get-AppId([string]$path){
+ $hash=[Security.Cryptography.SHA256]::Create()
+ try{return ([BitConverter]::ToString($hash.ComputeHash([Text.Encoding]::UTF8.GetBytes($path.ToLowerInvariant())))).Replace('-','').ToLowerInvariant()}finally{$hash.Dispose()}
+}
+function Get-AppStamp([string]$path){$item=Get-Item -LiteralPath $path;return ([string]$item.Length+':'+[string]$item.LastWriteTimeUtc.Ticks)}
+function Get-AppIdentity([string]$path){
+ foreach($process in Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($path)) -ErrorAction SilentlyContinue){
+  try{if($process.Path -ieq $path -and $process.MainWindowHandle -ne 0){return @{handle=[string]$process.MainWindowHandle.ToInt64();target_pid=$process.Id;started=[string]$process.StartTime.ToUniversalTime().Ticks;title=$process.MainWindowTitle;app=$process.ProcessName}}}catch{}
+ }
+ return $null
+}
+function Get-DiscoveryCatalog($catalog){
+ $records=[Collections.Generic.List[object]]::new();$bytes=0;$clock=[Diagnostics.Stopwatch]::StartNew();$partial=$false
+ # Running apps precede dormant apps. Metadata is observed file data, never launch authority.
+ $running=@{}
+ foreach($p in Get-Process -ErrorAction SilentlyContinue){try{if($p.MainWindowHandle -ne 0 -and $p.Path){$running[$p.Path.ToLowerInvariant()]=$true}}catch{}}
+ $ordered=@($catalog | Sort-Object @{Expression={if($running.ContainsKey($_.path.ToLowerInvariant())){0}else{1}}},name)
+ foreach($app in $ordered){
+  if($records.Count -ge 96 -or $clock.ElapsedMilliseconds -gt 8000){$partial=$true;break}
+  try{
+   $file=Get-Item -LiteralPath $app.path;$version=$file.VersionInfo;$identity=Get-AppIdentity $app.path
+   $record=@{id=(Get-AppId $app.path);stamp=(Get-AppStamp $app.path);name=([string]$app.name).Substring(0,[Math]::Min(80,([string]$app.name).Length));product=([string]$version.ProductName);description=([string]$version.FileDescription);running=($null -ne $identity)}
+   foreach($key in @('product','description')){if($record[$key].Length -gt 64){$record[$key]=$record[$key].Substring(0,64)}}
+   $size=[Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json $record -Compress))
+   if($bytes+$size -gt 24000){$partial=$true;continue}
+   $records.Add($record);$bytes+=$size
+  }catch{$partial=$true}
+ }
+ return @{status='catalog';apps=$records.ToArray();partial=$partial}
+}
+function Open-Discovered($request,$catalog){
+ if($request.app_id -notmatch '^[a-f0-9]{64}$' -or $request.stamp -notmatch '^\d+:\d+$'){throw 'Invalid catalog choice'}
+ $matches=@($catalog | Where-Object {(Get-AppId $_.path) -ceq $request.app_id})
+ if($matches.Count -ne 1){return @{status='stale'}}
+ $app=$matches[0]
+ if(-not (Test-AppExecutable $app.path) -or (Get-AppStamp $app.path) -cne $request.stamp){return @{status='stale'}}
+ $identity=Get-AppIdentity $app.path
+ if($null -ne $identity){return @{status='visible';name=$app.name;identity=$identity}}
+ return Open-Target @{kind='app';path=$app.path;name=$app.name}
 }
 function Resolve-Target([string]$target,$catalog) {
  $key=Normalize-Name $target
@@ -146,6 +216,12 @@ try {
    $process=Get-Process -Id $processId -ErrorAction SilentlyContinue
    if($process){$reply.items+=@{pid=[int]$processId;bytes=[long]$process.WorkingSet64;cpu_seconds=[double]$process.TotalProcessorTime.TotalSeconds}}
   }
+ } elseif($request.operation -in @('catalog','catalog_open')) {
+  if([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT){$reply.status='unsupported'}else{
+   $catalog=@(Get-AppCatalog)
+   $outcome=if($request.operation -eq 'catalog'){Get-DiscoveryCatalog $catalog}else{Open-Discovered $request $catalog}
+   foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
+  }
  } elseif($request.operation -eq 'overlay') {
   $reply.operation='overlay';$outcome=Set-CompanionOverlay $request
   foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
@@ -161,6 +237,7 @@ try {
  foreach($key in $outcome.Keys){$reply[$key]=$outcome[$key]}
  }
 } catch { $reply.status='failed' }
-$json=ConvertTo-Json -InputObject $reply -Depth 5 -Compress
+$json=ConvertTo-Json -InputObject $reply -Depth 6 -Compress
+if([Text.Encoding]::UTF8.GetByteCount($json) -gt 32000){$json=ConvertTo-Json @{nonce=$reply.nonce;status='too_large'} -Compress}
 [IO.File]::WriteAllText($ResultPath+'.tmp',$json,[Text.UTF8Encoding]::new($false))
 Move-Item -LiteralPath ($ResultPath+'.tmp') -Destination $ResultPath -Force

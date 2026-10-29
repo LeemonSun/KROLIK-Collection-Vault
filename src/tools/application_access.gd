@@ -90,7 +90,7 @@ func _result(result):
 		var acted_name=str(pending.get("element_name",""))
 		pending={}
 		if not quiet:notice.emit("access_"+status_ if status_ in ["invoked","selected","expanded","written","not_empty","write_unsupported","write_unverified","invoke_unsupported","stale","unsupported"] else "access_failed",{"name":acted_name})
-		if status_ in ["invoked","selected","expanded","written","stale"]:nodes=[];observed_ms=0;observation={}
+		if status_ in ["invoked","selected","expanded","toggle_set","written","stale"]:nodes=[];observed_ms=0;observation={}
 	quiet=false
 	changed.emit()
 
@@ -111,7 +111,8 @@ func act_id(plan,confirmed=false):
 	if not preload("res://src/core/action_proposal.gd").same_target(plan.get("target",{}),target):return false
 	var node=Controls.resolve(plan.node,nodes)
 	if node.is_empty():return false
-	if not node.get("enabled",false) or not node.get(plan.action,false):return false
+	if not node.get("enabled",false) or not node.get("toggle" if plan.action in ["enable","disable"] else plan.action,false):return false
+	if plan.action in ["enable","disable"] and int(node.get("toggle_state",-1))!=int(plan.node.get("toggle_state",-2)):return false
 	quiet=true;pending={}
-	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true,"element_descriptor":Controls.descriptor(node)})
+	var payload=target.merged({"operation":"write" if plan.action=="write" else "invoke","pattern":plan.action,"expected_toggle_state":node.get("toggle_state",-1),"element_id":node.id,"element_name":node.name,"text":plan.text,"append":plan.append,"owner_pid":OS.get_process_id(),"confirmed":true,"element_descriptor":Controls.descriptor(node)})
 	return _request(payload)

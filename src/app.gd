@@ -63,6 +63,18 @@ const ResponseGuard=preload("res://src/core/response_guard.gd")
 var desktop_actions
 var browser_tabs
 var vpn_connection
+var catalog
+var discovery_mode=""
+var discovery_context={}
+var discovery_goal=""
+var discovery_query=""
+var discovery_open_only=false
+var discovery_deadline=0
+var discovery_candidates=[]
+var discovery_retry=0
+var discovery_at=0
+var discovery_resolver=preload("res://src/core/app_resolver.gd").new()
+var goal_invoke_before=[]
 var launch_goal=""
 var launch_vpn={}
 var application_access
@@ -136,6 +148,9 @@ func _ready():
 	application_access.read_ready.connect(_window_read_observed)
 	application_access.snapshot_ready.connect(_goal_observed)
 	application_access.completed.connect(_goal_access_completed)
+	catalog=preload("res://src/tools/app_catalog.gd").new()
+	add_child(catalog)
+	catalog.completed.connect(_discovery_completed)
 	vpn_connection=preload("res://src/tools/vpn_connection.gd").new()
 	add_child(vpn_connection)
 	vpn_connection.completed.connect(_vpn_completed)
@@ -197,6 +212,7 @@ func t(key, values = {}):
 	return l10n.text(key, values)
 
 func _process(_delta):
+	if not discovery_mode.is_empty() and Time.get_ticks_msec()>discovery_deadline:_discovery_error("discover_expired")
 	if agent.active and Time.get_ticks_msec()>agent.deadline:_agent_finish("agent_expired")
 	if not window_read_mode.is_empty() and Time.get_ticks_msec()>window_read_deadline:_window_read_error("window_read_expired")
 	if not goal_mode.is_empty() and Time.get_ticks_msec()>goal_deadline_ms:_goal_error("goal_expired")
@@ -302,18 +318,19 @@ func submit(text):
 	if paused:
 		add_message("assistant", t("paused_message"))
 		return
-	if not goal_mode.is_empty() or state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()) or (is_instance_valid(application_access) and application_access.pid>0):
+	if not discovery_mode.is_empty() or not goal_mode.is_empty() or state.current != "idle" or not queued_chat_text.is_empty() or (is_instance_valid(speech_input) and speech_input.busy()) or (is_instance_valid(application_access) and application_access.pid>0):
 		add_message("assistant", t("busy_message"))
 		return
 	mark_active()
 	if is_instance_valid(browser_tabs):browser_tabs.forget()
+	_discovery_clear()
 	var command = router.route(text)
 	if not application_access.target.is_empty() and (goal_planner.contextual_goal(text) or preload("res://src/core/draft_policy.gd").requested(text)) and (command.kind=="chat" or command.get("tool","") in ["apps.open","browser.search"]):
 		command={"kind":"tool","tool":"agent.run","args":{"goal":text}}
 	if command.kind == "invalid":
 		add_message("assistant", t(command.key))
 		return
-	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task"])
+	add_message("user", text, command.get("tool","") in ["access.read","web.read","agent.run","desktop.task","agent.discover"])
 	if command.kind == "help":
 		add_message("assistant", t("help_text"))
 		return
@@ -355,7 +372,7 @@ func submit(text):
 	_submit_model_text(command.text)
 
 func chat_busy():
-	return state.current!="idle" or not queued_chat_text.is_empty() or speech_input.busy() or application_access.pid>0 or not goal_mode.is_empty() or not window_read_mode.is_empty()
+	return not discovery_mode.is_empty() or state.current!="idle" or not queued_chat_text.is_empty() or speech_input.busy() or application_access.pid>0 or not goal_mode.is_empty() or not window_read_mode.is_empty()
 
 func queue_chat(text):
 	# Deferred work must never inherit a selected window or trigger an OS action.
@@ -442,6 +459,8 @@ func _execute(command):
 		return
 	state.transition("executing")
 	changed.emit()
+	if command.tool=="agent.discover":
+		_begin_discovery(command.args.query,command.args.goal,command.args.get("open_only",false));return
 	if command.tool=="desktop.task":
 		if command.args.action=="vpn":
 			if not vpn_connection.connect_profile(command.args.name):_vpn_completed({"status":"failed"})
@@ -544,7 +563,9 @@ func _execute(command):
 		if target.begins_with("http://") or target.begins_with("https://"):
 			var result=browser_search.open_url(target)
 			_desktop_completed({"status":"browser_handoff" if result.ok else "failed"})
-		elif not desktop_actions.request(target):_desktop_completed({"status":"failed"})
+		elif target.to_lower() in ["проводник","explorer","file explorer","文件资源管理器","загрузки","downloads","documents","документы","рабочий стол","desktop","下载","文档","桌面"] or target.contains(":\\"):
+			if not desktop_actions.request(target):_desktop_completed({"status":"failed"})
+		else:_begin_discovery(target,target,true)
 		return
 	elif command.tool == "notes.add":
 		var ok = persistence_ready and store.add_note(command.args.text)
@@ -585,6 +606,7 @@ func _execute(command):
 	changed.emit()
 
 func _on_answer(text):
+	if discovery_mode=="thinking":_discovery_answer(text);return
 	if provider is Llama and is_instance_valid(diagnostics):diagnostics.record_inference(provider.last_usage)
 	if window_read_mode=="thinking":
 		_window_read_answer(text);return
@@ -648,6 +670,7 @@ func _on_answer(text):
 	changed.emit()
 
 func _on_failure(key):
+	if not discovery_mode.is_empty():_discovery_error(key);return
 	logic_mode=false
 	chat_draft_mode=false;chat_draft_attempt=0
 	answer_reviewing=false
@@ -671,6 +694,7 @@ func _on_failure(key):
 	changed.emit()
 
 func cancel():
+	_discovery_clear()
 	launch_goal="";launch_vpn={}
 	if is_instance_valid(vpn_connection):vpn_connection.cancel()
 	if is_instance_valid(browser_tabs):browser_tabs.forget()
@@ -777,6 +801,7 @@ func _runtime_ready(port, token):
 		return
 	_set_provider("local_worker")
 	provider.configure_local(port, token)
+	if discovery_mode=="loading":_discovery_think();return
 	if window_read_mode=="loading":
 		_window_read_observe();return
 	if goal_mode=="loading":
@@ -795,7 +820,7 @@ func _runtime_ready(port, token):
 		_submit_model_text(text)
 
 func _runtime_changed():
-	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode or not goal_mode.is_empty() or not window_read_mode.is_empty()):
+	if local_runtime.status in ["ai_hash_failed","ai_worker_failed","ai_windows_only"] and (not queued_chat_text.is_empty() or screen_mode or not goal_mode.is_empty() or not window_read_mode.is_empty() or not discovery_mode.is_empty()):
 		_on_failure(local_runtime.status)
 	# Installing only prepares files. Heavy weights wake on the next actual request.
 	changed.emit()
@@ -1157,14 +1182,18 @@ func _goal_observed():
 	elif goal_mode=="confirming":
 		if not goal_planner.same_target(goal_plan.target,application_access.target) or str(goal_plan.target.get("title",""))!=str(application_access.target.get("title","")):_goal_error("goal_changed");return
 		goal_mode="executing";goal_deadline_ms=Time.get_ticks_msec()+20000
+		goal_invoke_before=application_access.nodes.duplicate(true) if goal_plan.action=="invoke" else []
 		if not application_access.act_id(goal_plan,true):_goal_error("goal_changed")
 	elif goal_mode=="verifying":
 		var verified=false
 		if goal_planner.same_target(goal_plan.target,application_access.target):
 			# Reidentification is for observing an outcome only, never for retargeting a click.
 			var node=preload("res://src/core/control_context.gd").resolve(goal_plan.node,application_access.nodes,true)
-			if not node.is_empty():verified=node.get("selected",false)==true if goal_plan.action=="select" else int(node.get("expansion",-1))==1
-		if verified:_goal_done("goal_verified_"+goal_plan.action)
+			if goal_plan.action=="invoke":verified=preload("res://src/core/observed_effect.gd").changed(goal_invoke_before,application_access.nodes)
+			elif not node.is_empty():
+				if goal_plan.action in ["enable","disable"]:verified=int(node.get("toggle_state",-1))==(1 if goal_plan.action=="enable" else 0)
+				else:verified=node.get("selected",false)==true if goal_plan.action=="select" else int(node.get("expansion",-1))==1
+		if verified:_goal_done("goal_observed_invoke" if goal_plan.action=="invoke" else "goal_verified_"+goal_plan.action)
 		elif goal_verify_attempt<3:
 			goal_mode="verify_wait"
 			get_tree().create_timer(0.25 if goal_verify_attempt==1 else 0.6).timeout.connect(_retry_goal_verification.bind(goal_verify_revision))
@@ -1229,9 +1258,12 @@ func _goal_access_completed(result):
 		_goal_error("goal_failed");return
 	if goal_mode!="executing":return
 	var status_=str(result.get("status","failed"))
+	if status_=="stale" and agent.recover_stale():
+		var retry_goal=agent.goal
+		_clear_goal();_start_goal_step(retry_goal);return
 	if status_=="written":_goal_done("goal_written")
-	elif status_=="invoked":_goal_done("goal_invoked")
-	elif status_ in ["selected","expanded"]:
+	elif status_=="invoked" and not agent.active:_goal_done("goal_invoked")
+	elif status_ in ["selected","expanded","toggle_set","invoked"]:
 		goal_mode="verifying";goal_deadline_ms=Time.get_ticks_msec()+20000
 		goal_verify_attempt=1;goal_verify_revision+=1
 		if not application_access.inspect(true):_goal_error("goal_unverified")
@@ -1246,7 +1278,7 @@ func _retry_goal_verification(revision):
 func _goal_done(key):
 	if agent.active:
 		var values={"name":goal_plan.node.name,"window":goal_plan.target.get("title","")}
-		var verified=key in ["goal_written","goal_verified_select","goal_verified_expand"]
+		var verified=key in ["goal_written","goal_verified_select","goal_verified_expand","goal_verified_enable","goal_verified_disable","goal_observed_invoke"]
 		if not agent.record(goal_plan,verified,application_access.target,Time.get_ticks_msec()):
 			add_message("assistant",t(key,values),true);_agent_finish("agent_unverified");return
 		add_message("assistant",t(key,values),true)
@@ -1276,6 +1308,7 @@ func _goal_error(key):
 	if interrupted:add_message("assistant",t("workflow_stopped"),true)
 	request_motion("work.error_recover");changed.emit()
 func _clear_goal():
+	goal_invoke_before=[]
 	goal_verify_revision+=1;goal_verify_attempt=0
 	goal_composing_alias="";goal_compose_attempt=0
 	var active=not goal_mode.is_empty()
@@ -1393,3 +1426,69 @@ func _vpn_completed(result):
 	var status=str(result.get("status","failed"))
 	add_message("assistant",t(status if status in ["vpn_connected","vpn_missing","vpn_ambiguous","vpn_timeout","vpn_unverified"] else "vpn_failed"),true)
 	state.reset();changed.emit()
+
+func _begin_discovery(query,goal,open_only=false):
+	_discovery_clear()
+	discovery_retry=0;discovery_query=query;discovery_goal=goal;discovery_open_only=open_only
+	discovery_mode="scanning";discovery_deadline=Time.get_ticks_msec()+120000
+	state.reset();state.transition("executing")
+	if not catalog.scan():_discovery_error("discover_failed")
+	changed.emit()
+func _discovery_completed(result):
+	if discovery_mode=="scanning":
+		if result.get("status")!="catalog":_discovery_error("discover_unavailable");return
+		discovery_context=discovery_resolver.prepare(discovery_query,discovery_goal,result.get("apps",[]),Time.get_ticks_msec(),l10n.locale)
+		if not discovery_context.get("ok",false):_discovery_error("discover_missing");return
+		if not discovery_context.direct.is_empty():_discovery_open(discovery_context.direct);return
+		if not local_runtime.installed():_discovery_offer_choices();return
+		if local_runtime.status!="ai_ready" or provider_name!="local_worker":
+			discovery_mode="loading";local_ai_enabled=true
+			if not local_runtime.start(runtime_options()):_discovery_error("goal_need_ai")
+		else:_discovery_think()
+	elif discovery_mode=="opening":
+		if result.get("status")=="stale" and discovery_retry<1:
+			discovery_retry+=1;discovery_mode="scanning";discovery_deadline=Time.get_ticks_msec()+120000
+			if not catalog.scan():_discovery_error("discover_failed")
+			changed.emit();return
+		var goal=discovery_goal;var only=discovery_open_only
+		if result.get("status")!="visible" or not result.get("identity") is Dictionary:_discovery_error("discover_not_visible");return
+		var identity=result.identity.duplicate(true)
+		_discovery_clear();state.reset()
+		if not application_access.adopt(identity):_discovery_error("discover_failed");return
+		if only:add_message("assistant",t("discover_opened",{"name":str(result.get("name",""))}),true)
+		else:
+			add_message("assistant",t("discover_selected",{"name":str(result.get("name",""))}),true)
+			if not begin_agent(goal):add_message("assistant",t("discover_failed"),true)
+	changed.emit()
+func _discovery_think():
+	if not discovery_context.get("ok",false):_discovery_error("discover_failed");return
+	discovery_mode="thinking";state.reset();state.transition("thinking")
+	local_runtime.generation_busy=true;local_runtime.touch()
+	if not provider.submit(discovery_context.messages,{"max_tokens":48,"context_tokens":runtime_options().context_tokens,"response_schema":discovery_context.schema}):_discovery_error("discover_failed")
+	changed.emit()
+func _discovery_answer(text):
+	local_runtime.generation_busy=false;local_runtime.touch()
+	var choice=discovery_resolver.validate(text,discovery_context,Time.get_ticks_msec())
+	if choice.is_empty() or choice.get("ask",false) or (provider is Llama and provider.last_truncated):_discovery_offer_choices();return
+	_discovery_open(choice)
+func _discovery_offer_choices():
+	discovery_candidates=Array(discovery_context.get("map",{}).values()).duplicate(true)
+	discovery_context={};discovery_mode="";discovery_at=Time.get_ticks_msec();state.reset()
+	add_message("assistant",t("discover_choose"),true);changed.emit()
+func choose_discovered_app(index):
+	if paused or chat_busy():return false
+	if index<0 or index>=discovery_candidates.size() or Time.get_ticks_msec()-discovery_at>30000:_discovery_error("discover_expired");return false
+	_discovery_open(discovery_candidates[index]);return true
+func _discovery_open(record):
+	discovery_candidates=[];discovery_context={};discovery_mode="opening";discovery_deadline=Time.get_ticks_msec()+20000
+	state.reset();state.transition("executing")
+	if not catalog.open_record(record):_discovery_error("discover_failed")
+	changed.emit()
+func _discovery_error(key):
+	_discovery_clear();state.reset();add_message("assistant",t(key),true);changed.emit()
+func _discovery_clear():
+	if is_instance_valid(catalog):catalog.cancel()
+	if discovery_mode in ["loading","thinking"]:
+		if is_instance_valid(provider):provider.cancel()
+		if is_instance_valid(local_runtime):local_runtime.generation_busy=false;local_runtime.touch()
+	discovery_mode="";discovery_context={};discovery_goal="";discovery_query="";discovery_candidates=[];discovery_at=0;discovery_deadline=0

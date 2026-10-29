@@ -107,7 +107,7 @@ func _ready():
 	tab_row=HBoxContainer.new();task_layout.add_child(tab_row)
 	tab_choices=OptionButton.new();tab_choices.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	tab_choices.clip_text=true;tab_choices.fit_to_longest_item=false;tab_row.add_child(tab_choices)
-	tab_open=_button("→",tab_row,func():app.choose_browser_tab(tab_choices.selected))
+	tab_open=_button("→",tab_row,func():app.choose_discovered_app(tab_choices.selected) if not app.discovery_candidates.is_empty() else app.choose_browser_tab(tab_choices.selected))
 	VisualTheme.primary(tab_open)
 	queue_row=HBoxContainer.new();layout.add_child(queue_row);queue_row.visible=false
 	queue_label=Label.new();queue_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;queue_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;queue_label.add_theme_font_size_override("font_size",11);queue_label.add_theme_color_override("font_color",VisualTheme.RED);queue_row.add_child(queue_label)
@@ -271,20 +271,24 @@ func refresh():
 	var available_height=minf(size.y,get_viewport_rect().size.y)
 	layout.add_theme_constant_override("separation",4 if available_height<340 else 8)
 	var tab_items=app.browser_tabs.candidates
-	var task_active=app.state.current=="executing" and (app.browser_tabs.pid>0 or app.vpn_connection.pid>0 or not app.launch_goal.is_empty() or not app.launch_vpn.is_empty())
-	task_card.visible=not tab_items.is_empty() or task_active
-	task_label.visible=available_height>=340 or tab_items.is_empty()
-	tab_row.visible=not tab_items.is_empty()
+	var discovering=not app.discovery_mode.is_empty()
+	var app_items=app.discovery_candidates
+	var task_active=discovering or app.state.current=="executing" and (app.browser_tabs.pid>0 or app.vpn_connection.pid>0 or not app.launch_goal.is_empty() or not app.launch_vpn.is_empty())
+	task_card.visible=not tab_items.is_empty() or not app_items.is_empty() or task_active
+	task_label.visible=available_height>=340 or (tab_items.is_empty() and app_items.is_empty())
+	tab_row.visible=not tab_items.is_empty() or not app_items.is_empty()
 	editor.custom_minimum_size.y=44 if available_height<340 and task_card.visible else 58
 	var task_style=task_card.get_theme_stylebox("panel")
 	task_style.content_margin_top=4 if available_height<340 else 8
 	task_style.content_margin_bottom=4 if available_height<340 else 8
 	task_label.text=app.t("tabs_choice" if not tab_items.is_empty() else ("vpn_working" if app.vpn_connection.pid>0 else ("launch_working" if not app.launch_goal.is_empty() or not app.launch_vpn.is_empty() else "tabs_working")))
-	var signature=JSON.stringify(tab_items)+app.l10n.locale
+	if discovering or not app_items.is_empty():task_label.text=app.t("discover_"+app.discovery_mode if discovering else "discover_choose_short")
+	var signature=JSON.stringify(tab_items)+JSON.stringify(app_items)+app.l10n.locale
 	if signature!=tabs_signature:
 		tabs_signature=signature;tab_choices.clear()
+		for item in app_items:tab_choices.add_item(str(item.get("name",""))+" · "+str(item.get("product","")))
 		for item in tab_items:tab_choices.add_item(str(item.node.name).left(100)+" · "+str(item.identity.app))
-		tab_open.tooltip_text=app.t("tabs_open")
+		tab_open.tooltip_text=app.t("discover_open" if not app_items.is_empty() else "tabs_open")
 	copy_chat_button.tooltip_text=app.t("chat_copy_all")
 	copy_chat_button.text=app.t("chat_copy_short")
 	if last_locale!=app.l10n.locale:
@@ -342,7 +346,7 @@ func refresh():
 	queue_label.text=app.t("queue_pending",{"count":app.chat_queue.items.size()})+" / 3 · "+(str(app.chat_queue.items[0]).left(65) if queue_row.visible else "")
 	queue_clear.tooltip_text=app.t("queue_clear")
 	send_button.disabled=app.paused
-	stop_button.disabled=not busy and app.chat_queue.items.is_empty() and app.browser_tabs.candidates.is_empty()
+	stop_button.disabled=not busy and app.chat_queue.items.is_empty() and app.browser_tabs.candidates.is_empty() and app.discovery_candidates.is_empty()
 	var installed=app.vision_asset.installed() if install_mode=='screen' else (app.speech_input.installed() if install_mode=='voice' else app.local_runtime.installed())
 	var installing=app.vision_asset.installing() if install_mode=='screen' else (app.speech_input.installing() if install_mode=='voice' else app.local_runtime.downloading or app.local_runtime.hash_thread!=null)
 	setup_hint.visible=available_height>=380 and not installed and not task_card.visible

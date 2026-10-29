@@ -20,6 +20,7 @@ namespace Windows.Automation {
  public class CurrentData {public string Name;public string AutomationId;public Kind ControlType;public bool IsPassword=false;public bool IsOffscreen=false;public bool IsEnabled=true;}
  public class PatternData {public bool IsReadOnly=false;public bool IsSelected=false;public int ExpandCollapseState=0;}
  public class Pattern {public PatternData Current=new PatternData();}
+ public class TogglePattern {public static object Pattern="toggle";}
  public class ValuePattern {public static object Pattern="value";}
  public class InvokePattern {public static object Pattern="invoke";}
  public class SelectionItemPattern {public static object Pattern="select";}

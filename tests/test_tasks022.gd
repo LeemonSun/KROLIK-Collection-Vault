@@ -22,9 +22,9 @@ func run():
  for text in ['найди во вкладках SoundCloud','открой браузер и найди мне там во вкладках саунклауд','find tab SoundCloud','open browser tab SoundCloud','打开标签页SoundCloud','найд во вкладках SoundCloud']:
   var result=router.route(text);check(result.get('tool')=='desktop.task' and result.get('args',{}).get('action')=='tabs','Tab intent '+text)
  for text in ['включи впн','connect vpn Work','连接VPN']:
-  check(router.route(text).get('args',{}).get('action')=='vpn','VPN intent '+text)
+  check(preload("res://src/core/desktop_task_intent.gd").new().route(text).get('args',{}).get('action')=='vpn','VPN intent '+text)
  for text in ['открой Proton VPN и нажми Подключить','launch Notepad and click New','启动记事本并点击新建']:
-  check(router.route(text).get('args',{}).get('action')=='launch_goal','Launch then agent '+text)
+  check(preload("res://src/core/desktop_task_intent.gd").new().route(text).get('args',{}).get('action')=='launch_goal','Launch then agent '+text)
  for text in ['не включи впн','как включить впн?','не найди во вкладках SoundCloud','расскажи про вкладки','find tab x','найди во вкладках '+ 'x'.repeat(101)]:
   check(router.route(text).get('tool')!='desktop.task','No task effects '+text.left(60))
  var tabs=preload('res://src/tools/browser_tabs.gd').new();root.add_child(tabs)
@@ -39,27 +39,27 @@ func run():
  var vpn=Vpn.new();app.add_child(vpn);app.vpn_connection=vpn
  var access=Access.new();app.add_child(access);var desktop=Desktop.new();app.add_child(desktop)
  app.application_access=access;app.desktop_actions=desktop
- app.submit('открой Proton VPN и нажми Подключить')
+ app._execute(preload('res://src/core/desktop_task_intent.gd').new().route('открой Proton VPN и нажми Подключить'))
  check(desktop.requested=='Proton VPN' and app.launch_goal=='нажми Подключить','Literal launch/goal preserved')
  app._desktop_completed({'status':'visible','identity':identity})
  check(access.target==identity and access.inspected==1 and app.goal_mode=='observing' and app.agent.active,'Visible launch hands actual identity into shared observation loop')
  app.cancel();check(app.launch_goal.is_empty() and not app.agent.active,'Stop clears chained goal')
- app.submit('открой Proton VPN и нажми Подключить');app._desktop_completed({'status':'started'})
+ app._execute(preload('res://src/core/desktop_task_intent.gd').new().route('открой Proton VPN и нажми Подключить'));app._desktop_completed({'status':'started'})
  check(app.launch_goal.is_empty() and not app.agent.active and app.state.current=='idle','Unverified launch cannot continue agent')
- app.submit('открой Proton VPN и нажми Подключить');app.cancel();app._desktop_completed({'status':'visible','identity':identity})
+ app._execute(preload('res://src/core/desktop_task_intent.gd').new().route('открой Proton VPN и нажми Подключить'));app.cancel();app._desktop_completed({'status':'visible','identity':identity})
  check(not app.agent.active and app.launch_goal.is_empty(),'Late receipt after stop cannot start agent')
  app.state.transition('executing');app.browser_tabs.query='SoundCloud';app._tabs_completed({'status':'tabs','tabs':[{'identity':identity,'node':node},{'identity':identity,'node':node.merged({'id':'1,3'},true)}]})
  check(app.state.current=='idle' and app.browser_tabs.candidates.size()==2,'Multiple matches require choice')
  app.submit('/help');check(app.browser_tabs.candidates.is_empty(),'New user task revokes old choices')
  app.cancel()
  for text in ['открой Steam и включи впн Work','open Steam and connect vpn Work','启动Steam并连接VPN']:
-  app.submit(text);check(desktop.requested=='Steam' and not app.launch_vpn.is_empty(),'Two-stage launch '+text)
+  app._execute(preload('res://src/core/desktop_task_intent.gd').new().route(text));check(desktop.requested=='Steam' and not app.launch_vpn.is_empty(),'Two-stage launch '+text)
   var before=vpn.requested.size();app._desktop_completed({'status':'visible'})
   check(vpn.requested.size()==before+1 and app.launch_vpn.is_empty(),'VPN stage starts only after visible launch')
   app.cancel()
- app.submit('открой Steam и включи впн');var count=vpn.requested.size();app._desktop_completed({'status':'started'})
+ app._execute(preload('res://src/core/desktop_task_intent.gd').new().route('открой Steam и включи впн'));var count=vpn.requested.size();app._desktop_completed({'status':'started'})
  check(vpn.requested.size()==count and app.launch_vpn.is_empty(),'Unverified launch does not connect VPN')
- app.submit('открой Steam и включи впн');app.cancel();app._desktop_completed({'status':'visible'})
+ app._execute(preload('res://src/core/desktop_task_intent.gd').new().route('открой Steam и включи впн'));app.cancel();app._desktop_completed({'status':'visible'})
  check(vpn.requested.size()==count and app.launch_vpn.is_empty(),'Cancelled chain does not connect VPN')
  app.application_access=old_access;app.desktop_actions=old_desktop;app.vpn_connection=old_vpn;access.queue_free();desktop.queue_free();vpn.queue_free()
  # Real helper transport on Linux validates nonce/request/result plumbing only.

@@ -30,13 +30,14 @@ function Get-ScopedNodes($rootElement, [bool]$chromeOnly=$false) {
    if($c.IsPassword -or ($chromeOnly -and $c.ControlType.ProgrammaticName -eq 'ControlType.Document') -or ($c.IsOffscreen -and -not $chromeOnly)){continue}
    $name=Clip-Text $c.Name 160
    $automationId=Clip-Text $c.AutomationId 64
-   $value=$null;$invoke=$null;$select=$null;$expand=$null
+   $value=$null;$invoke=$null;$select=$null;$expand=$null;$toggle=$null
    $writable=$element.TryGetCurrentPattern([Windows.Automation.ValuePattern]::Pattern,[ref]$value) -and -not $value.Current.IsReadOnly
    $canInvoke=$element.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern,[ref]$invoke)
    $canSelect=$element.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$select)
    $canExpand=$element.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)
+   $canToggle=$element.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$toggle)
    $parents=@($frame.ancestors)
-   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
+   $record=@{id=($element.GetRuntimeId() -join ',');name=$name;type=$c.ControlType.ProgrammaticName;automation_id=$automationId;ancestors=$parents;enabled=$c.IsEnabled;toggle=$canToggle;toggle_state=$(if($canToggle){[int]$toggle.Current.ToggleState}else{-1});write=$writable;invoke=$canInvoke;select=$canSelect;expand=$canExpand;selected=($canSelect -and $select.Current.IsSelected);expansion=$(if($canExpand){[int]$expand.Current.ExpandCollapseState}else{-1})}
    if($name -or $writable){
     $recordBytes=[Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json -InputObject $record -Depth 6 -Compress))
     if($nodes.Count -lt 90 -and $bytes+$recordBytes -lt 25000){$nodes.Add(@{record=$record;element=$element});$bytes+=$recordBytes+1}else{$partial=$true}
@@ -69,6 +70,18 @@ function Test-Descriptor($record,$expected) {
   }
  }
  return $true
+}
+function Set-ObservedToggle($element,[int]$expected,[int]$desired){
+ if($desired -notin @(0,1) -or $expected -notin @(0,1)){return 'toggle_unverified'}
+ $pattern=$null
+ if(-not $element.TryGetCurrentPattern([Windows.Automation.TogglePattern]::Pattern,[ref]$pattern)){return 'invoke_unsupported'}
+ $before=[int]$pattern.Current.ToggleState
+ if($before -eq $desired){return 'toggle_set'}
+ if($before -notin @(0,1)){return 'toggle_unverified'}
+ if($before -ne $expected){return 'stale'}
+ $pattern.Toggle()
+ if([int]$pattern.Current.ToggleState -eq $desired){return 'toggle_set'}
+ return 'toggle_unverified'
 }
 function Is-Risky([string]$name) {
  return $name -match '(?i)send|submit|pay|buy|purchase|delete|remove|install|uninstall|format|reset|confirm|allow|sign.?in|log.?in|отправ|оплат|купить|удал|установ|сброс|формат|подтверд|разреш|войти|发送|提交|支付|购买|删除|安装|卸载|重置|确认|允许|登录'
@@ -225,8 +238,12 @@ public static class LeemonAccess {
     }elseif((Is-Risky $record.name) -and $request.confirmed -ne $true){$reply.status='confirmation_required'}else{
      $pattern=$null
      $requestedPattern=[string]$request.pattern
-     if($requestedPattern -and $requestedPattern -notin @('select','expand','invoke')){throw 'Unsupported pattern'}
-     if(((-not $requestedPattern) -or $requestedPattern -eq 'select') -and $record.select -and $element.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$pattern)){$pattern.Select();$reply.status='selected'}
+     if($requestedPattern -and $requestedPattern -notin @('select','expand','invoke','enable','disable')){throw 'Unsupported pattern'}
+     if($requestedPattern -in @('enable','disable')){
+      $desired=if($requestedPattern -eq 'enable'){1}else{0}
+      $reply.status=Set-ObservedToggle $element ([int]$request.expected_toggle_state) $desired
+     }
+     elseif(((-not $requestedPattern) -or $requestedPattern -eq 'select') -and $record.select -and $element.TryGetCurrentPattern([Windows.Automation.SelectionItemPattern]::Pattern,[ref]$pattern)){$pattern.Select();$reply.status='selected'}
      elseif(((-not $requestedPattern) -or $requestedPattern -eq 'expand') -and $record.expand -and $element.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$pattern)){$pattern.Expand();$reply.status='expanded'}
      elseif(((-not $requestedPattern) -or $requestedPattern -eq 'invoke') -and $record.invoke -and $element.TryGetCurrentPattern([Windows.Automation.InvokePattern]::Pattern,[ref]$pattern)){$pattern.Invoke();$reply.status='invoked'}
      else{$reply.status='invoke_unsupported'}

@@ -1,0 +1,1 @@
+NATIVE023: 21 checks, 0 failures; synthetic native adapters, not Windows applications

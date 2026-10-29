@@ -21,6 +21,8 @@ def main():
     env = dict(os.environ)
     engine = str(Path(args.godot).resolve())
     commands = [
+        ("effects023",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_effects023.gd","--","--test-mode"]),
+        ("discovery023",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_discovery023.gd","--","--test-mode"]),
         ("tasks022",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_tasks022.gd","--","--test-mode"]),
         ("logic021",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_logic021.gd","--","--test-mode"]),
         ("logic_app021",[engine,"--headless","--path",str(ROOT),"--script","res://tests/test_logic_app021.gd","--","--test-mode"]),
@@ -77,6 +79,8 @@ def main():
         commands.append(("access_protocol019",[str(Path(args.pwsh).resolve()),"-NoLogo","-NoProfile","-NonInteractive","-File",str(ROOT/"tests/test_access_protocol019.ps1"),"-Helper",str(ROOT/"native/accessibility_bridge.ps1")]))
     if args.pwsh:
         commands.append(("vpn_protocol022",[str(Path(args.pwsh).resolve()),"-NoLogo","-NoProfile","-NonInteractive","-File",str(ROOT/"tests/test_vpn_protocol022.ps1"),"-Helper",str(ROOT/"native/vpn_bridge.ps1")]))
+    if args.pwsh:
+        commands.append(("native023",[str(Path(args.pwsh).resolve()),"-NoLogo","-NoProfile","-NonInteractive","-File",str(ROOT/"tests/test_native023.ps1"),"-Desktop",str(ROOT/"native/desktop_bridge.ps1"),"-Access",str(ROOT/"native/accessibility_bridge.ps1")]))
     outcomes = []
     for name, command in commands:
         with tempfile.TemporaryDirectory(prefix="leemon-check-"+name+"-") as profile:

@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "app_version": "0.22.0-desktop-preview",
-  "checkpoint_status": "022_delivered_source_pack_nativePASS_windows_acceptance_pending",
-  "current_task": "022 delivered: existing browser tabs/selection, launch→reviewed shared UIA agent, existing Windows VPN status-checked connection, launch→VPN chain, compact task card.47sourcegroups/10packgroups/native39+156+35/ZIPCRC PASS.",
-  "next_action": "User Windows acceptance on browser tabs/foreground/duplicates/stop, app launch continuation, systemVPN profiles and game resource use. Then improve common observation/planning loop; retain quiet2Bdefault.",
+  "app_version": "0.23.0-desktop-preview",
+  "checkpoint_status": "023_implemented_final_validation_build_review_archive_pending",
+  "current_task": "023: observed third-party catalog (shortcuts/desktop EXEs/AppPaths/running portable), generic transliteration/fuzzy and bounded semantic app selection, catalogstamp guarded launch→shared agent, generic reviewed invokes/toggles, observed UI-effect continuation,2stale element replans/1catalog rescan.39discovery+14effects+21native fixtures and42native visual PASS; full final checks/build/archive pending.",
+  "next_action": "Finish final checks/package. Create full source+runtime art/fonts ZIP without AI weights for Claude, save source and archive. GitHub connector lacks Releases tools; do not invent release URL.",
   "read_next": [
-    "docs/WORKFLOWS_022.md",
-    "docs/WINDOWS_ACCEPTANCE_017.md"
+    "docs/AGENT_023.md",
+    "CLAUDE_START_HERE.md"
   ],
   "known_limits": [
     "Windows EXE/UIA/DPI/native picker/file locks/reparse/microphone/system voice not executed on actual Windows",
